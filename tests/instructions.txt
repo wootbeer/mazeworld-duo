@@ -1,0 +1,36 @@
+# Opens the instructions (Command-/) from the high-score window and pages through all 24 pages
+# with the right arrow, back a few with the left arrow, then leaves with Escape and plays a moment.
+60 down cmd
+62 tap slash
+66 up cmd
+100 tap right
+140 tap right
+180 tap right
+220 tap right
+260 tap right
+300 tap right
+340 tap right
+380 tap right
+420 tap right
+460 tap right
+500 tap right
+540 tap right
+580 tap right
+620 tap right
+660 tap right
+700 tap right
+740 tap right
+780 tap right
+820 tap right
+860 tap right
+900 tap right
+940 tap right
+980 tap right
+1020 tap right
+1060 tap left
+1100 tap left
+1140 tap left
+1180 tap escape
+1240 tap space
+1300 down kp8
+1360 up kp8

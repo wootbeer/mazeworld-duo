@@ -1,0 +1,26 @@
+# Menu commands by Command-key from the shell: view size Tiny (cmd-1), play a moment, back with
+# Escape, view size 13" (cmd-4), Play Game (cmd-G), back, New Game (cmd-N), Play Game again.
+60 down cmd
+62 tap 1
+66 up cmd
+120 tap space
+160 down kp8
+200 up kp8
+240 tap escape
+300 down cmd
+302 tap 4
+306 up cmd
+360 down cmd
+362 tap g
+366 up cmd
+420 down kp9
+440 up kp9
+480 tap escape
+540 down cmd
+542 tap n
+546 up cmd
+600 down cmd
+602 tap g
+606 up cmd
+660 down kp8
+700 up kp8

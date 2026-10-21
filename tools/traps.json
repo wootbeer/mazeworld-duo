@@ -1,0 +1,7128 @@
+{
+ "dispatchers": {
+  "AliasDispatch": {
+   "loc": "D0W",
+   "sel": {
+    "0000": "FindFolder",
+    "0002": "NewAlias",
+    "0003": "ResolveAlias",
+    "0005": "MatchAlias",
+    "0006": "UpdateAlias",
+    "0007": "GetAliasInfo",
+    "0008": "NewAliasMinimal",
+    "0009": "NewAliasMinimalFromFullPath",
+    "000C": "ResolveAliasFile"
+   },
+   "trap": "A823"
+  },
+  "CodeFragmentDispatch": {
+   "loc": "StackW",
+   "sel": {
+    "0001": "GetSharedLibrary",
+    "0002": "GetDiskFragment",
+    "0003": "GetMemFragment",
+    "0004": "CloseConnection",
+    "0005": "FindSymbol",
+    "0006": "CountSymbols",
+    "0007": "GetIndSymbol"
+   },
+   "trap": "AA5A"
+  },
+  "DialogDispatch": {
+   "loc": "D0W",
+   "sel": {
+    "0203": "GetStdFilterProc",
+    "0304": "SetDialogDefaultItem",
+    "0305": "SetDialogCancelItem",
+    "0306": "SetDialogTracksCursor"
+   },
+   "trap": "AA68"
+  },
+  "DisplayDispatch": {
+   "loc": "D0W",
+   "sel": {
+    "0414": "DMRegisterNotifyProc"
+   },
+   "trap": "ABEB"
+  },
+  "DragDispatch": {
+   "loc": "D0W",
+   "sel": {
+    "0001": "InstallTrackingHandler",
+    "0002": "InstallReceiveHandler",
+    "0003": "RemoveTrackingHandler",
+    "0004": "RemoveReceiveHandler",
+    "0005": "NewDrag",
+    "0006": "DisposeDrag",
+    "0007": "AddDragItemFlavor",
+    "0009": "SetDragItemFlavorData",
+    "000A": "SetDragSendProc",
+    "000B": "SetDragInputProc",
+    "000C": "SetDragDrawingProc",
+    "000D": "TrackDrag",
+    "000E": "CountDragItems",
+    "000F": "GetDragItemReferenceNumber",
+    "0010": "CountDragItemFlavors",
+    "0011": "GetFlavorType",
+    "0012": "GetFlavorFlags",
+    "0013": "GetFlavorDataSize",
+    "0014": "GetFlavorData",
+    "0015": "GetDragItemBounds",
+    "0016": "SetDragItemBounds",
+    "0017": "GetDropLocation",
+    "0018": "SetDropLocation",
+    "0019": "GetDragAttributes",
+    "001A": "GetDragMouse",
+    "001B": "SetDragMouse",
+    "001C": "GetDragOrigin",
+    "001D": "GetDragModifiers",
+    "001E": "ShowDragHilite",
+    "001F": "HideDragHilite",
+    "0020": "DragPreScroll",
+    "0021": "DragPostScroll",
+    "0022": "UpdateDragHilite",
+    "0023": "WaitMouseMoved",
+    "0024": "ZoomRects",
+    "0025": "ZoomRegion",
+    "0026": "GetDragHiliteColor",
+    "0027": "SetDragImage",
+    "0028": "ChangeDragBehaviors"
+   },
+   "trap": "ABED"
+  },
+  "FSDispatch": {
+   "loc": "D0W",
+   "sel": {
+    "0001": "PBOpenWD",
+    "0002": "PBCloseWD",
+    "0005": "PBCatMove",
+    "0006": "PBDirCreate",
+    "0007": "PBGetWDInfo",
+    "0008": "PBGetFCBInfo",
+    "0009": "PBGetCatInfo",
+    "000A": "PBSetCatInfo",
+    "000B": "PBSetVInfo",
+    "0010": "PBLockRange",
+    "0011": "PBUnlockRange",
+    "0014": "PBCreateFileIDRef",
+    "0015": "PBDeleteFileIDRef",
+    "0016": "PBResolveFileIDRef",
+    "0017": "PBExchangeFiles",
+    "0018": "PBCatSearch",
+    "001A": "PBHOpenDF",
+    "0020": "PBDTGetPath",
+    "0021": "PBDTCloseDown",
+    "0022": "PBDTAddIcon",
+    "0023": "PBDTGetIcon",
+    "0024": "PBDTGetIconInfo",
+    "0025": "PBDTAddAPPL",
+    "0026": "PBDTRemoveAPPL",
+    "0027": "PBDTGetAPPL",
+    "0028": "PBDTSetComment",
+    "0029": "PBDTRemoveComment",
+    "002A": "PBDTGetComment",
+    "002B": "PBDTFlush",
+    "002C": "PBDTReset",
+    "002D": "PBDTGetInfo",
+    "002E": "PBDTOpenInform",
+    "002F": "PBDTDelete",
+    "0030": "PBHGetVolParms",
+    "0031": "PBHGetLogInInfo",
+    "0032": "PBHGetDirAccess",
+    "0033": "PBHSetDirAccess",
+    "0034": "PBHMapID",
+    "0035": "PBHMapName",
+    "0036": "PBHCopyFile",
+    "0037": "PBHMoveRename",
+    "0038": "PBHOpenDeny"
+   },
+   "trap": "A060"
+  },
+  "FontDispatch": {
+   "loc": "D0<0xF>",
+   "sel": {
+    "0000": "IsOutline",
+    "0001": "SetOutlinePreferred",
+    "0008": "OutlineMetrics",
+    "0009": "GetOutlinePreferred",
+    "000A": "SetPreserveGlyph",
+    "000B": "GetPreserveGlyph",
+    "000C": "FlushFonts"
+   },
+   "trap": "A854"
+  },
+  "GestaltDispatch": {
+   "loc": "TrapBits",
+   "sel": {
+    "0000": "Gestalt",
+    "0200": "NewGestalt",
+    "0400": "ReplaceGestalt"
+   },
+   "trap": "A1AD"
+  },
+  "HighLevelFSDispatch": {
+   "loc": "D0<0xF>",
+   "sel": {
+    "0001": "FSMakeFSSpec",
+    "0002": "FSpOpenDF",
+    "0003": "FSpOpenRF",
+    "0004": "FSpCreate",
+    "0005": "FSpDirCreate",
+    "0006": "FSpDelete",
+    "0007": "FSpGetFInfo",
+    "0008": "FSpSetFInfo",
+    "0009": "FSpSetFLock",
+    "000A": "FSpRstFLock",
+    "000B": "FSpRename",
+    "000C": "FSpCatMove",
+    "000D": "FSpOpenResFile",
+    "000E": "FSpCreateResFile",
+    "000F": "FSpExchangeFiles"
+   },
+   "trap": "AA52"
+  },
+  "IconDispatch": {
+   "loc": "D0W",
+   "sel": {
+    "0207": "NewIconSuite",
+    "0217": "GetSuiteLabel",
+    "0302": "DisposeIconSuite",
+    "0316": "SetSuiteLabel",
+    "0419": "GetIconCacheData",
+    "041A": "SetIconCacheData",
+    "041B": "GetIconCacheProc",
+    "041C": "SetIconCacheProc",
+    "0500": "PlotIconID",
+    "0501": "GetIconSuite",
+    "050B": "GetLabel",
+    "0603": "PlotIconSuite",
+    "0604": "MakeIconCache",
+    "0606": "LoadIconCache",
+    "0608": "AddIconToSuite",
+    "0609": "GetIconFromSuite",
+    "060D": "PtInIconID",
+    "0610": "RectInIconID",
+    "0613": "IconIDToRgn",
+    "061D": "PlotIconHandle",
+    "061E": "PlotSICNHandle",
+    "061F": "PlotCIconHandle",
+    "070E": "PtInIconSuite",
+    "0711": "RectInIconSuite",
+    "0714": "IconSuiteToRgn",
+    "0805": "PlotIconMethod",
+    "080A": "ForEachIconDo",
+    "090F": "PtInIconMethod",
+    "0912": "RectInIconMethod",
+    "0915": "IconMethodToRgn"
+   },
+   "trap": "ABC9"
+  },
+  "MixedModeDispatch": {
+   "loc": "D0W",
+   "sel": {
+    "0000": "NewRoutineDescriptor",
+    "0001": "DisposeRoutineDescriptor",
+    "0002": "NewFatRoutineDescriptor",
+    "0003": "SaveMixedModeState",
+    "0004": "RestoreMixedModeState"
+   },
+   "trap": "AA59"
+  },
+  "OSDispatch": {
+   "loc": "StackW",
+   "sel": {
+    "0015": "TempMaxMem",
+    "0016": "TempTopMem",
+    "0018": "TempFreeMem",
+    "001D": "TempNewHandle",
+    "001E": "TempHLock",
+    "001F": "TempHUnlock",
+    "0020": "TempDisposeHandle",
+    "0033": "AcceptHighLevelEvent",
+    "0034": "PostHighLevelEvent",
+    "0035": "GetProcessSerialNumberFromPortName",
+    "0037": "GetCurrentProcess",
+    "0038": "GetNextProcess",
+    "0039": "GetFrontProcess",
+    "003A": "GetProcessInformation",
+    "003B": "SetFrontProcess",
+    "003C": "WakeUpProcess",
+    "003D": "SameProcess",
+    "0045": "GetSpecificHighLevelEvent",
+    "0046": "GetPortNameFromProcessSerialNumber"
+   },
+   "trap": "A88F"
+  },
+  "Pack0": {
+   "loc": "StackW",
+   "sel": {
+    "0000": "LActivate",
+    "0004": "LAddColumn",
+    "0008": "LAddRow",
+    "000C": "LAddToCell",
+    "0010": "LAutoScroll",
+    "0014": "LCellSize",
+    "0018": "LClick",
+    "001C": "LClrCell",
+    "0020": "LDelColumn",
+    "0024": "LDelRow",
+    "0028": "LDispose",
+    "002C": "LSetDrawingMode",
+    "0030": "LDraw",
+    "0034": "LGetCellDataLocation",
+    "0038": "LGetCell",
+    "003C": "LGetSelect",
+    "0040": "LLastClick",
+    "0044": "LNew",
+    "0048": "LNextCell",
+    "004C": "LRect",
+    "0050": "LScroll",
+    "0054": "LSearch",
+    "0058": "LSetCell",
+    "005C": "LSetSelect",
+    "0060": "LSize",
+    "0064": "LUpdate"
+   },
+   "trap": "A9E7"
+  },
+  "Pack11": {
+   "loc": "D0W",
+   "sel": {
+    "0100": "InitEditionPackVersion",
+    "0206": "UnRegisterSection",
+    "0208": "IsRegisteredSection",
+    "0210": "DeleteEditionContainerFile",
+    "0224": "GoToPublisherSection",
+    "0226": "GetLastEditionContainerUsed",
+    "022A": "GetEditionOpenerProc",
+    "022C": "SetEditionOpenerProc",
+    "0232": "NewSubscriberDialog",
+    "0236": "NewPublisherDialog",
+    "023A": "SectionOptionsDialog",
+    "0316": "CloseEdition",
+    "040C": "AssociateSection",
+    "0412": "OpenEdition",
+    "0422": "GetEditionInfo",
+    "050E": "CreateEditionContainerFile",
+    "052E": "CallEditionOpenerProc",
+    "0530": "CallFormatIOProc",
+    "0604": "RegisterSection",
+    "0618": "EditionHasFormat",
+    "061E": "GetEditionFormatMark",
+    "0620": "SetEditionFormatMark",
+    "0814": "OpenNewEdition",
+    "081A": "ReadEdition",
+    "081C": "WriteEdition",
+    "0A02": "NewSection",
+    "0A28": "GetStandardFormats",
+    "0B34": "NewSubscriberExpDialog",
+    "0B38": "NewPublisherExpDialog",
+    "0B3C": "SectionOptionsExpDialog"
+   },
+   "trap": "A82D"
+  },
+  "Pack12": {
+   "loc": "StackW",
+   "sel": {
+    "0001": "Fix2SmallFract",
+    "0002": "SmallFract2Fix",
+    "0003": "CMY2RGB",
+    "0004": "RGB2CMY",
+    "0005": "HSL2RGB",
+    "0006": "RGB2HSL",
+    "0007": "HSV2RGB",
+    "0008": "RGB2HSV",
+    "0009": "GetColor"
+   },
+   "trap": "A82E"
+  },
+  "Pack14": {
+   "loc": "D0W",
+   "sel": {
+    "0002": "HMRemoveBalloon",
+    "0003": "HMGetBalloons",
+    "0007": "HMIsBalloon",
+    "0104": "HMSetBalloons",
+    "0108": "HMSetFont",
+    "0109": "HMSetFontSize",
+    "010C": "HMSetDialogResID",
+    "0200": "HMGetHelpMenuHandle",
+    "020A": "HMGetFont",
+    "020B": "HMGetFontSize",
+    "020D": "HMSetMenuResID",
+    "0213": "HMGetDialogResID",
+    "0215": "HMGetBalloonWindow",
+    "0314": "HMGetMenuResID",
+    "040E": "HMBalloonRect",
+    "040F": "HMBalloonPict",
+    "0410": "HMScanTemplateItems",
+    "0711": "HMExtractHelpMsg",
+    "0B01": "HMShowBalloon",
+    "0E05": "HMShowMenuBalloon",
+    "1306": "HMGetIndHelpMsg"
+   },
+   "trap": "A830"
+  },
+  "Pack15": {
+   "loc": "D0W",
+   "sel": {
+    "0206": "DisposePictInfo",
+    "0403": "RecordPictInfo",
+    "0404": "RecordPixMapInfo",
+    "0505": "RetrievePictInfo",
+    "0602": "NewPictInfo",
+    "0800": "GetPictInfo",
+    "0801": "GetPixMapInfo"
+   },
+   "trap": "A831"
+  },
+  "Pack2": {
+   "loc": "StackW",
+   "sel": {
+    "0000": "DIBadMount",
+    "0002": "DILoad",
+    "0004": "DIUnload",
+    "0006": "DIFormat",
+    "0008": "DIVerify",
+    "000A": "DIZero"
+   },
+   "trap": "A9E9"
+  },
+  "Pack3": {
+   "loc": "StackW",
+   "sel": {
+    "0001": "SFPutFile",
+    "0002": "SFGetFile",
+    "0003": "SFPPutFile",
+    "0004": "SFPGetFile",
+    "0005": "StandardPutFile",
+    "0006": "StandardGetFile",
+    "0007": "CustomPutFile",
+    "0008": "CustomGetFile"
+   },
+   "trap": "A9EA"
+  },
+  "Pack4": {
+   "loc": "StackWLookahead<0xFF>",
+   "sel": {
+    "0000": "ROMlib_Faddx",
+    "0001": "ROMlib_Fsetenv",
+    "0002": "ROMlib_Fsubx",
+    "0003": "ROMlib_Fgetenv",
+    "0004": "ROMlib_Fmulx",
+    "0005": "ROMlib_Fsethv",
+    "0006": "ROMlib_Fdivx",
+    "0007": "ROMlib_Fgethv",
+    "0008": "ROMlib_Fcmpx",
+    "0009": "ROMlib_Fdec2x",
+    "000A": "ROMlib_FcpXx",
+    "000B": "ROMlib_Fx2dec",
+    "000C": "ROMlib_Fremx",
+    "000D": "ROMlib_FnegX",
+    "000E": "ROMlib_Fx2X",
+    "000F": "ROMlib_FabsX",
+    "0010": "ROMlib_FX2x",
+    "0011": "ROMlib_Fcpysgnx",
+    "0012": "ROMlib_FsqrtX",
+    "0013": "ROMlib_FnextX",
+    "0014": "ROMlib_FrintX",
+    "0016": "ROMlib_FtintX",
+    "0017": "ROMlib_Fprocentry",
+    "0018": "ROMlib_FscalbX",
+    "0019": "ROMlib_Fprocexit",
+    "001A": "ROMlib_FlogbX",
+    "001B": "ROMlib_Ftestxcp",
+    "001C": "ROMlib_Fclassx"
+   },
+   "trap": "A9EB"
+  },
+  "Pack5": {
+   "loc": "StackWMasked<0xFF>",
+   "sel": {
+    "0000": "ROMlib_FlnX",
+    "0002": "ROMlib_Flog2X",
+    "0004": "ROMlib_Fln1X",
+    "0006": "ROMlib_Flog21X",
+    "0008": "ROMlib_FexpX",
+    "000A": "ROMlib_Fexp2X",
+    "000C": "ROMlib_Fexp1X",
+    "000E": "ROMlib_Fexp21X",
+    "0010": "ROMlib_Fxpwri",
+    "0012": "ROMlib_Fxpwry",
+    "0014": "ROMlib_Fcompound",
+    "0016": "ROMlib_Fannuity",
+    "0018": "ROMlib_FsinX",
+    "001A": "ROMlib_FcosX",
+    "001C": "ROMlib_FtanX",
+    "001E": "ROMlib_FatanX",
+    "0020": "ROMlib_FrandX"
+   },
+   "trap": "A9EC"
+  },
+  "Pack6": {
+   "loc": "StackW",
+   "sel": {
+    "0000": "IUDateString",
+    "0002": "IUTimeString",
+    "0004": "IsMetric",
+    "0006": "GetIntlResource",
+    "0008": "SetIntlResource",
+    "000A": "IUMagString",
+    "000C": "IUMagIDString",
+    "000E": "IUDatePString",
+    "0010": "IUTimePString",
+    "0012": "IUMystery",
+    "0014": "IULDateString",
+    "0016": "IULTimeString",
+    "0018": "ClearIntlResourceCache",
+    "001A": "IUMagPString",
+    "001C": "IUMagIDPString",
+    "001E": "IUScriptOrder",
+    "0020": "IULangOrder",
+    "0022": "IUTextOrder",
+    "0024": "GetIntlResourceTable"
+   },
+   "trap": "A9ED"
+  },
+  "Pack7": {
+   "loc": "StackW",
+   "sel": {
+    "0002": "ROMlib_Fpstr2dec",
+    "0003": "ROMlib_Fdec2str",
+    "0004": "ROMlib_Fcstr2dec"
+   },
+   "trap": "A9EE"
+  },
+  "Pack8": {
+   "loc": "D0W",
+   "sel": {
+    "011E": "AESetInteractionAllowed",
+    "0204": "AEDisposeDesc",
+    "0219": "AEResetTimer",
+    "021A": "AEGetTheCurrentEvent",
+    "021B": "AEProcessAppleEvent",
+    "021D": "AEGetInteractionAllowed",
+    "022B": "AESuspendTheCurrentEvent",
+    "022C": "AESetTheCurrentEvent",
+    "023A": "AEDisposeToken",
+    "0405": "AEDuplicateDesc",
+    "0407": "AECountItems",
+    "040E": "AEDeleteItem",
+    "0413": "AEDeleteParam",
+    "042F": "_AE_hdlr_table_free",
+    "0441": "AEManagerInfo",
+    "0500": "AEInstallSpecialHandler",
+    "0501": "AERemoveSpecialHandler",
+    "052D": "AEGetSpecialHandler",
+    "0536": "AEResolve",
+    "0603": "AECoerceDesc",
+    "0609": "AEPutDesc",
+    "0610": "AEPutParamDesc",
+    "061C": "AEInteractWithUser",
+    "0627": "AEPutAttributeDesc",
+    "0632": "_AE_hdlr_delete",
+    "0706": "AECreateList",
+    "0720": "AERemoveEventHandler",
+    "0723": "AERemoveCoercionHandler",
+    "0738": "AERemoveObjectAccessor",
+    "0812": "AEGetParamDesc",
+    "0818": "AEResumeTheCurrentEvent",
+    "0825": "AECreateDesc",
+    "0826": "AEGetAttributeDesc",
+    "0828": "AESizeOfAttribute",
+    "0829": "AESizeOfParam",
+    "082A": "AESizeOfNthItem",
+    "0830": "_AE_hdlr_install_unique",
+    "0831": "_AE_hdlr_install",
+    "0833": "_AE_hdlr_lookup",
+    "0834": "_AE_hdlr_get_key",
+    "091F": "AEInstallEventHandler",
+    "0921": "AEGetEventHandler",
+    "092E": "_AE_hdlr_table_alloc",
+    "0937": "AEInstallObjectAccessor",
+    "0939": "AEGetObjectAccessor",
+    "0A02": "AECoercePtr",
+    "0A08": "AEPutPtr",
+    "0A0B": "AEGetNthDesc",
+    "0A0F": "AEPutParamPtr",
+    "0A16": "AEPutAttributePtr",
+    "0A22": "AEInstallCoercionHandler",
+    "0B0D": "AEPutArray",
+    "0B14": "AECreateAppleEvent",
+    "0B24": "AEGetCoercionHandler",
+    "0C3B": "AECallObjectAccessor",
+    "0D0C": "AEGetArray",
+    "0D17": "AESend",
+    "0E11": "AEGetParamPtr",
+    "0E15": "AEGetAttributePtr",
+    "0E35": "AESetObjectCallbacks",
+    "100A": "AEGetNthPtr"
+   },
+   "trap": "A816"
+  },
+  "PaletteDispatch": {
+   "loc": "D0<0xFF>",
+   "sel": {
+    "0000": "Entry2Index",
+    "0002": "RestoreDeviceClut",
+    "0003": "ResizePalette",
+    "0015": "PMgrVersion",
+    "040D": "SaveFore",
+    "040E": "SaveBack",
+    "040F": "RestoreFore",
+    "0410": "RestoreBack",
+    "0417": "GetPaletteUpdates",
+    "0616": "SetPaletteUpdates",
+    "0A13": "SetDepth",
+    "0A14": "HasDepth",
+    "0C19": "GetGray"
+   },
+   "trap": "AAA2"
+  },
+  "PrGlue": {
+   "loc": "StackL",
+   "sel": {
+    "10000808": "PrOpenPage",
+    "1800040C": "PrClosePage",
+    "20040480": "PrintDefault",
+    "2A040484": "PrStlDialog",
+    "32040488": "PrJobDialog",
+    "3C04040C": "PrStlInit",
+    "4000C00": "PrOpenDoc",
+    "44040410": "PrJobInit",
+    "4A040894": "PrDlgMain",
+    "52040498": "PrValidate",
+    "5804089C": "PrJobMerge",
+    "60051480": "PrPicFile",
+    "70070480": "PrGeneral",
+    "80000000": "PrDrvrOpen",
+    "8000484": "PrCloseDoc",
+    "88000000": "PrDrvrClose",
+    "94000000": "PrDrvrDCE",
+    "9A000000": "PrDrvrVers",
+    "A0000E00": "PrCtlCall",
+    "BA000000": "PrError",
+    "C0000200": "PrSetError",
+    "C8000000": "PrOpen",
+    "D0000000": "PrClose"
+   },
+   "trap": "A8FD"
+  },
+  "QDExtensions": {
+   "loc": "D0L",
+   "sel": {
+    "0014": "OffscreenVersion",
+    "160000": "NewGWorld",
+    "160003": "UpdateGWorld",
+    "40001": "LockPixels",
+    "40002": "UnlockPixels",
+    "40004": "DisposeGWorld",
+    "40007": "CTabChanged",
+    "40008": "PixPatChanged",
+    "40009": "PortChanged",
+    "4000A": "GDeviceChanged",
+    "4000B": "AllowPurgePixels",
+    "4000C": "NoPurgePixels",
+    "4000D": "GetPixelsState",
+    "4000F": "GetPixBaseAddr",
+    "40011": "DisposeScreenBuffer",
+    "40012": "GetGWorldDevice",
+    "40013": "QDDone",
+    "40016": "PixMap32Bit",
+    "40017": "GetGWorldPixMap",
+    "80005": "GetGWorld",
+    "80006": "SetGWorld",
+    "8000E": "SetPixelsState",
+    "E0010": "NewScreenBuffer",
+    "E0015": "NewTempScreenBuffer"
+   },
+   "trap": "AB1D"
+  },
+  "QuickTime": {
+   "loc": "D0W",
+   "sel": {
+    "0001": "EnterMovies",
+    "0002": "ExitMovies",
+    "0005": "MoviesTask",
+    "0006": "PrerollMovie",
+    "0009": "SetMovieActive",
+    "000B": "StartMovie",
+    "000C": "StopMovie",
+    "000D": "GoToBeginningOfMovie",
+    "0016": "SetMovieGWorld",
+    "001F": "UpdateMovie",
+    "0023": "DisposeMovie",
+    "002E": "GetMovieVolume",
+    "00D5": "CloseMovieFile",
+    "00DD": "IsMovieDone",
+    "00F0": "NewMovieFromFile",
+    "00F3": "GetMoviePreferredRate",
+    "00F9": "GetMovieBox",
+    "00FA": "SetMovieBox",
+    "018A": "NewMovieController",
+    "018B": "DisposeMovieController",
+    "0192": "OpenMovieFile"
+   },
+   "trap": "AAAA"
+  },
+  "ResourceDispatch": {
+   "loc": "D0<0xF>",
+   "sel": {
+    "0001": "ReadPartialResource",
+    "0002": "WritePartialResource",
+    "0003": "SetResourceSize",
+    "000A": "GetNextFOND"
+   },
+   "trap": "A822"
+  },
+  "ScriptUtil": {
+   "loc": "StackL",
+   "sel": {
+    "80020004": "KeyScript",
+    "8008001E": "DrawJust",
+    "8008FFF0": "LongSecondsToDate",
+    "8008FFF2": "LongDateToSeconds",
+    "800AFFB6": "TextUtilFunctions",
+    "800C0020": "MeasureJust",
+    "800E001C": "HiliteText",
+    "8012001A": "FindWord",
+    "80160032": "DrawJustified",
+    "801A0034": "MeasureJustified",
+    "82000000": "FontScript",
+    "82000002": "IntlScript",
+    "82020006": "FontToScript",
+    "82040022": "ParseTable",
+    "8204FFF8": "InitDateCache",
+    "8206000A": "SetScriptManagerVariable",
+    "82060010": "CharByte",
+    "82060012": "CharType",
+    "8208000E": "SetScriptVariable",
+    "8208FFE0": "TruncString",
+    "820C0016": "Char2Pixel",
+    "820C0026": "FindScriptRun",
+    "820CFFDC": "ReplaceText",
+    "820CFFEC": "StringToFormatRec",
+    "820E0014": "Pixel2Char",
+    "820E0018": "Transliterate",
+    "820EFFEE": "ToggleDate",
+    "8210FFE6": "StringToExtended",
+    "8210FFE8": "ExtendedToString",
+    "8214FFF4": "StringToTime",
+    "8214FFF6": "StringToDate",
+    "821C0030": "CharToPixel",
+    "821CFFFE": "StyledLineBreak",
+    "8222002E": "PixelToChar",
+    "84020008": "GetScriptManagerVariable",
+    "8404000C": "GetScriptVariable",
+    "84080028": "VisibleLength",
+    "84120036": "PortionLine",
+    "C2040022": "FillParseTable",
+    "C2060010": "CharacterByteType",
+    "C2060012": "CharacterType",
+    "C20E0018": "TransliterateText"
+   },
+   "trap": "A8B5"
+  },
+  "ShutDown": {
+   "loc": "StackW",
+   "sel": {
+    "0001": "ShutDwnPower",
+    "0002": "ShutDwnStart",
+    "0003": "ShutDwnInstall",
+    "0004": "ShutDwnRemove"
+   },
+   "trap": "A895"
+  },
+  "SoundDispatch": {
+   "loc": "D0<0xFFFFFF>",
+   "sel": {
+    "0000": "FinaleUnknown1",
+    "0004": "DirectorUnknown3",
+    "000C": "SpeechManagerVersion",
+    "0010": "MACEVersion",
+    "0014": "SPBVersion",
+    "100010": "Exp1to6",
+    "108000C": "CountVoices",
+    "1100014": "SPBSignOutDevice",
+    "11C0008": "SndSetSysBeepState",
+    "1C0004": "DirectorUnknown4",
+    "2040008": "SndPauseFilePlay",
+    "2180008": "SndGetSysBeepState",
+    "21C000C": "DisposeSpeechChannel",
+    "21C0014": "SPBCloseDevice",
+    "220000C": "SpeakString",
+    "2240018": "GetSysBeepVolume",
+    "2280014": "SPBPauseRecording",
+    "2280018": "SetSysBeepVolume",
+    "22C000C": "StopSpeech",
+    "22C0014": "SPBResumeRecording",
+    "22C0018": "GetDefaultOutputVolume",
+    "2300014": "SPBStopRecording",
+    "2300018": "SetDefaultOutputVolume",
+    "238000C": "ContinueSpeech",
+    "3080008": "SndStopFilePlay",
+    "30C000C": "GetIndVoice",
+    "30C0014": "SPBSignInDevice",
+    "3140008": "SndManagerStatus",
+    "3200014": "SPBRecord",
+    "3C000C": "SpeechBusy",
+    "40000C": "SpeechBusySystemWide",
+    "40004": "FinaleUnknown2",
+    "40010": "Comp3to1",
+    "4040018": "GetSoundHeaderOffset",
+    "418000C": "NewSpeechChannel",
+    "4200008": "SndPlayDoubleBuffer",
+    "4240014": "SPBRecordToFile",
+    "430000C": "StopSpeechAt",
+    "434000C": "PauseSpeechAt",
+    "4400014": "SPBMillisecondsToBytes",
+    "444000C": "SetSpeechRate",
+    "4440014": "SPBBytesToMilliseconds",
+    "448000C": "GetSpeechRate",
+    "44C000C": "SetSpeechPitch",
+    "450000C": "GetSpeechPitch",
+    "460000C": "UseDictionary",
+    "5100008": "SndChannelStatus",
+    "5140014": "SPBGetIndexedDevice",
+    "5180014": "SPBOpenDevice",
+    "604000C": "MakeVoiceSpec",
+    "60C0018": "UnsignedFixedMulDiv",
+    "610000C": "GetVoiceDescription",
+    "614000C": "GetVoiceInfo",
+    "624000C": "SpeakText",
+    "6340018": "SetSoundPreference",
+    "6380014": "SPBGetDeviceInfo",
+    "6380018": "GetSoundPreference",
+    "63C0014": "SPBSetDeviceInfo",
+    "63C0018": "SndGetInfo",
+    "6400018": "SndSetInfo",
+    "654000C": "SetSpeechInfo",
+    "658000C": "GetSpeechInfo",
+    "7080014": "SndRecordToFile",
+    "7100018": "GetCompressionInfo",
+    "80010": "Exp1to3",
+    "8040014": "SndRecord",
+    "828000C": "SpeakBuffer",
+    "A5C000C": "TextToPhonemes",
+    "B4C0014": "SetupAIFFHeader",
+    "C0008": "SndSoundManagerVersion",
+    "C0010": "Comp6to1",
+    "D000008": "SndStartFilePlay",
+    "D480014": "SetupSndHeader",
+    "E340014": "SPBGetRecordingStatus"
+   },
+   "trap": "A800"
+  },
+  "TEDispatch": {
+   "loc": "StackW",
+   "sel": {
+    "0000": "TEStylePaste",
+    "0001": "TESetStyle",
+    "0002": "TEReplaceStyle",
+    "0003": "TEGetStyle",
+    "0004": "TEGetStyleHandle",
+    "0005": "TESetStyleHandle",
+    "0006": "TEGetStyleScrapHandle",
+    "0007": "TEStyleInsert",
+    "0008": "TEGetPoint",
+    "0009": "TEGetHeight",
+    "000A": "TEContinuousStyle",
+    "000B": "TEUseStyleScrap",
+    "000C": "TECustomHook",
+    "000D": "TENumStyles",
+    "000E": "TEFeatureFlag"
+   },
+   "trap": "A83D"
+  }
+ },
+ "traps": {
+  "A000": {
+   "args": [
+    "pb:ParmBlkPtr",
+    "async:Boolean"
+   ],
+   "file": "FileMgr.yaml",
+   "name": "PBOpen",
+   "ret": "OSErr"
+  },
+  "A001": {
+   "args": [
+    "pb:ParmBlkPtr",
+    "async:Boolean"
+   ],
+   "file": "FileMgr.yaml",
+   "name": "PBClose",
+   "ret": "OSErr"
+  },
+  "A002": {
+   "args": [
+    "pb:ParmBlkPtr",
+    "async:Boolean"
+   ],
+   "file": "FileMgr.yaml",
+   "name": "PBRead",
+   "ret": "OSErr"
+  },
+  "A003": {
+   "args": [
+    "pb:ParmBlkPtr",
+    "async:Boolean"
+   ],
+   "file": "FileMgr.yaml",
+   "name": "PBWrite",
+   "ret": "OSErr"
+  },
+  "A004": {
+   "args": [
+    "pbp:ParmBlkPtr",
+    "a:Boolean"
+   ],
+   "file": "DeviceMgr.yaml",
+   "name": "PBControl",
+   "ret": "OSErr"
+  },
+  "A005": {
+   "args": [
+    "pbp:ParmBlkPtr",
+    "a:Boolean"
+   ],
+   "file": "DeviceMgr.yaml",
+   "name": "PBStatus",
+   "ret": "OSErr"
+  },
+  "A006": {
+   "args": [
+    "pbp:ParmBlkPtr",
+    "a:Boolean"
+   ],
+   "file": "DeviceMgr.yaml",
+   "name": "PBKillIO",
+   "ret": "OSErr"
+  },
+  "A007": {
+   "args": [
+    "pb:ParmBlkPtr",
+    "async:Boolean"
+   ],
+   "file": "FileMgr.yaml",
+   "name": "PBGetVInfo",
+   "ret": "OSErr"
+  },
+  "A008": {
+   "args": [
+    "pb:ParmBlkPtr",
+    "async:Boolean"
+   ],
+   "file": "FileMgr.yaml",
+   "name": "PBCreate",
+   "ret": "OSErr"
+  },
+  "A009": {
+   "args": [
+    "pb:ParmBlkPtr",
+    "async:Boolean"
+   ],
+   "file": "FileMgr.yaml",
+   "name": "PBDelete",
+   "ret": "OSErr"
+  },
+  "A00A": {
+   "args": [
+    "pb:ParmBlkPtr",
+    "async:Boolean"
+   ],
+   "file": "FileMgr.yaml",
+   "name": "PBOpenRF",
+   "ret": "OSErr"
+  },
+  "A00B": {
+   "args": [
+    "pb:ParmBlkPtr",
+    "async:Boolean"
+   ],
+   "file": "FileMgr.yaml",
+   "name": "PBRename",
+   "ret": "OSErr"
+  },
+  "A00C": {
+   "args": [
+    "pb:ParmBlkPtr",
+    "async:Boolean"
+   ],
+   "file": "FileMgr.yaml",
+   "name": "PBGetFInfo",
+   "ret": "OSErr"
+  },
+  "A00D": {
+   "args": [
+    "pb:ParmBlkPtr",
+    "async:Boolean"
+   ],
+   "file": "FileMgr.yaml",
+   "name": "PBSetFInfo",
+   "ret": "OSErr"
+  },
+  "A00E": {
+   "args": [
+    "pb:ParmBlkPtr"
+   ],
+   "file": "FileMgr.yaml",
+   "name": "PBUnmountVol",
+   "ret": "OSErr"
+  },
+  "A00F": {
+   "args": [
+    "pb:ParmBlkPtr"
+   ],
+   "file": "FileMgr.yaml",
+   "name": "PBMountVol",
+   "ret": "OSErr"
+  },
+  "A010": {
+   "args": [
+    "pb:ParmBlkPtr",
+    "async:Boolean"
+   ],
+   "file": "FileMgr.yaml",
+   "name": "PBAllocate",
+   "ret": "OSErr"
+  },
+  "A011": {
+   "args": [
+    "pb:ParmBlkPtr",
+    "async:Boolean"
+   ],
+   "file": "FileMgr.yaml",
+   "name": "PBGetEOF",
+   "ret": "OSErr"
+  },
+  "A012": {
+   "args": [
+    "pb:ParmBlkPtr",
+    "async:Boolean"
+   ],
+   "file": "FileMgr.yaml",
+   "name": "PBSetEOF",
+   "ret": "OSErr"
+  },
+  "A013": {
+   "args": [
+    "pb:ParmBlkPtr",
+    "async:Boolean"
+   ],
+   "file": "FileMgr.yaml",
+   "name": "PBFlushVol",
+   "ret": "OSErr"
+  },
+  "A014": {
+   "args": [
+    "pb:ParmBlkPtr",
+    "async:Boolean"
+   ],
+   "file": "FileMgr.yaml",
+   "name": "PBGetVol",
+   "ret": "OSErr"
+  },
+  "A015": {
+   "args": [
+    "pb:ParmBlkPtr",
+    "async:Boolean"
+   ],
+   "file": "FileMgr.yaml",
+   "name": "PBSetVol",
+   "ret": "OSErr"
+  },
+  "A016": {
+   "args": [],
+   "file": "FileMgr.yaml",
+   "name": "FInitQueue",
+   "ret": null
+  },
+  "A017": {
+   "args": [
+    "pb:ParmBlkPtr"
+   ],
+   "file": "FileMgr.yaml",
+   "name": "PBEject",
+   "ret": "OSErr"
+  },
+  "A018": {
+   "args": [
+    "pb:ParmBlkPtr",
+    "async:Boolean"
+   ],
+   "file": "FileMgr.yaml",
+   "name": "PBGetFPos",
+   "ret": "OSErr"
+  },
+  "A019": {
+   "args": [],
+   "file": "MemoryMgr.yaml",
+   "name": "InitZone68K",
+   "ret": null
+  },
+  "A01B": {
+   "args": [
+    "hz:THz"
+   ],
+   "file": "MemoryMgr.yaml",
+   "name": "SetZone",
+   "ret": null
+  },
+  "A01C": {
+   "args": [
+    "sys_p:bool"
+   ],
+   "file": "MemoryMgr.yaml",
+   "name": "FreeMem",
+   "ret": "int32_t"
+  },
+  "A01F": {
+   "args": [
+    "p:Ptr"
+   ],
+   "file": "MemoryMgr.yaml",
+   "name": "DisposePtr",
+   "ret": null
+  },
+  "A020": {
+   "args": [
+    "p:Ptr",
+    "newsize:Size"
+   ],
+   "file": "MemoryMgr.yaml",
+   "name": "SetPtrSize",
+   "ret": null
+  },
+  "A021": {
+   "args": [
+    "p:Ptr"
+   ],
+   "file": "MemoryMgr.yaml",
+   "name": "GetPtrSize",
+   "ret": "Size"
+  },
+  "A023": {
+   "args": [
+    "h:Handle"
+   ],
+   "file": "MemoryMgr.yaml",
+   "name": "DisposeHandle",
+   "ret": null
+  },
+  "A024": {
+   "args": [
+    "h:Handle",
+    "newsize:Size"
+   ],
+   "file": "MemoryMgr.yaml",
+   "name": "SetHandleSize",
+   "ret": null
+  },
+  "A025": {
+   "args": [
+    "h:Handle"
+   ],
+   "file": "MemoryMgr.yaml",
+   "name": "GetHandleSize",
+   "ret": "Size"
+  },
+  "A027": {
+   "args": [
+    "h:Handle",
+    "size:Size"
+   ],
+   "file": "MemoryMgr.yaml",
+   "name": "ReallocateHandle",
+   "ret": null
+  },
+  "A029": {
+   "args": [
+    "h:Handle"
+   ],
+   "file": "MemoryMgr.yaml",
+   "name": "HLock",
+   "ret": null
+  },
+  "A02A": {
+   "args": [
+    "h:Handle"
+   ],
+   "file": "MemoryMgr.yaml",
+   "name": "HUnlock",
+   "ret": null
+  },
+  "A02B": {
+   "args": [
+    "h:Handle"
+   ],
+   "file": "MemoryMgr.yaml",
+   "name": "EmptyHandle",
+   "ret": null
+  },
+  "A02C": {
+   "args": [],
+   "file": "MemoryMgr.yaml",
+   "name": "InitApplZone",
+   "ret": null
+  },
+  "A02D": {
+   "args": [
+    "newlimit:Ptr"
+   ],
+   "file": "MemoryMgr.yaml",
+   "name": "SetApplLimit",
+   "ret": null
+  },
+  "A02E": {
+   "args": [
+    "src:const void*",
+    "dst:void*",
+    "cnt:Size",
+    "flush_p:bool"
+   ],
+   "file": "MemoryMgr.yaml",
+   "name": "BlockMove",
+   "ret": null
+  },
+  "A02F": {
+   "args": [],
+   "file": "OSEvent.yaml",
+   "name": "PostEvent",
+   "ret": null
+  },
+  "A030": {
+   "args": [
+    "evmask:INTEGER",
+    "eventp:EventRecord*"
+   ],
+   "file": "OSEvent.yaml",
+   "name": "OSEventAvail",
+   "ret": "Boolean"
+  },
+  "A031": {
+   "args": [
+    "evmask:INTEGER",
+    "eventp:EventRecord*"
+   ],
+   "file": "OSEvent.yaml",
+   "name": "GetOSEvent",
+   "ret": "Boolean"
+  },
+  "A032": {
+   "args": [
+    "evmask:INTEGER",
+    "stopmask:INTEGER"
+   ],
+   "file": "OSEvent.yaml",
+   "name": "FlushEvents",
+   "ret": null
+  },
+  "A033": {
+   "args": [
+    "vtaskp:VBLTaskPtr"
+   ],
+   "file": "VRetraceMgr.yaml",
+   "name": "VInstall",
+   "ret": "OSErr"
+  },
+  "A034": {
+   "args": [
+    "vtaskp:VBLTaskPtr"
+   ],
+   "file": "VRetraceMgr.yaml",
+   "name": "VRemove",
+   "ret": "OSErr"
+  },
+  "A035": {
+   "args": [
+    "pb:ParmBlkPtr"
+   ],
+   "file": "FileMgr.yaml",
+   "name": "PBOffLine",
+   "ret": "OSErr"
+  },
+  "A036": {
+   "args": [],
+   "file": "MemoryMgr.yaml",
+   "name": "MoreMasters",
+   "ret": null
+  },
+  "A038": {
+   "args": [],
+   "file": "OSUtil.yaml",
+   "name": "WriteParam",
+   "ret": "OSErr"
+  },
+  "A039": {
+   "args": [
+    "secs:ULONGINT*"
+   ],
+   "file": "OSUtil.yaml",
+   "name": "ReadDateTime",
+   "ret": "OSErr"
+  },
+  "A03A": {
+   "args": [
+    "mactime:ULONGINT"
+   ],
+   "file": "OSUtil.yaml",
+   "name": "SetDateTime",
+   "ret": "OSErr"
+  },
+  "A03B": {
+   "args": [
+    "n:LONGINT",
+    "ftp:LONGINT*"
+   ],
+   "file": "OSUtil.yaml",
+   "name": "Delay",
+   "ret": null
+  },
+  "A03C": {
+   "args": [],
+   "file": "OSUtil.yaml",
+   "name": "EqualString",
+   "ret": null
+  },
+  "A03D": {
+   "args": [],
+   "file": "DeviceMgr.yaml",
+   "name": "DrvrInstall",
+   "ret": null
+  },
+  "A03E": {
+   "args": [],
+   "file": "DeviceMgr.yaml",
+   "name": "DrvrRemove",
+   "ret": null
+  },
+  "A03F": {
+   "args": [],
+   "file": "OSUtil.yaml",
+   "name": "InitUtil",
+   "ret": "OSErr"
+  },
+  "A040": {
+   "args": [
+    "needed:Size",
+    "sys_p:bool"
+   ],
+   "file": "MemoryMgr.yaml",
+   "name": "ReserveMem",
+   "ret": null
+  },
+  "A041": {
+   "args": [
+    "pb:ParmBlkPtr",
+    "async:Boolean"
+   ],
+   "file": "FileMgr.yaml",
+   "name": "PBSetFLock",
+   "ret": "OSErr"
+  },
+  "A042": {
+   "args": [
+    "pb:ParmBlkPtr",
+    "async:Boolean"
+   ],
+   "file": "FileMgr.yaml",
+   "name": "PBRstFLock",
+   "ret": "OSErr"
+  },
+  "A043": {
+   "args": [
+    "pb:ParmBlkPtr",
+    "async:Boolean"
+   ],
+   "file": "FileMgr.yaml",
+   "name": "PBSetFVers",
+   "ret": "OSErr"
+  },
+  "A044": {
+   "args": [
+    "pb:ParmBlkPtr",
+    "async:Boolean"
+   ],
+   "file": "FileMgr.yaml",
+   "name": "PBSetFPos",
+   "ret": "OSErr"
+  },
+  "A045": {
+   "args": [
+    "pb:ParmBlkPtr",
+    "async:Boolean"
+   ],
+   "file": "FileMgr.yaml",
+   "name": "PBFlushFile",
+   "ret": "OSErr"
+  },
+  "A047": {
+   "args": [
+    "addr:ProcPtr",
+    "n:uint16_t",
+    "newTraps:bool",
+    "tool:bool"
+   ],
+   "file": "OSUtil.yaml",
+   "name": "SetTrapAddress",
+   "ret": null
+  },
+  "A049": {
+   "args": [
+    "h:Handle"
+   ],
+   "file": "MemoryMgr.yaml",
+   "name": "HPurge",
+   "ret": null
+  },
+  "A04A": {
+   "args": [
+    "h:Handle"
+   ],
+   "file": "MemoryMgr.yaml",
+   "name": "HNoPurge",
+   "ret": null
+  },
+  "A04B": {
+   "args": [
+    "newgz:GrowZoneUPP"
+   ],
+   "file": "MemoryMgr.yaml",
+   "name": "SetGrowZone",
+   "ret": null
+  },
+  "A04C": {
+   "args": [
+    "sizeneeded:Size",
+    "sys_p:bool"
+   ],
+   "file": "MemoryMgr.yaml",
+   "name": "CompactMem",
+   "ret": "Size"
+  },
+  "A04D": {
+   "args": [
+    "needed:Size",
+    "sys_p:bool"
+   ],
+   "file": "MemoryMgr.yaml",
+   "name": "PurgeMem",
+   "ret": null
+  },
+  "A050": {
+   "args": [],
+   "file": "OSUtil.yaml",
+   "name": "RelString",
+   "ret": null
+  },
+  "A051": {
+   "args": [],
+   "file": "OSUtil.yaml",
+   "name": "IMVI_ReadXPRam",
+   "ret": null
+  },
+  "A054": {
+   "args": [],
+   "file": "OSUtil.yaml",
+   "name": "UpperString",
+   "ret": null
+  },
+  "A055": {
+   "args": [
+    "p:Ptr"
+   ],
+   "file": "OSUtil.yaml",
+   "name": "StripAddress",
+   "ret": "Ptr"
+  },
+  "A056": {
+   "args": [],
+   "file": "OSUtil.yaml",
+   "name": "IMVI_LowerText",
+   "ret": null
+  },
+  "A057": {
+   "args": [
+    "newbase:Ptr"
+   ],
+   "file": "MemoryMgr.yaml",
+   "name": "SetApplBase",
+   "ret": null
+  },
+  "A058": {
+   "args": [
+    "taskp:QElemPtr"
+   ],
+   "file": "TimeMgr.yaml",
+   "name": "InsTime",
+   "ret": null
+  },
+  "A059": {
+   "args": [
+    "taskp:QElemPtr"
+   ],
+   "file": "TimeMgr.yaml",
+   "name": "RmvTime",
+   "ret": null
+  },
+  "A05A": {
+   "args": [
+    "taskp:QElemPtr",
+    "count:LONGINT"
+   ],
+   "file": "TimeMgr.yaml",
+   "name": "PrimeTime",
+   "ret": null
+  },
+  "A05D": {
+   "args": [
+    "bp:Byte*"
+   ],
+   "file": "OSUtil.yaml",
+   "name": "SwapMMUMode",
+   "ret": null
+  },
+  "A05E": {
+   "args": [
+    "nmptr:NMRecPtr"
+   ],
+   "file": "NotifyMgr.yaml",
+   "name": "NMInstall",
+   "ret": "OSErr"
+  },
+  "A05F": {
+   "args": [
+    "nmptr:NMRecPtr"
+   ],
+   "file": "NotifyMgr.yaml",
+   "name": "NMRemove",
+   "ret": "OSErr"
+  },
+  "A060": {
+   "dispatcher": true,
+   "name": "FSDispatch"
+  },
+  "A061": {
+   "args": [
+    "sys_p:bool"
+   ],
+   "file": "MemoryMgr.yaml",
+   "name": "MaxBlock",
+   "ret": "Size"
+  },
+  "A062": {
+   "args": [
+    "totalp:Size*",
+    "contigp:Size*",
+    "sys_p:bool"
+   ],
+   "file": "MemoryMgr.yaml",
+   "name": "PurgeSpace",
+   "ret": null
+  },
+  "A063": {
+   "args": [],
+   "file": "MemoryMgr.yaml",
+   "name": "MaxApplZone",
+   "ret": null
+  },
+  "A064": {
+   "args": [
+    "h:Handle"
+   ],
+   "file": "MemoryMgr.yaml",
+   "name": "MoveHHi",
+   "ret": null
+  },
+  "A065": {
+   "args": [],
+   "file": "MemoryMgr.yaml",
+   "name": "StackSpace",
+   "ret": "Size"
+  },
+  "A067": {
+   "args": [
+    "h:Handle"
+   ],
+   "file": "MemoryMgr.yaml",
+   "name": "HSetRBit",
+   "ret": null
+  },
+  "A068": {
+   "args": [
+    "h:Handle"
+   ],
+   "file": "MemoryMgr.yaml",
+   "name": "HClrRBit",
+   "ret": null
+  },
+  "A069": {
+   "args": [
+    "h:Handle"
+   ],
+   "file": "MemoryMgr.yaml",
+   "name": "HGetState",
+   "ret": "SignedByte"
+  },
+  "A06A": {
+   "args": [
+    "h:Handle",
+    "flags:SignedByte"
+   ],
+   "file": "MemoryMgr.yaml",
+   "name": "HSetState",
+   "ret": null
+  },
+  "A06E": {
+   "args": [],
+   "file": "DeviceMgr.yaml",
+   "name": "SlotManager",
+   "ret": null
+  },
+  "A06F": {
+   "args": [
+    "vtaskp:VBLTaskPtr",
+    "slot:INTEGER"
+   ],
+   "file": "VRetraceMgr.yaml",
+   "name": "SlotVInstall",
+   "ret": "OSErr"
+  },
+  "A070": {
+   "args": [
+    "vtaskp:VBLTaskPtr",
+    "slot:INTEGER"
+   ],
+   "file": "VRetraceMgr.yaml",
+   "name": "SlotVRemove",
+   "ret": "OSErr"
+  },
+  "A077": {
+   "args": [],
+   "file": "ADB.yaml",
+   "name": "CountADBs",
+   "ret": "INTEGER"
+  },
+  "A078": {
+   "args": [
+    "adbp:ADBDataBlock*",
+    "index:INTEGER"
+   ],
+   "file": "ADB.yaml",
+   "name": "GetIndADB",
+   "ret": "OSErr"
+  },
+  "A079": {
+   "args": [
+    "adbp:ADBDataBlock*",
+    "address:INTEGER"
+   ],
+   "file": "ADB.yaml",
+   "name": "GetADBInfo",
+   "ret": "OSErr"
+  },
+  "A07A": {
+   "args": [
+    "adbp:ADBSetInfoBlock*",
+    "address:INTEGER"
+   ],
+   "file": "ADB.yaml",
+   "name": "SetADBInfo",
+   "ret": "OSErr"
+  },
+  "A07B": {
+   "args": [],
+   "file": "ADB.yaml",
+   "name": "ADBReInit",
+   "ret": null
+  },
+  "A07C": {
+   "args": [],
+   "file": "ADB.yaml",
+   "name": "ADBOp",
+   "ret": null
+  },
+  "A07D": {
+   "args": [],
+   "file": "StartMgr.yaml",
+   "name": "GetDefaultStartup",
+   "ret": null
+  },
+  "A07E": {
+   "args": [],
+   "file": "StartMgr.yaml",
+   "name": "SetDefaultStartup",
+   "ret": null
+  },
+  "A080": {
+   "args": [],
+   "file": "StartMgr.yaml",
+   "name": "GetVideoDefault",
+   "ret": null
+  },
+  "A081": {
+   "args": [],
+   "file": "StartMgr.yaml",
+   "name": "SetVideoDefault",
+   "ret": null
+  },
+  "A083": {
+   "args": [],
+   "file": "StartMgr.yaml",
+   "name": "SetOSDefault",
+   "ret": null
+  },
+  "A084": {
+   "args": [],
+   "file": "StartMgr.yaml",
+   "name": "GetOSDefault",
+   "ret": null
+  },
+  "A08B": {
+   "args": [],
+   "file": "CommTool.yaml",
+   "name": "CommToolboxDispatch",
+   "ret": null
+  },
+  "A090": {
+   "args": [
+    "vers:INTEGER",
+    "p:SysEnvRecPtr"
+   ],
+   "file": "OSUtil.yaml",
+   "name": "SysEnvirons",
+   "ret": "OSErr"
+  },
+  "A0BD": {
+   "args": [],
+   "file": "OSUtil.yaml",
+   "name": "FlushCodeCache",
+   "ret": null
+  },
+  "A0DD": {
+   "args": [],
+   "file": "PPC.yaml",
+   "name": "IMVI_PPC",
+   "ret": null
+  },
+  "A0FC": {
+   "args": [],
+   "file": "ResourceMgr.yaml",
+   "name": "ResourceStub",
+   "ret": null
+  },
+  "A11A": {
+   "args": [],
+   "file": "MemoryMgr.yaml",
+   "name": "GetZone",
+   "ret": "THz"
+  },
+  "A11D": {
+   "args": [
+    "growp:Size*",
+    "sys_p:bool"
+   ],
+   "file": "MemoryMgr.yaml",
+   "name": "MaxMem",
+   "ret": "Size"
+  },
+  "A11E": {
+   "args": [
+    "size:Size",
+    "sys_p:bool",
+    "clear_p:bool"
+   ],
+   "file": "MemoryMgr.yaml",
+   "name": "NewPtr",
+   "ret": "Ptr"
+  },
+  "A122": {
+   "args": [
+    "size:Size",
+    "sys_p:bool",
+    "clear_p:bool"
+   ],
+   "file": "MemoryMgr.yaml",
+   "name": "NewHandle",
+   "ret": "Handle"
+  },
+  "A126": {
+   "args": [
+    "h:Handle"
+   ],
+   "file": "MemoryMgr.yaml",
+   "name": "HandleZone",
+   "ret": "THz"
+  },
+  "A128": {
+   "args": [
+    "p:Ptr",
+    "sys_p:bool"
+   ],
+   "file": "MemoryMgr.yaml",
+   "name": "RecoverHandle",
+   "ret": "Handle"
+  },
+  "A146": {
+   "args": [
+    "n:uint16_t",
+    "newTraps:bool",
+    "tool:bool"
+   ],
+   "file": "OSUtil.yaml",
+   "name": "GetTrapAddress",
+   "ret": "ProcPtr"
+  },
+  "A148": {
+   "args": [
+    "p:Ptr"
+   ],
+   "file": "MemoryMgr.yaml",
+   "name": "PtrZone",
+   "ret": "THz"
+  },
+  "A166": {
+   "args": [
+    "sys_p:bool"
+   ],
+   "file": "MemoryMgr.yaml",
+   "name": "NewEmptyHandle",
+   "ret": "Handle"
+  },
+  "A193": {
+   "args": [],
+   "file": "TimeMgr.yaml",
+   "name": "Microseconds",
+   "ret": null
+  },
+  "A198": {
+   "args": [
+    "d0:LONGINT",
+    "a0:LONGINT"
+   ],
+   "file": "OSUtil.yaml",
+   "name": "HWPriv",
+   "ret": null
+  },
+  "A1AD": {
+   "dispatcher": true,
+   "name": "GestaltDispatch"
+  },
+  "A200": {
+   "args": [
+    "pb:HParmBlkPtr",
+    "async:Boolean"
+   ],
+   "file": "FileMgr.yaml",
+   "name": "PBHOpen",
+   "ret": "OSErr"
+  },
+  "A207": {
+   "args": [
+    "pb:HParmBlkPtr",
+    "async:Boolean"
+   ],
+   "file": "FileMgr.yaml",
+   "name": "PBHGetVInfo",
+   "ret": "OSErr"
+  },
+  "A208": {
+   "args": [
+    "pb:HParmBlkPtr",
+    "async:Boolean"
+   ],
+   "file": "FileMgr.yaml",
+   "name": "PBHCreate",
+   "ret": "OSErr"
+  },
+  "A209": {
+   "args": [
+    "pb:HParmBlkPtr",
+    "async:Boolean"
+   ],
+   "file": "FileMgr.yaml",
+   "name": "PBHDelete",
+   "ret": "OSErr"
+  },
+  "A20A": {
+   "args": [
+    "pb:HParmBlkPtr",
+    "async:Boolean"
+   ],
+   "file": "FileMgr.yaml",
+   "name": "PBHOpenRF",
+   "ret": "OSErr"
+  },
+  "A20B": {
+   "args": [
+    "pb:HParmBlkPtr",
+    "async:Boolean"
+   ],
+   "file": "FileMgr.yaml",
+   "name": "PBHRename",
+   "ret": "OSErr"
+  },
+  "A20C": {
+   "args": [
+    "pb:HParmBlkPtr",
+    "async:Boolean"
+   ],
+   "file": "FileMgr.yaml",
+   "name": "PBHGetFInfo",
+   "ret": "OSErr"
+  },
+  "A20D": {
+   "args": [
+    "pb:HParmBlkPtr",
+    "async:Boolean"
+   ],
+   "file": "FileMgr.yaml",
+   "name": "PBHSetFInfo",
+   "ret": "OSErr"
+  },
+  "A214": {
+   "args": [
+    "pb:WDPBPtr",
+    "async:Boolean"
+   ],
+   "file": "FileMgr.yaml",
+   "name": "PBHGetVol",
+   "ret": "OSErr"
+  },
+  "A215": {
+   "args": [
+    "pb:WDPBPtr",
+    "async:Boolean"
+   ],
+   "file": "FileMgr.yaml",
+   "name": "PBHSetVol",
+   "ret": "OSErr"
+  },
+  "A241": {
+   "args": [
+    "pb:HParmBlkPtr",
+    "async:Boolean"
+   ],
+   "file": "FileMgr.yaml",
+   "name": "PBHSetFLock",
+   "ret": "OSErr"
+  },
+  "A242": {
+   "args": [
+    "pb:HParmBlkPtr",
+    "async:Boolean"
+   ],
+   "file": "FileMgr.yaml",
+   "name": "PBHRstFLock",
+   "ret": "OSErr"
+  },
+  "A458": {
+   "args": [
+    "taskp:QElemPtr"
+   ],
+   "file": "TimeMgr.yaml",
+   "name": "InsXTime",
+   "ret": null
+  },
+  "A800": {
+   "dispatcher": true,
+   "name": "SoundDispatch"
+  },
+  "A801": {
+   "args": [
+    "chanp:SndChannelPtr",
+    "quitnow:Boolean"
+   ],
+   "file": "SoundMgr.yaml",
+   "name": "SndDisposeChannel",
+   "ret": "OSErr"
+  },
+  "A802": {
+   "args": [
+    "chanp:SndChannelPtr",
+    "mod:ProcPtr",
+    "id:INTEGER",
+    "init:LONGINT"
+   ],
+   "file": "SoundMgr.yaml",
+   "name": "SndAddModifier",
+   "ret": "OSErr"
+  },
+  "A803": {
+   "args": [
+    "chanp:SndChannelPtr",
+    "cmdp:SndCommand*",
+    "nowait:Boolean"
+   ],
+   "file": "SoundMgr.yaml",
+   "name": "SndDoCommand",
+   "ret": "OSErr"
+  },
+  "A804": {
+   "args": [
+    "chanp:SndChannelPtr",
+    "cmdp:SndCommand*"
+   ],
+   "file": "SoundMgr.yaml",
+   "name": "SndDoImmediate",
+   "ret": "OSErr"
+  },
+  "A805": {
+   "args": [
+    "chanp:SndChannelPtr",
+    "sndh:Handle",
+    "async:Boolean"
+   ],
+   "file": "SoundMgr.yaml",
+   "name": "SndPlay",
+   "ret": "OSErr"
+  },
+  "A806": {
+   "args": [
+    "id:INTEGER",
+    "cmdp:SndCommand*"
+   ],
+   "file": "SoundMgr.yaml",
+   "name": "SndControl",
+   "ret": "OSErr"
+  },
+  "A807": {
+   "args": [
+    "chanpp:SndChannelPtr*",
+    "synth:INTEGER",
+    "init:LONGINT",
+    "userroutinep:SndCallbackUPP"
+   ],
+   "file": "SoundMgr.yaml",
+   "name": "SndNewChannel",
+   "ret": "OSErr"
+  },
+  "A808": {
+   "args": [
+    "mbid:INTEGER"
+   ],
+   "file": "MenuMgr.yaml",
+   "name": "InitProcMenu",
+   "ret": null
+  },
+  "A809": {
+   "args": [
+    "c:ControlHandle"
+   ],
+   "file": "ControlMgr.yaml",
+   "name": "GetControlVariant",
+   "ret": "INTEGER"
+  },
+  "A80A": {
+   "args": [
+    "w:WindowPtr"
+   ],
+   "file": "WindowMgr.yaml",
+   "name": "GetWVariant",
+   "ret": "INTEGER"
+  },
+  "A80B": {
+   "args": [
+    "mh:MenuHandle",
+    "top:INTEGER",
+    "left:INTEGER",
+    "item:INTEGER"
+   ],
+   "file": "MenuMgr.yaml",
+   "name": "PopUpMenuSelect",
+   "ret": "LONGINT"
+  },
+  "A80C": {
+   "args": [
+    "typ:ResType",
+    "id:INTEGER"
+   ],
+   "file": "ResourceMgr.yaml",
+   "name": "RGetResource",
+   "ret": "Handle"
+  },
+  "A80D": {
+   "args": [
+    "typ:ResType"
+   ],
+   "file": "ResourceMgr.yaml",
+   "name": "Count1Resources",
+   "ret": "INTEGER"
+  },
+  "A80E": {
+   "args": [
+    "typ:ResType",
+    "i:INTEGER"
+   ],
+   "file": "ResourceMgr.yaml",
+   "name": "Get1IndResource",
+   "ret": "Handle"
+  },
+  "A80F": {
+   "args": [
+    "typ:ResType*",
+    "indx:INTEGER"
+   ],
+   "file": "ResourceMgr.yaml",
+   "name": "Get1IndType",
+   "ret": null
+  },
+  "A810": {
+   "args": [
+    "typ:ResType"
+   ],
+   "file": "ResourceMgr.yaml",
+   "name": "Unique1ID",
+   "ret": "INTEGER"
+  },
+  "A811": {
+   "args": [
+    "teh:TEHandle"
+   ],
+   "file": "TextEdit.yaml",
+   "name": "TESelView",
+   "ret": null
+  },
+  "A812": {
+   "args": [
+    "dh:INTEGER",
+    "dv:INTEGER",
+    "teh:TEHandle"
+   ],
+   "file": "TextEdit.yaml",
+   "name": "TEPinScroll",
+   "ret": null
+  },
+  "A813": {
+   "args": [
+    "autoflag:Boolean",
+    "teh:TEHandle"
+   ],
+   "file": "TextEdit.yaml",
+   "name": "TEAutoView",
+   "ret": null
+  },
+  "A814": {
+   "args": [
+    "enable:Boolean"
+   ],
+   "file": "FontMgr.yaml",
+   "name": "SetFractEnable",
+   "ret": null
+  },
+  "A815": {
+   "args": [],
+   "file": "DeviceMgr.yaml",
+   "name": "SCSIDispatch",
+   "ret": null
+  },
+  "A816": {
+   "dispatcher": true,
+   "name": "Pack8"
+  },
+  "A817": {
+   "args": [
+    "srcbp:BitMap*",
+    "mskbp:BitMap*",
+    "dstbp:BitMap*",
+    "srcrp:const Rect*",
+    "mskrp:const Rect*",
+    "dstrp:const Rect*"
+   ],
+   "file": "QuickDraw.yaml",
+   "name": "CopyMask",
+   "ret": null
+  },
+  "A818": {
+   "args": [
+    "x:LONGINT",
+    "y:LONGINT"
+   ],
+   "file": "ToolboxUtil.yaml",
+   "name": "FixATan2",
+   "ret": "Fixed"
+  },
+  "A81A": {
+   "args": [
+    "vref:INTEGER",
+    "dirid:LONGINT",
+    "file_name:ConstStringPtr",
+    "perm:SignedByte"
+   ],
+   "file": "FileMgr.yaml",
+   "name": "HOpenResFile",
+   "ret": "INTEGER"
+  },
+  "A81B": {
+   "args": [
+    "vrefnum:INTEGER",
+    "parid:LONGINT",
+    "name:ConstStringPtr"
+   ],
+   "file": "FileMgr.yaml",
+   "name": "HCreateResFile",
+   "ret": null
+  },
+  "A81C": {
+   "args": [],
+   "file": "ResourceMgr.yaml",
+   "name": "Count1Types",
+   "ret": "INTEGER"
+  },
+  "A81D": {
+   "args": [],
+   "file": "MenuMgr.yaml",
+   "name": "InvalMenuBar",
+   "ret": null
+  },
+  "A81F": {
+   "args": [
+    "typ:ResType",
+    "id:INTEGER"
+   ],
+   "file": "ResourceMgr.yaml",
+   "name": "Get1Resource",
+   "ret": "Handle"
+  },
+  "A820": {
+   "args": [
+    "typ:ResType",
+    "s:ConstStringPtr"
+   ],
+   "file": "ResourceMgr.yaml",
+   "name": "Get1NamedResource",
+   "ret": "Handle"
+  },
+  "A821": {
+   "args": [
+    "h:Handle"
+   ],
+   "file": "ResourceMgr.yaml",
+   "name": "GetMaxResourceSize",
+   "ret": "LONGINT"
+  },
+  "A822": {
+   "dispatcher": true,
+   "name": "ResourceDispatch"
+  },
+  "A823": {
+   "dispatcher": true,
+   "name": "AliasDispatch"
+  },
+  "A826": {
+   "args": [
+    "mh:MenuHandle",
+    "str:ConstStringPtr",
+    "after:INTEGER"
+   ],
+   "file": "MenuMgr.yaml",
+   "name": "InsertMenuItem",
+   "ret": null
+  },
+  "A827": {
+   "args": [
+    "dp:DialogPtr",
+    "item:INTEGER"
+   ],
+   "file": "DialogMgr.yaml",
+   "name": "HideDialogItem",
+   "ret": null
+  },
+  "A828": {
+   "args": [
+    "dp:DialogPtr",
+    "item:INTEGER"
+   ],
+   "file": "DialogMgr.yaml",
+   "name": "ShowDialogItem",
+   "ret": null
+  },
+  "A82D": {
+   "dispatcher": true,
+   "name": "Pack11"
+  },
+  "A82E": {
+   "dispatcher": true,
+   "name": "Pack12"
+  },
+  "A830": {
+   "dispatcher": true,
+   "name": "Pack14"
+  },
+  "A831": {
+   "dispatcher": true,
+   "name": "Pack15"
+  },
+  "A834": {
+   "args": [
+    "disable:Boolean"
+   ],
+   "file": "FontMgr.yaml",
+   "name": "SetFScaleDisable",
+   "ret": null
+  },
+  "A835": {
+   "args": [
+    "metrp:FMetricRec*"
+   ],
+   "file": "FontMgr.yaml",
+   "name": "FontMetrics",
+   "ret": null
+  },
+  "A836": {
+   "args": [],
+   "file": "QuickDraw.yaml",
+   "name": "GetMaskTable",
+   "ret": "INTEGER*"
+  },
+  "A837": {
+   "args": [
+    "n:INTEGER",
+    "text:Ptr",
+    "chars:Ptr"
+   ],
+   "file": "QuickDraw.yaml",
+   "name": "MeasureText",
+   "ret": null
+  },
+  "A838": {
+   "args": [
+    "srcp:Ptr",
+    "dstp:Ptr",
+    "srcr:INTEGER",
+    "dstr:INTEGER",
+    "height:INTEGER",
+    "width:INTEGER"
+   ],
+   "file": "QuickDraw.yaml",
+   "name": "CalcMask",
+   "ret": null
+  },
+  "A839": {
+   "args": [
+    "srcp:Ptr",
+    "dstp:Ptr",
+    "srcr:INTEGER",
+    "dstr:INTEGER",
+    "height:INTEGER",
+    "width:INTEGER",
+    "seedh:INTEGER",
+    "seedv:INTEGER"
+   ],
+   "file": "QuickDraw.yaml",
+   "name": "SeedFill",
+   "ret": null
+  },
+  "A83A": {
+   "args": [
+    "wp:WindowPtr",
+    "part:INTEGER",
+    "front:Boolean"
+   ],
+   "file": "WindowMgr.yaml",
+   "name": "ZoomWindow",
+   "ret": null
+  },
+  "A83B": {
+   "args": [
+    "wp:WindowPtr",
+    "pt:Point",
+    "part:INTEGER"
+   ],
+   "file": "WindowMgr.yaml",
+   "name": "TrackBox",
+   "ret": "Boolean"
+  },
+  "A83C": {
+   "args": [
+    "pt:Point",
+    "teh:TEHandle"
+   ],
+   "file": "TextEdit.yaml",
+   "name": "TEGetOffset",
+   "ret": "INTEGER"
+  },
+  "A83D": {
+   "dispatcher": true,
+   "name": "TEDispatch"
+  },
+  "A83E": {
+   "args": [
+    "dst:const Rect*",
+    "view:const Rect*"
+   ],
+   "file": "TextEdit.yaml",
+   "name": "TEStyleNew",
+   "ret": "TEHandle"
+  },
+  "A83F": {
+   "args": [
+    "x:LONGINT"
+   ],
+   "file": "ToolboxUtil.yaml",
+   "name": "Long2Fix",
+   "ret": "Fixed"
+  },
+  "A840": {
+   "args": [
+    "x:Fixed"
+   ],
+   "file": "ToolboxUtil.yaml",
+   "name": "Fix2Long",
+   "ret": "LONGINT"
+  },
+  "A841": {
+   "args": [
+    "x:Fixed"
+   ],
+   "file": "ToolboxUtil.yaml",
+   "name": "Fix2Frac",
+   "ret": "Fract"
+  },
+  "A842": {
+   "args": [
+    "x:Fract"
+   ],
+   "file": "ToolboxUtil.yaml",
+   "name": "Frac2Fix",
+   "ret": "Fixed"
+  },
+  "A843": {
+   "args": [],
+   "file": "ToolboxUtil.yaml",
+   "name": "Fix2X",
+   "ret": null
+  },
+  "A844": {
+   "args": [
+    "x:extended80*"
+   ],
+   "file": "ToolboxUtil.yaml",
+   "name": "R_X2Fix",
+   "ret": "Fixed"
+  },
+  "A845": {
+   "args": [],
+   "file": "ToolboxUtil.yaml",
+   "name": "Frac2X",
+   "ret": null
+  },
+  "A846": {
+   "args": [
+    "x:extended80*"
+   ],
+   "file": "ToolboxUtil.yaml",
+   "name": "R_X2Frac",
+   "ret": "Fract"
+  },
+  "A847": {
+   "args": [
+    "x:Fixed"
+   ],
+   "file": "ToolboxUtil.yaml",
+   "name": "FracCos",
+   "ret": "Fract"
+  },
+  "A848": {
+   "args": [
+    "x:Fixed"
+   ],
+   "file": "ToolboxUtil.yaml",
+   "name": "FracSin",
+   "ret": "Fract"
+  },
+  "A849": {
+   "args": [
+    "x:Fract"
+   ],
+   "file": "ToolboxUtil.yaml",
+   "name": "FracSqrt",
+   "ret": "Fract"
+  },
+  "A84A": {
+   "args": [
+    "x:Fract",
+    "y:Fract"
+   ],
+   "file": "ToolboxUtil.yaml",
+   "name": "FracMul",
+   "ret": "Fract"
+  },
+  "A84B": {
+   "args": [
+    "x:Fract",
+    "y:Fract"
+   ],
+   "file": "ToolboxUtil.yaml",
+   "name": "FracDiv",
+   "ret": "Fract"
+  },
+  "A84D": {
+   "args": [
+    "x:Fixed",
+    "y:Fixed"
+   ],
+   "file": "ToolboxUtil.yaml",
+   "name": "FixDiv",
+   "ret": "Fixed"
+  },
+  "A84E": {
+   "args": [
+    "mh:MenuHandle",
+    "item:INTEGER",
+    "cmdp:CharParameter*"
+   ],
+   "file": "MenuMgr.yaml",
+   "name": "GetItemCmd",
+   "ret": null
+  },
+  "A84F": {
+   "args": [
+    "mh:MenuHandle",
+    "item:INTEGER",
+    "cmd:CharParameter"
+   ],
+   "file": "MenuMgr.yaml",
+   "name": "SetItemCmd",
+   "ret": null
+  },
+  "A850": {
+   "args": [],
+   "file": "QuickDraw.yaml",
+   "name": "InitCursor",
+   "ret": null
+  },
+  "A851": {
+   "args": [
+    "cp:Cursor*"
+   ],
+   "file": "QuickDraw.yaml",
+   "name": "SetCursor",
+   "ret": null
+  },
+  "A852": {
+   "args": [],
+   "file": "QuickDraw.yaml",
+   "name": "HideCursor",
+   "ret": null
+  },
+  "A853": {
+   "args": [],
+   "file": "QuickDraw.yaml",
+   "name": "ShowCursor",
+   "ret": null
+  },
+  "A854": {
+   "dispatcher": true,
+   "name": "FontDispatch"
+  },
+  "A855": {
+   "args": [
+    "rp:Rect*",
+    "p:Point"
+   ],
+   "file": "QuickDraw.yaml",
+   "name": "ShieldCursor",
+   "ret": null
+  },
+  "A856": {
+   "args": [],
+   "file": "QuickDraw.yaml",
+   "name": "ObscureCursor",
+   "ret": null
+  },
+  "A858": {
+   "args": [
+    "a:LONGINT",
+    "b:LONGINT"
+   ],
+   "file": "ToolboxUtil.yaml",
+   "name": "BitAnd",
+   "ret": "LONGINT"
+  },
+  "A859": {
+   "args": [
+    "a:LONGINT",
+    "b:LONGINT"
+   ],
+   "file": "ToolboxUtil.yaml",
+   "name": "BitXor",
+   "ret": "LONGINT"
+  },
+  "A85A": {
+   "args": [
+    "a:LONGINT"
+   ],
+   "file": "ToolboxUtil.yaml",
+   "name": "BitNot",
+   "ret": "LONGINT"
+  },
+  "A85B": {
+   "args": [
+    "a:LONGINT",
+    "b:LONGINT"
+   ],
+   "file": "ToolboxUtil.yaml",
+   "name": "BitOr",
+   "ret": "LONGINT"
+  },
+  "A85C": {
+   "args": [
+    "a:LONGINT",
+    "n:INTEGER"
+   ],
+   "file": "ToolboxUtil.yaml",
+   "name": "BitShift",
+   "ret": "LONGINT"
+  },
+  "A85D": {
+   "args": [
+    "bp:Ptr",
+    "bn:LONGINT"
+   ],
+   "file": "ToolboxUtil.yaml",
+   "name": "BitTst",
+   "ret": "Boolean"
+  },
+  "A85E": {
+   "args": [
+    "bp:Ptr",
+    "bn:LONGINT"
+   ],
+   "file": "ToolboxUtil.yaml",
+   "name": "BitSet",
+   "ret": null
+  },
+  "A85F": {
+   "args": [
+    "bp:Ptr",
+    "bn:LONGINT"
+   ],
+   "file": "ToolboxUtil.yaml",
+   "name": "BitClr",
+   "ret": null
+  },
+  "A860": {
+   "args": [
+    "mask:INTEGER",
+    "evp:EventRecord*",
+    "sleep:LONGINT",
+    "mousergn:RgnHandle"
+   ],
+   "file": "ToolboxEvent.yaml",
+   "name": "WaitNextEvent",
+   "ret": "Boolean"
+  },
+  "A861": {
+   "args": [],
+   "file": "QuickDraw.yaml",
+   "name": "Random",
+   "ret": "INTEGER"
+  },
+  "A862": {
+   "args": [
+    "c:LONGINT"
+   ],
+   "file": "QuickDraw.yaml",
+   "name": "ForeColor",
+   "ret": null
+  },
+  "A863": {
+   "args": [
+    "c:LONGINT"
+   ],
+   "file": "QuickDraw.yaml",
+   "name": "BackColor",
+   "ret": null
+  },
+  "A864": {
+   "args": [
+    "b:INTEGER"
+   ],
+   "file": "QuickDraw.yaml",
+   "name": "ColorBit",
+   "ret": null
+  },
+  "A865": {
+   "args": [
+    "h:INTEGER",
+    "v:INTEGER"
+   ],
+   "file": "QuickDraw.yaml",
+   "name": "GetPixel",
+   "ret": "Boolean"
+  },
+  "A866": {
+   "args": [
+    "p:Ptr",
+    "s:ConstStringPtr"
+   ],
+   "file": "QuickDraw.yaml",
+   "name": "StuffHex",
+   "ret": null
+  },
+  "A867": {
+   "args": [
+    "a:LONGINT",
+    "b:LONGINT",
+    "c:Int64Bit*"
+   ],
+   "file": "ToolboxUtil.yaml",
+   "name": "LongMul",
+   "ret": null
+  },
+  "A868": {
+   "args": [
+    "a:Fixed",
+    "b:Fixed"
+   ],
+   "file": "ToolboxUtil.yaml",
+   "name": "FixMul",
+   "ret": "Fixed"
+  },
+  "A869": {
+   "args": [
+    "n:INTEGER",
+    "d:INTEGER"
+   ],
+   "file": "ToolboxUtil.yaml",
+   "name": "FixRatio",
+   "ret": "Fixed"
+  },
+  "A86A": {
+   "args": [
+    "a:LONGINT"
+   ],
+   "file": "ToolboxUtil.yaml",
+   "name": "HiWord",
+   "ret": "INTEGER"
+  },
+  "A86B": {
+   "args": [
+    "a:LONGINT"
+   ],
+   "file": "ToolboxUtil.yaml",
+   "name": "LoWord",
+   "ret": "INTEGER"
+  },
+  "A86C": {
+   "args": [
+    "x:Fixed"
+   ],
+   "file": "ToolboxUtil.yaml",
+   "name": "FixRound",
+   "ret": "INTEGER"
+  },
+  "A86D": {
+   "args": [
+    "p:GrafPtr"
+   ],
+   "file": "QuickDraw.yaml",
+   "name": "InitPort",
+   "ret": null
+  },
+  "A86E": {
+   "args": [
+    "gp:GrafPtr*"
+   ],
+   "file": "QuickDraw.yaml",
+   "name": "InitGraf",
+   "ret": null
+  },
+  "A86F": {
+   "args": [
+    "p:GrafPtr"
+   ],
+   "file": "QuickDraw.yaml",
+   "name": "OpenPort",
+   "ret": null
+  },
+  "A870": {
+   "args": [
+    "pt:Point*"
+   ],
+   "file": "QuickDraw.yaml",
+   "name": "LocalToGlobal",
+   "ret": null
+  },
+  "A871": {
+   "args": [
+    "pt:Point*"
+   ],
+   "file": "QuickDraw.yaml",
+   "name": "GlobalToLocal",
+   "ret": null
+  },
+  "A872": {
+   "args": [
+    "d:INTEGER"
+   ],
+   "file": "QuickDraw.yaml",
+   "name": "GrafDevice",
+   "ret": null
+  },
+  "A873": {
+   "args": [
+    "p:GrafPtr"
+   ],
+   "file": "QuickDraw.yaml",
+   "name": "SetPort",
+   "ret": null
+  },
+  "A874": {
+   "args": [
+    "pp:GrafPtr*"
+   ],
+   "file": "QuickDraw.yaml",
+   "name": "GetPort",
+   "ret": null
+  },
+  "A875": {
+   "args": [
+    "bm:BitMap*"
+   ],
+   "file": "QuickDraw.yaml",
+   "name": "SetPortBits",
+   "ret": null
+  },
+  "A876": {
+   "args": [
+    "w:INTEGER",
+    "h:INTEGER"
+   ],
+   "file": "QuickDraw.yaml",
+   "name": "PortSize",
+   "ret": null
+  },
+  "A877": {
+   "args": [
+    "lg:INTEGER",
+    "tg:INTEGER"
+   ],
+   "file": "QuickDraw.yaml",
+   "name": "MovePortTo",
+   "ret": null
+  },
+  "A878": {
+   "args": [
+    "h:INTEGER",
+    "v:INTEGER"
+   ],
+   "file": "QuickDraw.yaml",
+   "name": "SetOrigin",
+   "ret": null
+  },
+  "A879": {
+   "args": [
+    "r:RgnHandle"
+   ],
+   "file": "QuickDraw.yaml",
+   "name": "SetClip",
+   "ret": null
+  },
+  "A87A": {
+   "args": [
+    "r:RgnHandle"
+   ],
+   "file": "QuickDraw.yaml",
+   "name": "GetClip",
+   "ret": null
+  },
+  "A87B": {
+   "args": [
+    "r:Rect*"
+   ],
+   "file": "QuickDraw.yaml",
+   "name": "ClipRect",
+   "ret": null
+  },
+  "A87C": {
+   "args": [
+    "pp:const Pattern*"
+   ],
+   "file": "QuickDraw.yaml",
+   "name": "BackPat",
+   "ret": null
+  },
+  "A87D": {
+   "args": [
+    "p:GrafPtr"
+   ],
+   "file": "QuickDraw.yaml",
+   "name": "ClosePort",
+   "ret": null
+  },
+  "A87E": {
+   "args": [
+    "src:Point",
+    "dst:Point*"
+   ],
+   "file": "QuickDraw.yaml",
+   "name": "AddPt",
+   "ret": null
+  },
+  "A87F": {
+   "args": [
+    "src:Point",
+    "dst:Point*"
+   ],
+   "file": "QuickDraw.yaml",
+   "name": "SubPt",
+   "ret": null
+  },
+  "A880": {
+   "args": [
+    "pt:Point*",
+    "h:INTEGER",
+    "v:INTEGER"
+   ],
+   "file": "QuickDraw.yaml",
+   "name": "SetPt",
+   "ret": null
+  },
+  "A881": {
+   "args": [
+    "p1:Point",
+    "p2:Point"
+   ],
+   "file": "QuickDraw.yaml",
+   "name": "EqualPt",
+   "ret": "Boolean"
+  },
+  "A882": {
+   "args": [
+    "n:INTEGER",
+    "textbufp:Ptr",
+    "num:Point",
+    "den:Point"
+   ],
+   "file": "QuickDraw.yaml",
+   "name": "StdText",
+   "ret": null
+  },
+  "A883": {
+   "args": [
+    "thec:CharParameter"
+   ],
+   "file": "QuickDraw.yaml",
+   "name": "DrawChar",
+   "ret": null
+  },
+  "A884": {
+   "args": [
+    "s:ConstStringPtr"
+   ],
+   "file": "QuickDraw.yaml",
+   "name": "DrawString",
+   "ret": null
+  },
+  "A885": {
+   "args": [
+    "tb:Ptr",
+    "fb:INTEGER",
+    "bc:INTEGER"
+   ],
+   "file": "QuickDraw.yaml",
+   "name": "DrawText",
+   "ret": null
+  },
+  "A886": {
+   "args": [
+    "tb:Ptr",
+    "fb:INTEGER",
+    "bc:INTEGER"
+   ],
+   "file": "QuickDraw.yaml",
+   "name": "TextWidth",
+   "ret": "INTEGER"
+  },
+  "A887": {
+   "args": [
+    "f:INTEGER"
+   ],
+   "file": "QuickDraw.yaml",
+   "name": "TextFont",
+   "ret": null
+  },
+  "A888": {
+   "args": [
+    "thef:INTEGER"
+   ],
+   "file": "QuickDraw.yaml",
+   "name": "TextFace",
+   "ret": null
+  },
+  "A889": {
+   "args": [
+    "m:INTEGER"
+   ],
+   "file": "QuickDraw.yaml",
+   "name": "TextMode",
+   "ret": null
+  },
+  "A88A": {
+   "args": [
+    "s:INTEGER"
+   ],
+   "file": "QuickDraw.yaml",
+   "name": "TextSize",
+   "ret": null
+  },
+  "A88B": {
+   "args": [
+    "ip:FontInfo*"
+   ],
+   "file": "QuickDraw.yaml",
+   "name": "GetFontInfo",
+   "ret": null
+  },
+  "A88C": {
+   "args": [
+    "s:ConstStringPtr"
+   ],
+   "file": "QuickDraw.yaml",
+   "name": "StringWidth",
+   "ret": "INTEGER"
+  },
+  "A88D": {
+   "args": [
+    "thec:CharParameter"
+   ],
+   "file": "QuickDraw.yaml",
+   "name": "CharWidth",
+   "ret": "INTEGER"
+  },
+  "A88E": {
+   "args": [
+    "e:Fixed"
+   ],
+   "file": "QuickDraw.yaml",
+   "name": "SpaceExtra",
+   "ret": null
+  },
+  "A88F": {
+   "dispatcher": true,
+   "name": "OSDispatch"
+  },
+  "A890": {
+   "args": [
+    "p:Point"
+   ],
+   "file": "QuickDraw.yaml",
+   "name": "StdLine",
+   "ret": null
+  },
+  "A891": {
+   "args": [
+    "h:INTEGER",
+    "v:INTEGER"
+   ],
+   "file": "QuickDraw.yaml",
+   "name": "LineTo",
+   "ret": null
+  },
+  "A892": {
+   "args": [
+    "dh:INTEGER",
+    "dv:INTEGER"
+   ],
+   "file": "QuickDraw.yaml",
+   "name": "Line",
+   "ret": null
+  },
+  "A893": {
+   "args": [
+    "h:INTEGER",
+    "v:INTEGER"
+   ],
+   "file": "QuickDraw.yaml",
+   "name": "MoveTo",
+   "ret": null
+  },
+  "A894": {
+   "args": [
+    "dh:INTEGER",
+    "dv:INTEGER"
+   ],
+   "file": "QuickDraw.yaml",
+   "name": "Move",
+   "ret": null
+  },
+  "A895": {
+   "dispatcher": true,
+   "name": "ShutDown"
+  },
+  "A896": {
+   "args": [],
+   "file": "QuickDraw.yaml",
+   "name": "HidePen",
+   "ret": null
+  },
+  "A897": {
+   "args": [],
+   "file": "QuickDraw.yaml",
+   "name": "ShowPen",
+   "ret": null
+  },
+  "A898": {
+   "args": [
+    "ps:PenState*"
+   ],
+   "file": "QuickDraw.yaml",
+   "name": "GetPenState",
+   "ret": null
+  },
+  "A899": {
+   "args": [
+    "ps:PenState*"
+   ],
+   "file": "QuickDraw.yaml",
+   "name": "SetPenState",
+   "ret": null
+  },
+  "A89A": {
+   "args": [
+    "ptp:Point*"
+   ],
+   "file": "QuickDraw.yaml",
+   "name": "GetPen",
+   "ret": null
+  },
+  "A89B": {
+   "args": [
+    "w:INTEGER",
+    "h:INTEGER"
+   ],
+   "file": "QuickDraw.yaml",
+   "name": "PenSize",
+   "ret": null
+  },
+  "A89C": {
+   "args": [
+    "m:INTEGER"
+   ],
+   "file": "QuickDraw.yaml",
+   "name": "PenMode",
+   "ret": null
+  },
+  "A89D": {
+   "args": [
+    "pp:const Pattern*"
+   ],
+   "file": "QuickDraw.yaml",
+   "name": "PenPat",
+   "ret": null
+  },
+  "A89E": {
+   "args": [],
+   "file": "QuickDraw.yaml",
+   "name": "PenNormal",
+   "ret": null
+  },
+  "A89F": {
+   "args": [],
+   "file": "OSUtil.yaml",
+   "name": "Unimplemented",
+   "ret": null
+  },
+  "A8A0": {
+   "args": [
+    "v:GrafVerb",
+    "rp:const Rect*"
+   ],
+   "file": "QuickDraw.yaml",
+   "name": "StdRect",
+   "ret": null
+  },
+  "A8A1": {
+   "args": [
+    "r:const Rect*"
+   ],
+   "file": "QuickDraw.yaml",
+   "name": "FrameRect",
+   "ret": null
+  },
+  "A8A2": {
+   "args": [
+    "r:const Rect*"
+   ],
+   "file": "QuickDraw.yaml",
+   "name": "PaintRect",
+   "ret": null
+  },
+  "A8A3": {
+   "args": [
+    "r:const Rect*"
+   ],
+   "file": "QuickDraw.yaml",
+   "name": "EraseRect",
+   "ret": null
+  },
+  "A8A4": {
+   "args": [
+    "r:const Rect*"
+   ],
+   "file": "QuickDraw.yaml",
+   "name": "InvertRect",
+   "ret": null
+  },
+  "A8A5": {
+   "args": [
+    "r:const Rect*",
+    "pat:const Pattern*"
+   ],
+   "file": "QuickDraw.yaml",
+   "name": "FillRect",
+   "ret": null
+  },
+  "A8A6": {
+   "args": [
+    "r1:const Rect*",
+    "r2:const Rect*"
+   ],
+   "file": "QuickDraw.yaml",
+   "name": "EqualRect",
+   "ret": "Boolean"
+  },
+  "A8A7": {
+   "args": [
+    "r:Rect*",
+    "left:INTEGER",
+    "top:INTEGER",
+    "right:INTEGER",
+    "bottom:INTEGER"
+   ],
+   "file": "QuickDraw.yaml",
+   "name": "SetRect",
+   "ret": null
+  },
+  "A8A8": {
+   "args": [
+    "r:Rect*",
+    "dh:INTEGER",
+    "dv:INTEGER"
+   ],
+   "file": "QuickDraw.yaml",
+   "name": "OffsetRect",
+   "ret": null
+  },
+  "A8A9": {
+   "args": [
+    "r:Rect*",
+    "dh:INTEGER",
+    "dv:INTEGER"
+   ],
+   "file": "QuickDraw.yaml",
+   "name": "InsetRect",
+   "ret": null
+  },
+  "A8AA": {
+   "args": [
+    "s1:const Rect*",
+    "s2:const Rect*",
+    "dest:Rect*"
+   ],
+   "file": "QuickDraw.yaml",
+   "name": "SectRect",
+   "ret": "Boolean"
+  },
+  "A8AB": {
+   "args": [
+    "s1:const Rect*",
+    "s2:const Rect*",
+    "dest:Rect*"
+   ],
+   "file": "QuickDraw.yaml",
+   "name": "UnionRect",
+   "ret": null
+  },
+  "A8AC": {
+   "args": [
+    "p1:Point",
+    "p2:Point",
+    "dest:Rect*"
+   ],
+   "file": "QuickDraw.yaml",
+   "name": "Pt2Rect",
+   "ret": null
+  },
+  "A8AD": {
+   "args": [
+    "p:Point",
+    "r:const Rect*"
+   ],
+   "file": "QuickDraw.yaml",
+   "name": "PtInRect",
+   "ret": "Boolean"
+  },
+  "A8AE": {
+   "args": [
+    "r:const Rect*"
+   ],
+   "file": "QuickDraw.yaml",
+   "name": "EmptyRect",
+   "ret": "Boolean"
+  },
+  "A8AF": {
+   "args": [
+    "verb:GrafVerb",
+    "r:const Rect*",
+    "width:INTEGER",
+    "height:INTEGER"
+   ],
+   "file": "QuickDraw.yaml",
+   "name": "StdRRect",
+   "ret": null
+  },
+  "A8B0": {
+   "args": [
+    "r:const Rect*",
+    "ow:INTEGER",
+    "oh:INTEGER"
+   ],
+   "file": "QuickDraw.yaml",
+   "name": "FrameRoundRect",
+   "ret": null
+  },
+  "A8B1": {
+   "args": [
+    "r:const Rect*",
+    "ow:INTEGER",
+    "oh:INTEGER"
+   ],
+   "file": "QuickDraw.yaml",
+   "name": "PaintRoundRect",
+   "ret": null
+  },
+  "A8B2": {
+   "args": [
+    "r:const Rect*",
+    "ow:INTEGER",
+    "oh:INTEGER"
+   ],
+   "file": "QuickDraw.yaml",
+   "name": "EraseRoundRect",
+   "ret": null
+  },
+  "A8B3": {
+   "args": [
+    "r:const Rect*",
+    "ow:INTEGER",
+    "oh:INTEGER"
+   ],
+   "file": "QuickDraw.yaml",
+   "name": "InvertRoundRect",
+   "ret": null
+  },
+  "A8B4": {
+   "args": [
+    "r:const Rect*",
+    "ow:INTEGER",
+    "oh:INTEGER",
+    "pat:const Pattern*"
+   ],
+   "file": "QuickDraw.yaml",
+   "name": "FillRoundRect",
+   "ret": null
+  },
+  "A8B5": {
+   "dispatcher": true,
+   "name": "ScriptUtil"
+  },
+  "A8B6": {
+   "args": [
+    "v:GrafVerb",
+    "rp:const Rect*"
+   ],
+   "file": "QuickDraw.yaml",
+   "name": "StdOval",
+   "ret": null
+  },
+  "A8B7": {
+   "args": [
+    "r:const Rect*"
+   ],
+   "file": "QuickDraw.yaml",
+   "name": "FrameOval",
+   "ret": null
+  },
+  "A8B8": {
+   "args": [
+    "r:const Rect*"
+   ],
+   "file": "QuickDraw.yaml",
+   "name": "PaintOval",
+   "ret": null
+  },
+  "A8B9": {
+   "args": [
+    "r:const Rect*"
+   ],
+   "file": "QuickDraw.yaml",
+   "name": "EraseOval",
+   "ret": null
+  },
+  "A8BA": {
+   "args": [
+    "r:const Rect*"
+   ],
+   "file": "QuickDraw.yaml",
+   "name": "InvertOval",
+   "ret": null
+  },
+  "A8BB": {
+   "args": [
+    "r:const Rect*",
+    "pat:const Pattern*"
+   ],
+   "file": "QuickDraw.yaml",
+   "name": "FillOval",
+   "ret": null
+  },
+  "A8BC": {
+   "args": [
+    "a:INTEGER"
+   ],
+   "file": "ToolboxUtil.yaml",
+   "name": "SlopeFromAngle",
+   "ret": "Fixed"
+  },
+  "A8BD": {
+   "args": [
+    "verb:GrafVerb",
+    "r:const Rect*",
+    "starta:INTEGER",
+    "arca:INTEGER"
+   ],
+   "file": "QuickDraw.yaml",
+   "name": "StdArc",
+   "ret": null
+  },
+  "A8BE": {
+   "args": [
+    "r:const Rect*",
+    "start:INTEGER",
+    "angle:INTEGER"
+   ],
+   "file": "QuickDraw.yaml",
+   "name": "FrameArc",
+   "ret": null
+  },
+  "A8BF": {
+   "args": [
+    "r:const Rect*",
+    "start:INTEGER",
+    "angle:INTEGER"
+   ],
+   "file": "QuickDraw.yaml",
+   "name": "PaintArc",
+   "ret": null
+  },
+  "A8C0": {
+   "args": [
+    "r:const Rect*",
+    "start:INTEGER",
+    "angle:INTEGER"
+   ],
+   "file": "QuickDraw.yaml",
+   "name": "EraseArc",
+   "ret": null
+  },
+  "A8C1": {
+   "args": [
+    "r:const Rect*",
+    "start:INTEGER",
+    "angle:INTEGER"
+   ],
+   "file": "QuickDraw.yaml",
+   "name": "InvertArc",
+   "ret": null
+  },
+  "A8C2": {
+   "args": [
+    "r:const Rect*",
+    "start:INTEGER",
+    "angle:INTEGER",
+    "pat:const Pattern*"
+   ],
+   "file": "QuickDraw.yaml",
+   "name": "FillArc",
+   "ret": null
+  },
+  "A8C3": {
+   "args": [
+    "rp:const Rect*",
+    "p:Point",
+    "angle:INTEGER*"
+   ],
+   "file": "QuickDraw.yaml",
+   "name": "PtToAngle",
+   "ret": null
+  },
+  "A8C4": {
+   "args": [
+    "s:Fixed"
+   ],
+   "file": "ToolboxUtil.yaml",
+   "name": "AngleFromSlope",
+   "ret": "INTEGER"
+  },
+  "A8C5": {
+   "args": [
+    "verb:GrafVerb",
+    "ph:PolyHandle"
+   ],
+   "file": "QuickDraw.yaml",
+   "name": "StdPoly",
+   "ret": null
+  },
+  "A8C6": {
+   "args": [
+    "poly:PolyHandle"
+   ],
+   "file": "QuickDraw.yaml",
+   "name": "FramePoly",
+   "ret": null
+  },
+  "A8C7": {
+   "args": [
+    "poly:PolyHandle"
+   ],
+   "file": "QuickDraw.yaml",
+   "name": "PaintPoly",
+   "ret": null
+  },
+  "A8C8": {
+   "args": [
+    "poly:PolyHandle"
+   ],
+   "file": "QuickDraw.yaml",
+   "name": "ErasePoly",
+   "ret": null
+  },
+  "A8C9": {
+   "args": [
+    "poly:PolyHandle"
+   ],
+   "file": "QuickDraw.yaml",
+   "name": "InvertPoly",
+   "ret": null
+  },
+  "A8CA": {
+   "args": [
+    "poly:PolyHandle",
+    "pat:const Pattern*"
+   ],
+   "file": "QuickDraw.yaml",
+   "name": "FillPoly",
+   "ret": null
+  },
+  "A8CB": {
+   "args": [],
+   "file": "QuickDraw.yaml",
+   "name": "OpenPoly",
+   "ret": "PolyHandle"
+  },
+  "A8CC": {
+   "args": [],
+   "file": "QuickDraw.yaml",
+   "name": "ClosePoly",
+   "ret": null
+  },
+  "A8CD": {
+   "args": [
+    "poly:PolyHandle"
+   ],
+   "file": "QuickDraw.yaml",
+   "name": "KillPoly",
+   "ret": null
+  },
+  "A8CE": {
+   "args": [
+    "poly:PolyHandle",
+    "dh:INTEGER",
+    "dv:INTEGER"
+   ],
+   "file": "QuickDraw.yaml",
+   "name": "OffsetPoly",
+   "ret": null
+  },
+  "A8CF": {
+   "args": [
+    "sp:Ptr*",
+    "dp:Ptr*",
+    "len:INTEGER"
+   ],
+   "file": "ToolboxUtil.yaml",
+   "name": "PackBits",
+   "ret": null
+  },
+  "A8D0": {
+   "args": [
+    "sp:Ptr*",
+    "dp:Ptr*",
+    "len:INTEGER"
+   ],
+   "file": "ToolboxUtil.yaml",
+   "name": "UnpackBits",
+   "ret": null
+  },
+  "A8D1": {
+   "args": [
+    "verb:GrafVerb",
+    "rgn:RgnHandle"
+   ],
+   "file": "QuickDraw.yaml",
+   "name": "StdRgn",
+   "ret": null
+  },
+  "A8D2": {
+   "args": [
+    "rh:RgnHandle"
+   ],
+   "file": "QuickDraw.yaml",
+   "name": "FrameRgn",
+   "ret": null
+  },
+  "A8D3": {
+   "args": [
+    "rh:RgnHandle"
+   ],
+   "file": "QuickDraw.yaml",
+   "name": "PaintRgn",
+   "ret": null
+  },
+  "A8D4": {
+   "args": [
+    "rh:RgnHandle"
+   ],
+   "file": "QuickDraw.yaml",
+   "name": "EraseRgn",
+   "ret": null
+  },
+  "A8D5": {
+   "args": [
+    "rh:RgnHandle"
+   ],
+   "file": "QuickDraw.yaml",
+   "name": "InvertRgn",
+   "ret": null
+  },
+  "A8D6": {
+   "args": [
+    "rh:RgnHandle",
+    "pat:const Pattern*"
+   ],
+   "file": "QuickDraw.yaml",
+   "name": "FillRgn",
+   "ret": null
+  },
+  "A8D7": {
+   "args": [
+    "None:RgnHandle",
+    "None:const BitMap*"
+   ],
+   "file": "CQuickDraw.yaml",
+   "name": "BitMapToRegion",
+   "ret": "OSErr"
+  },
+  "A8D8": {
+   "args": [],
+   "file": "QuickDraw.yaml",
+   "name": "NewRgn",
+   "ret": "RgnHandle"
+  },
+  "A8D9": {
+   "args": [
+    "rh:RgnHandle"
+   ],
+   "file": "QuickDraw.yaml",
+   "name": "DisposeRgn",
+   "ret": null
+  },
+  "A8DA": {
+   "args": [],
+   "file": "QuickDraw.yaml",
+   "name": "OpenRgn",
+   "ret": null
+  },
+  "A8DB": {
+   "args": [
+    "rh:RgnHandle"
+   ],
+   "file": "QuickDraw.yaml",
+   "name": "CloseRgn",
+   "ret": null
+  },
+  "A8DC": {
+   "args": [
+    "s:RgnHandle",
+    "d:RgnHandle"
+   ],
+   "file": "QuickDraw.yaml",
+   "name": "CopyRgn",
+   "ret": null
+  },
+  "A8DD": {
+   "args": [
+    "rh:RgnHandle"
+   ],
+   "file": "QuickDraw.yaml",
+   "name": "SetEmptyRgn",
+   "ret": null
+  },
+  "A8DE": {
+   "args": [
+    "rh:RgnHandle",
+    "left:INTEGER",
+    "top:INTEGER",
+    "right:INTEGER",
+    "bottom:INTEGER"
+   ],
+   "file": "QuickDraw.yaml",
+   "name": "SetRectRgn",
+   "ret": null
+  },
+  "A8DF": {
+   "args": [
+    "rh:RgnHandle",
+    "rect:const Rect*"
+   ],
+   "file": "QuickDraw.yaml",
+   "name": "RectRgn",
+   "ret": null
+  },
+  "A8E0": {
+   "args": [
+    "rh:RgnHandle",
+    "dh:INTEGER",
+    "dv:INTEGER"
+   ],
+   "file": "QuickDraw.yaml",
+   "name": "OffsetRgn",
+   "ret": null
+  },
+  "A8E1": {
+   "args": [
+    "rh:RgnHandle",
+    "dh:INTEGER",
+    "dv:INTEGER"
+   ],
+   "file": "QuickDraw.yaml",
+   "name": "InsetRgn",
+   "ret": null
+  },
+  "A8E2": {
+   "args": [
+    "rh:RgnHandle"
+   ],
+   "file": "QuickDraw.yaml",
+   "name": "EmptyRgn",
+   "ret": "Boolean"
+  },
+  "A8E3": {
+   "args": [
+    "r1:RgnHandle",
+    "r2:RgnHandle"
+   ],
+   "file": "QuickDraw.yaml",
+   "name": "EqualRgn",
+   "ret": "Boolean"
+  },
+  "A8E4": {
+   "args": [
+    "s1:RgnHandle",
+    "s2:RgnHandle",
+    "dest:RgnHandle"
+   ],
+   "file": "QuickDraw.yaml",
+   "name": "SectRgn",
+   "ret": null
+  },
+  "A8E5": {
+   "args": [
+    "s1:RgnHandle",
+    "s2:RgnHandle",
+    "dest:RgnHandle"
+   ],
+   "file": "QuickDraw.yaml",
+   "name": "UnionRgn",
+   "ret": null
+  },
+  "A8E6": {
+   "args": [
+    "s1:RgnHandle",
+    "s2:RgnHandle",
+    "dest:RgnHandle"
+   ],
+   "file": "QuickDraw.yaml",
+   "name": "DiffRgn",
+   "ret": null
+  },
+  "A8E7": {
+   "args": [
+    "s1:RgnHandle",
+    "s2:RgnHandle",
+    "dest:RgnHandle"
+   ],
+   "file": "QuickDraw.yaml",
+   "name": "XorRgn",
+   "ret": null
+  },
+  "A8E8": {
+   "args": [
+    "p:Point",
+    "rh:RgnHandle"
+   ],
+   "file": "QuickDraw.yaml",
+   "name": "PtInRgn",
+   "ret": "Boolean"
+  },
+  "A8E9": {
+   "args": [
+    "rp:const Rect*",
+    "rh:RgnHandle"
+   ],
+   "file": "QuickDraw.yaml",
+   "name": "RectInRgn",
+   "ret": "Boolean"
+  },
+  "A8EA": {
+   "args": [
+    "procs:QDProcs*"
+   ],
+   "file": "QuickDraw.yaml",
+   "name": "SetStdProcs",
+   "ret": null
+  },
+  "A8EB": {
+   "args": [
+    "srcbmp:const BitMap*",
+    "srcrp:const Rect*",
+    "dstrp:const Rect*",
+    "mode:INTEGER",
+    "mask:RgnHandle"
+   ],
+   "file": "QuickDraw.yaml",
+   "name": "StdBits",
+   "ret": null
+  },
+  "A8EC": {
+   "args": [
+    "src_bitmap:BitMap*",
+    "dst_bitmap:BitMap*",
+    "src_rect:const Rect*",
+    "dst_rect:const Rect*",
+    "mode:INTEGER",
+    "mask:RgnHandle"
+   ],
+   "file": "QuickDraw.yaml",
+   "name": "CopyBits",
+   "ret": null
+  },
+  "A8ED": {
+   "args": [
+    "n:INTEGER",
+    "p:Ptr",
+    "nump:Point*",
+    "denp:Point*",
+    "finfop:FontInfo*"
+   ],
+   "file": "QuickDraw.yaml",
+   "name": "StdTxMeas",
+   "ret": "INTEGER"
+  },
+  "A8EE": {
+   "args": [
+    "dp:void*",
+    "bc:INTEGER"
+   ],
+   "file": "QuickDraw.yaml",
+   "name": "StdGetPic",
+   "ret": null
+  },
+  "A8EF": {
+   "args": [
+    "rp:Rect*",
+    "dh:INTEGER",
+    "dv:INTEGER",
+    "updatergn:RgnHandle"
+   ],
+   "file": "QuickDraw.yaml",
+   "name": "ScrollRect",
+   "ret": null
+  },
+  "A8F0": {
+   "args": [
+    "sp:const void*",
+    "bc:INTEGER"
+   ],
+   "file": "QuickDraw.yaml",
+   "name": "StdPutPic",
+   "ret": null
+  },
+  "A8F1": {
+   "args": [
+    "kind:INTEGER",
+    "size:INTEGER",
+    "hand:Handle"
+   ],
+   "file": "QuickDraw.yaml",
+   "name": "StdComment",
+   "ret": null
+  },
+  "A8F2": {
+   "args": [
+    "kind:INTEGER",
+    "size:INTEGER",
+    "hand:Handle"
+   ],
+   "file": "QuickDraw.yaml",
+   "name": "PicComment",
+   "ret": null
+  },
+  "A8F3": {
+   "args": [
+    "pf:const Rect*"
+   ],
+   "file": "QuickDraw.yaml",
+   "name": "OpenPicture",
+   "ret": "PicHandle"
+  },
+  "A8F4": {
+   "args": [],
+   "file": "QuickDraw.yaml",
+   "name": "ClosePicture",
+   "ret": null
+  },
+  "A8F5": {
+   "args": [
+    "pic:PicHandle"
+   ],
+   "file": "QuickDraw.yaml",
+   "name": "KillPicture",
+   "ret": null
+  },
+  "A8F6": {
+   "args": [
+    "pic:PicHandle",
+    "destrp:const Rect*"
+   ],
+   "file": "QuickDraw.yaml",
+   "name": "DrawPicture",
+   "ret": null
+  },
+  "A8F8": {
+   "args": [
+    "pt:Point*",
+    "srcr:const Rect*",
+    "dstr:const Rect*"
+   ],
+   "file": "QuickDraw.yaml",
+   "name": "ScalePt",
+   "ret": null
+  },
+  "A8F9": {
+   "args": [
+    "pt:Point*",
+    "srcr:const Rect*",
+    "dstr:const Rect*"
+   ],
+   "file": "QuickDraw.yaml",
+   "name": "MapPt",
+   "ret": null
+  },
+  "A8FA": {
+   "args": [
+    "r:Rect*",
+    "srcr:const Rect*",
+    "dstr:const Rect*"
+   ],
+   "file": "QuickDraw.yaml",
+   "name": "MapRect",
+   "ret": null
+  },
+  "A8FB": {
+   "args": [
+    "rh:RgnHandle",
+    "srcr:const Rect*",
+    "dstr:const Rect*"
+   ],
+   "file": "QuickDraw.yaml",
+   "name": "MapRgn",
+   "ret": null
+  },
+  "A8FC": {
+   "args": [
+    "poly:PolyHandle",
+    "srcr:const Rect*",
+    "dstr:const Rect*"
+   ],
+   "file": "QuickDraw.yaml",
+   "name": "MapPoly",
+   "ret": null
+  },
+  "A8FD": {
+   "dispatcher": true,
+   "name": "PrGlue"
+  },
+  "A8FE": {
+   "args": [],
+   "file": "FontMgr.yaml",
+   "name": "InitFonts",
+   "ret": null
+  },
+  "A8FF": {
+   "args": [
+    "fnum:INTEGER",
+    "fnam:StringPtr"
+   ],
+   "file": "FontMgr.yaml",
+   "name": "GetFontName",
+   "ret": null
+  },
+  "A900": {
+   "args": [
+    "fnam:ConstStringPtr",
+    "fnum:INTEGER*"
+   ],
+   "file": "FontMgr.yaml",
+   "name": "GetFNum",
+   "ret": null
+  },
+  "A901": {
+   "args": [
+    "fmip:FMInput*"
+   ],
+   "file": "FontMgr.yaml",
+   "name": "FMSwapFont",
+   "ret": "FMOutPtr"
+  },
+  "A902": {
+   "args": [
+    "fnum:INTEGER",
+    "sz:INTEGER"
+   ],
+   "file": "FontMgr.yaml",
+   "name": "RealFont",
+   "ret": "Boolean"
+  },
+  "A903": {
+   "args": [
+    "lflag:Boolean"
+   ],
+   "file": "FontMgr.yaml",
+   "name": "SetFontLock",
+   "ret": null
+  },
+  "A904": {
+   "args": [
+    "w:WindowPtr"
+   ],
+   "file": "WindowMgr.yaml",
+   "name": "DrawGrowIcon",
+   "ret": null
+  },
+  "A905": {
+   "args": [
+    "rgn:RgnHandle",
+    "startp:Point",
+    "limit:const Rect*",
+    "slop:const Rect*",
+    "axis:INTEGER",
+    "proc:ProcPtr"
+   ],
+   "file": "WindowMgr.yaml",
+   "name": "DragGrayRgn",
+   "ret": "LONGINT"
+  },
+  "A906": {
+   "args": [
+    "s:ConstStringPtr"
+   ],
+   "file": "ToolboxUtil.yaml",
+   "name": "NewString",
+   "ret": "StringHandle"
+  },
+  "A907": {
+   "args": [
+    "h:StringHandle",
+    "s:ConstStringPtr"
+   ],
+   "file": "ToolboxUtil.yaml",
+   "name": "SetString",
+   "ret": null
+  },
+  "A908": {
+   "args": [
+    "w:WindowPtr",
+    "flag:Boolean"
+   ],
+   "file": "WindowMgr.yaml",
+   "name": "ShowHide",
+   "ret": null
+  },
+  "A909": {
+   "args": [
+    "w:WindowPeek"
+   ],
+   "file": "WindowMgr.yaml",
+   "name": "CalcVis",
+   "ret": null
+  },
+  "A90A": {
+   "args": [
+    "w:WindowPeek",
+    "clobbered:RgnHandle"
+   ],
+   "file": "WindowMgr.yaml",
+   "name": "CalcVisBehind",
+   "ret": null
+  },
+  "A90B": {
+   "args": [
+    "w:WindowPeek"
+   ],
+   "file": "WindowMgr.yaml",
+   "name": "ClipAbove",
+   "ret": null
+  },
+  "A90C": {
+   "args": [
+    "w:WindowPeek",
+    "clobbered:RgnHandle"
+   ],
+   "file": "WindowMgr.yaml",
+   "name": "PaintOne",
+   "ret": null
+  },
+  "A90D": {
+   "args": [
+    "w:WindowPeek",
+    "clobbered:RgnHandle"
+   ],
+   "file": "WindowMgr.yaml",
+   "name": "PaintBehind",
+   "ret": null
+  },
+  "A90E": {
+   "args": [
+    "w:WindowPeek"
+   ],
+   "file": "WindowMgr.yaml",
+   "name": "SaveOld",
+   "ret": null
+  },
+  "A90F": {
+   "args": [
+    "w:WindowPeek",
+    "flag:Boolean"
+   ],
+   "file": "WindowMgr.yaml",
+   "name": "DrawNew",
+   "ret": null
+  },
+  "A910": {
+   "args": [
+    "wp:GrafPtr*"
+   ],
+   "file": "WindowMgr.yaml",
+   "name": "GetWMgrPort",
+   "ret": null
+  },
+  "A911": {
+   "args": [
+    "ev:EventRecord*"
+   ],
+   "file": "WindowMgr.yaml",
+   "name": "CheckUpdate",
+   "ret": "Boolean"
+  },
+  "A912": {
+   "args": [],
+   "file": "WindowMgr.yaml",
+   "name": "InitWindows",
+   "ret": null
+  },
+  "A913": {
+   "args": [
+    "wst:void*",
+    "r:const Rect*",
+    "title:ConstStringPtr",
+    "vis:Boolean",
+    "procid:INTEGER",
+    "behind:WindowPtr",
+    "gaflag:Boolean",
+    "rc:LONGINT"
+   ],
+   "file": "WindowMgr.yaml",
+   "name": "NewWindow",
+   "ret": "WindowPtr"
+  },
+  "A914": {
+   "args": [
+    "w:WindowPtr"
+   ],
+   "file": "WindowMgr.yaml",
+   "name": "DisposeWindow",
+   "ret": null
+  },
+  "A915": {
+   "args": [
+    "w:WindowPtr"
+   ],
+   "file": "WindowMgr.yaml",
+   "name": "ShowWindow",
+   "ret": null
+  },
+  "A916": {
+   "args": [
+    "w:WindowPtr"
+   ],
+   "file": "WindowMgr.yaml",
+   "name": "HideWindow",
+   "ret": null
+  },
+  "A917": {
+   "args": [
+    "w:WindowPtr"
+   ],
+   "file": "WindowMgr.yaml",
+   "name": "GetWRefCon",
+   "ret": "LONGINT"
+  },
+  "A918": {
+   "args": [
+    "w:WindowPtr",
+    "data:LONGINT"
+   ],
+   "file": "WindowMgr.yaml",
+   "name": "SetWRefCon",
+   "ret": null
+  },
+  "A919": {
+   "args": [
+    "w:WindowPtr",
+    "t:StringPtr"
+   ],
+   "file": "WindowMgr.yaml",
+   "name": "GetWTitle",
+   "ret": null
+  },
+  "A91A": {
+   "args": [
+    "w:WindowPtr",
+    "t:ConstStringPtr"
+   ],
+   "file": "WindowMgr.yaml",
+   "name": "SetWTitle",
+   "ret": null
+  },
+  "A91B": {
+   "args": [
+    "wp:WindowPtr",
+    "h:INTEGER",
+    "v:INTEGER",
+    "front:Boolean"
+   ],
+   "file": "WindowMgr.yaml",
+   "name": "MoveWindow",
+   "ret": null
+  },
+  "A91C": {
+   "args": [
+    "w:WindowPtr",
+    "flag:Boolean"
+   ],
+   "file": "WindowMgr.yaml",
+   "name": "HiliteWindow",
+   "ret": null
+  },
+  "A91D": {
+   "args": [
+    "w:WindowPtr",
+    "width:INTEGER",
+    "height:INTEGER",
+    "flag:Boolean"
+   ],
+   "file": "WindowMgr.yaml",
+   "name": "SizeWindow",
+   "ret": null
+  },
+  "A91E": {
+   "args": [
+    "w:WindowPtr",
+    "p:Point"
+   ],
+   "file": "WindowMgr.yaml",
+   "name": "TrackGoAway",
+   "ret": "Boolean"
+  },
+  "A91F": {
+   "args": [
+    "w:WindowPtr"
+   ],
+   "file": "WindowMgr.yaml",
+   "name": "SelectWindow",
+   "ret": null
+  },
+  "A920": {
+   "args": [
+    "w:WindowPtr"
+   ],
+   "file": "WindowMgr.yaml",
+   "name": "BringToFront",
+   "ret": null
+  },
+  "A921": {
+   "args": [
+    "w:WindowPtr",
+    "behind:WindowPtr"
+   ],
+   "file": "WindowMgr.yaml",
+   "name": "SendBehind",
+   "ret": null
+  },
+  "A922": {
+   "args": [
+    "w:WindowPtr"
+   ],
+   "file": "WindowMgr.yaml",
+   "name": "BeginUpdate",
+   "ret": null
+  },
+  "A923": {
+   "args": [
+    "w:WindowPtr"
+   ],
+   "file": "WindowMgr.yaml",
+   "name": "EndUpdate",
+   "ret": null
+  },
+  "A924": {
+   "args": [],
+   "file": "WindowMgr.yaml",
+   "name": "FrontWindow",
+   "ret": "WindowPtr"
+  },
+  "A925": {
+   "args": [
+    "wp:WindowPtr",
+    "p:Point",
+    "rp:const Rect*"
+   ],
+   "file": "WindowMgr.yaml",
+   "name": "DragWindow",
+   "ret": null
+  },
+  "A926": {
+   "args": [
+    "rgn:RgnHandle",
+    "startp:Point",
+    "limit:const Rect*",
+    "slop:const Rect*",
+    "axis:INTEGER",
+    "proc:ProcPtr"
+   ],
+   "file": "WindowMgr.yaml",
+   "name": "DragTheRgn",
+   "ret": "LONGINT"
+  },
+  "A927": {
+   "args": [
+    "r:RgnHandle"
+   ],
+   "file": "WindowMgr.yaml",
+   "name": "InvalRgn",
+   "ret": null
+  },
+  "A928": {
+   "args": [
+    "r:const Rect*"
+   ],
+   "file": "WindowMgr.yaml",
+   "name": "InvalRect",
+   "ret": null
+  },
+  "A929": {
+   "args": [
+    "r:RgnHandle"
+   ],
+   "file": "WindowMgr.yaml",
+   "name": "ValidRgn",
+   "ret": null
+  },
+  "A92A": {
+   "args": [
+    "r:const Rect*"
+   ],
+   "file": "WindowMgr.yaml",
+   "name": "ValidRect",
+   "ret": null
+  },
+  "A92B": {
+   "args": [
+    "w:WindowPtr",
+    "startp:Point",
+    "rp:const Rect*"
+   ],
+   "file": "WindowMgr.yaml",
+   "name": "GrowWindow",
+   "ret": "LONGINT"
+  },
+  "A92C": {
+   "args": [
+    "p:Point",
+    "wpp:WindowPtr*"
+   ],
+   "file": "WindowMgr.yaml",
+   "name": "FindWindow",
+   "ret": "INTEGER"
+  },
+  "A92D": {
+   "args": [
+    "w:WindowPtr"
+   ],
+   "file": "WindowMgr.yaml",
+   "name": "CloseWindow",
+   "ret": null
+  },
+  "A92E": {
+   "args": [
+    "w:WindowPtr",
+    "p:PicHandle"
+   ],
+   "file": "WindowMgr.yaml",
+   "name": "SetWindowPic",
+   "ret": null
+  },
+  "A92F": {
+   "args": [
+    "w:WindowPtr"
+   ],
+   "file": "WindowMgr.yaml",
+   "name": "GetWindowPic",
+   "ret": "PicHandle"
+  },
+  "A930": {
+   "args": [],
+   "file": "MenuMgr.yaml",
+   "name": "InitMenus",
+   "ret": null
+  },
+  "A931": {
+   "args": [
+    "mid:INTEGER",
+    "str:ConstStringPtr"
+   ],
+   "file": "MenuMgr.yaml",
+   "name": "NewMenu",
+   "ret": "MenuHandle"
+  },
+  "A932": {
+   "args": [
+    "mh:MenuHandle"
+   ],
+   "file": "MenuMgr.yaml",
+   "name": "DisposeMenu",
+   "ret": null
+  },
+  "A933": {
+   "args": [
+    "mh:MenuHandle",
+    "str:ConstStringPtr"
+   ],
+   "file": "MenuMgr.yaml",
+   "name": "AppendMenu",
+   "ret": null
+  },
+  "A934": {
+   "args": [],
+   "file": "MenuMgr.yaml",
+   "name": "ClearMenuBar",
+   "ret": null
+  },
+  "A935": {
+   "args": [
+    "mh:MenuHandle",
+    "before:INTEGER"
+   ],
+   "file": "MenuMgr.yaml",
+   "name": "InsertMenu",
+   "ret": null
+  },
+  "A936": {
+   "args": [
+    "mid:INTEGER"
+   ],
+   "file": "MenuMgr.yaml",
+   "name": "DeleteMenu",
+   "ret": null
+  },
+  "A937": {
+   "args": [],
+   "file": "MenuMgr.yaml",
+   "name": "DrawMenuBar",
+   "ret": null
+  },
+  "A938": {
+   "args": [
+    "mid:INTEGER"
+   ],
+   "file": "MenuMgr.yaml",
+   "name": "HiliteMenu",
+   "ret": null
+  },
+  "A939": {
+   "args": [
+    "mh:MenuHandle",
+    "item:INTEGER"
+   ],
+   "file": "MenuMgr.yaml",
+   "name": "EnableItem",
+   "ret": null
+  },
+  "A93A": {
+   "args": [
+    "mh:MenuHandle",
+    "item:INTEGER"
+   ],
+   "file": "MenuMgr.yaml",
+   "name": "DisableItem",
+   "ret": null
+  },
+  "A93B": {
+   "args": [],
+   "file": "MenuMgr.yaml",
+   "name": "GetMenuBar",
+   "ret": "Handle"
+  },
+  "A93C": {
+   "args": [
+    "ml:Handle"
+   ],
+   "file": "MenuMgr.yaml",
+   "name": "SetMenuBar",
+   "ret": null
+  },
+  "A93D": {
+   "args": [
+    "p:Point"
+   ],
+   "file": "MenuMgr.yaml",
+   "name": "MenuSelect",
+   "ret": "LONGINT"
+  },
+  "A93E": {
+   "args": [
+    "thec:CharParameter"
+   ],
+   "file": "MenuMgr.yaml",
+   "name": "MenuKey",
+   "ret": "LONGINT"
+  },
+  "A93F": {
+   "args": [
+    "mh:MenuHandle",
+    "item:INTEGER",
+    "iconp:INTEGER*"
+   ],
+   "file": "MenuMgr.yaml",
+   "name": "GetItemIcon",
+   "ret": null
+  },
+  "A940": {
+   "args": [
+    "mh:MenuHandle",
+    "item:INTEGER",
+    "icon:Byte"
+   ],
+   "file": "MenuMgr.yaml",
+   "name": "SetItemIcon",
+   "ret": null
+  },
+  "A941": {
+   "args": [
+    "mh:MenuHandle",
+    "item:INTEGER",
+    "stylep:INTEGER*"
+   ],
+   "file": "MenuMgr.yaml",
+   "name": "GetItemStyle",
+   "ret": null
+  },
+  "A942": {
+   "args": [
+    "mh:MenuHandle",
+    "item:INTEGER",
+    "style:INTEGER"
+   ],
+   "file": "MenuMgr.yaml",
+   "name": "SetItemStyle",
+   "ret": null
+  },
+  "A943": {
+   "args": [
+    "mh:MenuHandle",
+    "item:INTEGER",
+    "markp:INTEGER*"
+   ],
+   "file": "MenuMgr.yaml",
+   "name": "GetItemMark",
+   "ret": null
+  },
+  "A944": {
+   "args": [
+    "mh:MenuHandle",
+    "item:INTEGER",
+    "mark:CharParameter"
+   ],
+   "file": "MenuMgr.yaml",
+   "name": "SetItemMark",
+   "ret": null
+  },
+  "A945": {
+   "args": [
+    "mh:MenuHandle",
+    "item:INTEGER",
+    "cflag:Boolean"
+   ],
+   "file": "MenuMgr.yaml",
+   "name": "CheckItem",
+   "ret": null
+  },
+  "A946": {
+   "args": [
+    "mh:MenuHandle",
+    "item:INTEGER",
+    "str:StringPtr"
+   ],
+   "file": "MenuMgr.yaml",
+   "name": "GetMenuItemText",
+   "ret": null
+  },
+  "A947": {
+   "args": [
+    "mh:MenuHandle",
+    "item:INTEGER",
+    "str:ConstStringPtr"
+   ],
+   "file": "MenuMgr.yaml",
+   "name": "SetMenuItemText",
+   "ret": null
+  },
+  "A948": {
+   "args": [
+    "mh:MenuHandle"
+   ],
+   "file": "MenuMgr.yaml",
+   "name": "CalcMenuSize",
+   "ret": null
+  },
+  "A949": {
+   "args": [
+    "mid:INTEGER"
+   ],
+   "file": "MenuMgr.yaml",
+   "name": "GetMenuHandle",
+   "ret": "MenuHandle"
+  },
+  "A94A": {
+   "args": [
+    "i:INTEGER"
+   ],
+   "file": "MenuMgr.yaml",
+   "name": "SetMenuFlash",
+   "ret": null
+  },
+  "A94B": {
+   "args": [
+    "rect:const Rect*",
+    "icon:Handle"
+   ],
+   "file": "Iconutil.yaml",
+   "name": "PlotIcon",
+   "ret": null
+  },
+  "A94C": {
+   "args": [
+    "mid:INTEGER"
+   ],
+   "file": "MenuMgr.yaml",
+   "name": "FlashMenuBar",
+   "ret": null
+  },
+  "A94D": {
+   "args": [
+    "mh:MenuHandle",
+    "restype:ResType"
+   ],
+   "file": "MenuMgr.yaml",
+   "name": "AppendResMenu",
+   "ret": null
+  },
+  "A94E": {
+   "args": [
+    "r:const Rect*",
+    "p:Point"
+   ],
+   "file": "WindowMgr.yaml",
+   "name": "PinRect",
+   "ret": "LONGINT"
+  },
+  "A94F": {
+   "args": [
+    "a:Point",
+    "b:Point"
+   ],
+   "file": "ToolboxUtil.yaml",
+   "name": "DeltaPoint",
+   "ret": "LONGINT"
+  },
+  "A950": {
+   "args": [
+    "mh:MenuHandle"
+   ],
+   "file": "MenuMgr.yaml",
+   "name": "CountMItems",
+   "ret": "INTEGER"
+  },
+  "A951": {
+   "args": [
+    "mh:MenuHandle",
+    "restype:ResType",
+    "after:INTEGER"
+   ],
+   "file": "MenuMgr.yaml",
+   "name": "InsertResMenu",
+   "ret": null
+  },
+  "A952": {
+   "args": [
+    "mh:MenuHandle",
+    "item:INTEGER"
+   ],
+   "file": "MenuMgr.yaml",
+   "name": "DeleteMenuItem",
+   "ret": null
+  },
+  "A953": {
+   "args": [
+    "wp:WindowPtr",
+    "rh:RgnHandle"
+   ],
+   "file": "ControlMgr.yaml",
+   "name": "UpdateControls",
+   "ret": null
+  },
+  "A954": {
+   "args": [
+    "wst:WindowPtr",
+    "r:const Rect*",
+    "title:ConstStringPtr",
+    "vis:Boolean",
+    "value:INTEGER",
+    "min:INTEGER",
+    "max:INTEGER",
+    "procid:INTEGER",
+    "rc:LONGINT"
+   ],
+   "file": "ControlMgr.yaml",
+   "name": "NewControl",
+   "ret": "ControlHandle"
+  },
+  "A955": {
+   "args": [
+    "c:ControlHandle"
+   ],
+   "file": "ControlMgr.yaml",
+   "name": "DisposeControl",
+   "ret": null
+  },
+  "A956": {
+   "args": [
+    "w:WindowPtr"
+   ],
+   "file": "ControlMgr.yaml",
+   "name": "KillControls",
+   "ret": null
+  },
+  "A957": {
+   "args": [
+    "c:ControlHandle"
+   ],
+   "file": "ControlMgr.yaml",
+   "name": "ShowControl",
+   "ret": null
+  },
+  "A958": {
+   "args": [
+    "c:ControlHandle"
+   ],
+   "file": "ControlMgr.yaml",
+   "name": "HideControl",
+   "ret": null
+  },
+  "A959": {
+   "args": [
+    "c:ControlHandle",
+    "h:INTEGER",
+    "v:INTEGER"
+   ],
+   "file": "ControlMgr.yaml",
+   "name": "MoveControl",
+   "ret": null
+  },
+  "A95A": {
+   "args": [
+    "c:ControlHandle"
+   ],
+   "file": "ControlMgr.yaml",
+   "name": "GetControlReference",
+   "ret": "LONGINT"
+  },
+  "A95B": {
+   "args": [
+    "c:ControlHandle",
+    "data:LONGINT"
+   ],
+   "file": "ControlMgr.yaml",
+   "name": "SetControlReference",
+   "ret": null
+  },
+  "A95C": {
+   "args": [
+    "c:ControlHandle",
+    "width:INTEGER",
+    "height:INTEGER"
+   ],
+   "file": "ControlMgr.yaml",
+   "name": "SizeControl",
+   "ret": null
+  },
+  "A95D": {
+   "args": [
+    "c:ControlHandle",
+    "state:INTEGER"
+   ],
+   "file": "ControlMgr.yaml",
+   "name": "HiliteControl",
+   "ret": null
+  },
+  "A95E": {
+   "args": [
+    "c:ControlHandle",
+    "t:StringPtr"
+   ],
+   "file": "ControlMgr.yaml",
+   "name": "GetControlTitle",
+   "ret": null
+  },
+  "A95F": {
+   "args": [
+    "c:ControlHandle",
+    "t:ConstStringPtr"
+   ],
+   "file": "ControlMgr.yaml",
+   "name": "SetControlTitle",
+   "ret": null
+  },
+  "A960": {
+   "args": [
+    "c:ControlHandle"
+   ],
+   "file": "ControlMgr.yaml",
+   "name": "GetControlValue",
+   "ret": "INTEGER"
+  },
+  "A961": {
+   "args": [
+    "c:ControlHandle"
+   ],
+   "file": "ControlMgr.yaml",
+   "name": "GetControlMinimum",
+   "ret": "INTEGER"
+  },
+  "A962": {
+   "args": [
+    "c:ControlHandle"
+   ],
+   "file": "ControlMgr.yaml",
+   "name": "GetControlMaximum",
+   "ret": "INTEGER"
+  },
+  "A963": {
+   "args": [
+    "c:ControlHandle",
+    "v:INTEGER"
+   ],
+   "file": "ControlMgr.yaml",
+   "name": "SetControlValue",
+   "ret": null
+  },
+  "A964": {
+   "args": [
+    "c:ControlHandle",
+    "v:INTEGER"
+   ],
+   "file": "ControlMgr.yaml",
+   "name": "SetControlMinimum",
+   "ret": null
+  },
+  "A965": {
+   "args": [
+    "c:ControlHandle",
+    "v:INTEGER"
+   ],
+   "file": "ControlMgr.yaml",
+   "name": "SetControlMaximum",
+   "ret": null
+  },
+  "A966": {
+   "args": [
+    "c:ControlHandle",
+    "p:Point"
+   ],
+   "file": "ControlMgr.yaml",
+   "name": "TestControl",
+   "ret": "INTEGER"
+  },
+  "A967": {
+   "args": [
+    "c:ControlHandle",
+    "p:Point",
+    "limit:const Rect*",
+    "slop:const Rect*",
+    "axis:INTEGER"
+   ],
+   "file": "ControlMgr.yaml",
+   "name": "DragControl",
+   "ret": null
+  },
+  "A968": {
+   "args": [
+    "c:ControlHandle",
+    "p:Point",
+    "a:ControlActionUPP"
+   ],
+   "file": "ControlMgr.yaml",
+   "name": "TrackControl",
+   "ret": "INTEGER"
+  },
+  "A969": {
+   "args": [
+    "w:WindowPtr"
+   ],
+   "file": "ControlMgr.yaml",
+   "name": "DrawControls",
+   "ret": null
+  },
+  "A96A": {
+   "args": [
+    "c:ControlHandle"
+   ],
+   "file": "ControlMgr.yaml",
+   "name": "GetControlAction",
+   "ret": "ControlActionUPP"
+  },
+  "A96B": {
+   "args": [
+    "c:ControlHandle",
+    "a:ControlActionUPP"
+   ],
+   "file": "ControlMgr.yaml",
+   "name": "SetControlAction",
+   "ret": null
+  },
+  "A96C": {
+   "args": [
+    "p:Point",
+    "w:WindowPtr",
+    "cp:ControlHandle*"
+   ],
+   "file": "ControlMgr.yaml",
+   "name": "FindControl",
+   "ret": "INTEGER"
+  },
+  "A96D": {
+   "args": [
+    "c:ControlHandle"
+   ],
+   "file": "ControlMgr.yaml",
+   "name": "Draw1Control",
+   "ret": null
+  },
+  "A96E": {
+   "args": [
+    "e:QElemPtr",
+    "h:QHdrPtr"
+   ],
+   "file": "OSUtil.yaml",
+   "name": "Dequeue",
+   "ret": "OSErr"
+  },
+  "A96F": {
+   "args": [
+    "e:QElemPtr",
+    "h:QHdrPtr"
+   ],
+   "file": "OSUtil.yaml",
+   "name": "Enqueue",
+   "ret": null
+  },
+  "A970": {
+   "args": [
+    "em:INTEGER",
+    "evt:EventRecord*"
+   ],
+   "file": "ToolboxEvent.yaml",
+   "name": "GetNextEvent",
+   "ret": "Boolean"
+  },
+  "A971": {
+   "args": [
+    "em:INTEGER",
+    "evt:EventRecord*"
+   ],
+   "file": "ToolboxEvent.yaml",
+   "name": "EventAvail",
+   "ret": "Boolean"
+  },
+  "A972": {
+   "args": [
+    "p:Point*"
+   ],
+   "file": "ToolboxEvent.yaml",
+   "name": "GetMouse",
+   "ret": null
+  },
+  "A973": {
+   "args": [],
+   "file": "ToolboxEvent.yaml",
+   "name": "StillDown",
+   "ret": "Boolean"
+  },
+  "A974": {
+   "args": [],
+   "file": "ToolboxEvent.yaml",
+   "name": "Button",
+   "ret": "Boolean"
+  },
+  "A975": {
+   "args": [],
+   "file": "ToolboxEvent.yaml",
+   "name": "TickCount",
+   "ret": "ULONGINT"
+  },
+  "A976": {
+   "args": [
+    "keys:uint8_t*"
+   ],
+   "file": "ToolboxEvent.yaml",
+   "name": "GetKeys",
+   "ret": null
+  },
+  "A977": {
+   "args": [],
+   "file": "ToolboxEvent.yaml",
+   "name": "WaitMouseUp",
+   "ret": "Boolean"
+  },
+  "A978": {
+   "args": [
+    "dp:DialogPtr",
+    "rgn:RgnHandle"
+   ],
+   "file": "DialogMgr.yaml",
+   "name": "UpdateDialog",
+   "ret": null
+  },
+  "A979": {
+   "args": [
+    "id:INTEGER"
+   ],
+   "file": "DialogMgr.yaml",
+   "name": "CouldDialog",
+   "ret": null
+  },
+  "A97A": {
+   "args": [
+    "id:INTEGER"
+   ],
+   "file": "DialogMgr.yaml",
+   "name": "FreeDialog",
+   "ret": null
+  },
+  "A97B": {
+   "args": [
+    "rp:ProcPtr"
+   ],
+   "file": "DialogMgr.yaml",
+   "name": "InitDialogs",
+   "ret": null
+  },
+  "A97C": {
+   "args": [
+    "id:INTEGER",
+    "dst:void*",
+    "behind:WindowPtr"
+   ],
+   "file": "DialogMgr.yaml",
+   "name": "GetNewDialog",
+   "ret": "DialogPtr"
+  },
+  "A97D": {
+   "args": [
+    "dst:void*",
+    "r:const Rect*",
+    "tit:ConstStringPtr",
+    "vis:Boolean",
+    "procid:INTEGER",
+    "behind:WindowPtr",
+    "gaflag:Boolean",
+    "rc:LONGINT",
+    "items:Handle"
+   ],
+   "file": "DialogMgr.yaml",
+   "name": "NewDialog",
+   "ret": "DialogPtr"
+  },
+  "A97E": {
+   "args": [
+    "dp:DialogPtr",
+    "itemno:INTEGER",
+    "start:INTEGER",
+    "stop:INTEGER"
+   ],
+   "file": "DialogMgr.yaml",
+   "name": "SelectDialogItemText",
+   "ret": null
+  },
+  "A97F": {
+   "args": [
+    "evt:EventRecord*"
+   ],
+   "file": "DialogMgr.yaml",
+   "name": "IsDialogEvent",
+   "ret": "Boolean"
+  },
+  "A980": {
+   "args": [
+    "evt:EventRecord*",
+    "dpp:DialogPtr*",
+    "item:INTEGER*"
+   ],
+   "file": "DialogMgr.yaml",
+   "name": "DialogSelect",
+   "ret": "Boolean"
+  },
+  "A981": {
+   "args": [
+    "dp:DialogPtr"
+   ],
+   "file": "DialogMgr.yaml",
+   "name": "DrawDialog",
+   "ret": null
+  },
+  "A982": {
+   "args": [
+    "dp:DialogPtr"
+   ],
+   "file": "DialogMgr.yaml",
+   "name": "CloseDialog",
+   "ret": null
+  },
+  "A983": {
+   "args": [
+    "dp:DialogPtr"
+   ],
+   "file": "DialogMgr.yaml",
+   "name": "DisposeDialog",
+   "ret": null
+  },
+  "A984": {
+   "args": [
+    "dp:DialogPtr",
+    "pt:Point"
+   ],
+   "file": "DialogMgr.yaml",
+   "name": "FindDialogItem",
+   "ret": "INTEGER"
+  },
+  "A985": {
+   "args": [
+    "id:INTEGER",
+    "fp:ModalFilterUPP"
+   ],
+   "file": "DialogMgr.yaml",
+   "name": "Alert",
+   "ret": "INTEGER"
+  },
+  "A986": {
+   "args": [
+    "id:INTEGER",
+    "fp:ModalFilterUPP"
+   ],
+   "file": "DialogMgr.yaml",
+   "name": "StopAlert",
+   "ret": "INTEGER"
+  },
+  "A987": {
+   "args": [
+    "id:INTEGER",
+    "fp:ModalFilterUPP"
+   ],
+   "file": "DialogMgr.yaml",
+   "name": "NoteAlert",
+   "ret": "INTEGER"
+  },
+  "A988": {
+   "args": [
+    "id:INTEGER",
+    "fp:ModalFilterUPP"
+   ],
+   "file": "DialogMgr.yaml",
+   "name": "CautionAlert",
+   "ret": "INTEGER"
+  },
+  "A989": {
+   "args": [
+    "id:INTEGER"
+   ],
+   "file": "DialogMgr.yaml",
+   "name": "CouldAlert",
+   "ret": null
+  },
+  "A98A": {
+   "args": [
+    "id:INTEGER"
+   ],
+   "file": "DialogMgr.yaml",
+   "name": "FreeAlert",
+   "ret": null
+  },
+  "A98B": {
+   "args": [
+    "p0:ConstStringPtr",
+    "p1:ConstStringPtr",
+    "p2:ConstStringPtr",
+    "p3:ConstStringPtr"
+   ],
+   "file": "DialogMgr.yaml",
+   "name": "ParamText",
+   "ret": null
+  },
+  "A98C": {
+   "args": [
+    "sp:SoundUPP"
+   ],
+   "file": "DialogMgr.yaml",
+   "name": "ErrorSound",
+   "ret": null
+  },
+  "A98D": {
+   "args": [
+    "dp:DialogPtr",
+    "itemno:INTEGER",
+    "itype:INTEGER*",
+    "item:Handle*",
+    "r:Rect*"
+   ],
+   "file": "DialogMgr.yaml",
+   "name": "GetDialogItem",
+   "ret": null
+  },
+  "A98E": {
+   "args": [
+    "dp:DialogPtr",
+    "itemno:INTEGER",
+    "itype:INTEGER",
+    "item:Handle",
+    "r:const Rect*"
+   ],
+   "file": "DialogMgr.yaml",
+   "name": "SetDialogItem",
+   "ret": null
+  },
+  "A98F": {
+   "args": [
+    "item:Handle",
+    "text:ConstStringPtr"
+   ],
+   "file": "DialogMgr.yaml",
+   "name": "SetDialogItemText",
+   "ret": null
+  },
+  "A990": {
+   "args": [
+    "item:Handle",
+    "text:StringPtr"
+   ],
+   "file": "DialogMgr.yaml",
+   "name": "GetDialogItemText",
+   "ret": null
+  },
+  "A991": {
+   "args": [
+    "fp:ModalFilterUPP",
+    "item:INTEGER*"
+   ],
+   "file": "DialogMgr.yaml",
+   "name": "ModalDialog",
+   "ret": null
+  },
+  "A992": {
+   "args": [
+    "res:Handle"
+   ],
+   "file": "ResourceMgr.yaml",
+   "name": "DetachResource",
+   "ret": null
+  },
+  "A993": {
+   "args": [
+    "install:Boolean"
+   ],
+   "file": "ResourceMgr.yaml",
+   "name": "SetResPurge",
+   "ret": null
+  },
+  "A994": {
+   "args": [],
+   "file": "ResourceMgr.yaml",
+   "name": "CurResFile",
+   "ret": "INTEGER"
+  },
+  "A995": {
+   "args": [],
+   "file": "ResourceMgr.yaml",
+   "name": "InitResources",
+   "ret": "INTEGER"
+  },
+  "A996": {
+   "args": [],
+   "file": "ResourceMgr.yaml",
+   "name": "RsrcZoneInit",
+   "ret": null
+  },
+  "A997": {
+   "args": [
+    "fn:ConstStringPtr"
+   ],
+   "file": "ResourceMgr.yaml",
+   "name": "OpenResFile",
+   "ret": "INTEGER"
+  },
+  "A998": {
+   "args": [
+    "rn:INTEGER"
+   ],
+   "file": "ResourceMgr.yaml",
+   "name": "UseResFile",
+   "ret": null
+  },
+  "A999": {
+   "args": [
+    "rn:INTEGER"
+   ],
+   "file": "ResourceMgr.yaml",
+   "name": "UpdateResFile",
+   "ret": null
+  },
+  "A99A": {
+   "args": [
+    "rn:INTEGER"
+   ],
+   "file": "ResourceMgr.yaml",
+   "name": "CloseResFile",
+   "ret": null
+  },
+  "A99B": {
+   "args": [
+    "load:Boolean"
+   ],
+   "file": "ResourceMgr.yaml",
+   "name": "SetResLoad",
+   "ret": null
+  },
+  "A99C": {
+   "args": [
+    "typ:ResType"
+   ],
+   "file": "ResourceMgr.yaml",
+   "name": "CountResources",
+   "ret": "INTEGER"
+  },
+  "A99D": {
+   "args": [
+    "typ:ResType",
+    "indx:INTEGER"
+   ],
+   "file": "ResourceMgr.yaml",
+   "name": "GetIndResource",
+   "ret": "Handle"
+  },
+  "A99E": {
+   "args": [],
+   "file": "ResourceMgr.yaml",
+   "name": "CountTypes",
+   "ret": "INTEGER"
+  },
+  "A99F": {
+   "args": [
+    "typ:ResType*",
+    "indx:INTEGER"
+   ],
+   "file": "ResourceMgr.yaml",
+   "name": "GetIndType",
+   "ret": null
+  },
+  "A9A0": {
+   "args": [
+    "typ:ResType",
+    "id:INTEGER"
+   ],
+   "file": "ResourceMgr.yaml",
+   "name": "GetResource",
+   "ret": "Handle"
+  },
+  "A9A1": {
+   "args": [
+    "typ:ResType",
+    "nam:ConstStringPtr"
+   ],
+   "file": "ResourceMgr.yaml",
+   "name": "GetNamedResource",
+   "ret": "Handle"
+  },
+  "A9A2": {
+   "args": [
+    "res:Handle"
+   ],
+   "file": "ResourceMgr.yaml",
+   "name": "LoadResource",
+   "ret": null
+  },
+  "A9A3": {
+   "args": [
+    "res:Handle"
+   ],
+   "file": "ResourceMgr.yaml",
+   "name": "ReleaseResource",
+   "ret": null
+  },
+  "A9A4": {
+   "args": [
+    "res:Handle"
+   ],
+   "file": "ResourceMgr.yaml",
+   "name": "HomeResFile",
+   "ret": "INTEGER"
+  },
+  "A9A5": {
+   "args": [
+    "res:Handle"
+   ],
+   "file": "ResourceMgr.yaml",
+   "name": "GetResourceSizeOnDisk",
+   "ret": "LONGINT"
+  },
+  "A9A6": {
+   "args": [
+    "res:Handle"
+   ],
+   "file": "ResourceMgr.yaml",
+   "name": "GetResAttrs",
+   "ret": "INTEGER"
+  },
+  "A9A7": {
+   "args": [
+    "res:Handle",
+    "attrs:INTEGER"
+   ],
+   "file": "ResourceMgr.yaml",
+   "name": "SetResAttrs",
+   "ret": null
+  },
+  "A9A8": {
+   "args": [
+    "res:Handle",
+    "id1:INTEGER*",
+    "typ:ResType*",
+    "name:StringPtr"
+   ],
+   "file": "ResourceMgr.yaml",
+   "name": "GetResInfo",
+   "ret": null
+  },
+  "A9A9": {
+   "args": [
+    "res:Handle",
+    "id:INTEGER",
+    "name:ConstStringPtr"
+   ],
+   "file": "ResourceMgr.yaml",
+   "name": "SetResInfo",
+   "ret": null
+  },
+  "A9AA": {
+   "args": [
+    "res:Handle"
+   ],
+   "file": "ResourceMgr.yaml",
+   "name": "ChangedResource",
+   "ret": null
+  },
+  "A9AB": {
+   "args": [
+    "data:Handle",
+    "typ:ResType",
+    "id:INTEGER",
+    "name:ConstStringPtr"
+   ],
+   "file": "ResourceMgr.yaml",
+   "name": "AddResource",
+   "ret": null
+  },
+  "A9AD": {
+   "args": [
+    "res:Handle"
+   ],
+   "file": "ResourceMgr.yaml",
+   "name": "RemoveResource",
+   "ret": null
+  },
+  "A9AF": {
+   "args": [],
+   "file": "ResourceMgr.yaml",
+   "name": "ResError",
+   "ret": "INTEGER"
+  },
+  "A9B0": {
+   "args": [
+    "res:Handle"
+   ],
+   "file": "ResourceMgr.yaml",
+   "name": "WriteResource",
+   "ret": null
+  },
+  "A9B1": {
+   "args": [
+    "fn:ConstStringPtr"
+   ],
+   "file": "ResourceMgr.yaml",
+   "name": "CreateResFile",
+   "ret": null
+  },
+  "A9B2": {
+   "args": [
+    "evp:EventRecord*"
+   ],
+   "file": "DeskMgr.yaml",
+   "name": "SystemEvent",
+   "ret": "Boolean"
+  },
+  "A9B3": {
+   "args": [
+    "evp:EventRecord*",
+    "wp:WindowPtr"
+   ],
+   "file": "DeskMgr.yaml",
+   "name": "SystemClick",
+   "ret": null
+  },
+  "A9B4": {
+   "args": [],
+   "file": "DeskMgr.yaml",
+   "name": "SystemTask",
+   "ret": null
+  },
+  "A9B5": {
+   "args": [
+    "menu:LONGINT"
+   ],
+   "file": "DeskMgr.yaml",
+   "name": "SystemMenu",
+   "ret": null
+  },
+  "A9B6": {
+   "args": [
+    "acc:ConstStringPtr"
+   ],
+   "file": "DeskMgr.yaml",
+   "name": "OpenDeskAcc",
+   "ret": "INTEGER"
+  },
+  "A9B7": {
+   "args": [
+    "rn:INTEGER"
+   ],
+   "file": "DeskMgr.yaml",
+   "name": "CloseDeskAcc",
+   "ret": null
+  },
+  "A9B8": {
+   "args": [
+    "id:INTEGER"
+   ],
+   "file": "ToolboxUtil.yaml",
+   "name": "GetPattern",
+   "ret": "PatHandle"
+  },
+  "A9B9": {
+   "args": [
+    "id:INTEGER"
+   ],
+   "file": "ToolboxUtil.yaml",
+   "name": "GetCursor",
+   "ret": "CursHandle"
+  },
+  "A9BA": {
+   "args": [
+    "i:INTEGER"
+   ],
+   "file": "ToolboxUtil.yaml",
+   "name": "GetString",
+   "ret": "StringHandle"
+  },
+  "A9BB": {
+   "args": [
+    "icon_id:int16_t"
+   ],
+   "file": "Iconutil.yaml",
+   "name": "GetIcon",
+   "ret": "Handle"
+  },
+  "A9BC": {
+   "args": [
+    "id:INTEGER"
+   ],
+   "file": "ToolboxUtil.yaml",
+   "name": "GetPicture",
+   "ret": "PicHandle"
+  },
+  "A9BD": {
+   "args": [
+    "wid:INTEGER",
+    "wst:void*",
+    "behind:WindowPtr"
+   ],
+   "file": "WindowMgr.yaml",
+   "name": "GetNewWindow",
+   "ret": "WindowPtr"
+  },
+  "A9BE": {
+   "args": [
+    "cid:INTEGER",
+    "wst:WindowPtr"
+   ],
+   "file": "ControlMgr.yaml",
+   "name": "GetNewControl",
+   "ret": "ControlHandle"
+  },
+  "A9BF": {
+   "args": [
+    "rid:INTEGER"
+   ],
+   "file": "MenuMgr.yaml",
+   "name": "GetMenu",
+   "ret": "MenuHandle"
+  },
+  "A9C0": {
+   "args": [
+    "mbarid:INTEGER"
+   ],
+   "file": "MenuMgr.yaml",
+   "name": "GetNewMBar",
+   "ret": "Handle"
+  },
+  "A9C1": {
+   "args": [
+    "typ:ResType"
+   ],
+   "file": "ResourceMgr.yaml",
+   "name": "UniqueID",
+   "ret": "INTEGER"
+  },
+  "A9C2": {
+   "args": [
+    "editcmd:INTEGER"
+   ],
+   "file": "DeskMgr.yaml",
+   "name": "SystemEdit",
+   "ret": "Boolean"
+  },
+  "A9C3": {
+   "args": [
+    "mapp:Ptr",
+    "code:uint16_t",
+    "state:uint32_t*"
+   ],
+   "file": "ToolboxEvent.yaml",
+   "name": "KeyTranslate",
+   "ret": "uint32_t"
+  },
+  "A9C4": {
+   "args": [
+    "fn:ConstStringPtr",
+    "vref:INTEGER",
+    "perm:Byte"
+   ],
+   "file": "ResourceMgr.yaml",
+   "name": "OpenRFPerm",
+   "ret": "INTEGER"
+  },
+  "A9C5": {
+   "args": [
+    "h:Handle"
+   ],
+   "file": "ResourceMgr.yaml",
+   "name": "RsrcMapEntry",
+   "ret": "LONGINT"
+  },
+  "A9C6": {
+   "args": [
+    "mactime:ULONGINT",
+    "d:DateTimeRec*"
+   ],
+   "file": "OSUtil.yaml",
+   "name": "SecondsToDate",
+   "ret": null
+  },
+  "A9C7": {
+   "args": [
+    "d:DateTimeRec*",
+    "s:ULONGINT*"
+   ],
+   "file": "OSUtil.yaml",
+   "name": "DateToSeconds",
+   "ret": null
+  },
+  "A9C8": {
+   "args": [
+    "i:INTEGER"
+   ],
+   "file": "OSUtil.yaml",
+   "name": "SysBeep",
+   "ret": null
+  },
+  "A9C9": {
+   "args": [
+    "errorcode:int16_t"
+   ],
+   "file": "SysErr.yaml",
+   "name": "SysError",
+   "ret": null
+  },
+  "A9CB": {
+   "args": [
+    "teh:TEHandle"
+   ],
+   "file": "TextEdit.yaml",
+   "name": "TEGetText",
+   "ret": "CharsHandle"
+  },
+  "A9CC": {
+   "args": [],
+   "file": "TextEdit.yaml",
+   "name": "TEInit",
+   "ret": null
+  },
+  "A9CD": {
+   "args": [
+    "teh:TEHandle"
+   ],
+   "file": "TextEdit.yaml",
+   "name": "TEDispose",
+   "ret": null
+  },
+  "A9CE": {
+   "args": [
+    "p:Ptr",
+    "ln:LONGINT",
+    "r:const Rect*",
+    "j:INTEGER"
+   ],
+   "file": "TextEdit.yaml",
+   "name": "TETextBox",
+   "ret": null
+  },
+  "A9CF": {
+   "args": [
+    "p:Ptr",
+    "ln:LONGINT",
+    "teh:TEHandle"
+   ],
+   "file": "TextEdit.yaml",
+   "name": "TESetText",
+   "ret": null
+  },
+  "A9D0": {
+   "args": [
+    "teh:TEHandle"
+   ],
+   "file": "TextEdit.yaml",
+   "name": "TECalText",
+   "ret": null
+  },
+  "A9D1": {
+   "args": [
+    "start:LONGINT",
+    "stop:LONGINT",
+    "teh:TEHandle"
+   ],
+   "file": "TextEdit.yaml",
+   "name": "TESetSelect",
+   "ret": null
+  },
+  "A9D2": {
+   "args": [
+    "dst:const Rect*",
+    "view:const Rect*"
+   ],
+   "file": "TextEdit.yaml",
+   "name": "TENew",
+   "ret": "TEHandle"
+  },
+  "A9D3": {
+   "args": [
+    "r:const Rect*",
+    "teh:TEHandle"
+   ],
+   "file": "TextEdit.yaml",
+   "name": "TEUpdate",
+   "ret": null
+  },
+  "A9D4": {
+   "args": [
+    "p:Point",
+    "ext:Boolean",
+    "teh:TEHandle"
+   ],
+   "file": "TextEdit.yaml",
+   "name": "TEClick",
+   "ret": null
+  },
+  "A9D5": {
+   "args": [
+    "teh:TEHandle"
+   ],
+   "file": "TextEdit.yaml",
+   "name": "TECopy",
+   "ret": null
+  },
+  "A9D6": {
+   "args": [
+    "teh:TEHandle"
+   ],
+   "file": "TextEdit.yaml",
+   "name": "TECut",
+   "ret": null
+  },
+  "A9D7": {
+   "args": [
+    "teh:TEHandle"
+   ],
+   "file": "TextEdit.yaml",
+   "name": "TEDelete",
+   "ret": null
+  },
+  "A9D8": {
+   "args": [
+    "teh:TEHandle"
+   ],
+   "file": "TextEdit.yaml",
+   "name": "TEActivate",
+   "ret": null
+  },
+  "A9D9": {
+   "args": [
+    "teh:TEHandle"
+   ],
+   "file": "TextEdit.yaml",
+   "name": "TEDeactivate",
+   "ret": null
+  },
+  "A9DA": {
+   "args": [
+    "teh:TEHandle"
+   ],
+   "file": "TextEdit.yaml",
+   "name": "TEIdle",
+   "ret": null
+  },
+  "A9DB": {
+   "args": [
+    "teh:TEHandle"
+   ],
+   "file": "TextEdit.yaml",
+   "name": "TEPaste",
+   "ret": null
+  },
+  "A9DC": {
+   "args": [
+    "thec:CharParameter",
+    "teh:TEHandle"
+   ],
+   "file": "TextEdit.yaml",
+   "name": "TEKey",
+   "ret": null
+  },
+  "A9DD": {
+   "args": [
+    "dh:INTEGER",
+    "dv:INTEGER",
+    "teh:TEHandle"
+   ],
+   "file": "TextEdit.yaml",
+   "name": "TEScroll",
+   "ret": null
+  },
+  "A9DE": {
+   "args": [
+    "p:Ptr",
+    "ln:LONGINT",
+    "teh:TEHandle"
+   ],
+   "file": "TextEdit.yaml",
+   "name": "TEInsert",
+   "ret": null
+  },
+  "A9DF": {
+   "args": [
+    "j:INTEGER",
+    "teh:TEHandle"
+   ],
+   "file": "TextEdit.yaml",
+   "name": "TESetAlignment",
+   "ret": null
+  },
+  "A9E0": {
+   "args": [
+    "h:Handle",
+    "off:LONGINT",
+    "p1:Ptr",
+    "len1:LONGINT",
+    "p2:Ptr",
+    "len2:LONGINT"
+   ],
+   "file": "ToolboxUtil.yaml",
+   "name": "Munger",
+   "ret": "LONGINT"
+  },
+  "A9E1": {
+   "args": [
+    "h:Handle*"
+   ],
+   "file": "OSUtil.yaml",
+   "name": "HandToHand",
+   "ret": "OSErr"
+  },
+  "A9E2": {
+   "args": [
+    "p:const void*",
+    "h:Handle",
+    "s:LONGINT"
+   ],
+   "file": "OSUtil.yaml",
+   "name": "PtrToXHand",
+   "ret": "OSErr"
+  },
+  "A9E3": {
+   "args": [
+    "p:const void*",
+    "h:Handle*",
+    "s:LONGINT"
+   ],
+   "file": "OSUtil.yaml",
+   "name": "PtrToHand",
+   "ret": "OSErr"
+  },
+  "A9E4": {
+   "args": [
+    "h1:Handle",
+    "h2:Handle"
+   ],
+   "file": "OSUtil.yaml",
+   "name": "HandAndHand",
+   "ret": "OSErr"
+  },
+  "A9E5": {
+   "args": [
+    "packid:INTEGER"
+   ],
+   "file": "Package.yaml",
+   "name": "InitPack",
+   "ret": null
+  },
+  "A9E6": {
+   "args": [],
+   "file": "Package.yaml",
+   "name": "InitAllPacks",
+   "ret": null
+  },
+  "A9E7": {
+   "dispatcher": true,
+   "name": "Pack0"
+  },
+  "A9E8": {
+   "args": [],
+   "file": "Package.yaml",
+   "name": "Pack1",
+   "ret": null
+  },
+  "A9E9": {
+   "dispatcher": true,
+   "name": "Pack2"
+  },
+  "A9EA": {
+   "dispatcher": true,
+   "name": "Pack3"
+  },
+  "A9EB": {
+   "dispatcher": true,
+   "name": "Pack4"
+  },
+  "A9EC": {
+   "dispatcher": true,
+   "name": "Pack5"
+  },
+  "A9ED": {
+   "dispatcher": true,
+   "name": "Pack6"
+  },
+  "A9EE": {
+   "dispatcher": true,
+   "name": "Pack7"
+  },
+  "A9EF": {
+   "args": [
+    "p:const void*",
+    "h:Handle",
+    "s1:LONGINT"
+   ],
+   "file": "OSUtil.yaml",
+   "name": "PtrAndHand",
+   "ret": "OSErr"
+  },
+  "A9F0": {
+   "args": [],
+   "file": "SegmentLdr.yaml",
+   "name": "LoadSeg",
+   "ret": null
+  },
+  "A9F1": {
+   "args": [
+    "addr:void*"
+   ],
+   "file": "SegmentLdr.yaml",
+   "name": "UnloadSeg",
+   "ret": null
+  },
+  "A9F2": {
+   "args": [
+    "params:LaunchParamBlockRec*"
+   ],
+   "file": "ProcessMgr.yaml",
+   "name": "LaunchApplication",
+   "ret": "OSErr"
+  },
+  "A9F3": {
+   "args": [],
+   "file": "SegmentLdr.yaml",
+   "name": "Chain",
+   "ret": null
+  },
+  "A9F4": {
+   "args": [],
+   "file": "SegmentLdr.yaml",
+   "name": "ExitToShell",
+   "ret": null
+  },
+  "A9F5": {
+   "args": [
+    "namep:StringPtr",
+    "rnp:INTEGER*",
+    "aphandp:Handle*"
+   ],
+   "file": "SegmentLdr.yaml",
+   "name": "GetAppParms",
+   "ret": null
+  },
+  "A9F6": {
+   "args": [
+    "rn:INTEGER"
+   ],
+   "file": "ResourceMgr.yaml",
+   "name": "GetResFileAttrs",
+   "ret": "INTEGER"
+  },
+  "A9F7": {
+   "args": [
+    "rn:INTEGER",
+    "attrs:INTEGER"
+   ],
+   "file": "ResourceMgr.yaml",
+   "name": "SetResFileAttrs",
+   "ret": null
+  },
+  "A9F9": {
+   "args": [],
+   "file": "ScrapMgr.yaml",
+   "name": "InfoScrap",
+   "ret": "PScrapStuff"
+  },
+  "A9FA": {
+   "args": [],
+   "file": "ScrapMgr.yaml",
+   "name": "UnloadScrap",
+   "ret": "LONGINT"
+  },
+  "A9FB": {
+   "args": [],
+   "file": "ScrapMgr.yaml",
+   "name": "LoadScrap",
+   "ret": "LONGINT"
+  },
+  "A9FC": {
+   "args": [],
+   "file": "ScrapMgr.yaml",
+   "name": "ZeroScrap",
+   "ret": "LONGINT"
+  },
+  "A9FD": {
+   "args": [
+    "h:Handle",
+    "rest:ResType",
+    "off:LONGINT*"
+   ],
+   "file": "ScrapMgr.yaml",
+   "name": "GetScrap",
+   "ret": "LONGINT"
+  },
+  "A9FE": {
+   "args": [
+    "len:LONGINT",
+    "rest:ResType",
+    "p:Ptr"
+   ],
+   "file": "ScrapMgr.yaml",
+   "name": "PutScrap",
+   "ret": "LONGINT"
+  },
+  "A9FF": {
+   "args": [],
+   "file": "OSUtil.yaml",
+   "name": "Debugger",
+   "ret": null
+  },
+  "AA00": {
+   "args": [
+    "None:CGrafPtr"
+   ],
+   "file": "CQuickDraw.yaml",
+   "name": "OpenCPort",
+   "ret": null
+  },
+  "AA01": {
+   "args": [
+    "None:CGrafPtr"
+   ],
+   "file": "CQuickDraw.yaml",
+   "name": "InitCPort",
+   "ret": null
+  },
+  "AA02": {
+   "args": [
+    "None:CGrafPtr"
+   ],
+   "file": "CQuickDraw.yaml",
+   "name": "CloseCPort",
+   "ret": null
+  },
+  "AA03": {
+   "args": [],
+   "file": "CQuickDraw.yaml",
+   "name": "NewPixMap",
+   "ret": "PixMapHandle"
+  },
+  "AA04": {
+   "args": [
+    "None:PixMapHandle"
+   ],
+   "file": "CQuickDraw.yaml",
+   "name": "DisposePixMap",
+   "ret": null
+  },
+  "AA05": {
+   "args": [
+    "None:PixMapHandle",
+    "None:PixMapHandle"
+   ],
+   "file": "CQuickDraw.yaml",
+   "name": "CopyPixMap",
+   "ret": null
+  },
+  "AA06": {
+   "args": [
+    "None:PixMapHandle"
+   ],
+   "file": "CQuickDraw.yaml",
+   "name": "SetPortPix",
+   "ret": null
+  },
+  "AA07": {
+   "args": [],
+   "file": "CQuickDraw.yaml",
+   "name": "NewPixPat",
+   "ret": "PixPatHandle"
+  },
+  "AA08": {
+   "args": [
+    "None:PixPatHandle"
+   ],
+   "file": "CQuickDraw.yaml",
+   "name": "DisposePixPat",
+   "ret": null
+  },
+  "AA09": {
+   "args": [
+    "None:PixPatHandle",
+    "None:PixPatHandle"
+   ],
+   "file": "CQuickDraw.yaml",
+   "name": "CopyPixPat",
+   "ret": null
+  },
+  "AA0A": {
+   "args": [
+    "None:PixPatHandle"
+   ],
+   "file": "CQuickDraw.yaml",
+   "name": "PenPixPat",
+   "ret": null
+  },
+  "AA0B": {
+   "args": [
+    "None:PixPatHandle"
+   ],
+   "file": "CQuickDraw.yaml",
+   "name": "BackPixPat",
+   "ret": null
+  },
+  "AA0C": {
+   "args": [
+    "None:INTEGER"
+   ],
+   "file": "CQuickDraw.yaml",
+   "name": "GetPixPat",
+   "ret": "PixPatHandle"
+  },
+  "AA0D": {
+   "args": [
+    "ph:PixPatHandle",
+    "colorp:RGBColor*"
+   ],
+   "file": "QuickDraw.yaml",
+   "name": "MakeRGBPat",
+   "ret": null
+  },
+  "AA0E": {
+   "args": [
+    "None:const Rect*",
+    "None:PixPatHandle"
+   ],
+   "file": "CQuickDraw.yaml",
+   "name": "FillCRect",
+   "ret": null
+  },
+  "AA0F": {
+   "args": [
+    "None:const Rect*",
+    "None:PixPatHandle"
+   ],
+   "file": "CQuickDraw.yaml",
+   "name": "FillCOval",
+   "ret": null
+  },
+  "AA10": {
+   "args": [
+    "None:const Rect*",
+    "None:int16_t",
+    "None:int16_t",
+    "None:PixPatHandle"
+   ],
+   "file": "CQuickDraw.yaml",
+   "name": "FillCRoundRect",
+   "ret": null
+  },
+  "AA11": {
+   "args": [
+    "None:const Rect*",
+    "None:int16_t",
+    "None:int16_t",
+    "None:PixPatHandle"
+   ],
+   "file": "CQuickDraw.yaml",
+   "name": "FillCArc",
+   "ret": null
+  },
+  "AA12": {
+   "args": [
+    "None:RgnHandle",
+    "None:PixPatHandle"
+   ],
+   "file": "CQuickDraw.yaml",
+   "name": "FillCRgn",
+   "ret": null
+  },
+  "AA13": {
+   "args": [
+    "None:PolyHandle",
+    "None:PixPatHandle"
+   ],
+   "file": "CQuickDraw.yaml",
+   "name": "FillCPoly",
+   "ret": null
+  },
+  "AA14": {
+   "args": [
+    "None:RGBColor*"
+   ],
+   "file": "CQuickDraw.yaml",
+   "name": "RGBForeColor",
+   "ret": null
+  },
+  "AA15": {
+   "args": [
+    "None:RGBColor*"
+   ],
+   "file": "CQuickDraw.yaml",
+   "name": "RGBBackColor",
+   "ret": null
+  },
+  "AA16": {
+   "args": [
+    "h:INTEGER",
+    "v:INTEGER",
+    "colorp:RGBColor*"
+   ],
+   "file": "QuickDraw.yaml",
+   "name": "SetCPixel",
+   "ret": null
+  },
+  "AA17": {
+   "args": [
+    "h:INTEGER",
+    "v:INTEGER",
+    "colorp:RGBColor*"
+   ],
+   "file": "QuickDraw.yaml",
+   "name": "GetCPixel",
+   "ret": null
+  },
+  "AA18": {
+   "args": [
+    "None:INTEGER"
+   ],
+   "file": "CQuickDraw.yaml",
+   "name": "GetCTable",
+   "ret": "CTabHandle"
+  },
+  "AA19": {
+   "args": [
+    "None:RGBColor*"
+   ],
+   "file": "CQuickDraw.yaml",
+   "name": "GetForeColor",
+   "ret": null
+  },
+  "AA1A": {
+   "args": [
+    "None:RGBColor*"
+   ],
+   "file": "CQuickDraw.yaml",
+   "name": "GetBackColor",
+   "ret": null
+  },
+  "AA1B": {
+   "args": [
+    "None:INTEGER"
+   ],
+   "file": "CQuickDraw.yaml",
+   "name": "GetCCursor",
+   "ret": "CCrsrHandle"
+  },
+  "AA1C": {
+   "args": [
+    "None:CCrsrHandle"
+   ],
+   "file": "CQuickDraw.yaml",
+   "name": "SetCCursor",
+   "ret": null
+  },
+  "AA1D": {
+   "args": [],
+   "file": "CQuickDraw.yaml",
+   "name": "AllocCursor",
+   "ret": null
+  },
+  "AA1E": {
+   "args": [
+    "icon_id:int16_t"
+   ],
+   "file": "Iconutil.yaml",
+   "name": "GetCIcon",
+   "ret": "CIconHandle"
+  },
+  "AA1F": {
+   "args": [
+    "rect:const Rect*",
+    "icon:CIconHandle"
+   ],
+   "file": "Iconutil.yaml",
+   "name": "PlotCIcon",
+   "ret": null
+  },
+  "AA20": {
+   "args": [
+    "newheaderp:OpenCPicParams*"
+   ],
+   "file": "CQuickDraw.yaml",
+   "name": "OpenCPicture",
+   "ret": "PicHandle"
+  },
+  "AA21": {
+   "args": [
+    "None:RGBColor*"
+   ],
+   "file": "CQuickDraw.yaml",
+   "name": "OpColor",
+   "ret": null
+  },
+  "AA22": {
+   "args": [
+    "None:RGBColor*"
+   ],
+   "file": "CQuickDraw.yaml",
+   "name": "HiliteColor",
+   "ret": null
+  },
+  "AA23": {
+   "args": [
+    "Extra:Fixed"
+   ],
+   "file": "QuickDraw.yaml",
+   "name": "CharExtra",
+   "ret": null
+  },
+  "AA24": {
+   "args": [
+    "None:CTabHandle"
+   ],
+   "file": "CQuickDraw.yaml",
+   "name": "DisposeCTable",
+   "ret": null
+  },
+  "AA25": {
+   "args": [
+    "icon:CIconHandle"
+   ],
+   "file": "Iconutil.yaml",
+   "name": "DisposeCIcon",
+   "ret": null
+  },
+  "AA26": {
+   "args": [
+    "None:CCrsrHandle"
+   ],
+   "file": "CQuickDraw.yaml",
+   "name": "DisposeCCursor",
+   "ret": null
+  },
+  "AA27": {
+   "args": [
+    "None:const Rect*"
+   ],
+   "file": "CQuickDraw.yaml",
+   "name": "GetMaxDevice",
+   "ret": "GDHandle"
+  },
+  "AA28": {
+   "args": [],
+   "file": "CQuickDraw.yaml",
+   "name": "GetCTSeed",
+   "ret": "LONGINT"
+  },
+  "AA29": {
+   "args": [],
+   "file": "CQuickDraw.yaml",
+   "name": "GetDeviceList",
+   "ret": "GDHandle"
+  },
+  "AA2A": {
+   "args": [],
+   "file": "CQuickDraw.yaml",
+   "name": "GetMainDevice",
+   "ret": "GDHandle"
+  },
+  "AA2B": {
+   "args": [
+    "None:GDHandle"
+   ],
+   "file": "CQuickDraw.yaml",
+   "name": "GetNextDevice",
+   "ret": "GDHandle"
+  },
+  "AA2C": {
+   "args": [
+    "None:GDHandle",
+    "None:INTEGER"
+   ],
+   "file": "CQuickDraw.yaml",
+   "name": "TestDeviceAttribute",
+   "ret": "Boolean"
+  },
+  "AA2D": {
+   "args": [
+    "None:GDHandle",
+    "None:INTEGER",
+    "None:Boolean"
+   ],
+   "file": "CQuickDraw.yaml",
+   "name": "SetDeviceAttribute",
+   "ret": null
+  },
+  "AA2E": {
+   "args": [
+    "None:INTEGER",
+    "None:LONGINT",
+    "None:GDHandle"
+   ],
+   "file": "CQuickDraw.yaml",
+   "name": "InitGDevice",
+   "ret": null
+  },
+  "AA2F": {
+   "args": [
+    "None:INTEGER",
+    "None:LONGINT"
+   ],
+   "file": "CQuickDraw.yaml",
+   "name": "NewGDevice",
+   "ret": "GDHandle"
+  },
+  "AA30": {
+   "args": [
+    "None:GDHandle"
+   ],
+   "file": "CQuickDraw.yaml",
+   "name": "DisposeGDevice",
+   "ret": null
+  },
+  "AA31": {
+   "args": [
+    "None:GDHandle"
+   ],
+   "file": "CQuickDraw.yaml",
+   "name": "SetGDevice",
+   "ret": null
+  },
+  "AA32": {
+   "args": [],
+   "file": "CQuickDraw.yaml",
+   "name": "GetGDevice",
+   "ret": "GDHandle"
+  },
+  "AA33": {
+   "args": [
+    "None:RGBColor*"
+   ],
+   "file": "CQuickDraw.yaml",
+   "name": "Color2Index",
+   "ret": "LONGINT"
+  },
+  "AA34": {
+   "args": [
+    "None:LONGINT",
+    "None:RGBColor*"
+   ],
+   "file": "CQuickDraw.yaml",
+   "name": "Index2Color",
+   "ret": null
+  },
+  "AA35": {
+   "args": [
+    "None:RGBColor*"
+   ],
+   "file": "CQuickDraw.yaml",
+   "name": "InvertColor",
+   "ret": null
+  },
+  "AA36": {
+   "args": [
+    "None:RGBColor*"
+   ],
+   "file": "CQuickDraw.yaml",
+   "name": "RealColor",
+   "ret": "Boolean"
+  },
+  "AA37": {
+   "args": [
+    "None:CTabHandle",
+    "None:INTEGER",
+    "None:CTabHandle"
+   ],
+   "file": "CQuickDraw.yaml",
+   "name": "GetSubTable",
+   "ret": null
+  },
+  "AA39": {
+   "args": [
+    "None:CTabHandle",
+    "None:ITabHandle",
+    "None:INTEGER"
+   ],
+   "file": "CQuickDraw.yaml",
+   "name": "MakeITable",
+   "ret": null
+  },
+  "AA3A": {
+   "args": [
+    "None:ProcPtr"
+   ],
+   "file": "CQuickDraw.yaml",
+   "name": "AddSearch",
+   "ret": null
+  },
+  "AA3B": {
+   "args": [
+    "None:ProcPtr"
+   ],
+   "file": "CQuickDraw.yaml",
+   "name": "AddComp",
+   "ret": null
+  },
+  "AA3C": {
+   "args": [
+    "None:INTEGER"
+   ],
+   "file": "CQuickDraw.yaml",
+   "name": "SetClientID",
+   "ret": null
+  },
+  "AA3D": {
+   "args": [
+    "None:INTEGER",
+    "None:Boolean"
+   ],
+   "file": "CQuickDraw.yaml",
+   "name": "ProtectEntry",
+   "ret": null
+  },
+  "AA3E": {
+   "args": [
+    "None:INTEGER",
+    "None:Boolean"
+   ],
+   "file": "CQuickDraw.yaml",
+   "name": "ReserveEntry",
+   "ret": null
+  },
+  "AA3F": {
+   "args": [
+    "None:INTEGER",
+    "None:INTEGER",
+    "cSpecArray:ColorSpec*"
+   ],
+   "file": "CQuickDraw.yaml",
+   "name": "SetEntries",
+   "ret": null
+  },
+  "AA40": {
+   "args": [],
+   "file": "CQuickDraw.yaml",
+   "name": "QDError",
+   "ret": "INTEGER"
+  },
+  "AA41": {
+   "args": [
+    "w:WindowPtr",
+    "new_w_ctab:CTabHandle"
+   ],
+   "file": "WindowMgr.yaml",
+   "name": "SetWinColor",
+   "ret": null
+  },
+  "AA42": {
+   "args": [
+    "None:WindowPtr",
+    "None:AuxWinHandle*"
+   ],
+   "file": "WindowMgr.yaml",
+   "name": "GetAuxWin",
+   "ret": "Boolean"
+  },
+  "AA43": {
+   "args": [
+    "ctl:ControlHandle",
+    "ctab:CCTabHandle"
+   ],
+   "file": "ControlMgr.yaml",
+   "name": "SetControlColor",
+   "ret": null
+  },
+  "AA44": {
+   "args": [
+    "c:ControlHandle",
+    "acHndl:AuxCtlHandle*"
+   ],
+   "file": "ControlMgr.yaml",
+   "name": "GetAuxiliaryControlRecord",
+   "ret": "Boolean"
+  },
+  "AA45": {
+   "args": [
+    "storage:void*",
+    "None:const Rect*",
+    "None:ConstStringPtr",
+    "None:Boolean",
+    "None:INTEGER",
+    "None:WindowPtr",
+    "None:Boolean",
+    "None:LONGINT"
+   ],
+   "file": "WindowMgr.yaml",
+   "name": "NewCWindow",
+   "ret": "WindowPtr"
+  },
+  "AA46": {
+   "args": [
+    "None:INTEGER",
+    "None:void*",
+    "None:WindowPtr"
+   ],
+   "file": "WindowMgr.yaml",
+   "name": "GetNewCWindow",
+   "ret": "WindowPtr"
+  },
+  "AA47": {
+   "args": [
+    "None:PixPatHandle"
+   ],
+   "file": "WindowMgr.yaml",
+   "name": "SetDeskCPat",
+   "ret": null
+  },
+  "AA48": {
+   "args": [
+    "None:CGrafPtr*"
+   ],
+   "file": "CQuickDraw.yaml",
+   "name": "GetCWMgrPort",
+   "ret": null
+  },
+  "AA49": {
+   "args": [
+    "None:CTabHandle",
+    "None:CTabHandle",
+    "None:ReqListRec*"
+   ],
+   "file": "CQuickDraw.yaml",
+   "name": "SaveEntries",
+   "ret": null
+  },
+  "AA4A": {
+   "args": [
+    "None:CTabHandle",
+    "None:CTabHandle",
+    "None:ReqListRec*"
+   ],
+   "file": "CQuickDraw.yaml",
+   "name": "RestoreEntries",
+   "ret": null
+  },
+  "AA4B": {
+   "args": [
+    "None:void*",
+    "None:const Rect*",
+    "None:ConstStringPtr",
+    "None:Boolean",
+    "None:INTEGER",
+    "None:WindowPtr",
+    "None:Boolean",
+    "None:LONGINT",
+    "None:Handle"
+   ],
+   "file": "DialogMgr.yaml",
+   "name": "NewColorDialog",
+   "ret": "DialogPtr"
+  },
+  "AA4C": {
+   "args": [
+    "None:ProcPtr"
+   ],
+   "file": "CQuickDraw.yaml",
+   "name": "DelSearch",
+   "ret": null
+  },
+  "AA4D": {
+   "args": [
+    "None:ProcPtr"
+   ],
+   "file": "CQuickDraw.yaml",
+   "name": "DelComp",
+   "ret": null
+  },
+  "AA4E": {
+   "args": [
+    "cProcs:CQDProcs*"
+   ],
+   "file": "CQuickDraw.yaml",
+   "name": "SetStdCProcs",
+   "ret": null
+  },
+  "AA4F": {
+   "args": [
+    "srcbp:BitMap*",
+    "dstbp:BitMap*",
+    "srcrp:const Rect*",
+    "dstrp:const Rect*",
+    "seedrgbp:RGBColor*",
+    "matchprocp:ProcPtr",
+    "matchdata:LONGINT"
+   ],
+   "file": "QuickDraw.yaml",
+   "name": "CalcCMask",
+   "ret": null
+  },
+  "AA50": {
+   "args": [
+    "srcbp:BitMap*",
+    "dstbp:BitMap*",
+    "srcrp:const Rect*",
+    "dstrp:const Rect*",
+    "seedh:INTEGER",
+    "seedv:INTEGER",
+    "matchprocp:ProcPtr",
+    "matchdata:LONGINT"
+   ],
+   "file": "QuickDraw.yaml",
+   "name": "SeedCFill",
+   "ret": null
+  },
+  "AA51": {
+   "args": [
+    "srcBits:BitMap*",
+    "maskBits:BitMap*",
+    "dstBits:BitMap*",
+    "srcRect:const Rect*",
+    "maskRect:const Rect*",
+    "dstRect:const Rect*",
+    "mode:INTEGER",
+    "maskRgn:RgnHandle"
+   ],
+   "file": "QuickDraw.yaml",
+   "name": "CopyDeepMask",
+   "ret": null
+  },
+  "AA52": {
+   "dispatcher": true,
+   "name": "HighLevelFSDispatch"
+  },
+  "AA59": {
+   "dispatcher": true,
+   "name": "MixedModeDispatch"
+  },
+  "AA5A": {
+   "dispatcher": true,
+   "name": "CodeFragmentDispatch"
+  },
+  "AA60": {
+   "args": [
+    "None:INTEGER",
+    "None:INTEGER"
+   ],
+   "file": "MenuMgr.yaml",
+   "name": "DeleteMCEntries",
+   "ret": null
+  },
+  "AA61": {
+   "args": [],
+   "file": "MenuMgr.yaml",
+   "name": "GetMCInfo",
+   "ret": "MCTableHandle"
+  },
+  "AA62": {
+   "args": [
+    "None:MCTableHandle"
+   ],
+   "file": "MenuMgr.yaml",
+   "name": "SetMCInfo",
+   "ret": null
+  },
+  "AA63": {
+   "args": [
+    "None:MCTableHandle"
+   ],
+   "file": "MenuMgr.yaml",
+   "name": "DisposeMCInfo",
+   "ret": null
+  },
+  "AA64": {
+   "args": [
+    "None:INTEGER",
+    "None:INTEGER"
+   ],
+   "file": "MenuMgr.yaml",
+   "name": "GetMCEntry",
+   "ret": "MCEntryPtr"
+  },
+  "AA65": {
+   "args": [
+    "None:INTEGER",
+    "None:MCTablePtr"
+   ],
+   "file": "MenuMgr.yaml",
+   "name": "SetMCEntries",
+   "ret": null
+  },
+  "AA66": {
+   "args": [],
+   "file": "MenuMgr.yaml",
+   "name": "MenuChoice",
+   "ret": "LONGINT"
+  },
+  "AA68": {
+   "dispatcher": true,
+   "name": "DialogDispatch"
+  },
+  "AA90": {
+   "args": [],
+   "file": "CQuickDraw.yaml",
+   "name": "InitPalettes",
+   "ret": null
+  },
+  "AA91": {
+   "args": [
+    "None:INTEGER",
+    "None:CTabHandle",
+    "None:INTEGER",
+    "None:INTEGER"
+   ],
+   "file": "CQuickDraw.yaml",
+   "name": "NewPalette",
+   "ret": "PaletteHandle"
+  },
+  "AA92": {
+   "args": [
+    "None:INTEGER"
+   ],
+   "file": "CQuickDraw.yaml",
+   "name": "GetNewPalette",
+   "ret": "PaletteHandle"
+  },
+  "AA93": {
+   "args": [
+    "None:PaletteHandle"
+   ],
+   "file": "CQuickDraw.yaml",
+   "name": "DisposePalette",
+   "ret": null
+  },
+  "AA94": {
+   "args": [
+    "None:WindowPtr"
+   ],
+   "file": "CQuickDraw.yaml",
+   "name": "ActivatePalette",
+   "ret": null
+  },
+  "AA95": {
+   "args": [
+    "None:WindowPtr",
+    "None:PaletteHandle",
+    "updates:INTEGER"
+   ],
+   "file": "CQuickDraw.yaml",
+   "name": "NSetPalette",
+   "ret": null
+  },
+  "AA96": {
+   "args": [
+    "None:WindowPtr"
+   ],
+   "file": "CQuickDraw.yaml",
+   "name": "GetPalette",
+   "ret": "PaletteHandle"
+  },
+  "AA97": {
+   "args": [
+    "None:INTEGER"
+   ],
+   "file": "CQuickDraw.yaml",
+   "name": "PmForeColor",
+   "ret": null
+  },
+  "AA98": {
+   "args": [
+    "None:INTEGER"
+   ],
+   "file": "CQuickDraw.yaml",
+   "name": "PmBackColor",
+   "ret": null
+  },
+  "AA99": {
+   "args": [
+    "None:WindowPtr",
+    "None:INTEGER",
+    "None:RGBColor*"
+   ],
+   "file": "CQuickDraw.yaml",
+   "name": "AnimateEntry",
+   "ret": null
+  },
+  "AA9A": {
+   "args": [
+    "None:WindowPtr",
+    "None:CTabHandle",
+    "None:INTEGER",
+    "None:INTEGER",
+    "None:INTEGER"
+   ],
+   "file": "CQuickDraw.yaml",
+   "name": "AnimatePalette",
+   "ret": null
+  },
+  "AA9B": {
+   "args": [
+    "None:PaletteHandle",
+    "None:INTEGER",
+    "None:RGBColor*"
+   ],
+   "file": "CQuickDraw.yaml",
+   "name": "GetEntryColor",
+   "ret": null
+  },
+  "AA9C": {
+   "args": [
+    "None:PaletteHandle",
+    "None:INTEGER",
+    "None:RGBColor*"
+   ],
+   "file": "CQuickDraw.yaml",
+   "name": "SetEntryColor",
+   "ret": null
+  },
+  "AA9D": {
+   "args": [
+    "None:PaletteHandle",
+    "None:INTEGER",
+    "None:INTEGER*",
+    "None:INTEGER*"
+   ],
+   "file": "CQuickDraw.yaml",
+   "name": "GetEntryUsage",
+   "ret": null
+  },
+  "AA9E": {
+   "args": [
+    "None:PaletteHandle",
+    "None:INTEGER",
+    "None:INTEGER",
+    "None:INTEGER"
+   ],
+   "file": "CQuickDraw.yaml",
+   "name": "SetEntryUsage",
+   "ret": null
+  },
+  "AA9F": {
+   "args": [
+    "None:CTabHandle",
+    "None:PaletteHandle",
+    "None:INTEGER",
+    "None:INTEGER"
+   ],
+   "file": "CQuickDraw.yaml",
+   "name": "CTab2Palette",
+   "ret": null
+  },
+  "AAA0": {
+   "args": [
+    "None:PaletteHandle",
+    "None:CTabHandle"
+   ],
+   "file": "CQuickDraw.yaml",
+   "name": "Palette2CTab",
+   "ret": null
+  },
+  "AAA1": {
+   "args": [
+    "src_palette:PaletteHandle",
+    "dst_palette:PaletteHandle",
+    "src_start:int16_t",
+    "dst_start:int16_t",
+    "n_entries:int16_t"
+   ],
+   "file": "CQuickDraw.yaml",
+   "name": "CopyPalette",
+   "ret": null
+  },
+  "AAA2": {
+   "dispatcher": true,
+   "name": "PaletteDispatch"
+  },
+  "AAAA": {
+   "dispatcher": true,
+   "name": "QuickTime"
+  },
+  "AAFE": {
+   "args": [],
+   "file": "MixedMode.yaml",
+   "name": "modeswitch",
+   "ret": null
+  },
+  "AB03": {
+   "args": [],
+   "file": "QuickDraw.yaml",
+   "name": "WackyQD32Trap",
+   "ret": null
+  },
+  "AB1D": {
+   "dispatcher": true,
+   "name": "QDExtensions"
+  },
+  "ABC9": {
+   "dispatcher": true,
+   "name": "IconDispatch"
+  },
+  "ABCA": {
+   "args": [
+    "None:RgnHandle",
+    "None:DeviceLoopDrawingUPP",
+    "None:LONGINT",
+    "None:DeviceLoopFlags"
+   ],
+   "file": "CQuickDraw.yaml",
+   "name": "DeviceLoop",
+   "ret": null
+  },
+  "ABEB": {
+   "dispatcher": true,
+   "name": "DisplayDispatch"
+  },
+  "ABED": {
+   "dispatcher": true,
+   "name": "DragDispatch"
+  },
+  "ABFF": {
+   "args": [
+    "p:ConstStringPtr"
+   ],
+   "file": "OSUtil.yaml",
+   "name": "DebugStr",
+   "ret": null
+  }
+ }
+}

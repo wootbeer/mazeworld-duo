@@ -1,0 +1,16 @@
+/* The port's shell (shell.c) and what it needs from the front end. */
+#ifndef SHELL_H
+#define SHELL_H
+enum { MENU_APPLE = 128, MENU_FILE, MENU_EDIT, MENU_VIEW, MENU_SOUND, MENU_OPTIONS };
+/* the port's own menus (the front end handles them; the game never sees them) */
+enum { MENU_PORT_VOLUME = 200, MENU_PORT_GAME };
+/* the Options menu's items: the original dialog's check boxes (the port's own options will follow) */
+enum { OPT_DIRECT = 1, OPT_NOSYNC, OPT_DISTRIBUTE };
+int  shell_playing(void);       /* is the game window in front (play in progress)? */
+
+int  shell_item_state(int menu, int item, int *checked);   /* returns 1 if enabled */
+void shell_choose(int menu, int item);                      /* a command chosen in the native menu */
+void shell_request_quit(void);
+void shell_focus(int active);
+
+#endif

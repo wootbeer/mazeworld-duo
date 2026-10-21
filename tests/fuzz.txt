@@ -1,0 +1,9 @@
+# Fuzz targets for tools/fuzz_all.sh: assembly routines whose inputs are registers, run with random
+# register values (low words) on top of a real call's state. One per line:
+#   <function> <count> <inputs> <script> <ticks>
+# inputs: dN = low word of DN; fXX = the word at A6 - $XX; gXX = the global word at A5 - $XX;
+# a %N suffix (decimal) on fXX / gXX takes the random value modulo N
+fn_S2_52A2 20000 d4,d5,d6,d7 explore.txt 300
+fn_S2_510E 20000 f28,f2a,f2c,f2e,f30,f32,f34,f36 explore.txt 300
+fn_S2_3A36 3000 g2102%50,g214E%300,g2104 explore.txt 300
+fn_S8_5884 300 g214A,g2152,g214E%300 explore.txt 100

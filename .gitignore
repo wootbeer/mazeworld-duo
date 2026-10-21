@@ -1,0 +1,24 @@
+# build outputs
+build/
+port/build/
+port/build-win/
+*.o
+*.exe
+harness/mzharness
+harness/gen/m68kmake
+harness/gen/m68kops.c
+harness/gen/m68kops.h
+port/mzport
+port/mzport-headless
+archive/tools/arcdump
+__pycache__/
+# fetched by tools/get_sdl2_mingw.sh
+third_party/sdl2-mingw/
+# reference sources and inputs that are not part of the build
+third_party/multiversal/
+third_party/XADMaster/
+third_party/deark/
+# game archives copied next to a built program
+port/*.hqx
+port/*.sit
+port/*.bin

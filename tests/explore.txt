@@ -1,0 +1,12 @@
+# Start a game, fire at the rat, turn around and walk.
+60   tap   space
+100  down  shift
+160  up    shift
+170  down  kp9
+230  up    kp9
+240  down  kp8
+420  up    kp8
+430  down  kp7
+470  up    kp7
+480  down  kp8
+600  up    kp8

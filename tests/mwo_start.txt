@@ -1,0 +1,5 @@
+# Mazeworld Original: click past the shareware notice, then try keys and clicks.
+60   click 320 240
+120  tap   return
+180  tap   space
+240  click 320 200

@@ -1,0 +1,9 @@
+# The shell by mouse: a click in the high-score window starts play; Escape leaves it; a click in the
+# window's top-right 4x4 pixels toggles the floor-pass order (G_22C9) and starts play again.
+60 click 300 300
+200 down kp8
+260 up kp8
+300 tap escape
+360 click 493 81
+500 down kp8
+560 up kp8

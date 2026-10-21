@@ -1,0 +1,4 @@
+# Start a game from the high-score screen and walk forward for a few seconds.
+60   tap   space
+120  down  kp8
+300  up    kp8

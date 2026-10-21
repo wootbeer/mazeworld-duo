@@ -1,0 +1,12 @@
+# Opens the instructions with Command-/ and uses the buttons with the mouse: Next twice,
+# Previous once, then Exit Instructions; then starts play with Return.
+60 down cmd
+62 tap slash
+66 up cmd
+100 click 488 401
+140 click 488 401
+180 click 153 401
+220 click 320 401
+280 tap return
+300 down kp8
+330 up kp8
