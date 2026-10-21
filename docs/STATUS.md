@@ -1,13 +1,34 @@
-# Status — Mazeworld Original, step 2 (in progress)
+# Status — Mazeworld Original, step 3 (in progress)
+
+- Where the games differ, the C code now handles both: a shared function checks `mz_original`
+  for Original's version (subs.txt `both`: the menus, screen sizes, loading the level's graphics,
+  movement without sliding, the frame's timing — Original draws at most 15 frames a second —, the
+  sprite pass with Original's table-driven projection, the play events with the mouse button),
+  and Original's own routines are `fo_S<seg>_<off>` in `game/orig_*.c` (subs.txt `orig`): the
+  wall outline, the 45 object models and their dispatcher, the panel (frames, the two gauges,
+  the mood labels, the message box with the texts of segment 6), mouse steering and the mood,
+  saving and restoring the level's objects and the player. Original's own globals are named by
+  its offsets (`og16(0x56DA)`).
+- `tools/orig_todo.py [--ready]` lists what Original's runs execute that no C covers yet (ready:
+  everything it calls is C already); `tools/quick_original.sh [test ticks]` is a fast per-call
+  check; `tools/verify_original.sh` the full one (per call and end to end).
+- The map (`tools/map_builds.py`): globals that only near pairs show can be wrong; the ones found
+  wrong are fixed in its MANUAL table (and the rig stops when C code reaches a Catacombs global
+  Original lacks). Identical twin functions (the same code on other tables) are left unpaired.
+- Left to do: the play loop (fn_S8_0E2A, fn_S8_0000), the creatures' behaviour (segments 9, 10,
+  11), sound (Original's own, segment 4 / 9 driver calls), the level change and save files.
+  For the port: Original's projection reads the word at low memory $30 (a bug: an exception
+  vector, in the rig the fault gate's address), so the port's low memory must hold the same.
+
+## Step 2
 
 - Shared code: `tools/map_builds.py` pairs Catacombs' functions with Original's and, inside each
   pair, the A5 globals, jump-table slots and callees that only moved; it writes `game/orig_map.h`.
   For Original, `GADDR` translates the C code's global offsets (`mz_gmap`: each offset moves with
   the nearest global at or above it), `mz_jt` the jump-table addresses, and `mz_seg_of` loads the
   segment the called function is in. A translated function runs for Original when it and all its
-  callees match exactly (87 of them); `tools/verify_original.sh` checks them per call and end to
-  end on Original's tests and recordings. The rest (the renderer, sound, the shell's menus) differs
-  for real and is step 3. `tools/diff_pair.py fn_Sx_xxxx` shows how a pair differs.
+  callees match exactly; `tools/verify_original.sh` checks them per call and end to end on
+  Original's tests and recordings. `tools/diff_pair.py fn_Sx_xxxx` shows how a pair differs.
 
 ## Step 1
 

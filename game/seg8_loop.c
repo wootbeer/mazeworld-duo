@@ -25,8 +25,19 @@ void fn_S8_1192(uint32_t ev) {
 
 /* fn_S8_10EC: dispatches event `ev` during play: key down / auto-key (fn_S8_124E), update
  * (fn_S8_11F0), activate (fn_S8_133E), operating-system (fn_S8_1192); a disk event or a high-level
- * event ends the game loop (G_2220, G_221F, G_221E). Mouse events are ignored. */
+ * event ends the game loop (G_2220, G_221F, G_221E). Mouse events are ignored (Original: the
+ * button reads the mood and fires, fo_S8_145E). */
+void fo_S8_145E(void);
 void fn_S8_10EC(uint32_t ev) {
+    if (mz_original) switch (r16(ev)) {                     /* Original (fn_S8_1696): the mouse button */
+    case 1:                                                   /* mouseDown: the mood is to be read */
+        sog8(0x71FE, 1); sog8(0x71F8, 0); sog16(0x71FC, 0); sog16(0x71FA, 0);
+        return;
+    case 2:                                                   /* mouseUp: a shot by the mood (not while dying) */
+        if (og16(0x56E0)) { sog8(0x71FE, 0); sog8(0x71F8, 0); }
+        else if (og8(0x71FE)) { sog8(0x71FE, 0); sog8(0x71F8, 0); fo_S8_145E(); }
+        return;
+    }
     switch (r16(ev)) {
     case 3: case 5: fn_S8_124E(ev); break;              /* keyDown, autoKey */
     case 6: fn_S8_11F0(r32(ev + 2)); break;              /* updateEvt */
@@ -176,6 +187,7 @@ void fn_S8_172A(void) {
     w16(g32(0x4E12), g16(0x2184));
     w32(g32(0x4E0E), r32(g32(0x4E12)));
     w8(g32(0x4E0A), r8(g32(0x4E06)));
+    if (mz_original) { sog16(0x5756, 0); sog16(0x5754, 0); }   /* Original (fn_S8_6514) also clears these */
     sg16(0x2194, 1);                                        /* vType */
     sg32(0x2192, VBL_TASK_ENTRY);                           /* vblAddr */
     sg16(0x218E, 1);                                        /* vblCount */
@@ -198,30 +210,51 @@ void fn_S8_17D0(void) {
  * of, the wanted ones not yet loaded are loaded (id 128 + i, detached, into G_1EBC[i]), their total
  * size in G_22AA. Returns 1, or 0 if one is missing. */
 uint8_t fn_S8_0206(void) {
+    /* Mazeworld Original (fn_S8_036A) detaches before checking the error and has no "return 1": it
+     * returns what is left in D0, the last value computed (an index x 4 or the last size) */
+    uint32_t d0 = 0;
     for (int16_t i = 0; i < 0x32; i++) {
         uint32_t slot = GADDR(0x1EBC) + 4u * (uint32_t)i;
-        if (!r8(GADDR(0x4E68) + (uint32_t)i) && r32(slot)) { mac_DisposeHandle(r32(slot)); w32(slot, 0); }
+        if (r8(GADDR(0x4E68) + (uint32_t)i)) continue;
+        d0 = 4u * (uint32_t)i;
+        if (r32(slot)) { mac_DisposeHandle(r32(slot)); w32(slot, 0); }
     }
     sg32(0x22AA, 0);
     for (int16_t i = 0; i < 0x32; i++) {
         uint32_t slot = GADDR(0x1EBC) + 4u * (uint32_t)i;
-        if (!r8(GADDR(0x4E68) + (uint32_t)i) || r32(slot)) continue;
+        if (!r8(GADDR(0x4E68) + (uint32_t)i)) continue;
+        d0 = 4u * (uint32_t)i;
+        if (r32(slot)) continue;
         uint32_t h = mac_GetResource(0x6D326376, (int16_t)(0x80 + i));   /* 'm2cv' */
+        if (mz_original) mac_DetachResource(h);
         int16_t err = mac_ResError();
         if (err || !h) return 0;
-        mac_DetachResource(h);
+        if (!mz_original) mac_DetachResource(h);
         w32(slot, h);
-        sg32(0x22AA, g32(0x22AA) + (uint32_t)(mz_seg_of(3, 0x020E), fn_S3_020E(h)));
+        d0 = (uint32_t)(mz_seg_of(3, 0x020E), fn_S3_020E(h));
+        sg32(0x22AA, g32(0x22AA) + d0);
     }
-    return 1;
+    return mz_original ? (uint8_t)d0 : 1;
 }
 
 /* fn_S8_0136: marks the graphics every level needs (fn_S8_01CE, fn_S8_01F2 for each) and loads
- * them (fn_S8_0206). */
-uint8_t fn_S8_0136(int16_t unused) {
+ * them (fn_S8_0206); Catacombs ignores the argument. */
+uint8_t fn_S8_0136(int16_t level) {
     static const int16_t always[] = {3, 5, 7, 8, 9, 0xA, 0xB, 0xC, 0x14, 0x15, 0x16, 0x1B, 0x1C, 0x22, 0x24, 0x28};
-    (void)unused;
+    /* Mazeworld Original (fn_S8_0156): four for every level, then those of level 1..6 (another
+     * level: nothing loaded, 0) */
+    static const int8_t original[7][11] = {
+        {0xB, 0xC, 0x15, 0x17, -1},
+        {0, 1, 2, 3, 4, 5, 6, 0x1A, 0x22, 0x23, -1}, {5, 0x14, 0x19, 0x1B, 0x1C, 0x1D, -1},
+        {6, 0x1D, 0x1F, 0x20, 0x21, -1}, {7, 8, 9, 0xA, 0xD, 0xE, 0xF, 0x16, -1},
+        {0x10, 0x11, 0x12, 0x13, 0x27, -1}, {0x21, 0x24, 0x25, 0x26, -1}};
     fn_S8_01CE();
+    if (mz_original) {
+        for (int k = 0; original[0][k] >= 0; k++) fn_S8_01F2(original[0][k]);
+        if (level < 1 || level > 6) return 0;
+        for (int k = 0; original[level][k] >= 0; k++) fn_S8_01F2(original[level][k]);
+        return fn_S8_0206();
+    }
     for (unsigned k = 0; k < sizeof always / sizeof *always; k++) fn_S8_01F2(always[k]);
     return fn_S8_0206();
 }

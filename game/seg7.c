@@ -731,16 +731,30 @@ void fn_S7_2A86(Regs *r) {
 void fn_S2_1CF6(Regs *r);
 void fn_S2_4DC4(Regs *r);
 
-static void draw_stream(Regs *r, uint32_t stream) {
+void mz_draw_stream(Regs *r, uint32_t stream) {
     sg32(0x20A2, stream);
     mz_seg_of(2, 0x1CF6), fn_S2_1CF6(r);
     mz_seg_of(2, 0x4DC4), fn_S2_4DC4(r);
 }
 
+/* the model of table `models` (32 self-relative offsets) for the object at A4 as the player sees
+ * it: entry (G_20D4 - A4+$2A - A4+$C) & $3E, by way of A1 (fn_S7_1844 and its kin; Mazeworld
+ * Original's are in game/orig_seg*.c) */
+void mz_draw_by_angle(Regs *r, uint32_t models) {
+    r->a[1] = models;
+    set_w(&r->d[1], g16(0x20D4));
+    sub_w(r, &r->d[1], r16(r->a[4] + 0x2A));
+    sub_w(r, &r->d[1], r16(r->a[4] + 0xC));
+    set_w(&r->d[1], (uint16_t)((uint16_t)r->d[1] & 0x3E));
+    lsl_w(r, &r->d[1], 1);
+    r->a[1] += r32(r->a[1] + sxw(r->d[1]));
+    mz_draw_stream(r, r->a[1]);
+}
+
 /* fn_S7_0000: model G_1D20 (its first entry). */
 void fn_S7_0000(Regs *r) {
     r->a[0] = g32(0x1D20); r->a[0] += r32(r->a[0]);
-    draw_stream(r, r->a[0]);
+    mz_draw_stream(r, r->a[0]);
 }
 
 /* fn_S7_0E2A: model G_1D54, frame A4+$12. */
@@ -748,7 +762,7 @@ void fn_S7_0E2A(Regs *r) {
     r->a[0] = g32(0x1D54);
     set_w(&r->d[0], r16(r->a[4] + 0x12)); lsl_w(r, &r->d[0], 2);
     r->a[0] += r32(r->a[0] + sxw(r->d[0]));
-    draw_stream(r, r->a[0]);
+    mz_draw_stream(r, r->a[0]);
 }
 
 /* fn_S7_0618: model G_1D94, frame = heading A4+$C. */
@@ -756,21 +770,12 @@ void fn_S7_0618(Regs *r) {
     set_w(&r->d[0], r16(r->a[4] + 0xC)); lsl_w(r, &r->d[0], 2);
     r->a[0] = g32(0x1D94);
     r->a[0] += r32(r->a[0] + sxw(r->d[0]));
-    draw_stream(r, r->a[0]);
+    mz_draw_stream(r, r->a[0]);
 }
 
 /* fn_S7_1844: model G_1D88, frame by the angle between the player's heading G_20D4 and the object
  * (heading A4+$C plus A4+$2A), in 32 steps. */
-void fn_S7_1844(Regs *r) {
-    r->a[1] = g32(0x1D88);
-    set_w(&r->d[1], g16(0x20D4));
-    sub_w(r, &r->d[1], r16(r->a[4] + 0x2A));
-    sub_w(r, &r->d[1], r16(r->a[4] + 0xC));
-    set_w(&r->d[1], (uint16_t)((uint16_t)r->d[1] & 0x3E));
-    lsl_w(r, &r->d[1], 1);
-    r->a[1] += r32(r->a[1] + sxw(r->d[1]));
-    draw_stream(r, r->a[1]);
-}
+void fn_S7_1844(Regs *r) { mz_draw_by_angle(r, g32(0x1D88)); }
 
 /* fn_S7_017E: model G_1D3C (entry 2) in the colour set G_0156[(A4+$16 >> 1) & 7]. */
 void fn_S7_017E(Regs *r) {
@@ -782,7 +787,7 @@ void fn_S7_017E(Regs *r) {
     set_w(&r->d[0], r16(r->a[0] + sxw(r->d[0])));
     sg16(0x209E, (uint16_t)r->d[0]);
     r->a[0] = g32(0x1D3C); r->a[0] += r32(r->a[0] + 8);
-    draw_stream(r, r->a[0]);
+    mz_draw_stream(r, r->a[0]);
 }
 
 /* fn_S7_020E: unless G_20D8 is $80, model G_1D78 in the colour set G_0146[heading A4+$C]. */
@@ -795,7 +800,7 @@ void fn_S7_020E(Regs *r) {
     set_w(&r->d[0], r16(r->a[0] + sxw(r->d[0])));
     sg16(0x209E, (uint16_t)r->d[0]);
     r->a[0] = g32(0x1D78); r->a[0] += r32(r->a[0]);
-    draw_stream(r, r->a[0]);
+    mz_draw_stream(r, r->a[0]);
 }
 
 /* Sets the view-relative drawing window for full-screen effects: G_20A8 = G_2154 + 4 (horizontal
@@ -822,7 +827,7 @@ void fn_S7_1D0E(Regs *r) {
         set_w(&r->d[0], order[(uint16_t)r->d[0] >> 1]);
         lsl_w(r, &r->d[0], 2);
         r->a[0] = g32(0x1D38); r->a[0] += r32(r->a[0] + sxw(r->d[0]));
-        draw_stream(r, r->a[0]);
+        mz_draw_stream(r, r->a[0]);
         return;
     }
     if (!(uint16_t)r->d[0]) return;
@@ -834,7 +839,7 @@ void fn_S7_1D0E(Regs *r) {
     set_w(&r->d[0], (uint16_t)((uint16_t)r->d[0] & 3));
     lsl_w(r, &r->d[0], 2);
     r->a[0] = g32(0x1D50); r->a[0] += r32(r->a[0] + sxw(r->d[0]));
-    draw_stream(r, r->a[0]);
+    mz_draw_stream(r, r->a[0]);
 }
 
 /* G_1DBC map value at the corner (x | $F or x & ~$F, y likewise) of the object's cell, relative to
@@ -999,7 +1004,7 @@ void fn_S7_0108(Regs *r) {
     lsl_w(r, &r->d[0], 2);
     r->a[0] = g32(0x1D18);
     r->a[0] += r32(r->a[0] + sxw(r->d[0]) + 4);
-    draw_stream(r, r->a[0]);
+    mz_draw_stream(r, r->a[0]);
 }
 
 /* The spinning jewels: model G_1D3C entry `entry` in the colour set table[(+$16 >> 1) & 7]. */
@@ -1012,7 +1017,7 @@ static void jewel_model(Regs *r, uint32_t table, uint32_t entry) {
     set_w(&r->d[0], r16(r->a[0] + sxw(r->d[0])));
     sg16(0x209E, (uint16_t)r->d[0]);
     r->a[0] = g32(0x1D3C); r->a[0] += r32(r->a[0] + entry);
-    draw_stream(r, r->a[0]);
+    mz_draw_stream(r, r->a[0]);
 }
 /* fn_S7_0394 / 0424 / 04B4: the jewels of types 4, 5, 6 (entries 3, 4, 5; colours G_013A, G_012A,
  * G_011A) */
@@ -1035,21 +1040,12 @@ void fn_S7_0544(Regs *r) {
         set_w(&r->d[0], r16(r->a[0] + sxw(r->d[0])));
         r->a[0] = g32(0x1D3C);
         r->a[0] += r32(r->a[0] + sxw(r->d[0]));
-        draw_stream(r, r->a[0]);
+        mz_draw_stream(r, r->a[0]);
     }
 }
 
 /* fn_S7_0704: type 9's model G_1D9C by the angle to the player, as fn_S7_1844. */
-void fn_S7_0704(Regs *r) {
-    r->a[1] = g32(0x1D9C);
-    set_w(&r->d[1], g16(0x20D4));
-    sub_w(r, &r->d[1], r16(r->a[4] + 0x2A));
-    sub_w(r, &r->d[1], r16(r->a[4] + 0xC));
-    set_w(&r->d[1], (uint16_t)((uint16_t)r->d[1] & 0x3E));
-    lsl_w(r, &r->d[1], 1);
-    r->a[1] += r32(r->a[1] + sxw(r->d[1]));
-    draw_stream(r, r->a[1]);
-}
+void fn_S7_0704(Regs *r) { mz_draw_by_angle(r, g32(0x1D9C)); }
 
 /* fn_S7_319E: as fn_S7_32DC without the diagonal test: can the object at A4 see the player along a
  * straight line? (G_20D8 < $80, within 63 cells; D0.l = 0 and G_00EC / G_00EE = the G_1DB8 / G_1DBC
@@ -1087,12 +1083,14 @@ yes:
 /* fn_S7_3D2A: D0.l = -1 if the player is within 8 pixels of the object at A4 both ways (and
  * G_20D8 < $80), else 0. */
 void fn_S7_3D2A(Regs *r) {
-    set_w(&r->d[0], g16(0x20D8));
-    if ((uint16_t)r->d[0] >= 0x80) goto far;
+    if (!mz_original) {                                   /* (Original, fn_S7_1B1E, has no G_20D8 test) */
+        set_w(&r->d[0], g16(0x20D8));
+        if ((uint16_t)r->d[0] >= 0x80) goto far;
+    }
     set_w(&r->d[0], g16(0x20D2)); sub_w(r, &r->d[0], r16(r->a[4] + 4)); add_w(r, &r->d[0], 8);
     if ((uint16_t)r->d[0] >= 0x11) goto far;
     set_w(&r->d[0], g16(0x20CE)); sub_w(r, &r->d[0], r16(r->a[4] + 8)); add_w(r, &r->d[0], 8);
-    if ((uint16_t)r->d[0] >= 0x11) goto far;
+    if ((uint16_t)r->d[0] >= (mz_original ? 0x10 : 0x11)) goto far;   /* Original: under 8 below */
     r->d[0] = 0xFFFFFFFFu; cc_nz_l(r, r->d[0]);
     return;
 far:
@@ -1180,20 +1178,11 @@ void fn_S7_0E0A(Regs *r) {
     lsl_w(r, &r->d[0], 2);
     r->a[0] = g32(0x1D50);
     r->a[0] += r32(r->a[0] + sxw(r->d[0]));
-    draw_stream(r, r->a[0]);
+    mz_draw_stream(r, r->a[0]);
 }
 
 /* fn_S7_0ADE: type $12's model G_1D58 by the angle to the player, as fn_S7_1844. */
-void fn_S7_0ADE(Regs *r) {
-    r->a[1] = g32(0x1D58);
-    set_w(&r->d[1], g16(0x20D4));
-    sub_w(r, &r->d[1], r16(r->a[4] + 0x2A));
-    sub_w(r, &r->d[1], r16(r->a[4] + 0xC));
-    set_w(&r->d[1], (uint16_t)((uint16_t)r->d[1] & 0x3E));
-    lsl_w(r, &r->d[1], 1);
-    r->a[1] += r32(r->a[1] + sxw(r->d[1]));
-    draw_stream(r, r->a[1]);
-}
+void fn_S7_0ADE(Regs *r) { mz_draw_by_angle(r, g32(0x1D58)); }
 
 /* fn_S7_406A: steps the object at A4 by entry D0.w of the step tables at A0 (fn_S7_374C) and
  * commits the move (fn_S7_3784) unless an object is in the way (fn_S7_3972). */
@@ -1282,28 +1271,10 @@ out:
 }
 
 /* fn_S7_0EF0: types $1E/$1F model G_1D8C by the angle to the player, as fn_S7_1844. */
-void fn_S7_0EF0(Regs *r) {
-    r->a[1] = g32(0x1D8C);
-    set_w(&r->d[1], g16(0x20D4));
-    sub_w(r, &r->d[1], r16(r->a[4] + 0x2A));
-    sub_w(r, &r->d[1], r16(r->a[4] + 0xC));
-    set_w(&r->d[1], (uint16_t)((uint16_t)r->d[1] & 0x3E));
-    lsl_w(r, &r->d[1], 1);
-    r->a[1] += r32(r->a[1] + sxw(r->d[1]));
-    draw_stream(r, r->a[1]);
-}
+void fn_S7_0EF0(Regs *r) { mz_draw_by_angle(r, g32(0x1D8C)); }
 
 /* fn_S7_20A0: type $28's model G_1D80 by the angle to the player, as fn_S7_1844. */
-void fn_S7_20A0(Regs *r) {
-    r->a[1] = g32(0x1D80);
-    set_w(&r->d[1], g16(0x20D4));
-    sub_w(r, &r->d[1], r16(r->a[4] + 0x2A));
-    sub_w(r, &r->d[1], r16(r->a[4] + 0xC));
-    set_w(&r->d[1], (uint16_t)((uint16_t)r->d[1] & 0x3E));
-    lsl_w(r, &r->d[1], 1);
-    r->a[1] += r32(r->a[1] + sxw(r->d[1]));
-    draw_stream(r, r->a[1]);
-}
+void fn_S7_20A0(Regs *r) { mz_draw_by_angle(r, g32(0x1D80)); }
 
 /* fn_S7_3694: the direction-map byte (G_1DBC) from the object at A4 to the point G_00DA / G_00D6,
  * or D0.l = -1 where the distance map (G_1DB8) has nothing (0) there. */
@@ -1338,20 +1309,11 @@ void fn_S7_2600(Regs *r) {
     lsl_w(r, &r->d[0], 2);
     r->a[0] = g32(0x1D50);
     r->a[0] += r32(r->a[0] + sxw(r->d[0]));
-    draw_stream(r, r->a[0]);
+    mz_draw_stream(r, r->a[0]);
 }
 
 /* fn_S7_269C: type $2D's model G_1D84 by the angle to the player, as fn_S7_1844. */
-void fn_S7_269C(Regs *r) {
-    r->a[1] = g32(0x1D84);
-    set_w(&r->d[1], g16(0x20D4));
-    sub_w(r, &r->d[1], r16(r->a[4] + 0x2A));
-    sub_w(r, &r->d[1], r16(r->a[4] + 0xC));
-    set_w(&r->d[1], (uint16_t)((uint16_t)r->d[1] & 0x3E));
-    lsl_w(r, &r->d[1], 1);
-    r->a[1] += r32(r->a[1] + sxw(r->d[1]));
-    draw_stream(r, r->a[1]);
-}
+void fn_S7_269C(Regs *r) { mz_draw_by_angle(r, g32(0x1D84)); }
 
 /* fn_S7_2AD2: shots $36 / $3D: flying, model G_1D54 frame +$14 & $C; sitting on the player
  * (+$12 > 0), a full-view flash of a random G_1D50 frame (window as effect_window, G_20AA random
@@ -1363,7 +1325,7 @@ void fn_S7_2AD2(Regs *r) {
         set_w(&r->d[0], r16(r->a[4] + 0x14));
         set_w(&r->d[0], (uint16_t)((uint16_t)r->d[0] & 0xC));
         r->a[0] += r32(r->a[0] + sxw(r->d[0]));
-        draw_stream(r, r->a[0]);
+        mz_draw_stream(r, r->a[0]);
         return;
     }
     if (!(uint16_t)r->d[0]) { cc_nz_w(r, 0); return; }
@@ -1378,5 +1340,5 @@ void fn_S7_2AD2(Regs *r) {
     lsl_w(r, &r->d[0], 2);
     r->a[0] = g32(0x1D50);
     r->a[0] += r32(r->a[0] + sxw(r->d[0]));
-    draw_stream(r, r->a[0]);
+    mz_draw_stream(r, r->a[0]);
 }

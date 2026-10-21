@@ -19,6 +19,8 @@ enum { CCR_C = 1, CCR_V = 2, CCR_Z = 4, CCR_N = 8, CCR_X = 16 };
 /* A Toolbox or OS trap called from register-level code: registers in and out through the block
  * (the OS dispatcher's TST.W D0 included). */
 void mac_trap_regs(Regs *r, uint16_t trapword);
+void mz_draw_stream(Regs *r, uint32_t stream);      /* game/seg7.c: model stream G_20A2, drawn */
+void mz_draw_by_angle(Regs *r, uint32_t models);
 
 /* partial-width register writes */
 static inline void set_b(uint32_t *r, uint8_t v)  { *r = (*r & 0xFFFFFF00u) | v; }

@@ -14,6 +14,10 @@
 #                                        callee-saved ones the original clobbers through an assembly
 #                                        helper. ignore=all: D0-D7, A0-A4 and the CCR (object handlers,
 #                                        whose dispatcher restores everything else)
+#                               both     a shared function that also handles Mazeworld Original's
+#                                        version (per-game branches); it then runs at the paired address
+#                               orig     Mazeworld Original's own function (fo_S<seg>_<off>, at
+#                                        Original's address): runs for Original only
 # <seg> <off> internal <name>: translated inside its callers only (its interface cannot be called from
 #                               the harness, e.g. it jumps through a code pointer in A3)
 #
@@ -26,11 +30,11 @@
 4  3896  void fn_S4_3896(i16 n)
 4  38B8  void fn_S4_38B8(void)
 2  3502  void fn_S2_3502(void)
-2  3532  regs fn_S2_3532
+2  3532  regs fn_S2_3532 both
 2  33A4  regs fn_S2_33A4
 2  3410  regs fn_S2_3410
 2  3480  regs fn_S2_3480
-2  3500  regs fn_S2_3500
+2  3500  regs fn_S2_3500 both
 4  141A  regs fn_S4_141A
 4  44DE  regs fn_S4_44DE
 4  3886  regs fn_S4_3886
@@ -44,17 +48,17 @@
 8  1376  regs fn_S8_1376
 8  138A  regs fn_S8_138A
 8  0E68  regs fn_S8_0E68
-8  2A32  regs fn_S8_2A32
-8  01F2  void fn_S8_01F2(i16 index)
+8  2A32  regs fn_S8_2A32 both
+8  01F2  void fn_S8_01F2(i16 index) both
 8  4858  i16 fn_S8_4858(i8 c)  d0=zext
-2  39F8  regs fn_S2_39F8
+2  39F8  regs fn_S2_39F8 both
 2  0252  i16 fn_S2_0252(ptr s)
 2  0332  void fn_S2_0332(ptr src, ptr dst)
 7  36F4  regs fn_S7_36F4
 7  374C  regs fn_S7_374C
 7  3784  regs fn_S7_3784
-8  04C8  regs fn_S8_04C8
-8  01CE  void fn_S8_01CE(void)
+8  04C8  regs fn_S8_04C8 both
+8  01CE  void fn_S8_01CE(void) both
 8  09FC  void fn_S8_09FC(ptr p)
 2  39B8  regs fn_S2_39B8
 7  3FA6  regs fn_S7_3FA6
@@ -62,32 +66,32 @@
 7  3A7A  regs fn_S7_3A7A
 7  3CBC  regs fn_S7_3CBC
 7  3FF0  regs fn_S7_3FF0
-8  521A  i16 fn_S8_521A(ptr gd)  d0=zext
+8  521A  i16 fn_S8_521A(ptr gd)  d0=zext both
 7  390E  regs fn_S7_390E
 7  3ACA  regs fn_S7_3ACA
 7  3128  regs fn_S7_3128
 4  1EAE  void fn_S4_1EAE(i16 n)
-8  0F1A  regs fn_S8_0F1A
+8  0F1A  regs fn_S8_0F1A both
 4  3B9A  void fn_S4_3B9A(void)
 4  2DF6  void fn_S4_2DF6(ptr h)
 4  2E6C  void fn_S4_2E6C(ptr h, ptr list, i16 x, i16 y)
 8  61FE  regs fn_S8_61FE
 8  6036  void fn_S8_6036(void)
-8  02F0  void fn_S8_02F0(void)
-8  0360  void fn_S8_0360(void)
+8  02F0  void fn_S8_02F0(void)  both
+8  0360  void fn_S8_0360(void)  both
 4  2E4C  void fn_S4_2E4C(ptr h, ptr list, i16 x, i16 y)
 7  008A  regs fn_S7_008A
 7  40D6  regs fn_S7_40D6
 7  3858  regs fn_S7_3858
 7  39C4  regs fn_S7_39C4
 7  3EE2  regs fn_S7_3EE2
-8  124E  void fn_S8_124E(ptr ev)
+8  124E  void fn_S8_124E(ptr ev) both
 8  15C0  regs fn_S8_15C0
 4  1C88  regs fn_S4_1C88
 4  3B10  void fn_S4_3B10(void)
 8  3492  void fn_S8_3492(void)
-8  083A  regs fn_S8_083A
-8  0946  regs fn_S8_0946
+8  083A  regs fn_S8_083A both
+8  0946  regs fn_S8_0946 both
 4  2CC8  void fn_S4_2CC8(ptr h)
 4  1D0A  void fn_S4_1D0A(void)
 7  3972  regs fn_S7_3972
@@ -96,7 +100,7 @@
 4  0112  void fn_S4_0112(i32 x, i32 y, ptr base)
 4  12D6  void fn_S4_12D6(i16 x, i16 y, i16 c)
 4  3D64  void fn_S4_3D64(i16 id, i16 prio, i16 unused, i16 value)
-2  4DC4  regs fn_S2_4DC4
+2  4DC4  regs fn_S2_4DC4 both
 2  3692  regs fn_S2_3692
 4  1420  void fn_S4_1420(void)
 4  1550  void fn_S4_1550(void)
@@ -119,7 +123,7 @@
 7  1C9A  regs fn_S7_1C9A
 7  0E46  regs fn_S7_0E46
 4  1158  void fn_S4_1158(i32 x, i32 y)
-8  140A  regs fn_S8_140A
+8  140A  regs fn_S8_140A both
 4  0FD0  void fn_S4_0FD0(u8 n)
 4  0CF2  void fn_S4_0CF2(u8 n)
 8  25A8  void fn_S8_25A8(void)  nocheck
@@ -179,7 +183,7 @@
 4  2ED4  u8 fn_S4_2ED4(ptr h, ptr list, i16 size, ptr px, ptr py, ptr pdir)
 4  335E  u8 fn_S4_335E(ptr h, i16 size, ptr px, ptr py, i16 dir)
 4  2C1C  void fn_S4_2C1C(ptr h, i16 size, i16 x, i16 y)
-2  52A2  regs fn_S2_52A2
+2  52A2  regs fn_S2_52A2 both
 2  510E  regs fn_S2_510E
 2  4F1C  void fn_S2_4F1C(ptr table)
 4  1448  void fn_S4_1448(void)
@@ -236,7 +240,7 @@
 7  0136  regs fn_S7_0136  ignore=all
 7  05AA  regs fn_S7_05AA  ignore=all
 7  319E  regs fn_S7_319E
-7  3D2A  regs fn_S7_3D2A
+7  3D2A  regs fn_S7_3D2A both
 7  0A52  regs fn_S7_0A52
 7  0A76  regs fn_S7_0A76
 7  09EC  regs fn_S7_09EC
@@ -281,7 +285,7 @@
 7  2E9A  regs fn_S7_2E9A  ignore=d0,d1,d2,a0,a1,ccr
 7  2D1C  regs fn_S7_2D1C  ignore=d0,d1,d2,a0,a1,ccr
 2  0376  regs fn_S2_0376  ignore=d0,d1,d2,a0,a1,ccr
-2  5810  regs fn_S2_5810  ignore=d1,d2,a0,a1,ccr
+2  5810  regs fn_S2_5810  ignore=d1,d2,a0,a1,ccr both
 4  2128  void fn_S4_2128(void)
 4  2208  void fn_S4_2208(void)
 4  2694  void fn_S4_2694(void)
@@ -293,9 +297,9 @@
 4  1C38  void fn_S4_1C38(i16 size, i16 x, i16 y)  ignore=d4,d5
 4  1898  void fn_S4_1898(void)  ignore=d4,d5
 2  3A36  void fn_S2_3A36(void)
-2  0000  void fn_S2_0000(ptr port, ptr gdh)
-2  0986  void fn_S2_0986(ptr pm, i16 x, i16 y, ptr now, ptr was, u8 wait, i16 mode)  ignore=d3,d4,d5,d6,d7,a2,a3
-2  040A  void fn_S2_040A(void)  ignore=d3,d4,d5,d6,d7,a2,a3
+2  0000  void fn_S2_0000(ptr port, ptr gdh) both
+2  0986  void fn_S2_0986(ptr pm, i16 x, i16 y, ptr now, ptr was, u8 wait, i16 mode)  ignore=d3,d4,d5,d6,d7,a2,a3 both
+2  040A  void fn_S2_040A(void)  ignore=d3,d4,d5,d6,d7,a2,a3 both
 4  38E6  i16 fn_S4_38E6(void)  d0=zext
 4  3AB2  void fn_S4_3AB2(void)
 4  38F4  i16 fn_S4_38F4(i16 file)  nocheck
@@ -311,7 +315,7 @@
 3  021C  pascal u32 fn_S3_021C(i16 trap, u8 toolbox)
 3  0230  pascal u32 fn_S3_0230(i16 ref)
 3  03BA  pascal void fn_S3_03BA(ptr str, i16 id, i16 index)  nocheck
-3  0400  pascal i16 fn_S3_0400(i16 vref, u32 type, u8 create, ptr pvref, ptr pdir)  nocheck
+3  0400  pascal i16 fn_S3_0400(i16 vref, u32 type, u8 create, ptr pvref, ptr pdir)  nocheck both
 8  5962  void fn_S8_5962(void)  ignore=d3,d4,d5
 8  5C80  void fn_S8_5C80(void)  ignore=d3,d4,d5
 8  5E7A  void fn_S8_5E7A(void)  ignore=d3,d4,d5
@@ -319,28 +323,28 @@
 8  3FB2  void fn_S8_3FB2(void)
 8  4D68  i16 fn_S8_4D68(ptr pview, ptr pmap, ptr gdh)  nocheck
 8  50FC  void fn_S8_50FC(ptr pview, ptr pmap)  nocheck
-8  04FA  i16 fn_S8_04FA(void)  nocheck
+8  04FA  i16 fn_S8_04FA(void)  nocheck both
 8  133E  void fn_S8_133E(ptr ev)
 8  11BA  void fn_S8_11BA(ptr ev)
 8  1192  void fn_S8_1192(ptr ev)
-8  10EC  void fn_S8_10EC(ptr ev)
+8  10EC  void fn_S8_10EC(ptr ev) both
 8  0F90  void fn_S8_0F90(void)
 8  1004  void fn_S8_1004(void)
 8  1078  void fn_S8_1078(void)
 8  0A24  void fn_S8_0A24(void)  nocheck
-8  172A  void fn_S8_172A(void)  nocheck
+8  172A  void fn_S8_172A(void)  nocheck both
 8  17D0  void fn_S8_17D0(void)  nocheck
-8  0206  u8 fn_S8_0206(void)  nocheck
-8  0136  u8 fn_S8_0136(i16 unused)  nocheck
+8  0206  u8 fn_S8_0206(void)  nocheck both
+8  0136  u8 fn_S8_0136(i16 level)  nocheck both
 8  03AE  u8 fn_S8_03AE(void)  nocheck
 8  0000  u8 fn_S8_0000(void)  nocheck
 8  1814  regs fn_S8_1814  ignore=ccr nocheck
 8  606C  ptr fn_S8_606C(ptr r)  nocheck
 8  610C  ptr fn_S8_610C(ptr r)  nocheck
-8  513C  i16 fn_S8_513C(void)  nocheck
+8  513C  i16 fn_S8_513C(void)  nocheck both
 8  61AA  u8 fn_S8_61AA(void)  nocheck
 8  4CF0  void fn_S8_4CF0(ptr pgd)  nocheck
-8  4BE2  u8 fn_S8_4BE2(u8 keep_visible)  nocheck
+8  4BE2  u8 fn_S8_4BE2(u8 keep_visible)  nocheck both
 8  486C  i16 fn_S8_486C(void)
 8  4802  u8 fn_S8_4802(i16 trap)
 8  47E0  regs fn_S8_47E0  ignore=d0,d1,d2,a1,ccr
@@ -356,8 +360,8 @@
 8  577A  u8 fn_S8_577A(void)  d0=zext nocheck
 8  527A  u8 fn_S8_527A(i16 size)  nocheck
 8  48A2  u8 fn_S8_48A2(i16 size, ptr rect)  nocheck
-8  2480  void fn_S8_2480(void)  nocheck
-8  25BE  void fn_S8_25BE(void)  nocheck
+8  2480  void fn_S8_2480(void)  nocheck both
+8  25BE  void fn_S8_25BE(void)  nocheck both
 8  237C  void fn_S8_237C(void)  nocheck
 3  024A  pascal i16 fn_S3_024A(i16 ref)  nocheck
 3  0264  pascal i16 fn_S3_0264(i16 ref, ptr pcount, ptr buf)  nocheck
@@ -398,7 +402,80 @@
 8  1F54  void fn_S8_1F54(void)
 # the game's menu records (game/seg8_shell.c)
 8  2E10  void fn_S8_2E10(void)
-8  2E4C  void fn_S8_2E4C(void)
-8  2FB4  void fn_S8_2FB4(void)
-8  3190  void fn_S8_3190(ptr m)
-8  3278  void fn_S8_3278(ptr m)
+8  2E4C  void fn_S8_2E4C(void) both
+8  2FB4  void fn_S8_2FB4(void) both
+8  3190  void fn_S8_3190(ptr m) both
+8  3278  void fn_S8_3278(ptr m) both
+
+# ---------- Mazeworld Original's own functions (its segments and offsets; game/orig_*.c) ----------
+2  41E8  void fo_S2_41E8(ptr table)  orig
+7  1278  regs fo_S7_1278  orig
+7  1282  regs fo_S7_1282  orig
+7  155C  regs fo_S7_155C  orig
+7  14C0  regs fo_S7_14C0  orig
+7  1488  regs fo_S7_1488  orig
+8  065A  regs fo_S8_065A  orig
+8  06DC  regs fo_S8_06DC  orig
+8  0510  regs fo_S8_0510  orig ignore=d1,d2,a0,a1,ccr
+8  07D4  regs fo_S8_07D4  orig ignore=d0,d1,a0,a1,ccr
+8  0468  regs fn_S8_0468
+8  0756  regs fo_S8_0756  orig ignore=d0,d1,d2,a0,a1,ccr
+10 0000  regs fo_S10_0000  orig
+10 21B4  regs fo_S10_21B4  orig
+4  075A  regs fo_S4_075A  orig
+4  0C1C  regs fo_S4_0C1C  orig
+4  122E  regs fo_S4_122E  orig
+4  1648  regs fo_S4_1648  orig
+4  1DD2  regs fo_S4_1DD2  orig
+7  05DE  regs fo_S7_05DE  orig
+7  0680  regs fo_S7_0680  orig
+7  0000  regs fo_S7_0000  orig
+7  003E  regs fo_S7_003E  orig
+7  03E2  regs fo_S7_03E2  orig
+7  0504  regs fo_S7_0504  orig
+7  080C  regs fo_S7_080C  orig
+7  0820  regs fo_S7_0820  orig
+7  08E2  regs fo_S7_08E2  orig
+7  08F6  regs fo_S7_08F6  orig
+7  0C40  regs fo_S7_0C40  orig
+7  0C68  regs fo_S7_0C68  orig
+7  0CFC  regs fo_S7_0CFC  orig
+7  0920  regs fo_S7_0920  orig
+4  0000  regs fo_S4_0000  orig
+4  21AE  regs fo_S4_21AE  orig
+4  27E2  regs fo_S4_27E2  orig
+4  2ABA  regs fo_S4_2ABA  orig
+10 18F0  regs fo_S10_18F0  orig
+10 1924  regs fo_S10_1924  orig
+10 1958  regs fo_S10_1958  orig
+9  0000  regs fo_S9_0000  orig
+9  034A  regs fo_S9_034A  orig
+9  0D2E  regs fo_S9_0D2E  orig
+9  1C6A  regs fo_S9_1C6A  orig
+9  202C  regs fo_S9_202C  orig
+10 2ABA  regs fo_S10_2ABA  orig
+10 2B26  regs fo_S10_2B26  orig
+10 2C2C  regs fo_S10_2C2C  orig
+11 0000  regs fo_S11_0000  orig
+11 007A  regs fo_S11_007A  orig
+4  03F8  regs fo_S4_03F8  orig ignore=ccr
+10 3EF8  regs fo_S10_3EF8  orig ignore=ccr
+11 0124  regs fo_S11_0124  orig ignore=ccr
+9  15BE  regs fo_S9_15BE  orig
+9  1962  regs fo_S9_1962  orig
+9  1D90  regs fo_S9_1D90  orig
+11 02CC  regs fo_S11_02CC  orig
+7  0D32  regs fo_S7_0D32  orig ignore=d0,d1,d2,a0,a1,ccr
+6  0000  regs fo_S6_0000  orig
+6  0004  regs fo_S6_0004  orig
+2  35FC  void fo_S2_35FC(void)  orig
+2  36C2  void fo_S2_36C2(void)  orig
+2  3A0E  void fo_S2_3A0E(void)  orig
+2  3D6E  void fo_S2_3D6E(void)  orig
+2  3E04  void fo_S2_3E04(void)  orig
+8  121A  void fo_S8_121A(void)  orig
+8  1282  void fo_S8_1282(void)  orig
+8  132A  void fo_S8_132A(void)  orig
+8  1152  void fo_S8_1152(void)  orig
+8  0F5A  void fo_S8_0F5A(void)  orig
+8  145E  void fo_S8_145E(void)  orig

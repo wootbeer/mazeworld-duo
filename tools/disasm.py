@@ -218,20 +218,33 @@ def main(src, out):
                             cover[o] = cover[o + 1] = 1
                             queue.append(tbase + dsp)
                 # hand-written jump table: [andi.w #mask,dX ; add.w dX,dX ;] add.w T(pc,dX.w),dX ; jmp T(pc,dX.w)
-                # entries are word offsets from T + 2k; the table ends at the mask or at the first word
-                # that is known code (traced), whichever comes first
+                # entries are word offsets from T + 2k; the table ends at the mask, at the first word
+                # that is known code (traced) or at the first case's code, whichever comes first
                 mj = re.match(r'\$([0-9a-f]+)\(pc, (d\d)\.w\)$', ops) if mn.startswith('jmp') else None
                 if mj and len(hist) >= 2 and hist[-2][0].startswith('add.w') and hist[-2][1].startswith(f"${mj.group(1)}(pc, {mj.group(2)}.w)"):
-                    tbase = int(mj.group(1), 16); cnt = 16
+                    tbase = int(mj.group(1), 16); cnt = 256   # without a mask: up to the first case's code
                     for hm, ho in reversed(hist[-8:]):
                         mm2 = re.match(r'#\$([0-9a-f]+), ' + mj.group(2) + '$', ho)
                         if hm.startswith('andi') and mm2: cnt = int(mm2.group(1), 16) + 1; break
                     known = traced_set
+                    def guessed_over(o):
+                        """the start of a heuristically decoded instruction covering o (to evict), or None"""
+                        for s0 in range(o, max(o - 10, -1), -2):
+                            if s0 in insn and s0 + insn[s0][0] > o:
+                                return s0 if prov.get(s0) in ('link', 'swept') else None
+                        return None
+                    first_case = len(code)
                     for k in range(cnt):
                         o = tbase + 2 * k
-                        if o in known or o + 2 > len(code) or cover[o]: break
+                        if o in known or o + 2 > len(code) or o >= first_case: break
+                        if cover[o]:
+                            s0 = guessed_over(o)
+                            if s0 is None: break
+                            for q in range(s0, s0 + insn[s0][0]): cover[q] = 0
+                            del insn[s0]; prov.pop(s0, None)
                         tgt2 = tbase + 2 * k + struct.unpack('>h', code[o:o + 2])[0]
                         if not (0 <= tgt2 < len(code)) or tgt2 & 1: break
+                        if tgt2 > tbase: first_case = min(first_case, tgt2)
                         insn[o] = (2, f"dc.w {fn_id(n, tbase)[3:]}_case{k}", f"jump table entry {k} -> {tgt2:05X}", ('case', tgt2))
                         cover[o] = cover[o + 1] = 1
                         queue.append(tgt2)

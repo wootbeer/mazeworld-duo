@@ -3,14 +3,14 @@
 Usage: merge_traces.py [catacombs|original]
   catacombs: build/run-catacombs*/trace, build/run[0-9]*/trace, build/run-m*/trace (monkey),
              build/run-hs*/trace, build/verify/*/trace -> build/trace
-  original:  build/run-original*/trace, build/mwo*/trace                            -> build/trace-original"""
+  original:  build/run-original*/trace, build/mwo*/trace, build/vo-*/orig/trace     -> build/trace-original"""
 import glob, os, re, sys
 game = sys.argv[1] if len(sys.argv) > 1 else 'catacombs'
 root = os.path.join(os.path.dirname(os.path.abspath(__file__)), '..', 'build')
 if game == 'catacombs':
     srcs = ['run-catacombs*', 'run[0-9]*', 'run', 'run-m[0-9]*', 'run-hs*', 'verify/*', 'lvrun*', 'verify-*/orig']; dst = 'trace'
 else:
-    srcs = ['run-original*', 'mwo*']; dst = 'trace-original'
+    srcs = ['run-original*', 'mwo*', 'vo-*/orig']; dst = 'trace-original'
 acc = {}
 files = [f for s in srcs for f in glob.glob(os.path.join(root, s, 'trace', 'seg*.pcs'))] + glob.glob(os.path.join(root, dst, 'seg*.pcs'))
 for f in files:

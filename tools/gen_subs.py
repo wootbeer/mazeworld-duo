@@ -86,7 +86,7 @@ for seg, off, ret, name, al, opts in rows:
     else: out.append(f'    uint32_t r = (uint16_t){c}; setreg(M68K_REG_D0, (reg(M68K_REG_D0) & 0xFFFF0000u) | r);')
     out.append('}')
 out.append('')
-out.append('typedef struct { int seg; uint32_t off; const char *name; void (*fn)(void); int regs; uint32_t d0mask; int argbytes; int nocheck; int pops; uint32_t ignore; } SubEntry;')
+out.append('typedef struct { int seg; uint32_t off; const char *name; void (*fn)(void); int regs; uint32_t d0mask; int argbytes; int nocheck; int pops; uint32_t ignore; int orig; } SubEntry;')
 def ignore_mask(opts):   # ignore=d0,d1,a0,ccr: registers a compiled callee leaves undefined (not compared)
     m = 0
     for o in opts:
@@ -102,8 +102,8 @@ def d0mask(ret, opts):   # the part of D0 a caller can see: what -subcheck compa
     return {2: 0xFF if ret in ('i8', 'u8') else 0xFFFF, 4: 0xFFFFFFFF}[SIZE[ret]]
 out.append('const SubEntry g_subs[] = {')
 for seg, off, ret, name, al, opts in rows:
-    out.append(f'    {{{seg}, 0x{off:04X}, "{name}", w_{name}, {1 if ret == "regs" else 0}, 0x{d0mask(ret, opts):X}u, {sum(SIZE[t] for t, n in al)}, {1 if "nocheck" in opts else 0}, {sum(SIZE[t] for t, n in al) if "pascal" in opts else 0}, 0x{ignore_mask(opts):X}u}},')
-out.append('    {0, 0, 0, 0, 0, 0, 0, 0, 0, 0}')
+    out.append(f'    {{{seg}, 0x{off:04X}, "{name}", w_{name}, {1 if ret == "regs" else 0}, 0x{d0mask(ret, opts):X}u, {sum(SIZE[t] for t, n in al)}, {1 if "nocheck" in opts else 0}, {sum(SIZE[t] for t, n in al) if "pascal" in opts else 0}, 0x{ignore_mask(opts):X}u, {1 if "orig" in opts else 0}}},')
+out.append('    {0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0}')
 out.append('};')
 os.makedirs(os.path.join(ROOT, 'harness', 'gen'), exist_ok=True)
 open(os.path.join(ROOT, 'harness', 'gen', 'subs.c'), 'w').write('\n'.join(out) + '\n')

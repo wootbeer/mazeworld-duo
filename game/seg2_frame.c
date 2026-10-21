@@ -22,6 +22,7 @@ void fn_S2_0000(uint32_t port, uint32_t gdh) {
     uint32_t tbl = GADDR(0x1CE0);
     switch (depth) {
     case 1:
+        if (mz_original) break;                               /* (Original leaves 1 bit alone) */
         w32(tbl, 0xFFFFFFFFu);
         for (int16_t i = 1; i < 0x10; i++) w32(tbl + 4u * (uint32_t)i, 0);
         break;
@@ -87,9 +88,20 @@ static uint32_t diff_row(uint32_t out, uint32_t row, uint32_t now, uint32_t was,
     return out;
 }
 
+/* Mazeworld Original waits before each frame instead: until 4 ticks have passed since the last
+ * one (Ticks through G_5F52, the last frame's in G_5F4E; at most 15 frames a second), then for
+ * the slot VBL counter G_21AE to move when one is installed (G_22B7). */
+static void frame_wait_original(void) {
+    uint32_t a = og32(0x5F52), last = og32(0x5F4E);
+    while ((int32_t)(r32(a) - last) < 4) mz_idle();
+    sog32(0x5F4E, r32(a));
+    if (g8(0x22B7)) { uint32_t t = g32(0x21AE); while (g32(0x21AE) == t) mz_idle(); }
+}
+
 /* Waits for the next tick when asked to (G_2394 for direct drawing): on the slot VBL counter
  * G_21AE when one was installed (G_22B7), otherwise on the Ticks counter G_241E points at. */
 static void wait_tick(void) {
+    if (mz_original) { frame_wait_original(); return; }
     if (g8(0x22B7)) {
         uint32_t t = g32(0x21AE);
         while (g32(0x21AE) == t) mz_idle();
@@ -114,7 +126,7 @@ void fn_S2_0986(uint32_t pm, int16_t x, int16_t y, uint32_t now, uint32_t was, u
     uint16_t end = (uint16_t)(g16(0x2156) + 4);
     int16_t rows = (int16_t)g16(0x2150);
     uint32_t row = base + (uint32_t)(uint16_t)(y - top) * rowbytes + (uint32_t)(uint16_t)(x - left) - 4;
-    int16_t step = (mode == 2 || mode == 3) ? mode : 1;
+    int16_t step = !mz_original && (mode == 2 || mode == 3) ? mode : 1;   /* (Original: no mode argument) */
     uint32_t a = now + 2, b = was + 2;
     for (;;) {
         out = diff_row(out, row, a, b, end);
@@ -145,7 +157,7 @@ void fn_S2_0986(uint32_t pm, int16_t x, int16_t y, uint32_t now, uint32_t was, u
 /* The same for the other pixel depths: never used by the port (its screen is 8 bits deep). */
 static void draw_runs(int16_t depth, uint32_t pm, int16_t x, int16_t y, uint8_t wait) {
     uint32_t now = g32(0x1DEC), was = g32(0x1DE8);
-    int16_t mode = (int16_t)g16(0x2392);
+    int16_t mode = mz_original ? 1 : (int16_t)g16(0x2392);
     switch (depth) {
     case 8: fn_S2_0986(pm, x, y, now, was, wait, mode); break;
     case 4: mz_unsupported("4-bit floor runs (fn_S2_0D98)"); break;
@@ -204,7 +216,7 @@ void fn_S2_040A(void) {
     if (direct) {
         fn_S2_0000(g32(0x222E), g32(0x22BC));
         draw_runs(screen_depth, r32(deref(g32(0x22BC)) + 0x16), (int16_t)(g16(0x2162) + g16(0x215E)),
-                  (int16_t)(g16(0x2160) + g16(0x215A)), g8(0x2394));
+                  (int16_t)(g16(0x2160) + g16(0x215A)), mz_original ? 1 : g8(0x2394));
     } else if (g32(0x22C4)) {
         fn_S2_0000(g32(0x22C4), 0);
         uint32_t pm = mac_GetGWorldPixMap(g32(0x22C4));
@@ -213,13 +225,13 @@ void fn_S2_040A(void) {
             set_rect(r, (int16_t)(g16(0x215A) + g16(0x2160)), (int16_t)(g16(0x215E) + g16(0x2162)),
                      (int16_t)(g16(0x2158) + g16(0x2160)), (int16_t)(g16(0x215C) + g16(0x2162)));
             mac_ForeColor(33); mac_BackColor(30);
-            if (g8(0x2394)) wait_tick();
+            if (mz_original || g8(0x2394)) wait_tick();
             mac_CopyBits(deref(pm), g32(0x222E) + 2, g32(0x22C4) + 0x10, r, 0, 0);
             mac_UnlockPixels(pm);
         }
     }
-    /* the automap */
-    if (g8(0x2393) && !(g32(0x238C) & 1)) return;
+    /* the automap (Original has none) */
+    if (mz_original || (g8(0x2393) && !(g32(0x238C) & 1))) return;
     uint32_t pm = mac_GetGWorldPixMap(g32(0x22C0));
     if (!mac_LockPixels(pm)) return;
     set_rect(src, 0x10, 0x10, 0x90, 0x90);

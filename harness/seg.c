@@ -1,5 +1,6 @@
 /* Segment Loader emulation and execution tracing. */
 #include "hx.h"
+void mz_seg(int n);
 #include <stdlib.h>
 #include <string.h>
 #include <sys/stat.h>
@@ -55,6 +56,9 @@ int seg_load(int n) {
 }
 
 int seg_is_loaded(int n) { return n > 0 && n < MAXSEG && segs[n].loaded; }
+
+/* where segment n's code is (loading it first), for data kept in a code segment */
+uint32_t mz_seg_base(int n) { mz_seg(n); return n > 0 && n < MAXSEG ? segs[n].base : 0; }
 
 int seg_of(uint32_t pc, uint32_t *off) {
     for (int n = 1; n < MAXSEG; n++) {

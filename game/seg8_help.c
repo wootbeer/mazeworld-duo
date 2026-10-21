@@ -5,7 +5,7 @@
 
 #define HELP_DIALOG   g32(0x4BC2)   /* the dialog */
 #define HELP_PAGE     0x4BC4        /* the page shown, 1..24 */
-#define HELP_PAGES    0x18
+#define HELP_PAGES    (mz_original ? 0x13 : 0x18)   /* Original: 19 */
 
 /* fn_S8_1A9C: shows page `page`: Previous (item 2) hidden on the first page, Next (item 3) on the last. */
 void fn_S8_1A9C(int16_t page) {

@@ -188,7 +188,7 @@ int16_t fn_S8_04FA(void) {
     if ((err = load_mazr(0x81, 0x1EE8))) return err;
     if ((err = load_mazr(0x82, 0x1EE4))) return err;
     sg32(0x1EE0, mac_NewHandle(0x8000)); if (!g32(0x1EE0)) return 1;
-    sg32(0x1ED8, mac_NewHandle(0x3200)); if (!g32(0x1ED8)) return 1;
+    sg32(0x1ED8, mac_NewHandle(mz_original ? 0x1E00 : 0x3200)); if (!g32(0x1ED8)) return 1;   /* Original: $1E00 */
     if ((err = load_mazr(0x83, 0x1ED4))) return err;
     if ((err = load_mazr(0x84, 0x1ED0))) return err;
     if ((err = load_mazr(0x85, 0x1ECC))) return err;
@@ -227,7 +227,7 @@ uint32_t fn_S8_610C(uint32_t r) {
 }
 
 /* fn_S8_513C: the largest view size any screen allows: 0 (under 352x320), 2 (464x384), 3 (640x480)
- * or 4 */
+ * or 4. Original: 0 (under 240x200), 1 (352x270), 2 (512x384), 3 (640x480) or 4. */
 int16_t fn_S8_513C(void) {
     int16_t best = 0;
     for (uint32_t gd = mac_GetDeviceList(); gd; gd = mac_GetNextDevice(gd)) {
@@ -235,6 +235,8 @@ int16_t fn_S8_513C(void) {
         uint32_t g = gd_rect(gd);
         int16_t w = (int16_t)(r16(g + 6) - r16(g + 2)), h = (int16_t)(r16(g + 4) - r16(g));
         int16_t size = (w < 0x160 || h < 0x140) ? 0 : (w < 0x1D0 || h < 0x180) ? 2 : (w < 0x280 || h < 0x1E0) ? 3 : 4;
+        if (mz_original)                                    /* Original (fn_S8_45C4): five sizes */
+            size = (w < 0xF0 || h < 0xC8) ? 0 : (w < 0x160 || h < 0x10E) ? 1 : (w < 0x200 || h < 0x180) ? 2 : (w < 0x280 || h < 0x1E0) ? 3 : 4;
         if (size > best) best = size;
     }
     return best;
@@ -273,7 +275,7 @@ uint8_t fn_S8_4BE2(uint8_t keep_visible) {
     int16_t top = (int16_t)r16(g), left = (int16_t)r16(g + 2), bottom = (int16_t)r16(g + 4), right = (int16_t)r16(g + 6);
     int16_t x = (int16_t)((int16_t)(right - left - g16(0x2166)) / 2);
     int16_t y = (int16_t)((int16_t)(bottom - top - g16(0x2164)) / 2);
-    x = (int16_t)((x >> 3) << 3);
+    x = mz_original ? (int16_t)((x >> 2) << 2) : (int16_t)((x >> 3) << 3);   /* Original (fn_S8_4322): multiple of 4 */
     if (keep_visible) {
         int16_t min_y = mac_GetMainDevice() == g32(0x22BC) ? (int16_t)(0x14 + r16(0x0BAA)) : 0x14;   /* MBarHeight */
         if (y < min_y) y = min_y;
@@ -632,7 +634,7 @@ uint8_t fn_S8_48A2(int16_t size, uint32_t rect) {
 void fn_S8_2480(void) {
     MZ_FRAME;
     uint32_t resp = mz_local(4);
-    if (!fn_S8_4802((int16_t)0xA1AD)) mz_seg_of(2, 0x03A0), fn_S2_03A0(GADDR(0x44F2), 0, 1);
+    if (!fn_S8_4802((int16_t)(mz_original ? 0xA0AD : 0xA1AD))) mz_seg_of(2, 0x03A0), fn_S2_03A0(GADDR(0x44F2), 0, 1);
     mz_seg(3);
     if (fn_S3_0000(0x73797376, resp) || (int32_t)(r32(resp) & 0xF00) < 0x700) mz_seg_of(2, 0x03A0), fn_S2_03A0(GADDR(0x44B0), 0, 1);     /* 'sysv' */
     if (fn_S3_0000(0x71642020, resp) || (int32_t)(r32(resp) & 0xFFFF) < 0x200) mz_seg_of(2, 0x03A0), fn_S2_03A0(GADDR(0x4488), 0, 1);   /* 'qd  ' */
@@ -650,6 +652,8 @@ void fn_S8_25BE(void) {
     if (mz_seg_of(3, 0x0000), fn_S3_0000(0x65766E74, resp)) mz_seg_of(2, 0x03A0), fn_S2_03A0(GADDR(0x4388), 0, 1);       /* 'evnt' */
     else if (!(r8(resp + 3) & 1)) mz_seg_of(2, 0x03A0), fn_S2_03A0(GADDR(0x436C), 0, 1);
     if (mac_AEInstallEventHandler(0x61657674, 0x6F617070, mz_jt(0x7A), 0, 0)) mz_seg_of(2, 0x03A0), fn_S2_03A0(GADDR(0x4352), 0, 1);   /* 'aevt' 'oapp' */
+    if (mz_original && mac_AEInstallEventHandler(0x61657674, 0x6F646F63, MZ_A5 + 0x9A, 0, 0))   /* Original: 'odoc' (fn_S8_3482) */
+        mz_seg_of(2, 0x03A0), fn_S2_03A0(OADDR(0x6EB4), 0, 1);
     if (mac_AEInstallEventHandler(0x61657674, 0x70646F63, mz_jt(0x82), 0, 0)) mz_seg_of(2, 0x03A0), fn_S2_03A0(GADDR(0x4324), 0, 1);   /* 'pdoc' */
     if (mac_AEInstallEventHandler(0x61657674, 0x71756974, mz_jt(0x8A), 0, 0)) mz_seg_of(2, 0x03A0), fn_S2_03A0(GADDR(0x42F8), 0, 1);   /* 'quit' */
 }

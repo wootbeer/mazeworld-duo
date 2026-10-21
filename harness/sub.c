@@ -27,7 +27,7 @@ void mz_local_reset(void);
 void sub_regs_load(Regs *r);
 void sub_regs_store(const Regs *r);
 
-typedef struct { int seg; uint32_t off; const char *name; void (*fn)(void); int regs; uint32_t d0mask; int argbytes; int nocheck; int pops; uint32_t ignore; } SubEntry;
+typedef struct { int seg; uint32_t off; const char *name; void (*fn)(void); int regs; uint32_t d0mask; int argbytes; int nocheck; int pops; uint32_t ignore; int orig; } SubEntry;
 extern const SubEntry g_subs[];
 extern void (*mz_wtrack)(uint32_t a, int n);
 int vbl_in_irq(void);
@@ -35,6 +35,7 @@ uint32_t vbl_ticks(void);
 
 static uint8_t enabled[1024];
 static uint32_t at_off[1024];   /* where each runs: its offset, or for Mazeworld Original the paired one */
+static int at_seg[1024];
 static uint32_t calls[1024], checked[1024];
 static int any_enabled;
 int g_sub_checkmode, g_sub_pending;
@@ -49,8 +50,15 @@ int sub_enable(const char *list) {
             size_t L = strlen(g_subs[i].name);
             if (p && (p[L] == 0 || p[L] == ',')) enabled[i] = 1;
         }
-        at_off[i] = g_subs[i].off;
-        if (enabled[i] && mz_original && !(at_off[i] = mz_orig_func(g_subs[i].seg, (uint16_t)g_subs[i].off))) enabled[i] = 0;
+        /* Mazeworld Original: a shared function runs at its paired address, if it can run there; one
+         * of Original's own (subs.txt "orig") only there */
+        at_off[i] = g_subs[i].off; at_seg[i] = g_subs[i].seg;
+        if (g_subs[i].orig && !mz_original) enabled[i] = 0;
+        if (enabled[i] && mz_original && !g_subs[i].orig) {
+            uint32_t at = mz_orig_func(g_subs[i].seg, (uint16_t)g_subs[i].off);
+            if (!at) enabled[i] = 0;
+            at_seg[i] = (int)(at >> 16); at_off[i] = at & 0xFFFF;
+        }
         if (enabled[i]) { n++; any_enabled = 1; }
     }
     hx_log("substitution: %d C functions enabled%s", n, g_sub_checkmode ? " (check mode: every call compared with the original)" : "");
@@ -273,7 +281,7 @@ void sub_check_return(uint32_t pc) {
 int sub_check(int seg, uint32_t off, uint32_t pc) {
     if (!any_enabled || g_sub_pending) return 0;     /* while a check runs, the original runs untouched */
     for (int i = 0; g_subs[i].name; i++) {
-        if (!enabled[i] || g_subs[i].seg != seg || at_off[i] != off) continue;
+        if (!enabled[i] || at_seg[i] != seg || at_off[i] != off) continue;
         g_sub_pc = pc;
         mz_local_reset();
         calls[i]++;

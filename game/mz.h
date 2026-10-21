@@ -36,14 +36,28 @@ extern const uint16_t *mz_gmap;
 extern int mz_original;
 void     mz_select_original(void);
 uint32_t mz_jt(uint16_t off);          /* jump-table entry `off` above A5 */
-uint16_t mz_orig_func(int seg, uint16_t off);
-#define GADDR(off) (MZ_A5 - (mz_gmap ? (uint32_t)mz_gmap[(uint16_t)(off)] : (uint32_t)(off)))
+uint32_t mz_orig_func(int seg, uint16_t off);
+uint32_t mz_gnone(uint32_t off);        /* a Catacombs global Original does not have: a fault */
+static inline uint32_t GADDR(uint32_t off) {
+    if (!mz_gmap) return MZ_A5 - off;
+    uint16_t o = mz_gmap[(uint16_t)off];
+    return o ? MZ_A5 - o : mz_gnone(off);
+}
+/* Mazeworld Original's own globals and functions (no Catacombs counterpart) are named by Original's
+ * offsets: globals through OADDR / og* (never translated), functions fo_S<seg>_<off>. */
+#define OADDR(off) (MZ_A5 - (uint32_t)(off))
 static inline uint8_t  g8(uint32_t off)  { return r8(GADDR(off)); }
 static inline uint16_t g16(uint32_t off) { return r16(GADDR(off)); }
 static inline uint32_t g32(uint32_t off) { return r32(GADDR(off)); }
 static inline void sg8(uint32_t off, uint8_t v)   { w8(GADDR(off), v); }
 static inline void sg16(uint32_t off, uint16_t v) { w16(GADDR(off), v); }
 static inline void sg32(uint32_t off, uint32_t v) { w32(GADDR(off), v); }
+static inline uint8_t  og8(uint32_t off)  { return r8(OADDR(off)); }
+static inline uint16_t og16(uint32_t off) { return r16(OADDR(off)); }
+static inline uint32_t og32(uint32_t off) { return r32(OADDR(off)); }
+static inline void sog8(uint32_t off, uint8_t v)   { w8(OADDR(off), v); }
+static inline void sog16(uint32_t off, uint16_t v) { w16(OADDR(off), v); }
+static inline void sog32(uint32_t off, uint32_t v) { w32(OADDR(off), v); }
 
 /* Handles: a Handle is the address of a master pointer. */
 static inline uint32_t deref(uint32_t h) { return r32(h); }
@@ -52,7 +66,8 @@ static inline uint32_t deref(uint32_t h) { return r32(h); }
  * harness this allocates its code, exactly as the original's LoadSeg does; the port has nothing
  * to load). Placed before each cross-segment call, mirroring the original's jsr x(A5). */
 void mz_seg(int n);
-void mz_seg_of(int seg, uint16_t off);   /* the same, named by the function called (games.c) */
+void mz_seg_of(int seg, uint16_t off);
+uint32_t mz_seg_base(int n);            /* where segment n's code is (loaded first): data kept in code */   /* the same, named by the function called (games.c) */
 /* Where the original spins until an interrupt (a VBL task) changes something: one tick passes and
  * its VBL processing runs. Call once per pass of the original's loop. */
 void mz_idle(void);
@@ -227,6 +242,7 @@ void     mac_PmBackColor(int16_t entry);
 void     mac_FrameRect(uint32_t rect);
 void     mac_EraseRect(uint32_t rect);
 void     mac_MoveTo(int16_t h, int16_t v);
+void     mac_DrawChar(int16_t ch);
 void     mac_Move(int16_t dh, int16_t dv);
 void     mac_LineTo(int16_t h, int16_t v);
 void     mac_Line(int16_t dh, int16_t dv);

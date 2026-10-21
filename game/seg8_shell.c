@@ -299,17 +299,24 @@ static void able(uint32_t m, int16_t item, int on) { if (on) mac_EnableItem(m, i
  * (G_2392 = 1 / 2 / 3: items 8 / 7 / 6). */
 void fn_S8_3190(uint32_t m) {
     for (int16_t i = 1; i <= 4; i++) mac_CheckItem(m, i, (int16_t)g16(0x22B6) == i);
+    if (mz_original) return;                                  /* Original (fn_S8_28EA): no resolutions */
     for (int16_t r = 1; r <= 3; r++) mac_CheckItem(m, (int16_t)(9 - r), (int16_t)g16(0x2392) == r);
 }
 
 /* fn_S8_3278: Sound menu m: the check mark on the sound level G_238E (items 1-4 = 0..3). */
 void fn_S8_3278(uint32_t m) {
+    if (mz_original) {                                        /* Original (fn_S8_2972): On / Off by G_22B8 */
+        mac_CheckItem(m, 1, !g8(0x22B8)); mac_CheckItem(m, 2, g8(0x22B8) != 0);
+        return;
+    }
     for (int16_t i = 1; i <= 4; i++) mac_CheckItem(m, i, (int16_t)g16(0x238E) == i - 1);
 }
 
 /* fn_S8_2E4C: everything disabled but Quit (a desk accessory or the game window in front). */
+static void menus_original(int on);
 void fn_S8_2E4C(void) {
     uint32_t m;
+    if (mz_original) { menus_original(0); return; }
     if (!(m = mac_GetMenuHandle(0x80))) return;
     mac_DisableItem(m, 1);
     if (!(m = mac_GetMenuHandle(0x81))) return;
@@ -332,6 +339,7 @@ void fn_S8_2E4C(void) {
  * sizes the screen allows (G_2168) and the resolutions; the sound levels; Options. */
 void fn_S8_2FB4(void) {
     uint32_t m;
+    if (mz_original) { menus_original(1); return; }
     if (!(m = mac_GetMenuHandle(0x80))) return;
     mac_EnableItem(m, 1);
     if (!(m = mac_GetMenuHandle(0x81))) return;
@@ -349,6 +357,28 @@ void fn_S8_2FB4(void) {
     fn_S8_3278(m);
     if (!(m = mac_GetMenuHandle(0x85))) return;
     mac_EnableItem(m, 1);
+}
+
+/* Mazeworld Original's menus (fn_S8_25D6 all off, fn_S8_2716 for the high-score window): Apple
+ * 1-4; File 1 Play Game unless over (G_21B3), 3 New Game unless in progress (G_21B4), 4, 6 only
+ * with G_21B0 and neither of those, 8; Edit off; View sizes allowed (G_2168); Sound On / Off. */
+static void menus_original(int on) {
+    uint32_t m;
+    if (!(m = mac_GetMenuHandle(0x80))) return;
+    for (int16_t i = 1; i <= 4; i++) able(m, i, on);
+    if (!(m = mac_GetMenuHandle(0x81))) return;
+    if (on) {
+        able(m, 1, !g8(0x21B3)); able(m, 3, !g8(0x21B4)); mac_EnableItem(m, 4);
+        able(m, 6, !g8(0x21B4) && !g8(0x21B3) && g8(0x21B0)); mac_EnableItem(m, 8);
+    } else { mac_DisableItem(m, 1); mac_DisableItem(m, 3); mac_DisableItem(m, 4); mac_DisableItem(m, 6); mac_DisableItem(m, 8); }
+    if (!(m = mac_GetMenuHandle(0x82))) return;
+    mac_DisableItem(m, 1); mac_DisableItem(m, 3); mac_DisableItem(m, 4); mac_DisableItem(m, 5); mac_DisableItem(m, 6);
+    if (!(m = mac_GetMenuHandle(0x83))) return;
+    for (int16_t i = 1; i <= 4; i++) able(m, i, on && (int16_t)g16(0x2168) >= i);
+    fn_S8_3190(m);
+    if (!(m = mac_GetMenuHandle(0x84))) return;
+    able(m, 1, on); able(m, 2, on);
+    fn_S8_3278(m);
 }
 
 /* fn_S8_2E10: before a menu command: fn_S8_2E4C if a desk accessory (negative window kind) or a

@@ -38,7 +38,9 @@ void fn_S8_0E68(Regs *r) {
 
 /* fn_S8_2A32: G_21FC = 0, G_22C6 = 0, G_21B4 = 1, G_21B3 = 0, G_21B0 = 0. */
 void fn_S8_2A32(Regs *r) {
-    sg8(0x21FC, 0); sg8(0x22C6, 0); sg8(0x21B4, 1); sg8(0x21B3, 0); sg8(0x21B0, 0);
+    sg8(0x21FC, 0);
+    if (mz_original) sog8(0x57DE, 0);                         /* Original (fn_S8_21CC) also clears G_57DE */
+    sg8(0x22C6, 0); sg8(0x21B4, 1); sg8(0x21B3, 0); sg8(0x21B0, 0);
     cc_nz_b(r, 0);
 }
 
@@ -53,7 +55,9 @@ int16_t fn_S8_4858(int8_t c) { return c < 0 ? 1 : 0; }
 /* fn_S8_04C8: G_20CA = cell offset of the position in G_20D2/G_20CE (integer parts & $1F0, combined
  * as in fn_S2_3480), then the word at +$C of that cell in the G_1DCC block = 1, then fn_S2_3500.
  * A0 = G_1DCC, D0.w = D1.w = the cell offset. */
+void fn_S2_355E(Regs *r);
 void fn_S8_04C8(Regs *r) {
+    if (mz_original) mz_seg_of(2, 0x355E), fn_S2_355E(r);    /* Original (fn_S8_08B2) floods the scent first */
     uint32_t v = g32(0x20D2);
     r->d[1] = (v << 16) | (v >> 16);
     set_w(&r->d[1], (uint16_t)((uint16_t)r->d[1] & 0x1F0)); lsl_w(r, &r->d[1], 1);
@@ -80,10 +84,14 @@ void fn_S8_09FC(uint32_t p) {
 }
 
 /* fn_S8_521A: size class of a screen (GDHandle): 2 if smaller than 464x384, 3 if smaller than
- * 640x480, else 4. */
+ * 640x480, else 4. Original: 1 under 352x270, 2 under 512x384, then the same. */
 int16_t fn_S8_521A(uint32_t gd) {
     uint32_t g = deref(gd);
     int16_t w = (int16_t)(r16(g + 0x28) - r16(g + 0x24)), h = (int16_t)(r16(g + 0x26) - r16(g + 0x22));
+    if (mz_original) {                                     /* Original (fn_S8_46BA): from size 1 */
+        if (w < 0x160 || h < 0x10E) return 1;
+        if (w < 0x200 || h < 0x180) return 2;
+    }
     if (w < 0x1D0 || h < 0x180) return 2;
     if (w < 0x280 || h < 0x1E0) return 3;
     return 4;
@@ -111,6 +119,11 @@ void fn_S8_0F1A(Regs *r) {
         if (v == 0x40) goto out;
     }
     set_w(&r->d[4], (uint16_t)r->d[1]);
+    if (mz_original) {                                        /* Original (fn_S8_14B4): a shot costs 16 of G_56E6 */
+        set_w(&r->d[1], og16(0x56E6)); sub_w(r, &r->d[1], 0x10);
+        if ((uint16_t)r->d[1] & 0x8000) goto out;
+        sog16(0x56E6, (uint16_t)r->d[1]);
+    }
     set_w(&r->d[0], (uint16_t)r->d[4]);
     set_w(&r->d[1], g16(0x20CA));
     mz_seg_of(2, 0x33A4), fn_S2_33A4(r);
@@ -118,7 +131,7 @@ void fn_S8_0F1A(Regs *r) {
     r->a[0] = g32(0x1DC4) + r->d[4];
     w16(r->a[0] + 2, (uint16_t)r->d[3]);
     w32(r->a[0] + 4, g32(0x20D2)); w32(r->a[0] + 8, g32(0x20CE)); w16(r->a[0] + 0xC, g16(0x20D4));
-    w16(r->a[0] + 0x12, 0); w16(r->a[0] + 0x14, 0); w16(r->a[0] + 0xE, 0);
+    w16(r->a[0] + 0x12, mz_original ? og16(0x56C6) : 0); w16(r->a[0] + 0x14, 0); w16(r->a[0] + 0xE, 0);
     set_w(&r->d[0], (uint16_t)r->d[4]);
     mz_seg_of(2, 0x3480), fn_S2_3480(r);
     mz_seg_of(2, 0x3500), fn_S2_3500(r);
@@ -176,7 +189,7 @@ void fn_S8_124E(uint32_t ev) {
         }
         return;
     }
-    if ((c == 0x1B || c == 0x0D) && keydown) { sg8(0x2220, 1); sg8(0x221F, 1); }
+    if ((c == 0x1B || c == 0x0D || (mz_original && c == ' ')) && keydown) { sg8(0x2220, 1); sg8(0x221F, 1); }   /* Original: Space too */
 }
 
 /* fn_S8_15C0: D0.l = -1 if object D0.b (record in G_1DC4) is close enough to the point
@@ -230,21 +243,34 @@ static const uint16_t lock_pairs[19][2] = {
     {0x1EEC, 0x1DD8}, {0x1EE8, 0x1DD4}, {0x1EE4, 0x1DD0}, {0x1EE0, 0x1DCC}, {0x1ED8, 0x1DC4},
     {0x1ED4, 0x1DC0}, {0x1ED0, 0x1DBC}, {0x1ECC, 0x1DB8}, {0x1EC8, 0x1DB4}};
 
-/* fn_S8_083A: locks the 19 handles and stores their master pointers in the pointer globals. */
+/* Mazeworld Original's (fn_S8_0C28 / fn_S8_0D42): 20 handles, all but the last unlocked again */
+static const uint16_t lock_pairs_original[20][2] = {
+    {0x5514, 0x53FC}, {0x5510, 0x53F8}, {0x550C, 0x53F4}, {0x5508, 0x53F0}, {0x54E8, 0x53D0},
+    {0x54CC, 0x53B4}, {0x54C8, 0x53B0}, {0x5504, 0x53EC}, {0x5500, 0x53E8}, {0x54FC, 0x53E4},
+    {0x54F8, 0x53E0}, {0x54F4, 0x53DC}, {0x54F0, 0x53D8}, {0x54EC, 0x53D4}, {0x54E4, 0x53CC},
+    {0x54E0, 0x53C8}, {0x54DC, 0x53C4}, {0x54D8, 0x53C0}, {0x54D4, 0x53BC}, {0x54D0, 0x53B8}};
+
+/* fn_S8_083A: locks the 19 handles (Original: 20) and stores their master pointers in the pointer globals. */
 void fn_S8_083A(Regs *r) {
-    for (int i = 0; i < 19; i++) {
-        r->a[0] = g32(lock_pairs[i][0]); mac_trap_regs(r, 0xA029);
-        r->a[0] = g32(lock_pairs[i][0]);
-        uint32_t p = r32(r->a[0]); sg32(lock_pairs[i][1], p); cc_nz_l(r, p);
+    int n = mz_original ? 20 : 19;
+    for (int i = 0; i < n; i++) {
+        uint32_t h = mz_original ? OADDR(lock_pairs_original[i][0]) : GADDR(lock_pairs[i][0]);
+        uint32_t d = mz_original ? OADDR(lock_pairs_original[i][1]) : GADDR(lock_pairs[i][1]);
+        r->a[0] = r32(h); mac_trap_regs(r, 0xA029);
+        r->a[0] = r32(h);
+        uint32_t p = r32(r->a[0]); w32(d, p); cc_nz_l(r, p);
     }
 }
 
-/* fn_S8_0946: unlocks the first 18 of those handles and clears their pointer globals (the 19th,
+/* fn_S8_0946: unlocks the first 18 (Original: 19) of those handles and clears their pointer globals (the 19th,
  * G_1EC8 / G_1DB4, is left locked, as in the original). */
 void fn_S8_0946(Regs *r) {
-    for (int i = 0; i < 18; i++) {
-        r->a[0] = g32(lock_pairs[i][0]); mac_trap_regs(r, 0xA02A);
-        sg32(lock_pairs[i][1], 0); cc_nz_l(r, 0);
+    int n = mz_original ? 19 : 18;
+    for (int i = 0; i < n; i++) {
+        uint32_t h = mz_original ? OADDR(lock_pairs_original[i][0]) : GADDR(lock_pairs[i][0]);
+        uint32_t d = mz_original ? OADDR(lock_pairs_original[i][1]) : GADDR(lock_pairs[i][1]);
+        r->a[0] = r32(h); mac_trap_regs(r, 0xA02A);
+        w32(d, 0); cc_nz_l(r, 0);
     }
 }
 
@@ -284,7 +310,9 @@ static uint16_t cell_y(Regs *r, uint32_t *reg, uint32_t pos) {
  * Otherwise the player position G_20D2 / G_20CE is updated; within the same cell the bytes D1.b and
  * D2.b go to G_22B0 / G_22AF, else the cell marker (+$C) moves to the new cell and G_20CA follows.
  * Keeps D5 (LINK frame). */
+static void move_original(Regs *r);
 void fn_S8_140A(Regs *r) {
+    if (mz_original) { move_original(r); return; }
     uint32_t d5save = r->d[5];
     uint8_t in1 = (uint8_t)r->d[1], in2 = (uint8_t)r->d[2];
     lsl_w(r, &r->d[0], 2);
@@ -328,6 +356,39 @@ void fn_S8_140A(Regs *r) {
 out:
     r->d[5] = d5save;
     cc_nz_l(r, d5save);   /* flags from restoring D5 */
+}
+
+/* Mazeworld Original's step (fn_S8_19C6): no sliding: x and y move together, into G_4E1A / G_4E16,
+ * unless the target cell is solid or holds an object (fn_S8_1522). Otherwise as Catacombs' (without
+ * the blocked case). */
+static void move_original(Regs *r) {
+    uint32_t d5save = r->d[5];
+    uint8_t in1 = (uint8_t)r->d[1], in2 = (uint8_t)r->d[2];
+    lsl_w(r, &r->d[0], 2);
+    r->a[0] = GADDR(0x12EA);
+    r->d[1] = r32(r->a[0] + sxw(r->d[0]) + 0x40); add_l(r, &r->d[1], g32(0x20D2)); sg32(0x4E1A, r->d[1]);
+    r->d[1] = r32(r->a[0] + sxw(r->d[0]));        add_l(r, &r->d[1], g32(0x20CE)); sg32(0x4E16, r->d[1]);
+    cell_x(r, &r->d[5], g32(0x4E1A));
+    cell_y(r, &r->d[0], g32(0x4E16));
+    set_w(&r->d[5], (uint16_t)((uint16_t)r->d[5] | (uint16_t)r->d[0]));
+    r->a[0] = g32(0x1DCC);
+    set_b(&r->d[0], r8(r->a[0] + sxw(r->d[5])));
+    if (r->d[0] & 1) goto out;
+    set_w(&r->d[0], (uint16_t)r->d[5]);
+    fn_S8_1522(r);
+    set_w(&r->d[1], (uint16_t)r->d[0]);
+    if ((uint16_t)r->d[1]) goto out;
+    sg32(0x20D2, g32(0x4E1A)); sg32(0x20CE, g32(0x4E16));
+    if ((uint16_t)r->d[5] == g16(0x20CA)) { sg8(0x22B0, in1); sg8(0x22AF, in2); goto out; }
+    set_w(&r->d[0], g16(0x20CA));
+    r->a[0] = g32(0x1DCC);
+    w16(r->a[0] + sxw(r->d[0]) + 0xC, 0);
+    w16(r->a[0] + sxw(r->d[5]) + 0xC, 1);
+    sg16(0x20CA, (uint16_t)r->d[5]);
+    mz_seg_of(2, 0x3500), fn_S2_3500(r);
+out:
+    r->d[5] = d5save;
+    cc_nz_l(r, d5save);
 }
 
 /* ---------- Toolbox setup and windows (compiled C) ---------- */
@@ -521,4 +582,31 @@ void fn_S8_0CFE(Regs *r) {
     }
     cc_cmp_w(r, 0x84, (uint16_t)t);
     if (t == 0x84) effect_frame(r, 10, 0x1D7C, 0x14, 7);
+}
+
+/* fn_S8_0468: puts object D0.w (64-byte records G_1DC4) back into the map: unless it is gone (+2
+ * negative) it is entered in its cell's list (fn_S2_3480); a blocking object (+$E: 1 means at
+ * its cell +$30) marks that cell (+$E = 1); one with a cell (+$30) is added there (fn_S2_33A4).
+ * Unused in Catacombs; Mazeworld Original (fn_S8_0852) runs it when a level is entered. Keeps D3,
+ * A2, A3 (LINK frame). */
+void fn_S8_0468(Regs *r) {
+    uint32_t d3 = r->d[3], a2 = r->a[2], a3 = r->a[3];
+    set_w(&r->d[3], (uint16_t)r->d[0]); lsl_w(r, &r->d[3], 6);
+    r->a[3] = g32(0x1DCC); r->a[2] = g32(0x1DC4);
+    uint32_t o = r->a[2] + sxw(r->d[3]);
+    set_w(&r->d[0], r16(o + 2));
+    if (!((uint16_t)r->d[0] & 0x8000)) {
+        r->d[0] = r->d[3];
+        mz_seg_of(2, 0x3480), fn_S2_3480(r);
+        set_w(&r->d[0], r16(o + 0xE));
+        if ((uint16_t)r->d[0]) {
+            if ((uint16_t)r->d[0] == 1) w16(o + 0xE, r16(o + 0x30));
+            set_w(&r->d[1], r16(o + 0xE));
+            w16(r->a[3] + sxw(r->d[1]) + 0xE, 1);
+        }
+        set_w(&r->d[1], r16(o + 0x30));
+        if ((uint16_t)r->d[1]) { set_w(&r->d[0], (uint16_t)r->d[3]); mz_seg_of(2, 0x33A4), fn_S2_33A4(r); }
+    }
+    r->d[3] = d3; r->a[2] = a2; r->a[3] = a3;
+    cc_nz_l(r, d3);
 }

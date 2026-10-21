@@ -4,6 +4,7 @@
  * them up; for Original the global offsets in the C code are translated through mz_gmap. */
 #include "mz.h"
 #include "orig_map.h"
+#include <string.h>
 
 int mz_original;
 const uint16_t *mz_gmap;
@@ -22,6 +23,17 @@ void mz_select_original(void) {
     mz_gmap = gmap;
 }
 
+/* the C code reached a Catacombs global with no Original counterpart: a translation error */
+uint32_t mz_gnone(uint32_t off) {
+    char msg[64];
+    static const char hex[] = "0123456789ABCDEF";
+    memcpy(msg, "Original has no global G_", 25);
+    for (int i = 0; i < 4; i++) msg[25 + i] = hex[(off >> (12 - 4 * i)) & 15];
+    msg[29] = 0;
+    mz_unsupported(msg);
+    return MZ_A5;
+}
+
 /* the address of jump-table entry `off` (above A5) in the running game */
 uint32_t mz_jt(uint16_t off) {
     if (mz_original)
@@ -34,10 +46,11 @@ static int pair_of(int seg, uint16_t off) {
         if (orig_funcs[i][0] == seg && orig_funcs[i][1] == off) return (int)i;
     return -1;
 }
-/* the Original offset of translated function seg:off, or 0 if it cannot run there as it is */
-uint16_t mz_orig_func(int seg, uint16_t off) {
+/* where translated function seg:off is in Original (segment << 16 | offset), or 0 if it cannot
+ * run there as it is */
+uint32_t mz_orig_func(int seg, uint16_t off) {
     int i = pair_of(seg, off);
-    return i >= 0 && orig_funcs[i][4] ? orig_funcs[i][3] : 0;
+    return i >= 0 && orig_funcs[i][4] ? (uint32_t)orig_funcs[i][2] << 16 | orig_funcs[i][3] : 0;
 }
 /* before a call into function seg:off of another segment: loads the segment it is in */
 void mz_seg_of(int seg, uint16_t off) {

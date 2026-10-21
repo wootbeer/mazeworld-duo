@@ -17,6 +17,11 @@ void fn_S2_3502(void) {
  * D0 = 1 while G_21FC is set. No frame; assembly callers see A0 = the table and D1.w = the new index,
  * so the register version is the implementation and fn_S2_3532_value is the C-facing form. */
 void fn_S2_3532(Regs *r) {
+    if (mz_original) {                                   /* Original (fn_S2_2B1C): D0.w = 1 or Random() */
+        set_w(&r->d[0], g8(0x21FC) ? 1 : (uint16_t)mac_Random());
+        cc_nz_w(r, (uint16_t)r->d[0]);
+        return;
+    }
     if (g8(0x21FC)) { r->d[0] = 1; cc_nz_l(r, 1); return; }
     r->a[0] = GADDR(0x1CA0);
     set_w(&r->d[1], g16(0x14A0));
@@ -111,13 +116,16 @@ void fn_S2_3480(Regs *r) {
     cc_nz_w(r, 0xFFFF);
 }
 
-/* fn_S2_3500 (JT 81): empty (a lone rts). */
-void fn_S2_3500(Regs *r) { (void)r; }
+/* fn_S2_3500 (JT 81): empty (a lone rts). Mazeworld Original calls fo_S2_2AD2 in its place. */
+void fo_S2_2AD2(Regs *r);
+void fn_S2_3500(Regs *r) { if (mz_original) fo_S2_2AD2(r); }
 
 /* fn_S2_39F8 (JT 90): sets ten flags: G_2104 G_2100 G_20FF G_20FA G_20F4 G_20EE G_20ED G_20E2 G_20DE G_20DD = 1. */
 void fn_S2_39F8(Regs *r) {
     static const uint16_t flag[10] = {0x2104, 0x2100, 0x20FF, 0x20FA, 0x20F4, 0x20EE, 0x20ED, 0x20E2, 0x20DE, 0x20DD};
-    for (int i = 0; i < 10; i++) sg8(flag[i], 1);
+    static const uint16_t orig[6] = {0x56F0, 0x56EC, 0x56EB, 0x56E8, 0x56E4, 0x56E3};   /* Original's six (fn_S2_2FB4) */
+    if (mz_original) for (int i = 0; i < 6; i++) sog8(orig[i], 1);
+    else for (int i = 0; i < 10; i++) sg8(flag[i], 1);
     cc_nz_b(r, 1);
 }
 
@@ -154,6 +162,7 @@ void fn_S2_39B8(Regs *r) {
  * new one (G_1DEC + 2). Words carry a position in the high ten bits and a value in the low six:
  * runs whose position >> 6 is 4 are collapsed to their last entry, keeping the old list's value at
  * that position. Transcribed label by label from the original (the labels are its addresses).
+ * Mazeworld Original (fn_S2_40E6) is the same with every row merged.
  * Keeps D3-D7 and A2-A4; flags from restoring D7. */
 void fn_S2_4DC4(Regs *r) {
     uint32_t save_d[8], save_a[8];
@@ -200,9 +209,9 @@ L4E66:
     goto L4E3C;
 L4E7C:
     do { set_w(d0, r16(a1)); a1 += 2; w16(a2, (uint16_t)*d0); a2 += 2; } while ((uint16_t)*d0 != d6);
-    set_w(d0, g16(0x2392));
+    if (!mz_original) set_w(d0, g16(0x2392));          /* Original has no row-skipping modes: every row */
     {
-        uint16_t step = (uint16_t)*d0 == 2 ? 2 : (uint16_t)*d0 == 3 ? 3 : 1;
+        uint16_t step = mz_original ? 1 : (uint16_t)*d0 == 2 ? 2 : (uint16_t)*d0 == 3 ? 3 : 1;
         if (step == 1) { a0 = a3; a1 = a4; a2 = *d2; a3 += 0xCC; a4 += 0xCC; *d2 += 0xCC; }
         x = d3 < step;                              /* X from subq.w #step,d3 */
         d3 = (uint16_t)(d3 - step);
@@ -1075,10 +1084,13 @@ fill_all:
     edge_fill(r, back);
 }
 
-/* A4 = G_136E + 2 * D4 (through D1, as the original) */
+/* the column table: G_136E; Mazeworld Original (fn_S2_452A) takes it from its caller's argument */
+static uint32_t col_table(Regs *r) { return mz_original ? r32(r->a[6] + 8) : g32(0x136E); }
+
+/* A4 = the table + 2 * D4 (through D1, as the original) */
 static void edge_start(Regs *r) {
     D(1) = (uint16_t)(Wd(4) << 1);
-    r->a[4] = g32(0x136E) + D(1);
+    r->a[4] = col_table(r) + D(1);
 }
 
 void fn_S2_52A2(Regs *r) {
@@ -1094,12 +1106,12 @@ void fn_S2_52A2(Regs *r) {
             SW(7, Wd(7) - Wd(5));
             SW(6, Wd(6) - Wd(4));
             if (!NEG(Wd(6))) {                 /* from off the left to off the right */
-                r->a[4] = g32(0x136E);
+                r->a[4] = col_table(r);
                 SW(4, -Wd(4));
                 edge_cross(r, 0);
             } else {                           /* from off the right to off the left */
                 D(1) = (uint16_t)(Wd(2) << 1);
-                r->a[4] = g32(0x136E) + D(1);
+                r->a[4] = col_table(r) + D(1);
                 SW(4, Wd(4) - Wd(2));
                 SW(6, -Wd(6));
                 edge_cross(r, 1);
@@ -1357,6 +1369,97 @@ void fn_S2_0376(Regs *r) {
     } while ((uint16_t)r->d[3]);
 }
 
+/* Mazeworld Original's projection of object D0.b (fn_S2_4C94, part of its fn_S2_4A9A whose frame
+ * A6 it shares): the object's row (-5(A6)) and depth (-6(A6)) from the cell entry at A1 (bytes +2
+ * column, +3 row) plus the table at D7 by the position's fractions (+4 / +8 & 15) and the player's
+ * step bytes; behind the viewer (negative row) it is skipped. Screen x (+$28, mirrored for a
+ * negative column) from the projection table G_53EC, height (+$2A) from G_53C4, row into +$26;
+ * an object sunk in the floor (+$3C negative) adds it to the depth; the depth (+$2C). The list
+ * entry at A4 gets the object and its distance byte (G_53BC map + A4+$36, at least 1), and A4
+ * moves on. A record whose +$26 is not negative is already projected. An object with a radius
+ * (+$3C positive) keeps its depth cell off walls: the original tests the cell at the word in low
+ * memory $30 (a bug: it meant the object's +$30) plus or minus a row / a column. */
+void fo_S7_0D32(Regs *r);
+static void orig_project(Regs *r) {
+    uint32_t a6 = r->a[6];
+    w8(r->a[4] + 1, (uint8_t)r->d[0]);
+    r->d[0] &= 0xFF; r->d[0] <<= 6;
+    r->a[3] = og32(0x53C8) + r->d[0];
+    uint32_t o = r->a[3];
+    set_w(&r->d[0], r16(o + 0x26));
+    uint8_t row, depth, b;
+    if (!((uint16_t)r->d[0] & 0x8000)) {                    /* already projected */
+        w8(a6 - 5, (uint8_t)r->d[0]); w8(a6 - 6, (uint8_t)r->d[0]);
+        set_w(&r->d[0], (uint16_t)(r16(o + 4) & 0xF)); set_w(&r->d[1], (uint16_t)(r16(o + 8) & 0xF));
+        r->a[0] = r->d[7];
+        goto column;
+    }
+    set_w(&r->d[0], r16(o + 0x3C));
+    if ((uint16_t)r->d[0] && !((uint16_t)r->d[0] & 0x8000)) {   /* a radius: the depth cell kept off walls */
+        uint32_t map = og32(0x53D4);
+        uint16_t rad = r16(o + 0x3C), bug = r16(0x30);
+        r->a[0] = map;
+        set_w(&r->d[0], (uint16_t)(r16(o + 4) & 0xF));
+        if ((uint16_t)r->d[0] < rad) { set_w(&r->d[2], (uint16_t)(bug - 0x20)); if (r8(map + sxw(r->d[2])) & 1) set_w(&r->d[0], rad); }
+        else { set_w(&r->d[2], (uint16_t)(0x10 - rad)); if ((uint16_t)r->d[0] >= (uint16_t)r->d[2]) { set_w(&r->d[2], (uint16_t)(bug + 0x20)); if (r8(map + sxw(r->d[2])) & 1) set_w(&r->d[0], (uint16_t)(0x10 - rad)); } }
+        set_w(&r->d[1], (uint16_t)(r16(o + 8) & 0xF));
+        if ((uint16_t)r->d[1] < rad) { set_w(&r->d[2], (uint16_t)(bug - 0x400)); if (r8(map + sxw(r->d[2])) & 1) set_w(&r->d[1], rad); }
+        else { set_w(&r->d[2], (uint16_t)(0x10 - rad)); if ((uint16_t)r->d[1] >= (uint16_t)r->d[2]) { set_w(&r->d[2], (uint16_t)(bug + 0x400)); if (r8(map + sxw(r->d[2])) & 1) set_w(&r->d[1], (uint16_t)(0x10 - rad)); } }
+        r->a[0] = r->d[7];
+        b = (uint8_t)(r8(r->a[1] + 3) + r8(r->a[0] + 0x10 + sxw(r->d[0])) + r8(r->a[0] + 0x30 + sxw(r->d[1])) + og8(0x582F));
+        if ((int8_t)b < 0) r->d[2] = 0; else set_b(&r->d[2], b);   /* moveq #0 when negative */
+        w8(a6 - 6, (uint8_t)r->d[2]);
+        set_w(&r->d[0], (uint16_t)(r16(o + 4) & 0xF)); set_w(&r->d[1], (uint16_t)(r16(o + 8) & 0xF));
+        r->a[0] = r->d[7];
+        b = (uint8_t)(r8(r->a[1] + 3) + r8(r->a[0] + 0x10 + sxw(r->d[0])) + r8(r->a[0] + 0x30 + sxw(r->d[1])) + og8(0x582F));
+        set_b(&r->d[2], b);
+        if ((int8_t)b < 0) return;
+        w8(a6 - 5, b);
+        goto column;
+    }
+    set_w(&r->d[0], (uint16_t)(r16(o + 4) & 0xF)); set_w(&r->d[1], (uint16_t)(r16(o + 8) & 0xF));
+    r->a[0] = r->d[7];
+    b = (uint8_t)(r8(r->a[1] + 3) + r8(r->a[0] + 0x10 + sxw(r->d[0])) + r8(r->a[0] + 0x30 + sxw(r->d[1])) + og8(0x582F));
+    set_b(&r->d[2], b);
+    if ((int8_t)b < 0) return;                               /* behind the viewer */
+    w8(a6 - 5, b); w8(a6 - 6, b);
+column:
+    b = (uint8_t)(r8(r->a[1] + 2) + r8(r->a[0] + sxw(r->d[0])) + r8(r->a[0] + 0x20 + sxw(r->d[1])) + og8(0x5830));
+    row = r8(a6 - 5);
+    {
+        int neg = (int8_t)b < 0;
+        uint8_t c2 = (uint8_t)((neg ? (uint8_t)-b : b) << 1);
+        r->a[0] = og32(0x53EC);
+        set_w(&r->d[1], (uint16_t)(row << 8 | c2));
+        int16_t x = (int16_t)r16(r->a[0] + sxw(r->d[1]));
+        set_w(&r->d[0], (uint16_t)((neg ? -x : x) + (int16_t)og16(0x5736)));
+        w16(o + 0x28, (uint16_t)r->d[0]);
+        r->a[0] = og32(0x53C4);
+        set_w(&r->d[1], (uint16_t)((uint16_t)r->d[1] >> 1));
+        r->d[0] = r8(r->a[0] + sxw(r->d[1]));
+        if (neg) set_w(&r->d[0], (uint16_t)-(int16_t)(uint16_t)r->d[0]);
+        w16(o + 0x2A, (uint16_t)r->d[0]);
+        set_b(&r->d[2], c2);
+    }
+    r->d[0] = row; w16(o + 0x26, (uint16_t)r->d[0]);
+    set_w(&r->d[0], r16(o + 0x3C));
+    if ((uint16_t)r->d[0] & 0x8000) {
+        depth = (uint8_t)((uint8_t)r->d[0] + r8(a6 - 6));
+        if ((int8_t)depth < 0) depth = 0;
+        w8(a6 - 6, depth);
+    }
+    r->d[0] = r8(a6 - 6); w16(o + 0x2C, (uint16_t)r->d[0]);
+    r->a[0] = og32(0x53BC);
+    set_w(&r->d[1], (uint16_t)(((uint16_t)(r16(o + 8) - og16(0x56D4)) & 0x7F) << 7));
+    set_w(&r->d[0], (uint16_t)((uint16_t)(r16(o + 4) - og16(0x56D8)) & 0x7F));
+    set_w(&r->d[1], (uint16_t)((uint16_t)r->d[1] | (uint16_t)r->d[0]));
+    r->d[0] = r8(r->a[0] + sxw(r->d[1]));
+    set_w(&r->d[0], (uint16_t)((uint16_t)r->d[0] + r16(o + 0x36)));
+    if ((int16_t)(uint16_t)r->d[0] <= 0) set_w(&r->d[0], 1);
+    w8(r->a[4], (uint8_t)r->d[0]);
+    r->a[4] += 2;
+}
+
 /* ---------- fn_S2_5810 (JT 88): the objects in view ----------
  * Collects the objects in the cells visible from the player's cell (G_20CA) looking in direction
  * G_20D4: the visibility list G_1DB4 for that direction (little-endian cell offsets, 100 ends it)
@@ -1373,15 +1476,15 @@ void fn_S2_5810(Regs *r) {
     uint32_t a4_saved = r->a[4], a6_saved = r->a[6];
     uint32_t fp = mz_local(0x12) + 0x12;
     r->a[6] = fp;
-    w16(fp - 8, 0x78);
+    if (!mz_original) w16(fp - 8, 0x78);
     w32(fp - 4, r->a[4]);
     r->a[2] = g32(0x1DCC);
     r->d[7] = g32(0x1DD4);
     r->d[0] = 0; set_w(&r->d[0], g16(0x20D4)); lsl_w(r, &r->d[0], 6);
     add_l(r, &r->d[7], r->d[0]);
-    r->a[0] = GADDR(0x136A);
     static const uint16_t quarter[3] = {0x20, 0x10, 0x30};
-    for (int k = 0; k < 3; k++) {
+    if (!mz_original) r->a[0] = GADDR(0x136A);
+    for (int k = 0; k < (mz_original ? 0 : 3); k++) {          /* (Original has no view basis here) */
         set_w(&r->d[0], g16(0x20D4)); add_w(r, &r->d[0], quarter[k]);
         set_w(&r->d[0], (uint16_t)((uint16_t)r->d[0] & 0x3F)); lsl_w(r, &r->d[0], 1);
         uint16_t v = r16(r->a[0] + sxw(r->d[0]));
@@ -1403,10 +1506,10 @@ void fn_S2_5810(Regs *r) {
             for (int k = 1; k <= 10; k++) {
                 set_b(&r->d[0], r8(r->a[2] + sxw(r->d[6]) + (uint32_t)k));
                 if (!(uint8_t)r->d[0]) break;
-                fn_S2_5AB2(r);
+                if (mz_original) orig_project(r); else fn_S2_5AB2(r);
             }
         }
-        if (r8(r->a[2] + sxw(r->d[6]) + 0x12) & 1) {
+        if (!mz_original && (r8(r->a[2] + sxw(r->d[6]) + 0x12) & 1)) {
             set_w(&r->d[0], r16(r->a[2] + sxw(r->d[6]) + 0x1C));
             set_w(&r->d[1], r16(r->a[2] + sxw(r->d[6]) + 0x1E));
             fn_S2_5A6C(r);
@@ -1496,7 +1599,8 @@ void fn_S2_5810(Regs *r) {
         set_w(&r->d[0], r16(o + 2));
         r->a[0] = o;
         r->d[1] = r->d[3];
-        mz_seg_of(7, 0x2D1C), fn_S7_2D1C(r);
+        if (mz_original) mz_seg(7), fo_S7_0D32(r);
+        else mz_seg_of(7, 0x2D1C), fn_S7_2D1C(r);
     next:
         set_w(&r->d[0], r16(r->a[4])); r->a[4] += 2;
     }

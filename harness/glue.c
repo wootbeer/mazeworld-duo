@@ -295,6 +295,7 @@ void     mac_PmBackColor(int16_t entry)            { pascal_trap(0xAA98, 0, "w",
 void     mac_FrameRect(uint32_t rect)              { pascal_trap(0xA8A1, 0, "l", rect); }
 void     mac_EraseRect(uint32_t rect)              { pascal_trap(0xA8A3, 0, "l", rect); }
 void     mac_MoveTo(int16_t h, int16_t v)          { pascal_trap(0xA893, 0, "ww", (uint32_t)(uint16_t)h, (uint32_t)(uint16_t)v); }
+void     mac_DrawChar(int16_t ch)                  { pascal_trap(0xA883, 0, "w", (uint32_t)(uint16_t)ch); }
 void     mac_Move(int16_t dh, int16_t dv)          { pascal_trap(0xA894, 0, "ww", (uint32_t)(uint16_t)dh, (uint32_t)(uint16_t)dv); }
 void     mac_LineTo(int16_t h, int16_t v)          { pascal_trap(0xA891, 0, "ww", (uint32_t)(uint16_t)h, (uint32_t)(uint16_t)v); }
 void     mac_Line(int16_t dh, int16_t dv)          { pascal_trap(0xA892, 0, "ww", (uint32_t)(uint16_t)dh, (uint32_t)(uint16_t)dv); }
