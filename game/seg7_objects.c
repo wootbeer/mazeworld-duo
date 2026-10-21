@@ -48,7 +48,7 @@ static void obj_sound_level(Regs *r) {
     lsl_w(r, &r->d[1], 1);
     set_w(&r->d[0], 0xFF);
     sub_w(r, &r->d[0], (uint16_t)r->d[1]);
-    mz_seg(4), fn_S4_141A(r);
+    mz_seg_of(4, 0x141A), fn_S4_141A(r);
 }
 
 /* ---------- types $20 and $21: the hunters ----------
@@ -108,7 +108,7 @@ static void t20_think(Regs *r) {
             fn_S7_3128(r);
             /* fall into the sound level */
             obj_sound_level(r);
-            mz_seg(4), fn_S4_1432();
+            mz_seg_of(4, 0x1432), fn_S4_1432();
             w16(o + 0x1E, 0xFFFF);
             set_w(&r->d[0], 6); continue;
         case 6:
@@ -122,7 +122,7 @@ static void t20_think(Regs *r) {
             w16(r->a[0] + sxw(r->d[0]) + 0xE, 0);
             set_w(&r->d[0], g16(0xF2));
             set_w(&r->d[1], r16(o + 0x30));
-            mz_seg(2), fn_S2_3410(r);
+            mz_seg_of(2, 0x3410), fn_S2_3410(r);
             w16(o + 0x10, r16(o + 0x30));
             r->d[0] = 0;
             w32(o + 4, 0); w32(o + 8, 0); w16(o + 0x30, 0); w16(o + 0xE, 0);
@@ -133,7 +133,7 @@ static void t20_think(Regs *r) {
             w16(o + 0x1E, (uint16_t)r->d[0]);
             if (!((uint16_t)r->d[0] & 0x8000)) return;
             set_w(&r->d[0], g16(0xF2));
-            mz_seg(2), fn_S2_3480(r);
+            mz_seg_of(2, 0x3480), fn_S2_3480(r);
             set_w(&r->d[0], 9); continue;
         case 9: {
             set_w(&r->d[1], 0x3DE0);
@@ -151,7 +151,7 @@ static void t20_think(Regs *r) {
             sg16(0xE0, 5);
             fn_S7_3ACA(r);
             if ((uint16_t)r->d[0]) {                       /* too close to the player: cost a life point */
-                mz_seg(4), fn_S4_1734();
+                mz_seg_of(4, 0x1734), fn_S4_1734();
                 set_w(&r->d[0], (uint16_t)(g16(0x20FE) - 1));
                 if ((uint16_t)r->d[0] & 0x8000) r->d[0] = 0;
                 sg16(0x20FE, (uint16_t)r->d[0]);
@@ -162,7 +162,7 @@ static void t20_think(Regs *r) {
         case 10:
             fn_S7_32DC(r);
             obj_sound_level(r);
-            mz_seg(4), fn_S4_15CE();
+            mz_seg_of(4, 0x15CE), fn_S4_15CE();
             w16(o + 0xE, r16(o + 0x30));
             set_w(&r->d[1], r16(o + 0x30));
             r->a[0] = g32(0x1DCC);
@@ -175,7 +175,7 @@ static void t20_think(Regs *r) {
             w16(o + 0x1E, (uint16_t)r->d[0]);
             if ((uint16_t)r->d[0] < 0x1C) return;
             set_w(&r->d[0], g16(0xF2));
-            mz_seg(2), fn_S2_3480(r);
+            mz_seg_of(2, 0x3480), fn_S2_3480(r);
             set_w(&r->d[0], 0); continue;
         default:                                    /* 1 */
             return;
@@ -227,7 +227,7 @@ static void t20_act(Regs *r) {
         r->a[0] = GADDR(0x0B6A);
         fn_S7_40D6(r);
         obj_sound_level(r);
-        mz_seg(4), fn_S4_14CC();
+        mz_seg_of(4, 0x14CC), fn_S4_14CC();
         w16(o + 0x1A, 0x2D);
         return;
     case 4: {
@@ -304,7 +304,7 @@ static int pickup(Regs *r) {
     if ((uint16_t)r->d[0] >= 3) return 0;
     set_w(&r->d[0], g16(0xF2));
     set_w(&r->d[1], r16(o + 0x30));
-    mz_seg(2), fn_S2_3410(r);
+    mz_seg_of(2, 0x3410), fn_S2_3410(r);
     w16(o + 2, (uint16_t)(r16(o + 2) | 0x8000));
     set_w(&r->d[0], r16(o + 0x30));
     r->a[0] = g32(0x1DCC);
@@ -316,11 +316,11 @@ static void jewel(Regs *r, uint32_t points) {
     set_w(&r->d[0], (uint16_t)((r16(o + 0x16) + 1) & 0xF));
     w16(o + 0x16, (uint16_t)r->d[0]);
     if (!pickup(r)) return;
-    mz_seg(4), fn_S4_1802();
+    mz_seg_of(4, 0x1802), fn_S4_1802();
     sg32(0x20EA, g32(0x20EA) + points);
     set_w(&r->d[0], (uint16_t)(g16(0x225E) - 1));
     sg16(0x225E, (uint16_t)r->d[0]);
-    if (!(uint16_t)r->d[0]) mz_seg(4), fn_S4_16C6();
+    if (!(uint16_t)r->d[0]) mz_seg_of(4, 0x16C6), fn_S4_16C6();
 }
 void fn_S7_01AC(Regs *r) { jewel(r, 500); }     /* type 2 */
 void fn_S7_03C2(Regs *r) { jewel(r, 750); }     /* type 4 */
@@ -330,7 +330,7 @@ void fn_S7_04E2(Regs *r) { jewel(r, 1500); }    /* type 6 */
 /* fn_S7_0136: type 1, the refill */
 void fn_S7_0136(Regs *r) {
     if (!pickup(r)) return;
-    mz_seg(4), fn_S4_16D8();
+    mz_seg_of(4, 0x16D8), fn_S4_16D8();
     sg16(0x20FE, g16(0x20FC));
     sg16(0x20F8, g16(0x20F6));
 }
@@ -342,7 +342,7 @@ void fn_S7_05AA(Regs *r) {
     if ((uint16_t)r->d[0] >= 0xC) r->d[0] = 0;
     w16(o + 0xC, (uint16_t)r->d[0]);
     if (!pickup(r)) return;
-    mz_seg(4), fn_S4_16EA();
+    mz_seg_of(4, 0x16EA), fn_S4_16EA();
     sg8(0x225B, 1); sg8(0x2258, 1); sg8(0x225C, 1);
     set_w(&r->d[0], r16(o + 0x30));
     r->a[0] = g32(0x1DCC);
@@ -352,8 +352,8 @@ void fn_S7_05AA(Regs *r) {
 /* end-of-level sequence step, every fourth tick (fn_S4_435E), then whether it is over (fn_S4_44DE) */
 static int level_end_step(Regs *r) {
     set_w(&r->d[0], g16(0x20BC) & 3);
-    if (!(uint16_t)r->d[0]) mz_seg(4), fn_S4_435E();
-    mz_seg(4), fn_S4_44DE(r);
+    if (!(uint16_t)r->d[0]) mz_seg_of(4, 0x435E), fn_S4_435E();
+    mz_seg_of(4, 0x44DE), fn_S4_44DE(r);
     return !(r->ccr & CCR_Z);
 }
 
@@ -388,7 +388,7 @@ void fn_S7_023E(Regs *r) {
             if ((uint16_t)r->d[0]) return;
             fn_S7_32DC(r);
             obj_sound_level(r);
-            mz_seg(4), fn_S4_175C();
+            mz_seg_of(4, 0x175C), fn_S4_175C();
             return;
         }
         set_w(&r->d[0], r16(o + 0xC));
@@ -402,7 +402,7 @@ void fn_S7_023E(Regs *r) {
         set_w(&r->d[0], g16(0xEC));
         if ((uint16_t)r->d[0] >= 5) return;
         w16(o + 0x16, 0xFFFF);
-        mz_seg(4), fn_S4_4340();
+        mz_seg_of(4, 0x4340), fn_S4_4340();
     }
     r->a[0] = GADDR(0x0146);
     set_w(&r->d[0], r16(o + 0xC));
@@ -438,7 +438,7 @@ static void t8_think(Regs *r) {
         case 1:
             fn_S7_32DC(r);
             obj_sound_level(r);
-            mz_seg(4), fn_S4_1746();
+            mz_seg_of(4, 0x1746), fn_S4_1746();
             w16(o + 0xC, 0);
             sg16(0x2256, (uint16_t)(g16(0x2256) + 1));
             set_w(&r->d[0], 2); continue;
@@ -450,7 +450,7 @@ static void t8_think(Regs *r) {
             w16(o + 0xC, 0);
             set_w(&r->d[0], 3); continue;
         case 3:
-            mz_seg(2), fn_S2_3532(r);
+            mz_seg_of(2, 0x3532), fn_S2_3532(r);
             set_w(&r->d[0], (uint16_t)r->d[0] & 0xF);
             if ((uint16_t)r->d[0]) return;
             set_w(&r->d[0], 2); continue;
@@ -501,7 +501,7 @@ static void t9_think(Regs *r) {
         case 3:
             fn_S7_3128(r);
             obj_sound_level(r);
-            mz_seg(4), fn_S4_145E();
+            mz_seg_of(4, 0x145E), fn_S4_145E();
             w16(o + 0x1E, 0xFFFF);
             set_w(&r->d[0], 4); continue;
         case 4:
@@ -515,7 +515,7 @@ static void t9_think(Regs *r) {
             w16(r->a[0] + sxw(r->d[0]) + 0xE, 0);
             set_w(&r->d[0], g16(0xF2));
             set_w(&r->d[1], r16(o + 0x30));
-            mz_seg(2), fn_S2_3410(r);
+            mz_seg_of(2, 0x3410), fn_S2_3410(r);
             w16(o + 0x10, r16(o + 0x30));
             r->d[0] = 0;
             w32(o + 4, 0); w32(o + 8, 0); w16(o + 0x30, 0); w16(o + 0xE, 0);
@@ -526,7 +526,7 @@ static void t9_think(Regs *r) {
             w16(o + 0x1E, (uint16_t)r->d[0]);
             if (!((uint16_t)r->d[0] & 0x8000)) return;
             set_w(&r->d[0], g16(0xF2));
-            mz_seg(2), fn_S2_3480(r);
+            mz_seg_of(2, 0x3480), fn_S2_3480(r);
             set_w(&r->d[0], 7); continue;
         case 7: {
             set_w(&r->d[1], 0x3DE0);
@@ -546,7 +546,7 @@ static void t9_think(Regs *r) {
         case 8:
             fn_S7_32DC(r);
             obj_sound_level(r);
-            mz_seg(4), fn_S4_15FA();
+            mz_seg_of(4, 0x15FA), fn_S4_15FA();
             w16(o + 0xE, r16(o + 0x30));
             set_w(&r->d[1], r16(o + 0x30));
             r->a[0] = g32(0x1DCC);
@@ -559,7 +559,7 @@ static void t9_think(Regs *r) {
             w16(o + 0x1E, (uint16_t)r->d[0]);
             if ((uint16_t)r->d[0] < 6) return;
             set_w(&r->d[0], g16(0xF2));
-            mz_seg(2), fn_S2_3480(r);
+            mz_seg_of(2, 0x3480), fn_S2_3480(r);
             set_w(&r->d[0], 0); continue;
         default:                                    /* 2 */
             return;
@@ -586,7 +586,7 @@ static void t9_act(Regs *r) {
         fn_S7_0A9C(r);
         if (!((uint16_t)r->d[0] & 0x8000)) fn_S7_3784(r);
         fn_S7_3D2A(r);
-        if ((uint16_t)r->d[0] & 0x8000) { mz_seg(4), fn_S4_1574(); fn_S7_09EC(r); }
+        if ((uint16_t)r->d[0] & 0x8000) { mz_seg_of(4, 0x1574), fn_S4_1574(); fn_S7_09EC(r); }
         w16(o + 0x34, 6);
         return;
     case 4: {
@@ -639,7 +639,7 @@ static void t12_spit(Regs *r, uint16_t wait) {
     r->a[0] = GADDR(0x0B6A);
     fn_S7_40D6(r);
     obj_sound_level(r);
-    mz_seg(4), fn_S4_1524();
+    mz_seg_of(4, 0x1524), fn_S4_1524();
     w16(r->a[4] + 0x1A, wait);
 }
 static void t12_think(Regs *r) {
@@ -683,7 +683,7 @@ static void t12_think(Regs *r) {
         case 5:
             fn_S7_3128(r);
             obj_sound_level(r);
-            mz_seg(4), fn_S4_14A0();
+            mz_seg_of(4, 0x14A0), fn_S4_14A0();
             w16(o + 0x1E, 0xFFFF);
             w16(o + 0x18, 0xC8);
             set_w(&r->d[0], 6); continue;
@@ -697,7 +697,7 @@ static void t12_think(Regs *r) {
         case 7:
             fn_S7_32DC(r);
             obj_sound_level(r);
-            mz_seg(4), fn_S4_163C();
+            mz_seg_of(4, 0x163C), fn_S4_163C();
             w16(o + 0x3A, 0x1D);
             w16(o + 0x1A, 0xA);
             set_w(&r->d[0], 4); continue;
@@ -815,7 +815,7 @@ static const uint16_t t1e_think_entry[13] = {0x1A, 0x7E, 0x82, 0xF2, 0x1B2, 0x1F
 static const uint16_t t1e_act_entry[13] = {0xAC, 0xD4, 0x114, 0x162, 0x212, 0x254, 0x282, 0x29C, 0x30C, 0x32A, 0x390, 0x3D4, 0x3F4};
 static void scent_reset(Regs *r) {
     sg16(0x209C, 0); sg16(0x209A, 0);
-    mz_seg(2), fn_S2_355E(r);
+    mz_seg_of(2, 0x355E), fn_S2_355E(r);
 }
 /* common states of the respawning monsters: dead (removed for $1F4 ticks), waiting in the corner
  * cell $3DE0 and coming back; returns 1 if the state was handled (D0 = the next state, or -1) */
@@ -825,7 +825,7 @@ static int obj_dead(Regs *r, uint32_t o, int next) {
     w16(r->a[0] + sxw(r->d[0]) + 0xE, 0);
     set_w(&r->d[0], g16(0xF2));
     set_w(&r->d[1], r16(o + 0x30));
-    mz_seg(2), fn_S2_3410(r);
+    mz_seg_of(2, 0x3410), fn_S2_3410(r);
     w16(o + 0x10, r16(o + 0x30));
     r->d[0] = 0;
     w32(o + 4, 0); w32(o + 8, 0); w16(o + 0x30, 0); w16(o + 0xE, 0);
@@ -838,7 +838,7 @@ static int obj_dead_wait(Regs *r, uint32_t o, int next) {
     w16(o + 0x1E, (uint16_t)r->d[0]);
     if (!((uint16_t)r->d[0] & 0x8000)) return 0;
     set_w(&r->d[0], g16(0xF2));
-    mz_seg(2), fn_S2_3480(r);
+    mz_seg_of(2, 0x3480), fn_S2_3480(r);
     set_w(&r->d[0], (uint16_t)next);
     return 1;
 }
@@ -861,7 +861,7 @@ static int obj_respawn(Regs *r, int check_player, int next) {
         sg16(0xE0, (uint16_t)check_player);
         fn_S7_3ACA(r);
         if ((uint16_t)r->d[0]) {
-            mz_seg(4), fn_S4_1734();
+            mz_seg_of(4, 0x1734), fn_S4_1734();
             set_w(&r->d[0], (uint16_t)(g16(0x20FE) - 1));
             if ((uint16_t)r->d[0] & 0x8000) r->d[0] = 0;
             sg16(0x20FE, (uint16_t)r->d[0]);
@@ -976,7 +976,7 @@ static void t1e_think(Regs *r) {
         case 12:
             if (!obj_count_up(r, 0x1E, 6)) return;
             set_w(&r->d[0], g16(0xF2));
-            mz_seg(2), fn_S2_3480(r);
+            mz_seg_of(2, 0x3480), fn_S2_3480(r);
             set_w(&r->d[0], 0); continue;
         default:                                    /* 1 */
             return;
@@ -1002,7 +1002,7 @@ static void t1e_act(Regs *r) {
         set_w(&r->d[0], g16(0x20CA));
         if ((uint16_t)r->d[0] != g16(0x22AC)) {
             sg16(0x209A, (uint16_t)r->d[0]); sg16(0x209C, 0x23);
-            mz_seg(2), fn_S2_355E(r);
+            mz_seg_of(2, 0x355E), fn_S2_355E(r);
         }
         fn_S7_3D2A(r);
         if (!((uint16_t)r->d[0] & 0x8000)) {
@@ -1021,7 +1021,7 @@ static void t1e_act(Regs *r) {
         set_w(&r->d[2], g16(0xF2));
         r->a[0] = GADDR(0x0B6A);
         fn_S7_40D6(r);
-        mz_seg(2), fn_S2_3532(r);
+        mz_seg_of(2, 0x3532), fn_S2_3532(r);
         set_w(&r->d[0], (uint16_t)(((uint16_t)r->d[0] & 0x1F) + 0x44));
         w16(o + 0x1A, (uint16_t)r->d[0]);
         return;
@@ -1094,7 +1094,7 @@ static void t28_fire(Regs *r, uint32_t steps) {
     r->a[0] = GADDR(steps);
     fn_S7_40D6(r);
     obj_sound_level(r);
-    mz_seg(4), fn_S4_153A();
+    mz_seg_of(4, 0x153A), fn_S4_153A();
     w16(r->a[4] + 0x1A, 0xA);
 }
 static void t28_think(Regs *r) {
@@ -1142,10 +1142,10 @@ static void t28_think(Regs *r) {
             fn_S7_3128(r);
             obj_sound_level(r);
             if (!(r16(o + 0x20) & 0x8000)) {           /* health left: just angered */
-                mz_seg(4), fn_S4_1668();
+                mz_seg_of(4, 0x1668), fn_S4_1668();
                 set_w(&r->d[0], 2); continue;
             }
-            mz_seg(4), fn_S4_14B6();
+            mz_seg_of(4, 0x14B6), fn_S4_14B6();
             w16(o + 0x20, 0);
             w16(o + 0x1E, 0xFFFF);
             set_w(&r->d[0], 6); continue;
@@ -1162,7 +1162,7 @@ static void t28_think(Regs *r) {
         case 11:
             if (!obj_count_up(r, 0x1E, 0x10)) return;
             set_w(&r->d[0], g16(0xF2));
-            mz_seg(2), fn_S2_3480(r);
+            mz_seg_of(2, 0x3480), fn_S2_3480(r);
             w16(o + 0x20, 0x15E);
             set_w(&r->d[0], 0); continue;
         default:                                    /* 1 */
@@ -1320,7 +1320,7 @@ static void t2d_think(Regs *r) {
         case 4:
             fn_S7_3128(r);
             obj_sound_level(r);
-            mz_seg(4), fn_S4_1448();
+            mz_seg_of(4, 0x1448), fn_S4_1448();
             w16(o + 0x1E, 0xFFFF);
             set_w(&r->d[0], 5); continue;
         case 5:
@@ -1333,7 +1333,7 @@ static void t2d_think(Regs *r) {
         case 10:
             if (!obj_count_up(r, 0x1E, 0x10)) return;
             set_w(&r->d[0], g16(0xF2));
-            mz_seg(2), fn_S2_3480(r);
+            mz_seg_of(2, 0x3480), fn_S2_3480(r);
             set_w(&r->d[0], 0); continue;
         default:
             return;
@@ -1362,7 +1362,7 @@ static void t2d_act(Regs *r) {
                 set_w(&r->d[0], (uint16_t)((uint16_t)r->d[0] - 0xF));
                 w16(o + 0x18, (uint16_t)r->d[0]);
                 obj_sound_level(r);
-                mz_seg(4), fn_S4_14E2();
+                mz_seg_of(4, 0x14E2), fn_S4_14E2();
                 fn_S7_2A86(r);
                 set_w(&r->d[1], (uint16_t)r->d[0]);
                 set_w(&r->d[0], 0x36);

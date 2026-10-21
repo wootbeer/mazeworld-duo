@@ -1,4 +1,15 @@
-# Status — Mazeworld Original, step 1 (in progress)
+# Status — Mazeworld Original, step 2 (in progress)
+
+- Shared code: `tools/map_builds.py` pairs Catacombs' functions with Original's and, inside each
+  pair, the A5 globals, jump-table slots and callees that only moved; it writes `game/orig_map.h`.
+  For Original, `GADDR` translates the C code's global offsets (`mz_gmap`: each offset moves with
+  the nearest global at or above it), `mz_jt` the jump-table addresses, and `mz_seg_of` loads the
+  segment the called function is in. A translated function runs for Original when it and all its
+  callees match exactly (95 of them); `tools/verify_original.sh` checks them per call and end to
+  end on Original's tests and recordings. The rest (the renderer, sound, the shell's menus) differs
+  for real and is step 3. `tools/diff_pair.py fn_Sx_xxxx` shows how a pair differs.
+
+## Step 1
 
 - Original runs in the rig through the shell and play: `tests/mwo_monkey_21..24.txt` (random play
   by mouse, 14400 ticks each) and `tests/mwo_shell.txt` (window sizes, Options, About, Read

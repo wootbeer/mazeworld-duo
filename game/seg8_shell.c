@@ -26,7 +26,7 @@ void fn_S8_394A(void) {
     if (mac_Alert(0x86, 0) == 2) {
         for (int16_t i = 0; i < 10; i++) {
             uint32_t e = tbl + (uint32_t)(0x46 * i);
-            mz_seg(2), fn_S2_0332(name, e + 0x118);
+            mz_seg_of(2, 0x0332), fn_S2_0332(name, e + 0x118);
             w16(e + 0x158, 0); w32(e + 0x15A, 0);
         }
         mac_SetPort(g32(0x2232));
@@ -53,10 +53,10 @@ void fn_S8_33E2(int16_t item) {
  * previous size (alert G_3B32) or to size 1 (alert G_3B94); the window is resized and recentred.
  * Returns 0 if not even size 1 works (the caller quits). */
 uint8_t fn_S8_4ACE(int16_t size) {
-    mz_seg(2), fn_S2_3872(GADDR(0x22C4));
+    mz_seg_of(2, 0x3872), fn_S2_3872(GADDR(0x22C4));
     fn_S2_3872(GADDR(0x22C0));
     uint8_t reserved = fn_S8_61AA();
-    if (!reserved) mz_seg(2), fn_S2_03A0(GADDR(0x3BF4), 0, 0);
+    if (!reserved) mz_seg_of(2, 0x03A0), fn_S2_03A0(GADDR(0x3BF4), 0, 0);
     mac_SetCursor(deref(mac_GetCursor(4)));                 /* watch */
     int16_t old = (int16_t)g16(0x22B6);
     int outcome = 0;                                        /* 1: fell back to size 1, 2: kept the old size */
@@ -66,7 +66,7 @@ uint8_t fn_S8_4ACE(int16_t size) {
         else {
             if (reserved) { Regs r = {{0}, {0}, 0}; fn_S8_61FE(&r); }
             mac_InitCursor();
-            mz_seg(2), fn_S2_03A0(GADDR(0x3BCC), 0, 0);
+            mz_seg_of(2, 0x03A0), fn_S2_03A0(GADDR(0x3BCC), 0, 0);
             return 0;
         }
     }
@@ -80,8 +80,8 @@ uint8_t fn_S8_4ACE(int16_t size) {
         mac_SelectWindow(w);
     }
     mac_InitCursor();
-    if (outcome == 1) mz_seg(2), fn_S2_03A0(GADDR(0x3B94), 0, 0);
-    if (outcome == 2) mz_seg(2), fn_S2_03A0(GADDR(0x3B32), 0, 0);
+    if (outcome == 1) mz_seg_of(2, 0x03A0), fn_S2_03A0(GADDR(0x3B94), 0, 0);
+    if (outcome == 2) mz_seg_of(2, 0x03A0), fn_S2_03A0(GADDR(0x3B32), 0, 0);
     return 1;
 }
 
@@ -179,7 +179,7 @@ uint32_t fn_S8_3822(int16_t err) {
 void fn_S8_37E6(uint32_t what, int16_t err) {
     MZ_FRAME;
     uint32_t num = mz_local(0x100);
-    mz_seg(3), fn_S3_038E(err, num);
+    mz_seg_of(3, 0x038E), fn_S3_038E(err, num);
     mac_ParamText(what, fn_S8_3822(err), num, GADDR(0x427C));
     mac_StopAlert(0x82, 0);
 }
@@ -206,7 +206,7 @@ int16_t fn_S8_3658(int16_t ref, uint32_t h) {
 int16_t fn_S8_3522(uint32_t spec, uint32_t h, uint32_t creator, uint32_t type) {
     MZ_FRAME;
     uint32_t name = mz_local(0x100), vref = mz_local(2), dir = mz_local(4), tmp = mz_local(0x46), ref = mz_local(2);
-    mz_seg(3), fn_S3_038E((int32_t)r32(0x020C), name);
+    mz_seg_of(3, 0x038E), fn_S3_038E((int32_t)r32(0x020C), name);
     int16_t err = fn_S3_0400((int16_t)r16(spec), 0x74656D70, 1, vref, dir);   /* 'temp', create */
     if (!err) err = mac_FSMakeFSSpec((int16_t)r16(vref), (int32_t)r32(dir), name, tmp);
     if (!err || err == -43) err = mac_FSpCreate(tmp, 0x74727368, 0x74727368, -1);   /* 'trsh' */
@@ -232,7 +232,7 @@ int16_t fn_S8_295A(uint32_t h) {
     w32(p + 2, r32(g + 0x22)); w32(p + 6, r32(g + 0x26));
     mac_HUnlock(h);
     uint32_t name = mz_local(0x100), vref = mz_local(2), dir = mz_local(4), spec = mz_local(0x46);
-    mz_seg(3), fn_S3_03BA(name, 0x80, 1);
+    mz_seg_of(3, 0x03BA), fn_S3_03BA(name, 0x80, 1);
     int16_t err = fn_S3_0400((int16_t)0x8000, 0x70726566, 0, vref, dir);   /* kOnSystemDisk, 'pref' */
     if (!err) {
         err = mac_FSMakeFSSpec((int16_t)r16(vref), (int32_t)r32(dir), name, spec);
@@ -255,25 +255,25 @@ void fn_S8_21AA(void) {
     fn_S8_25A8(); fn_S8_26A2(); fn_S8_2480(); fn_S8_25BE();
     mac_GetFNum(GADDR(0x4796), GADDR(0x2244));
     /* (a segment is loaded where the original first calls into it: that allocates its code) */
-    if (!g16(0x2244)) mz_seg(2), fn_S2_03DC(GADDR(0x478E), 0);
-    sg32(0x223A, mac_NewPtr(0x9C)); if (!g32(0x223A)) mz_seg(2), fn_S2_03A0(GADDR(0x4708), 0, 1);
-    sg32(0x2236, mac_NewPtr(0x9C)); if (!g32(0x2236)) mz_seg(2), fn_S2_03A0(GADDR(0x46EE), 0, 1);
-    sg32(0x2242, fn_S8_26D6()); if (!g32(0x2242)) mz_seg(2), fn_S2_03A0(GADDR(0x46D4), 0, 1);
+    if (!g16(0x2244)) mz_seg_of(2, 0x03DC), fn_S2_03DC(GADDR(0x478E), 0);
+    sg32(0x223A, mac_NewPtr(0x9C)); if (!g32(0x223A)) mz_seg_of(2, 0x03A0), fn_S2_03A0(GADDR(0x4708), 0, 1);
+    sg32(0x2236, mac_NewPtr(0x9C)); if (!g32(0x2236)) mz_seg_of(2, 0x03A0), fn_S2_03A0(GADDR(0x46EE), 0, 1);
+    sg32(0x2242, fn_S8_26D6()); if (!g32(0x2242)) mz_seg_of(2, 0x03A0), fn_S2_03A0(GADDR(0x46D4), 0, 1);
     uint32_t main_gd = mac_GetMainDevice();
-    if (r16(deref(r32(deref(main_gd) + 0x16)) + 0x20) == 1) sg32(0x2224, (mz_seg(2), fn_S2_01FA(0xCA)));
-    else if (mac_TestDeviceAttribute(mac_GetMainDevice(), 0)) sg32(0x2224, (mz_seg(2), fn_S2_01FA(0xC8)));
-    else sg32(0x2224, (mz_seg(2), fn_S2_01FA(0xC9)));
+    if (r16(deref(r32(deref(main_gd) + 0x16)) + 0x20) == 1) sg32(0x2224, (mz_seg_of(2, 0x01FA), fn_S2_01FA(0xCA)));
+    else if (mac_TestDeviceAttribute(mac_GetMainDevice(), 0)) sg32(0x2224, (mz_seg_of(2, 0x01FA), fn_S2_01FA(0xC8)));
+    else sg32(0x2224, (mz_seg_of(2, 0x01FA), fn_S2_01FA(0xC9)));
     if (!g32(0x2224)) fn_S2_03A0(GADDR(0x468C), 0, 1);
     sg32(0x22C4, 0); sg32(0x22C0, 0);
     int16_t err = fn_S8_04FA();
     if (err) fn_S2_03A0(GADDR(0x2386), err, 1);
     fn_S8_3492();
     fn_S8_0136(1);
-    mz_seg(4), fn_S4_38B8();
+    mz_seg_of(4, 0x38B8), fn_S4_38B8();
     if (g16(0x238E)) fn_S8_237C();
     fn_S4_3896(g16(0x238E) == 3 ? 4 : (int16_t)g16(0x238E));
     fn_S8_2A32(&r);
-    mz_seg(2), fn_S2_39B8(&r);
+    mz_seg_of(2, 0x39B8), fn_S2_39B8(&r);
     int16_t size = (int16_t)r16(deref(g32(0x2242)));
     if (!size) size = 2;
     if (!fn_S8_48A2(size, deref(g32(0x2242)) + 2)) mac_ExitToShell();
@@ -282,11 +282,11 @@ void fn_S8_21AA(void) {
     err = fn_S8_295A(g32(0x2242));
     if (err) {
         uint32_t what = mz_local(0x100);
-        mz_seg(3), fn_S3_03BA(what, 0x80, 1);
+        mz_seg_of(3, 0x03BA), fn_S3_03BA(what, 0x80, 1);
         fn_S8_37E6(what, err);
     }
     fn_S8_50FC(GADDR(0x22C4), GADDR(0x22C0));
-    mz_seg(4), fn_S4_3AB2();
+    mz_seg_of(4, 0x3AB2), fn_S4_3AB2();
 }
 
 /* ---------- enabling and checking the menu items ---------- */

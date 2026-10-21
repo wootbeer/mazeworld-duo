@@ -23,7 +23,7 @@ void fn_S8_1A9C(int16_t page) {
 /* a centred text box of the title page: rows top..bottom of `r`, the C string at global g */
 static void title_line(uint32_t r, int16_t top, int16_t bottom, uint16_t g) {
     w16(r, (uint16_t)top); w16(r + 4, (uint16_t)bottom);
-    mac_TETextBox(GADDR(g), (int32_t)(mz_seg(2), fn_S2_0252(GADDR(g))), r, 1);
+    mac_TETextBox(GADDR(g), (int32_t)(mz_seg_of(2, 0x0252), fn_S2_0252(GADDR(g))), r, 1);
 }
 
 /* fn_S8_1B0E (JT 16): the user item (item 4) drawing procedure: the page in white on black.
@@ -76,12 +76,12 @@ void fn_S8_1B0E(uint32_t dlg, int16_t item) {
                 mac_MoveTo((int16_t)r16(tr + 2), 0x16);
                 mac_TextFace(4);                            /* underline */
                 mac_DrawString(GADDR(0x4B32));
-                mz_seg(3), fn_S3_038E((int32_t)page - 1, num);
+                mz_seg_of(3, 0x038E), fn_S3_038E((int32_t)page - 1, num);
                 mac_DrawString(num);
                 mac_TextFace(0);
                 w16(tr, 0x2A); w16(tr + 4, 0x11A);
                 uint32_t p = deref(text);
-                mac_TETextBox(p, (mz_seg(3), fn_S3_020E(text)), tr, 0);
+                mac_TETextBox(p, (mz_seg_of(3, 0x020E), fn_S3_020E(text)), tr, 0);
                 mac_HUnlock(text);
                 mac_ReleaseResource(text);
             }
@@ -172,7 +172,7 @@ void fn_S8_190C(int16_t page) {
     uint32_t gd = deref(mac_GetMainDevice());
     int16_t top = (int16_t)r16(gd + 0x22), left = (int16_t)r16(gd + 0x24);
     int16_t bottom = (int16_t)r16(gd + 0x26), right = (int16_t)r16(gd + 0x28);
-    if ((int16_t)(bottom - top) < 0x156 && (int16_t)(right - left) < 0x200) mz_seg(2), fn_S2_03A0(GADDR(0x4BBA), 0, 0);
+    if ((int16_t)(bottom - top) < 0x156 && (int16_t)(right - left) < 0x200) mz_seg_of(2, 0x03A0), fn_S2_03A0(GADDR(0x4BBA), 0, 0);
     if ((int16_t)(bottom - top) < 0x180) fn_S8_1ED0();
     uint32_t port = mz_local(4), item = mz_local(2), h = mz_local(4), box = mz_local(8);
     mac_GetPort(port);
@@ -183,11 +183,11 @@ void fn_S8_190C(int16_t page) {
     if (!pal) return;                                        /* (the original leaves the dialog open) */
     mac_NSetPalette(HELP_DIALOG, pal, 0x100);
     mac_GetDialogItem(HELP_DIALOG, 4, item, h, box);         /* item 4's kind goes in the item-hit word */
-    mac_SetDialogItem(HELP_DIALOG, 4, (int16_t)r16(item), MZ_A5 + 0xA2, box);   /* JT 16: fn_S8_1B0E */
+    mac_SetDialogItem(HELP_DIALOG, 4, (int16_t)r16(item), mz_jt(0xA2), box);   /* JT 16: fn_S8_1B0E */
     fn_S8_1A9C(page);
     mac_ShowWindow(HELP_DIALOG);
     for (int done = 0; !done; ) {
-        mac_ModalDialog(MZ_A5 + 0xAA, item);                  /* JT 17: fn_S8_1D5C */
+        mac_ModalDialog(mz_jt(0xAA), item);                  /* JT 17: fn_S8_1D5C */
         int16_t hit = (int16_t)r16(item);
         if (hit <= 0 || hit > 3) continue;
         if (hit == 1) { done = 1; continue; }

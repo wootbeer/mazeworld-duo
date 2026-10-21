@@ -30,8 +30,14 @@ static inline void w8(uint32_t a, uint8_t v)   { MZ_WHOOK(a, 1); M[a & 0xFFFFFF]
 static inline void w16(uint32_t a, uint16_t v) { MZ_WHOOK(a, 2); a &= 0xFFFFFF; M[a] = (uint8_t)(v >> 8); M[a + 1] = (uint8_t)v; }
 static inline void w32(uint32_t a, uint32_t v) { MZ_WHOOK(a, 4); a &= 0xFFFFFF; M[a] = (uint8_t)(v >> 24); M[a + 1] = (uint8_t)(v >> 16); M[a + 2] = (uint8_t)(v >> 8); M[a + 3] = (uint8_t)v; }
 
-/* globals: G_xxxx is at A5 - 0xxxxx */
-#define GADDR(off) (MZ_A5 - (uint32_t)(off))
+/* globals: G_xxxx is at A5 - 0xxxxx (Catacombs offsets; for Mazeworld Original, mz_gmap moves
+ * them to that build's: game/games.c) */
+extern const uint16_t *mz_gmap;
+extern int mz_original;
+void     mz_select_original(void);
+uint32_t mz_jt(uint16_t off);          /* jump-table entry `off` above A5 */
+uint16_t mz_orig_func(int seg, uint16_t off);
+#define GADDR(off) (MZ_A5 - (mz_gmap ? (uint32_t)mz_gmap[(uint16_t)(off)] : (uint32_t)(off)))
 static inline uint8_t  g8(uint32_t off)  { return r8(GADDR(off)); }
 static inline uint16_t g16(uint32_t off) { return r16(GADDR(off)); }
 static inline uint32_t g32(uint32_t off) { return r32(GADDR(off)); }
@@ -46,6 +52,7 @@ static inline uint32_t deref(uint32_t h) { return r32(h); }
  * harness this allocates its code, exactly as the original's LoadSeg does; the port has nothing
  * to load). Placed before each cross-segment call, mirroring the original's jsr x(A5). */
 void mz_seg(int n);
+void mz_seg_of(int seg, uint16_t off);   /* the same, named by the function called (games.c) */
 /* Where the original spins until an interrupt (a VBL task) changes something: one tick passes and
  * its VBL processing runs. Call once per pass of the original's loop. */
 void mz_idle(void);

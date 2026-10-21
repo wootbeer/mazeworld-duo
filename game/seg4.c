@@ -116,14 +116,14 @@ void fn_S4_1EAE(int16_t n) {
     uint32_t cells = g32(0x1DCC), rec = g32(0x1DC4) + (uint32_t)(int32_t)(int16_t)off;
     if (r16(rec + 2) & 0x8000) return;
     Regs r = {{0}, {0}, 0};
-    r.d[0] = off; mz_seg(2), fn_S2_3480(&r);
+    r.d[0] = off; mz_seg_of(2, 0x3480), fn_S2_3480(&r);
     uint16_t m = r16(rec + 0xE);
     if (m) {
         if (m == 1) w16(rec + 0xE, r16(rec + 0x30));
         w16(cells + (uint32_t)(int32_t)(int16_t)r16(rec + 0xE) + 0xE, 1);
     }
     uint16_t cell = r16(rec + 0x30);
-    if (cell) { r.d[0] = off; r.d[1] = cell; mz_seg(2), fn_S2_33A4(&r); }
+    if (cell) { r.d[0] = off; r.d[1] = cell; mz_seg_of(2, 0x33A4), fn_S2_33A4(&r); }
 }
 
 /* fn_S4_3B9A (JT 66): unlocks the handle G_2A86 (if any) and the 128 handles of G_2A7E[], clearing
@@ -452,7 +452,7 @@ void fn_S4_1E8C(Regs *r) {
     sg16(0x36F8, n);
     r->ccr = (uint8_t)(n == 0 ? CCR_X : 0);   /* addq.w carry */
     cc_cmp_w(r, 100, n);
-    if ((int16_t)n >= 100) mz_seg(2), fn_S2_03A0(GADDR(0x2AB4), 0, 1);   /* arguments packed by the original as one long $100 */
+    if ((int16_t)n >= 100) mz_seg_of(2, 0x03A0), fn_S2_03A0(GADDR(0x2AB4), 0, 1);   /* arguments packed by the original as one long $100 */
 }
 
 void fn_S4_1E8C(Regs *r);
@@ -935,7 +935,7 @@ void fn_S2_03A0(uint32_t msg, int16_t num, int8_t fatal);
  * into the cell grid (fn_S4_2CC8, fn_S4_1C88). */
 void fn_S4_1C38(int16_t size, int16_t x, int16_t y) {
     uint32_t h = mac_NewHandle(0x400);
-    if (!h) mz_seg(2), fn_S2_03A0(GADDR(0x2AEA), 0, 1);   /* the long $100 pushed: num 0, fatal byte 1 */
+    if (!h) mz_seg_of(2, 0x03A0), fn_S2_03A0(GADDR(0x2AEA), 0, 1);   /* the long $100 pushed: num 0, fatal byte 1 */
     fn_S4_2C1C(h, size, x, y);
     fn_S4_2CC8(h);
     Regs r = {{0}, {0}, 0};
@@ -1030,18 +1030,18 @@ int16_t fn_S4_38F4(int16_t file) {
     if (err || !h) {
         mac_UseResFile(saved);
         sg32(0x2A86, 0);
-        mz_seg(2), fn_S2_03A0(GADDR(0x263E), err, 0);
+        mz_seg_of(2, 0x03A0), fn_S2_03A0(GADDR(0x263E), err, 0);
         return err ? err : 1;
     }
     mac_DetachResource(h);
     sg32(0x2A86, h);
-    int16_t n = (int16_t)((int16_t)(uint16_t)(mz_seg(3), fn_S3_020E(g32(0x2A86))) >> 1);
+    int16_t n = (int16_t)((int16_t)(uint16_t)(mz_seg_of(3, 0x020E), fn_S3_020E(g32(0x2A86))) >> 1);
     n = (int16_t)(n - 4);
     sg16(0x2A88, (uint16_t)n);
     if (n <= 0) {
         mac_UseResFile(saved);
         fn_S4_3AB2();
-        mz_seg(2), fn_S2_03A0(GADDR(g16(0x2A88) ? 0x25CE : 0x2600), 0, 0);
+        mz_seg_of(2, 0x03A0), fn_S2_03A0(GADDR(g16(0x2A88) ? 0x25CE : 0x2600), 0, 0);
         return 2;
     }
     mac_HLock(g32(0x2A86));
@@ -1050,7 +1050,7 @@ int16_t fn_S4_38F4(int16_t file) {
         int16_t id = (int16_t)(r16(map + 2u * (uint32_t)(int32_t)i + 8) & 0xFF);
         if (!id) continue;
         if (id < 0x80) {
-            mz_seg(2), fn_S2_03A0(GADDR(0x258A), i, 0);
+            mz_seg_of(2, 0x03A0), fn_S2_03A0(GADDR(0x258A), i, 0);
             mac_UseResFile(saved);
             fn_S4_3AB2();
             return 2;
@@ -1062,7 +1062,7 @@ int16_t fn_S4_38F4(int16_t file) {
         if (err || !s) {
             mac_UseResFile(saved);
             fn_S4_3AB2();
-            mz_seg(2), fn_S2_03A0(GADDR(0x25A8), id, 0);
+            mz_seg_of(2, 0x03A0), fn_S2_03A0(GADDR(0x25A8), id, 0);
             return err ? err : 1;
         }
         mac_DetachResource(s);
@@ -1095,10 +1095,10 @@ void fn_S4_3BF8(void) {
     if (!g32(0x2A86) || !g16(0x2A8A)) return;
     for (int16_t i = 0; i < (int16_t)g16(0x2A8A); i++) {
         w32(CHAN(i), 0);
-        int16_t err = mac_SndNewChannel(CHAN(i), 5, 0x80, MZ_A5 + 0x1FA);   /* sampledSynth, initMono */
+        int16_t err = mac_SndNewChannel(CHAN(i), 5, 0x80, mz_jt(0x1FA));   /* sampledSynth, initMono */
         if (err) {
             w32(CHAN(i), 0);
-            mz_seg(2), fn_S2_03A0(GADDR(err == -200 || err == -201 ? 0x2542 : 0x24D4), err, 0);
+            mz_seg_of(2, 0x03A0), fn_S2_03A0(GADDR(err == -200 || err == -201 ? 0x2542 : 0x24D4), err, 0);
         }
         w16(CHAN(i) + 4, 0);
     }
@@ -1111,7 +1111,7 @@ void fn_S4_3CE8(void) {
     for (int16_t i = 0; i < (int16_t)g16(0x2A8A); i++) {
         if (!r32(CHAN(i))) continue;
         int16_t err = mac_SndDisposeChannel(r32(CHAN(i)), 1);
-        if (err) mz_seg(2), fn_S2_03A0(GADDR(0x24C4), err, 0);
+        if (err) mz_seg_of(2, 0x03A0), fn_S2_03A0(GADDR(0x24C4), err, 0);
         w32(CHAN(i), 0);
     }
 }
@@ -1160,19 +1160,19 @@ void fn_S4_3F02(void) {
         int16_t err;
         if (r16(CHAN(best) + 4)) {
             w16(cmd, 4);                                   /* quietCmd */
-            if ((err = mac_SndDoImmediate(chan, cmd))) mz_seg(2), fn_S2_03A0(GADDR(0x24B2), err, 0);
+            if ((err = mac_SndDoImmediate(chan, cmd))) mz_seg_of(2, 0x03A0), fn_S2_03A0(GADDR(0x24B2), err, 0);
             if (!r16(REQ(i) + 4) || best_pri != -1) {
                 w16(cmd, 3);                               /* flushCmd */
-                if ((err = mac_SndDoImmediate(chan, cmd))) mz_seg(2), fn_S2_03A0(GADDR(0x24A8), err, 0);
+                if ((err = mac_SndDoImmediate(chan, cmd))) mz_seg_of(2, 0x03A0), fn_S2_03A0(GADDR(0x24A8), err, 0);
             }
         }
         w16(cmd, 0x2B); w16(cmd + 2, r16(REQ(i) + 6));     /* ampCmd */
-        if ((err = mac_SndDoImmediate(chan, cmd))) mz_seg(2), fn_S2_03A0(GADDR(0x249E), err, 0);
+        if ((err = mac_SndDoImmediate(chan, cmd))) mz_seg_of(2, 0x03A0), fn_S2_03A0(GADDR(0x249E), err, 0);
         w16(CHAN(best) + 4, r16(REQ(i) + 2));
         int16_t times = r16(REQ(i) + 4) ? (int16_t)(r16(REQ(i) + 4) - 1) : 0;
         for (int16_t k = 0; k <= times; k++) {
             w16(cmd, 0x51); w16(cmd + 2, 0); w32(cmd + 4, header);   /* bufferCmd */
-            if ((err = mac_SndDoCommand(chan, cmd, 1))) mz_seg(2), fn_S2_03A0(GADDR(0x2496), err, 0);
+            if ((err = mac_SndDoCommand(chan, cmd, 1))) mz_seg_of(2, 0x03A0), fn_S2_03A0(GADDR(0x2496), err, 0);
         }
         w16(cmd, 0x0D); w16(cmd + 2, (uint16_t)best); w32(cmd + 4, MZ_A5);   /* callBackCmd */
         mac_SndDoCommand(chan, cmd, 1);
@@ -1187,7 +1187,7 @@ void fn_S4_3F02(void) {
  * patterns G_1CE0), G_3A5C / G_3A62 / G_3A60 (pixels, row bytes) and G_3A48 (depth). */
 void fn_S4_0000(int32_t x, int32_t y, uint32_t other, uint32_t cells, uint32_t gw) {
     fn_S4_0112(x, y, cells);
-    mz_seg(2), fn_S2_0000(gw, 0);
+    mz_seg_of(2, 0x0000), fn_S2_0000(gw, 0);
     sg32(0x3A66, mac_GetGWorldPixMap(gw));
     uint32_t dev = mac_GetGWorldDevice(gw);
     sg16(0x3A48, r16(deref(r32(deref(dev) + 0x16)) + 0x20));

@@ -9,12 +9,12 @@ static void box_cols(uint32_t r, int16_t left, int16_t right) { w16(r + 2, (uint
 
 /* a number in `box` (TETextBox justification just); s: a Str255 to build it in */
 static void box_number(int32_t n, uint32_t box, int16_t just, uint32_t s) {
-    mz_seg(3), fn_S3_038E(n, s);
+    mz_seg_of(3, 0x038E), fn_S3_038E(n, s);
     mac_TETextBox(s + 1, r8(s), box, just);
 }
 /* a C string in `box` */
 static void box_cstring(uint32_t text, uint32_t box, int16_t just) {
-    mac_TETextBox(text, (int32_t)(mz_seg(2), fn_S2_0252(text)), box, just);
+    mac_TETextBox(text, (int32_t)(mz_seg_of(2, 0x0252), fn_S2_0252(text)), box, just);
 }
 
 enum { JUST_LEFT = 0, JUST_CENTER = 1, JUST_RIGHT = -1 };
@@ -245,8 +245,8 @@ int16_t fn_S8_513C(void) {
  * out of range). */
 uint8_t fn_S8_61AA(void) {
     int32_t n = 200000 - (int32_t)g32(0x22AA);
-    if (n <= 0) { mz_seg(2), fn_S2_03A0(GADDR(0x3AA2), 0, 0); return 0; }
-    if (n > 200000) { mz_seg(2), fn_S2_03A0(GADDR(0x3A8A), 0, 0); return 0; }
+    if (n <= 0) { mz_seg_of(2, 0x03A0), fn_S2_03A0(GADDR(0x3AA2), 0, 0); return 0; }
+    if (n > 200000) { mz_seg_of(2, 0x03A0), fn_S2_03A0(GADDR(0x3A8A), 0, 0); return 0; }
     sg32(0x3C9C, mac_NewHandle(n));
     return g32(0x3C9C) ? 1 : 0;
 }
@@ -262,7 +262,7 @@ void fn_S8_4CF0(uint32_t pgd) {
     w16(r + 2, (uint16_t)(r16(r + 2) - r16(b + 2))); w16(r + 6, (uint16_t)(r16(r + 6) - r16(b + 2)));
     w16(r, (uint16_t)(r16(r) - 0x14));
     w32(pgd, fn_S8_606C(r));
-    if (!g32(0x22BC)) mz_seg(2), fn_S2_03A0(GADDR(0x3AFE), 0, 1);
+    if (!g32(0x22BC)) mz_seg_of(2, 0x03A0), fn_S2_03A0(GADDR(0x3AFE), 0, 1);
 }
 
 /* fn_S8_4BE2: centres window G_2232 (G_2166 x G_2164) on screen G_22BC, x on a multiple of 8; with
@@ -317,7 +317,7 @@ void fn_S8_47E0(Regs *r) {
 
 /* the slot of screen G_22BC (its driver's dCtlSlot) */
 static int16_t screen_slot(void) {
-    uint32_t dce = (mz_seg(3), fn_S3_0230((int16_t)r16(deref(g32(0x22BC)))));
+    uint32_t dce = (mz_seg_of(3, 0x0230), fn_S3_0230((int16_t)r16(deref(g32(0x22BC)))));
     return (int8_t)r8(deref(dce) + 0x28);
 }
 
@@ -327,7 +327,7 @@ void fn_S8_471C(void) {
     if (!fn_S8_4802((int16_t)0xA06F)) { sg8(0x22B7, 0); return; }
     int16_t slot = screen_slot();
     sg16(0x21A6, 1);                                        /* qType */
-    sg32(0x21A4, MZ_A5 + 0x92);                             /* vblAddr: fn_S8_47E0's jump-table entry */
+    sg32(0x21A4, mz_jt(0x92));                             /* vblAddr: fn_S8_47E0's jump-table entry */
     sg16(0x21A0, 1); sg16(0x219E, 0);                       /* vblCount, vblPhase */
     sg32(0x219C, MZ_A5);
     sg8(0x22B7, mac_SlotVInstall(GADDR(0x21AA), slot) == 0);
@@ -337,7 +337,7 @@ void fn_S8_471C(void) {
 void fn_S8_4790(void) {
     if (!g8(0x22B7)) return;
     int16_t err = mac_SlotVRemove(GADDR(0x21AA), screen_slot());
-    if (err) mz_seg(2), fn_S2_03A0(GADDR(0x3CC8), err, 1);
+    if (err) mz_seg_of(2, 0x03A0), fn_S2_03A0(GADDR(0x3CC8), err, 1);
 }
 
 /* fn_S8_4526: opens the full-screen game window G_222E ('WIND' 129, storage G_2236) on screen G_22BC,
@@ -347,7 +347,7 @@ void fn_S8_4526(void) {
     MZ_FRAME;
     sg16(0x2226, r16(0x0BAA)); w16(0x0BAA, 0);
     sg32(0x222E, mac_GetNewCWindow(0x81, g32(0x2236), 0xFFFFFFFFu));
-    if (!g32(0x222E)) mz_seg(2), fn_S2_03A0(GADDR(0x3D18), 0, 1);
+    if (!g32(0x222E)) mz_seg_of(2, 0x03A0), fn_S2_03A0(GADDR(0x3D18), 0, 1);
     uint32_t g = gd_rect(g32(0x22BC)), w = g32(0x222E);
     int16_t top = (int16_t)r16(g), left = (int16_t)r16(g + 2), bottom = (int16_t)r16(g + 4), right = (int16_t)r16(g + 6);
     mac_SizeWindow(w, (int16_t)(right - left), (int16_t)(bottom - top), 1);
@@ -370,7 +370,7 @@ void fn_S8_4620(void) {
     for (uint32_t gd = mac_GetDeviceList(); gd; gd = mac_GetNextDevice(gd)) {
         if (!mac_TestDeviceAttribute(gd, gdScreenActive) || r32(gd) == r32(g32(0x22BC))) continue;
         uint32_t w = mac_GetNewCWindow(0x81, 0, 0xFFFFFFFFu);
-        if (!w) mz_seg(2), fn_S2_03A0(GADDR(0x3CF2), 0, 1);
+        if (!w) mz_seg_of(2, 0x03A0), fn_S2_03A0(GADDR(0x3CF2), 0, 1);
         uint32_t g = gd_rect(gd);
         int16_t top = (int16_t)r16(g), left = (int16_t)r16(g + 2), bottom = (int16_t)r16(g + 4), right = (int16_t)r16(g + 6);
         mac_SizeWindow(w, (int16_t)(right - left), (int16_t)(bottom - top), 0);
@@ -425,7 +425,7 @@ void fn_S8_3E88(uint32_t name) {
     }
     mac_GetDialogItemText(r32(edit), text);
     if (r8(text) > 0x3F) w8(text, 0x3F);
-    mz_seg(2), fn_S2_0332(text, name);
+    mz_seg_of(2, 0x0332), fn_S2_0332(text, name);
     mac_SetPort(r32(saved));
     mac_DisposeDialog(dlg);
 }
@@ -446,7 +446,7 @@ void fn_S8_3D66(void) {
         fn_S8_3E88(name);
         for (int16_t k = 9; k > place; k--)
             for (uint32_t b = 0; b < 0x46; b += 2) w16(ENTRY(k) + 0x118 + b, r16(ENTRY(k - 1) + 0x118 + b));
-        mz_seg(2), fn_S2_0332(name, ENTRY(place) + 0x118);
+        mz_seg_of(2, 0x0332), fn_S2_0332(name, ENTRY(place) + 0x118);
         w32(ENTRY(place) + 0x15A, g32(0x20E6));
         w16(ENTRY(place) + 0x158, g16(0x20EC));
     }
@@ -470,17 +470,17 @@ void fn_S8_3C0C(void) {
     MZ_FRAME;
     fn_S8_4CF0(GADDR(0x22BC));
     fn_S8_4D68(GADDR(0x22C4), GADDR(0x22C0), g32(0x22BC));
-    if (!g32(0x22C4)) { mz_seg(2), fn_S2_03A0(GADDR(0x403C), 0, 0); return; }
+    if (!g32(0x22C4)) { mz_seg_of(2, 0x03A0), fn_S2_03A0(GADDR(0x403C), 0, 0); return; }
     int16_t depth = (int16_t)r16(deref(r32(deref(g32(0x22BC)) + 0x16)) + 0x20);
     if (g8(0x21B3)) return;
     if (depth != 8 && depth != 4 && depth != 16 && depth != 32 && depth != 1) {
         fn_S8_4BE2(1);
-        mz_seg(2), fn_S2_03DC(GADDR(0x4004), 0);
+        mz_seg_of(2, 0x03DC), fn_S2_03DC(GADDR(0x4004), 0);
     }
     uint32_t g = gd_rect(g32(0x22BC));
     if ((int16_t)(r16(g + 6) - r16(g + 2)) < (int16_t)g16(0x2166) || (int16_t)(r16(g + 4) - r16(g)) < (int16_t)g16(0x2164)) {
         fn_S8_4BE2(1);
-        mz_seg(2), fn_S2_03DC(GADDR(0x3F10), 0);
+        mz_seg_of(2, 0x03DC), fn_S2_03DC(GADDR(0x3F10), 0);
         return;
     }
     sg8(0x21B4, 0); sg8(0x21B0, 1); sg8(0x21FC, 0);
@@ -491,7 +491,7 @@ void fn_S8_3C0C(void) {
     mac_SelectWindow(w); mac_SetPort(w);
     paint_port(w, r);
     mac_ValidRect(r);
-    { Regs regs = {{0}, {0}, 0}; mz_seg(2), fn_S2_39F8(&regs); }
+    { Regs regs = {{0}, {0}, 0}; mz_seg_of(2, 0x39F8), fn_S2_39F8(&regs); }
     fn_S8_0000();
     fn_S8_4790(); fn_S8_46EE(); fn_S8_460C();
     mac_SetPort(g32(0x2232));
@@ -556,7 +556,7 @@ uint8_t fn_S8_527A(int16_t size) {
         sg16(0x2114, (uint16_t)(g16(0x2166) - 0x3A)); sg16(0x2116, (uint16_t)(g16(0x212E) + 2));
         sg16(0x210C, (uint16_t)(int16_t)((int16_t)(g16(0x2166) - 0x136) / 2));
     } else {
-        mz_seg(2), fn_S2_03A0(GADDR(0x3AD8), 0, 1);
+        mz_seg_of(2, 0x03A0), fn_S2_03A0(GADDR(0x3AD8), 0, 1);
     }
     sg32(0x2148, (uint32_t)(0xCC * (int32_t)(int16_t)g16(0x2150)));
     sg32(0x2144, (uint32_t)((int32_t)g32(0x2148) >> 1));
@@ -576,7 +576,7 @@ uint8_t fn_S8_527A(int16_t size) {
 uint8_t fn_S8_48A2(int16_t size, uint32_t rect) {
     mac_SetCursor(deref(mac_GetCursor(4)));                 /* watch */
     sg16(0x2168, (uint16_t)fn_S8_513C());
-    if (!g16(0x2168)) { mac_InitCursor(); mz_seg(2), fn_S2_03A0(GADDR(0x3C98), 0, 0); return 0; }
+    if (!g16(0x2168)) { mac_InitCursor(); mz_seg_of(2, 0x03A0), fn_S2_03A0(GADDR(0x3C98), 0, 0); return 0; }
     int16_t use;
     if (size <= 0 || size > 4) {
         sg32(0x22BC, mac_GetMainDevice());
@@ -591,14 +591,14 @@ uint8_t fn_S8_48A2(int16_t size, uint32_t rect) {
         use = size;
     }
     uint8_t reserved = fn_S8_61AA();
-    if (!reserved) { mac_InitCursor(); mz_seg(2), fn_S2_03A0(GADDR(0x2386), 0, 1); return 0; }
+    if (!reserved) { mac_InitCursor(); mz_seg_of(2, 0x03A0), fn_S2_03A0(GADDR(0x2386), 0, 1); return 0; }
     int fell_back = 0;
     if (!fn_S8_527A(use)) {
         uint8_t ok = 0;
         for (int16_t k = (int16_t)(use - 1); k > 0 && !ok; k--) ok = fn_S8_527A(k);
         if (!ok) {
             if (reserved) { Regs r = {{0}, {0}, 0}; fn_S8_61FE(&r); }
-            mz_seg(2), fn_S2_03A0(GADDR(0x2386), 0, 0);
+            mz_seg_of(2, 0x03A0), fn_S2_03A0(GADDR(0x2386), 0, 0);
             return 0;
         }
         fell_back = 1;
@@ -612,7 +612,7 @@ uint8_t fn_S8_48A2(int16_t size, uint32_t rect) {
     x = (int16_t)(x + left); y = (int16_t)(y + top);
     if ((int16_t)(r16(0x0BAA) + 0x14) > y) y = (int16_t)(r16(0x0BAA) + 0x14);     /* below the menu bar */
     sg32(0x2232, mac_GetNewCWindow(0x80, g32(0x223A), 0xFFFFFFFFu));
-    if (!g32(0x2232)) mz_seg(2), fn_S2_03A0(GADDR(0x3C72), 1, 1);
+    if (!g32(0x2232)) mz_seg_of(2, 0x03A0), fn_S2_03A0(GADDR(0x3C72), 1, 1);
     uint32_t w = g32(0x2232);
     mac_SizeWindow(w, (int16_t)g16(0x2166), (int16_t)g16(0x2164), 1);
     mac_MoveWindow(w, x, y, 1);
@@ -620,7 +620,7 @@ uint8_t fn_S8_48A2(int16_t size, uint32_t rect) {
     mac_NSetPalette(w, g32(0x2224), 0x100);
     mac_ShowWindow(w);
     mac_InitCursor();
-    if (fell_back) mz_seg(2), fn_S2_03A0(GADDR(0x3C56), 0, 0);
+    if (fell_back) mz_seg_of(2, 0x03A0), fn_S2_03A0(GADDR(0x3C56), 0, 0);
     return 1;
 }
 
@@ -632,13 +632,13 @@ uint8_t fn_S8_48A2(int16_t size, uint32_t rect) {
 void fn_S8_2480(void) {
     MZ_FRAME;
     uint32_t resp = mz_local(4);
-    if (!fn_S8_4802((int16_t)0xA1AD)) mz_seg(2), fn_S2_03A0(GADDR(0x44F2), 0, 1);
+    if (!fn_S8_4802((int16_t)0xA1AD)) mz_seg_of(2, 0x03A0), fn_S2_03A0(GADDR(0x44F2), 0, 1);
     mz_seg(3);
-    if (fn_S3_0000(0x73797376, resp) || (int32_t)(r32(resp) & 0xF00) < 0x700) mz_seg(2), fn_S2_03A0(GADDR(0x44B0), 0, 1);     /* 'sysv' */
-    if (fn_S3_0000(0x71642020, resp) || (int32_t)(r32(resp) & 0xFFFF) < 0x200) mz_seg(2), fn_S2_03A0(GADDR(0x4488), 0, 1);   /* 'qd  ' */
-    if (fn_S3_0000(0x666F6C64, resp) || !(r8(resp + 3) & 1)) mz_seg(2), fn_S2_03A0(GADDR(0x444A), 0, 1);                       /* 'fold' */
-    if (fn_S3_0000(0x66732020, resp) || !(r8(resp + 3) & 2)) mz_seg(2), fn_S2_03A0(GADDR(0x440A), 0, 1);                       /* 'fs  ' */
-    if (fn_S3_0000(0x73746466, resp) || !(r8(resp + 3) & 1)) mz_seg(2), fn_S2_03A0(GADDR(0x43CA), 0, 1);                       /* 'stdf' */
+    if (fn_S3_0000(0x73797376, resp) || (int32_t)(r32(resp) & 0xF00) < 0x700) mz_seg_of(2, 0x03A0), fn_S2_03A0(GADDR(0x44B0), 0, 1);     /* 'sysv' */
+    if (fn_S3_0000(0x71642020, resp) || (int32_t)(r32(resp) & 0xFFFF) < 0x200) mz_seg_of(2, 0x03A0), fn_S2_03A0(GADDR(0x4488), 0, 1);   /* 'qd  ' */
+    if (fn_S3_0000(0x666F6C64, resp) || !(r8(resp + 3) & 1)) mz_seg_of(2, 0x03A0), fn_S2_03A0(GADDR(0x444A), 0, 1);                       /* 'fold' */
+    if (fn_S3_0000(0x66732020, resp) || !(r8(resp + 3) & 2)) mz_seg_of(2, 0x03A0), fn_S2_03A0(GADDR(0x440A), 0, 1);                       /* 'fs  ' */
+    if (fn_S3_0000(0x73746466, resp) || !(r8(resp + 3) & 1)) mz_seg_of(2, 0x03A0), fn_S2_03A0(GADDR(0x43CA), 0, 1);                       /* 'stdf' */
 }
 
 /* fn_S8_25BE: Apple events must be available (Gestalt 'evnt': fatal alerts G_4388 / G_436C); installs
@@ -647,11 +647,11 @@ void fn_S8_2480(void) {
 void fn_S8_25BE(void) {
     MZ_FRAME;
     uint32_t resp = mz_local(4);
-    if (mz_seg(3), fn_S3_0000(0x65766E74, resp)) mz_seg(2), fn_S2_03A0(GADDR(0x4388), 0, 1);       /* 'evnt' */
-    else if (!(r8(resp + 3) & 1)) mz_seg(2), fn_S2_03A0(GADDR(0x436C), 0, 1);
-    if (mac_AEInstallEventHandler(0x61657674, 0x6F617070, MZ_A5 + 0x7A, 0, 0)) mz_seg(2), fn_S2_03A0(GADDR(0x4352), 0, 1);   /* 'aevt' 'oapp' */
-    if (mac_AEInstallEventHandler(0x61657674, 0x70646F63, MZ_A5 + 0x82, 0, 0)) mz_seg(2), fn_S2_03A0(GADDR(0x4324), 0, 1);   /* 'pdoc' */
-    if (mac_AEInstallEventHandler(0x61657674, 0x71756974, MZ_A5 + 0x8A, 0, 0)) mz_seg(2), fn_S2_03A0(GADDR(0x42F8), 0, 1);   /* 'quit' */
+    if (mz_seg_of(3, 0x0000), fn_S3_0000(0x65766E74, resp)) mz_seg_of(2, 0x03A0), fn_S2_03A0(GADDR(0x4388), 0, 1);       /* 'evnt' */
+    else if (!(r8(resp + 3) & 1)) mz_seg_of(2, 0x03A0), fn_S2_03A0(GADDR(0x436C), 0, 1);
+    if (mac_AEInstallEventHandler(0x61657674, 0x6F617070, mz_jt(0x7A), 0, 0)) mz_seg_of(2, 0x03A0), fn_S2_03A0(GADDR(0x4352), 0, 1);   /* 'aevt' 'oapp' */
+    if (mac_AEInstallEventHandler(0x61657674, 0x70646F63, mz_jt(0x82), 0, 0)) mz_seg_of(2, 0x03A0), fn_S2_03A0(GADDR(0x4324), 0, 1);   /* 'pdoc' */
+    if (mac_AEInstallEventHandler(0x61657674, 0x71756974, mz_jt(0x8A), 0, 0)) mz_seg_of(2, 0x03A0), fn_S2_03A0(GADDR(0x42F8), 0, 1);   /* 'quit' */
 }
 
 /* fn_S8_237C: loads the sounds from the sound file (named G_45F2) in the application's folder (found
@@ -661,23 +661,23 @@ void fn_S8_237C(void) {
     MZ_FRAME;
     uint32_t psn = mz_local(8), info = mz_local(0x3C), spec = mz_local(0x46);
     int16_t err = mac_GetCurrentProcess(psn);
-    if (err) mz_seg(2), fn_S2_03A0(GADDR(0x466E), err, 0);
+    if (err) mz_seg_of(2, 0x03A0), fn_S2_03A0(GADDR(0x466E), err, 0);
     if (!err) {
         w32(info, 0x3C);                                    /* processInfoLength */
         w32(info + 4, 0);                                   /* processName */
         w32(info + 0x38, spec);                             /* processAppSpec */
         err = mac_GetProcessInformation(psn, info);
-        if (err) mz_seg(2), fn_S2_03A0(GADDR(0x4632), err, 0);
+        if (err) mz_seg_of(2, 0x03A0), fn_S2_03A0(GADDR(0x4632), err, 0);
     }
     if (!err) {
-        mz_seg(2), fn_S2_0332(GADDR(0x45F2), spec + 6);    /* the sound file's name, same folder */
+        mz_seg_of(2, 0x0332), fn_S2_0332(GADDR(0x45F2), spec + 6);    /* the sound file's name, same folder */
         int16_t ref = mac_FSpOpenResFile(spec, 1);          /* fsRdPerm */
         err = mac_ResError();
-        if (err == -43) mz_seg(2), fn_S2_03A0(GADDR(0x45D2), 0, 0);   /* fnfErr */
-        else if (err) mz_seg(2), fn_S2_03A0(GADDR(0x4580), err, 0);
+        if (err == -43) mz_seg_of(2, 0x03A0), fn_S2_03A0(GADDR(0x45D2), 0, 0);   /* fnfErr */
+        else if (err) mz_seg_of(2, 0x03A0), fn_S2_03A0(GADDR(0x4580), err, 0);
         if (!err) {
-            err = (mz_seg(4), fn_S4_38F4(ref));
-            if (err == 1) mz_seg(2), fn_S2_03A0(GADDR(0x455C), 0, 0);
+            err = (mz_seg_of(4, 0x38F4), fn_S4_38F4(ref));
+            if (err == 1) mz_seg_of(2, 0x03A0), fn_S2_03A0(GADDR(0x455C), 0, 0);
             mac_CloseResFile(ref);
         }
     }
@@ -714,11 +714,11 @@ uint32_t fn_S8_26D6(void) {
     MZ_FRAME;
     uint32_t h = mz_local(4), name = mz_local(0x100), vref = mz_local(2), dir = mz_local(4), spec = mz_local(0x46);
     w32(h, 0);
-    mz_seg(3), fn_S3_03BA(name, 0x80, 1);
+    mz_seg_of(3, 0x03BA), fn_S3_03BA(name, 0x80, 1);
     int16_t err = fn_S3_0400((int16_t)0x8000, 0x70726566, 0, vref, dir);   /* kOnSystemDisk, 'pref' */
     if (!err) err = mac_FSMakeFSSpec((int16_t)r16(vref), (int32_t)r32(dir), name, spec);
     if (!err) err = fn_S8_36F4(spec, h);
-    if (err || !r32(h) || (mz_seg(3), fn_S3_020E(r32(h))) != 0x3D4) {
+    if (err || !r32(h) || (mz_seg_of(3, 0x020E), fn_S3_020E(r32(h))) != 0x3D4) {
         if (r32(h)) mac_DisposeHandle(r32(h));
         w32(h, mac_NewHandle(0x3D4));
         if (r32(h)) fn_S8_27CC(r32(h));

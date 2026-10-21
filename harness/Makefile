@@ -4,7 +4,7 @@ GEN     = gen
 CC     ?= cc
 CFLAGS += -O2 -g -Wall -Wno-unused-parameter -I. -I$(GEN) -I$(MUSASHI) -DMUSASHI_CNF='"musashi_conf.h"'
 MACTB   = ../mactb
-OBJ     = main.o menu.o traps.o heap.o rsrc.o seg.o vfs.o qd.o dlg.o input.o vbl.o snd.o sub.o glue.o port_shell.o gen/subs.o game_seg1.o game_seg2.o game_seg2_frame.o game_seg3.o game_seg4.o game_seg7.o game_seg7_objects.o game_seg8.o game_seg8_tables.o game_seg8_ui.o game_seg8_loop.o game_seg8_shell.o game_seg8_help.o mactb_color.o mactb_pix8.o mactb_sane.o mactb_text.o mactb_font_data.o mactb_sound.o mactb_dialog.o mactb_pict.o arc_arc.o arc_sit13.o arc_arsenic.o $(GEN)/m68kops.o m68kcpu.o m68kdasm.o softfloat.o
+OBJ     = main.o menu.o traps.o heap.o rsrc.o seg.o vfs.o qd.o dlg.o input.o vbl.o snd.o sub.o glue.o port_shell.o gen/subs.o game_seg1.o game_seg2.o game_seg2_frame.o game_seg3.o game_seg4.o game_seg7.o game_seg7_objects.o game_seg8.o game_seg8_tables.o game_seg8_ui.o game_seg8_loop.o game_seg8_shell.o game_seg8_help.o game_games.o mactb_color.o mactb_pix8.o mactb_sane.o mactb_text.o mactb_font_data.o mactb_sound.o mactb_dialog.o mactb_pict.o arc_arc.o arc_sit13.o arc_arsenic.o $(GEN)/m68kops.o m68kcpu.o m68kdasm.o softfloat.o
 
 all: mzharness
 

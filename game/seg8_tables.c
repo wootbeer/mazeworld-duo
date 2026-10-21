@@ -78,7 +78,7 @@ void fn_S8_5962(void) {
     uint32_t t = mz_local(10), c = mz_local(8);
     ext_copy(t, y); fp_int(FP_MUL, t, 8);
     w32(c, 0); w32(c + 4, 0x7FFD);
-    if (!FP_LESS(mac_FP68K(FP_COMP | FP_CMP, t, c))) mz_seg(2), fn_S2_03A0(GADDR(0x3ABE), 0, 0);
+    if (!FP_LESS(mac_FP68K(FP_COMP | FP_CMP, t, c))) mz_seg_of(2, 0x03A0), fn_S2_03A0(GADDR(0x3ABE), 0, 0);
     ext_copy(t, y); fp_int(FP_MUL, t, 8);
     w16(p, (uint16_t)trunc_to(FP_INT, t));
     p += 0x100;

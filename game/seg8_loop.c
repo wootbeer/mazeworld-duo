@@ -129,7 +129,7 @@ void fn_S8_0A24(void) {
                 sg16(0x20B8, (uint16_t)(g16(0x20B8) + 1));
                 if (g16(0x20B8) & 1) continue;
                 sg16(0x20BC, (uint16_t)(g16(0x20BC) + 1));
-                mz_seg(2), fn_S2_0376(&r);
+                mz_seg_of(2, 0x0376), fn_S2_0376(&r);
             }
             mz_seg(2);
             fn_S2_4058(); fn_S2_41A6(); fn_S2_3A36();
@@ -142,9 +142,9 @@ void fn_S8_0A24(void) {
             if (g16(0x2102) == 0x2C) fn_S8_1004();
             if (g16(0x2102) == 0x2D) fn_S8_1078();
             if (!g8(0x2393) || !(g32(0x238C) & 1))
-                mz_seg(4), fn_S4_0000((int32_t)g32(0x20D2), (int32_t)g32(0x20CE), g32(0x1DC4), g32(0x1DCC), g32(0x22C0));
+                mz_seg_of(4, 0x0000), fn_S4_0000((int32_t)g32(0x20D2), (int32_t)g32(0x20CE), g32(0x1DC4), g32(0x1DCC), g32(0x22C0));
             fn_S2_040A();
-            mz_seg(4), fn_S4_3F02();
+            mz_seg_of(4, 0x3F02), fn_S4_3F02();
             fn_S2_42A8(); fn_S2_44AA(); fn_S2_46BC(); fn_S2_48D2(); fn_S2_4A98(); fn_S2_4BF8();
             sg16(0x20DC, (uint16_t)(g16(0x20DC) + (uint16_t)(g16(0x2174) << 3) - 0x10));
             if ((g32(0x238C) & 3) == 3) {
@@ -160,7 +160,7 @@ void fn_S8_0A24(void) {
 /* ---------- a play session ---------- */
 
 /* fn_S8_1814 is the VBL task (input polling); its jump-table entry is at A5 + $72. */
-#define VBL_TASK_ENTRY (MZ_A5 + 0x72)
+#define VBL_TASK_ENTRY mz_jt(0x72)
 
 /* fn_S8_172A: centres the mouse on the main screen G_22BC (G_2186 / G_2184 = the centre; the old
  * position kept in G_4E02; low-memory pointers G_4E0E, G_4E12, G_4E0A, G_4E06) and installs the
@@ -182,13 +182,13 @@ void fn_S8_172A(void) {
     sg16(0x218C, 0);                                        /* vblPhase */
     sg32(0x218A, MZ_A5);
     int16_t err = mac_VInstall(GADDR(0x2198));
-    if (err) mz_seg(2), fn_S2_03A0(GADDR(0x4DFE), err, 1);
+    if (err) mz_seg_of(2, 0x03A0), fn_S2_03A0(GADDR(0x4DFE), err, 1);
 }
 
 /* fn_S8_17D0: removes the input VBL task (fatal alert G_4DD0 on failure) and puts the mouse back. */
 void fn_S8_17D0(void) {
     int16_t err = mac_VRemove(GADDR(0x2198));
-    if (err) mz_seg(2), fn_S2_03A0(GADDR(0x4DD0), err, 1);
+    if (err) mz_seg_of(2, 0x03A0), fn_S2_03A0(GADDR(0x4DD0), err, 1);
     w32(g32(0x4E12), g32(0x4E02));
     w32(g32(0x4E0E), r32(g32(0x4E12)));
     w8(g32(0x4E0A), r8(g32(0x4E06)));
@@ -211,7 +211,7 @@ uint8_t fn_S8_0206(void) {
         if (err || !h) return 0;
         mac_DetachResource(h);
         w32(slot, h);
-        sg32(0x22AA, g32(0x22AA) + (uint32_t)(mz_seg(3), fn_S3_020E(h)));
+        sg32(0x22AA, g32(0x22AA) + (uint32_t)(mz_seg_of(3, 0x020E), fn_S3_020E(h)));
     }
     return 1;
 }
@@ -260,9 +260,9 @@ uint8_t fn_S8_0000(void) {
         if (g8(0x220C)) {
             sg32(0x4E34, r32(0x020C));                      /* Time */
             sg32(0x0082, g32(0x4E34));
-            mz_seg(2), fn_S2_3502();
+            mz_seg_of(2, 0x3502), fn_S2_3502();
             fn_S8_083A(&r);
-            mz_seg(4), fn_S4_1898();
+            mz_seg_of(4, 0x1898), fn_S4_1898();
             fn_S8_0946(&r);
             sg32(0x20D2, g32(0x2206)); sg32(0x20CE, g32(0x2202));
             sg16(0x20D4, g16(0x2208)); sg16(0x20EC, g16(0x220A));
@@ -279,13 +279,13 @@ uint8_t fn_S8_0000(void) {
         }
         fn_S8_083A(&r);
         fn_S8_02F0();
-        mz_seg(4), fn_S4_3B10(); fn_S4_3BF8();
+        mz_seg_of(4, 0x3B10), fn_S4_3B10(); fn_S4_3BF8();
         fn_S8_09FC(g32(0x1DE8));
         fn_S8_04C8(&r);
         fn_S8_0A24();
         fn_S8_0946(&r);
         fn_S8_0360();
-        mz_seg(4), fn_S4_3CE8(); fn_S4_3B9A();
+        mz_seg_of(4, 0x3CE8), fn_S4_3CE8(); fn_S4_3B9A();
         if (g8(0x21FC)) sg8(0x221F, 1);
     }
     if (!g8(0x21FC)) fn_S8_17D0();

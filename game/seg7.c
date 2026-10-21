@@ -92,10 +92,10 @@ void fn_S7_3784(Regs *r) {
     set_w(&r->d[0], g16(0xE2));
     if ((uint16_t)r->d[0] != r16(r->a[4] + 0x30)) {
         set_w(&r->d[0], g16(0xF2)); set_w(&r->d[1], g16(0xE2));
-        mz_seg(2), fn_S2_33A4(r);
+        mz_seg_of(2, 0x33A4), fn_S2_33A4(r);
         if ((uint16_t)r->d[0]) { r->d[0] = 0xFFFFFFFFu; cc_nz_l(r, r->d[0]); return; }
         set_w(&r->d[0], g16(0xF2)); set_w(&r->d[1], r16(r->a[4] + 0x30));
-        mz_seg(2), fn_S2_3410(r);
+        mz_seg_of(2, 0x3410), fn_S2_3410(r);
     }
     w32(r->a[4] + 4, g32(0xEA)); w32(r->a[4] + 8, g32(0xE6)); w16(r->a[4] + 0x30, g16(0xE2));
     r->d[0] = 0; cc_nz_l(r, 0);
@@ -112,7 +112,7 @@ void fn_S7_3FA6(Regs *r) {
     cc_nz_w(r, (uint16_t)r->d[0]);
     if ((uint16_t)r->d[0]) return;
     int own = (uint16_t)r->d[3] == r16(r->a[4] + 0x10);
-    mz_seg(2), fn_S2_3532(r);
+    mz_seg_of(2, 0x3532), fn_S2_3532(r);
     set_w(&r->d[0], (uint16_t)(((uint16_t)r->d[0] & 3) | (own ? 4 : 8)));
     uint16_t best = r16(r->a[6] - 0xE);
     cc_cmp_w(r, best, (uint16_t)r->d[0]);
@@ -320,14 +320,14 @@ void fn_S7_40D6(Regs *r) {
     r->d[4] = (uint16_t)r->d[1];
     set_w(&r->d[0], (uint16_t)r->d[4]);
     set_w(&r->d[1], g16(0xE2));
-    mz_seg(2), fn_S2_33A4(r);
+    mz_seg_of(2, 0x33A4), fn_S2_33A4(r);
     if ((uint16_t)r->d[0]) { r->d[0] = 0xFFFFFFFFu; r->d[1] = 0; goto out; }
     r->a[0] = g32(0x1DC4) + r->d[4];
     w16(r->a[0] + 2, type); w16(r->a[0] + 4, g16(0xEA)); w16(r->a[0] + 8, g16(0xE6));
     w16(r->a[0] + 6, 0x8000); w16(r->a[0] + 0xA, 0x8000); w16(r->a[0] + 0xE, 0);
     w16(r->a[0] + 0xC, heading); w16(r->a[0] + 0x10, value); w16(r->a[0] + 0x14, 0); w16(r->a[0] + 0x12, 0xFFFF);
     set_w(&r->d[0], (uint16_t)r->d[4]);
-    mz_seg(2), fn_S2_3480(r);
+    mz_seg_of(2, 0x3480), fn_S2_3480(r);
     r->d[0] = 0; set_w(&r->d[1], (uint16_t)r->d[4]);
 out:
     r->d[4] = d4;
@@ -476,7 +476,7 @@ void fn_S7_0E46(Regs *r) {
     goto out;
 remove:
     set_w(&r->d[0], g16(0xF2)); set_w(&r->d[1], r16(r->a[4] + 0x30));
-    mz_seg(2), fn_S2_3410(r);
+    mz_seg_of(2, 0x3410), fn_S2_3410(r);
     w16(r->a[4] + 2, 0xFFFF); cc_nz_w(r, 0xFFFF);
     goto out;
 hit:
@@ -504,7 +504,7 @@ void fn_S7_1E20(Regs *r) {
     sg16(0xE0, 4);
     fn_S7_3ACA(r);
     cc_nz_w(r, (uint16_t)r->d[0]);
-    if ((uint16_t)r->d[0]) { w16(r->a[4] + 0x12, 9); mz_seg(4), fn_S4_1550(); r->d[0] = 0xFFFFFFFFu; cc_nz_l(r, r->d[0]); return; }
+    if ((uint16_t)r->d[0]) { w16(r->a[4] + 0x12, 9); mz_seg_of(4, 0x1550), fn_S4_1550(); r->d[0] = 0xFFFFFFFFu; cc_nz_l(r, r->d[0]); return; }
     sg16(0xE0, 1); sg16(0xDE, r16(r->a[4] + 0x10));
     fn_S7_37C4(r);
     cc_nz_w(r, (uint16_t)r->d[0]);
@@ -520,13 +520,13 @@ void fn_S4_170E(void);
  * Once triggered (G_225C set): every 32 frames at phase 8 the marked area spreads (fn_S7_008A); if
  * the player's cell G_20CA is marked (and G_20D8 < $80), sound $25 and G_20FE counts down to 0. */
 void fn_S7_0014(Regs *r) {
-    mz_seg(4), fn_S4_1420();
+    mz_seg_of(4, 0x1420), fn_S4_1420();
     set_w(&r->d[0], r16(r->a[4] + 0x16));
     if (!(uint16_t)r->d[0]) {
         set_w(&r->d[0], g16(0x20F2));
         if (!(uint16_t)r->d[0]) {
             sg8(0x225C, 1); w16(r->a[4] + 0x16, 1);
-            mz_seg(4), fn_S4_1722();
+            mz_seg_of(4, 0x1722), fn_S4_1722();
             set_w(&r->d[0], r16(r->a[4] + 0x30));
             r->a[0] = g32(0x1DCC);
             uint32_t c = r->a[0] + sxw(r->d[0]) + 0x12; uint8_t v = (uint8_t)(r8(c) | 1);
@@ -544,7 +544,7 @@ void fn_S7_0014(Regs *r) {
     set_w(&r->d[0], g16(0x20CA));
     r->a[0] = g32(0x1DCC);
     if (!(r8(r->a[0] + sxw(r->d[0]) + 0x12) & 1)) { r->ccr |= CCR_Z; return; }
-    mz_seg(4), fn_S4_170E();
+    mz_seg_of(4, 0x170E), fn_S4_170E();
     set_w(&r->d[0], (uint16_t)(g16(0x20FE) - 1));
     if ((uint16_t)r->d[0] & 0x8000) r->d[0] = 0;
     sg16(0x20FE, (uint16_t)r->d[0]);
@@ -577,7 +577,7 @@ static void shot_tick(Regs *r, int anim, void (*fly)(Regs *), uint16_t drain) {
     }
     if (!s) {
         set_w(&r->d[0], g16(0xF2)); set_w(&r->d[1], r16(r->a[4] + 0x30));
-        mz_seg(2), fn_S2_3410(r);
+        mz_seg_of(2, 0x3410), fn_S2_3410(r);
         w16(r->a[4] + 2, 0xFFFF); cc_nz_w(r, 0xFFFF);
         return;
     }
@@ -678,13 +678,13 @@ void fn_S7_2620(Regs *r) {
     r->a[0] = g32(0x1DCC);
     if (r8(r->a[0] + sxw(r->d[1])) & 1) {
         set_w(&r->d[0], g16(0xF2)); set_w(&r->d[1], r16(r->a[4] + 0x30));
-        mz_seg(2), fn_S2_3410(r);
+        mz_seg_of(2, 0x3410), fn_S2_3410(r);
         w16(r->a[4] + 2, 0xFFFF); cc_nz_w(r, 0xFFFF);
         return;
     }
     fn_S7_3D2A(r);
     if ((uint16_t)r->d[0] & 0x8000) {
-        mz_seg(4), fn_S4_15BC();
+        mz_seg_of(4, 0x15BC), fn_S4_15BC();
         set_w(&r->d[0], g16(0x20FE)); sub_w(r, &r->d[0], 2);
         if ((uint16_t)r->d[0] & 0x8000) set_w(&r->d[0], 0);
         sg16(0x20FE, (uint16_t)r->d[0]);
@@ -733,8 +733,8 @@ void fn_S2_4DC4(Regs *r);
 
 static void draw_stream(Regs *r, uint32_t stream) {
     sg32(0x20A2, stream);
-    mz_seg(2), fn_S2_1CF6(r);
-    mz_seg(2), fn_S2_4DC4(r);
+    mz_seg_of(2, 0x1CF6), fn_S2_1CF6(r);
+    mz_seg_of(2, 0x4DC4), fn_S2_4DC4(r);
 }
 
 /* fn_S7_0000: model G_1D20 (its first entry). */
@@ -826,11 +826,11 @@ void fn_S7_1D0E(Regs *r) {
         return;
     }
     if (!(uint16_t)r->d[0]) return;
-    mz_seg(2), fn_S2_3532(r);
+    mz_seg_of(2, 0x3532), fn_S2_3532(r);
     set_w(&r->d[0], (uint16_t)((uint16_t)r->d[0] & 3));
     sg16(0x20AA, (uint16_t)r->d[0]);
     effect_window(r);
-    mz_seg(2), fn_S2_3532(r);
+    mz_seg_of(2, 0x3532), fn_S2_3532(r);
     set_w(&r->d[0], (uint16_t)((uint16_t)r->d[0] & 3));
     lsl_w(r, &r->d[0], 2);
     r->a[0] = g32(0x1D50); r->a[0] += r32(r->a[0] + sxw(r->d[0]));
@@ -990,7 +990,7 @@ out:
 /* fn_S7_0108: type 1's model: the frame (+$C, 0..15) moves on by 2 + a random 0..3 (fn_S2_3532)
  * each frame; model G_1D18 (entry 1 + frame). */
 void fn_S7_0108(Regs *r) {
-    mz_seg(2), fn_S2_3532(r);
+    mz_seg_of(2, 0x3532), fn_S2_3532(r);
     set_w(&r->d[0], (uint16_t)((uint16_t)r->d[0] & 3));
     add_w(r, &r->d[0], r16(r->a[4] + 0xC));
     add_w(r, &r->d[0], 2);
@@ -1129,7 +1129,7 @@ void fn_S7_09EC(Regs *r) {
         w16(r->a[0] + sxw(r->d[1]) + 0xC, 1);
         sg16(0x20CA, (uint16_t)r->d[1]);
     }
-    mz_seg(2), fn_S2_3500(r);
+    mz_seg_of(2, 0x3500), fn_S2_3500(r);
     set_w(&r->d[0], g16(0x20FE)); sub_w(r, &r->d[0], 3);
     if ((uint16_t)r->d[0] & 0x8000) r->d[0] = 0;
     sg16(0x20FE, (uint16_t)r->d[0]);
@@ -1175,7 +1175,7 @@ void fn_S7_0DE2(Regs *r) {
 
 /* fn_S7_0E0A: type $14's model: a random one of the eight frames of G_1D50 (fn_S2_3532). */
 void fn_S7_0E0A(Regs *r) {
-    mz_seg(2), fn_S2_3532(r);
+    mz_seg_of(2, 0x3532), fn_S2_3532(r);
     set_w(&r->d[0], (uint16_t)((uint16_t)r->d[0] & 7));
     lsl_w(r, &r->d[0], 2);
     r->a[0] = g32(0x1D50);
@@ -1333,7 +1333,7 @@ void fn_S7_2590(Regs *r) {
 
 /* fn_S7_2600: type $29's model: a random one of the eight frames of G_1D50 (as fn_S7_0E0A). */
 void fn_S7_2600(Regs *r) {
-    mz_seg(2), fn_S2_3532(r);
+    mz_seg_of(2, 0x3532), fn_S2_3532(r);
     set_w(&r->d[0], (uint16_t)((uint16_t)r->d[0] & 7));
     lsl_w(r, &r->d[0], 2);
     r->a[0] = g32(0x1D50);
@@ -1367,13 +1367,13 @@ void fn_S7_2AD2(Regs *r) {
         return;
     }
     if (!(uint16_t)r->d[0]) { cc_nz_w(r, 0); return; }
-    mz_seg(2), fn_S2_3532(r);
+    mz_seg_of(2, 0x3532), fn_S2_3532(r);
     set_w(&r->d[0], (uint16_t)((uint16_t)r->d[0] & 3));
     sg16(0x20AA, (uint16_t)r->d[0]);
     set_w(&r->d[0], g16(0x2154)); add_w(r, &r->d[0], 4); sg16(0x20A8, (uint16_t)r->d[0]);
     sg16(0x20A6, 4);
     set_w(&r->d[0], g16(0x2156)); add_w(r, &r->d[0], 4); sg16(0x20A4, (uint16_t)r->d[0]);
-    mz_seg(2), fn_S2_3532(r);
+    mz_seg_of(2, 0x3532), fn_S2_3532(r);
     set_w(&r->d[0], (uint16_t)((uint16_t)r->d[0] & 3));
     lsl_w(r, &r->d[0], 2);
     r->a[0] = g32(0x1D50);

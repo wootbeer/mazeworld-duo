@@ -8,7 +8,7 @@ MUSASHI  = ../third_party/Musashi
 CFLAGS  += -O2 -g -Wall -Wno-unused-parameter -I. -I$(H) -I$(H)/gen -I$(MUSASHI) -I$(GAME) -DMUSASHI_CNF='"musashi_conf.h"' -DMZ_PORT
 # the rig's Mac (Toolbox) modules, without the CPU, the checker or the rig's main and VBL interrupt
 TB       = menu traps heap rsrc seg vfs qd dlg input snd glue
-GAMESRC  = seg1 seg2 seg2_frame seg3 seg4 seg7 seg7_objects seg8 seg8_tables seg8_ui seg8_loop seg8_shell seg8_help
+GAMESRC  = seg1 seg2 seg2_frame seg3 seg4 seg7 seg7_objects seg8 seg8_tables seg8_ui seg8_loop seg8_shell seg8_help games
 MACTBSRC = color pix8 sane text font_data sound dialog pict
 ARCSRC   = arc sit13 arsenic
 

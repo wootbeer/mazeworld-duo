@@ -127,7 +127,7 @@ void fn_S2_0986(uint32_t pm, int16_t x, int16_t y, uint32_t now, uint32_t was, u
     w32(out, 0);
     uint32_t t = g32(0x1DEC); sg32(0x1DEC, g32(0x1DE8)); sg32(0x1DE8, t);
 
-    uint32_t list = (mz_seg(3), fn_S3_03A0(g32(0x1DF4)));
+    uint32_t list = (mz_seg_of(3, 0x03A0), fn_S3_03A0(g32(0x1DF4)));
     uint8_t mmu = mac_SwapMMUMode(1);
     if (wait) wait_tick();
     uint32_t copies[2] = { rowbytes, 2u * rowbytes };

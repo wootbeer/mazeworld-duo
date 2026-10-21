@@ -18,7 +18,7 @@ static void step_20D4(Regs *r, int delta) {
     v &= 0x3F;
     set_w(&r->d[0], v); sg16(0x20D4, v);
     r->ccr = (uint8_t)(x ? CCR_X : 0); cc_nz_w(r, v);
-    mz_seg(2), fn_S2_3500(r);
+    mz_seg_of(2, 0x3500), fn_S2_3500(r);
 }
 void fn_S8_1376(Regs *r) { step_20D4(r, -1); }
 void fn_S8_138A(Regs *r) { step_20D4(r, +1); }
@@ -66,7 +66,7 @@ void fn_S8_04C8(Regs *r) {
     set_w(&r->d[0], g16(0x20CA));
     w16(r->a[0] + (uint32_t)(int32_t)(int16_t)r->d[0] + 0xC, 1);
     cc_nz_w(r, 1);
-    mz_seg(2), fn_S2_3500(r);
+    mz_seg_of(2, 0x3500), fn_S2_3500(r);
 }
 
 /* fn_S8_01CE: clears the 50 byte flags G_4E68[0..49]. */
@@ -113,15 +113,15 @@ void fn_S8_0F1A(Regs *r) {
     set_w(&r->d[4], (uint16_t)r->d[1]);
     set_w(&r->d[0], (uint16_t)r->d[4]);
     set_w(&r->d[1], g16(0x20CA));
-    mz_seg(2), fn_S2_33A4(r);
+    mz_seg_of(2, 0x33A4), fn_S2_33A4(r);
     if ((uint16_t)r->d[0]) goto out;
     r->a[0] = g32(0x1DC4) + r->d[4];
     w16(r->a[0] + 2, (uint16_t)r->d[3]);
     w32(r->a[0] + 4, g32(0x20D2)); w32(r->a[0] + 8, g32(0x20CE)); w16(r->a[0] + 0xC, g16(0x20D4));
     w16(r->a[0] + 0x12, 0); w16(r->a[0] + 0x14, 0); w16(r->a[0] + 0xE, 0);
     set_w(&r->d[0], (uint16_t)r->d[4]);
-    mz_seg(2), fn_S2_3480(r);
-    mz_seg(2), fn_S2_3500(r);
+    mz_seg_of(2, 0x3480), fn_S2_3480(r);
+    mz_seg_of(2, 0x3500), fn_S2_3500(r);
 out:
     r->d[3] = d3; r->d[4] = d4;
     cc_nz_l(r, d4);   /* flags from restoring D4 */
@@ -316,7 +316,7 @@ void fn_S8_140A(Regs *r) {
     if ((uint16_t)r->d[5] == g16(0x20CA)) {
         sg8(0x22B0, in1); sg8(0x22AF, in2);
         set_b(&r->d[0], (uint8_t)blocked);
-        if (blocked) mz_seg(2), fn_S2_3500(r);
+        if (blocked) mz_seg_of(2, 0x3500), fn_S2_3500(r);
         goto out;
     }
     set_w(&r->d[0], g16(0x20CA));
@@ -324,7 +324,7 @@ void fn_S8_140A(Regs *r) {
     w16(r->a[0] + sxw(r->d[0]) + 0xC, 0);
     w16(r->a[0] + sxw(r->d[5]) + 0xC, 1);
     sg16(0x20CA, (uint16_t)r->d[5]);
-    mz_seg(2), fn_S2_3500(r);
+    mz_seg_of(2, 0x3500), fn_S2_3500(r);
 out:
     r->d[5] = d5save;
     cc_nz_l(r, d5save);   /* flags from restoring D5 */
@@ -374,7 +374,7 @@ void fn_S8_11F0(uint32_t w) {
     mac_PaintRect(gw + 0x10);   /* the original paints a copy of portRect */
     fn_S8_09FC(g32(0x1DE8));
     Regs r = {{0}, {0}, 0};
-    mz_seg(2), fn_S2_39F8(&r);
+    mz_seg_of(2, 0x39F8), fn_S2_39F8(&r);
     mac_ShowCursor(); mac_HideCursor();
 }
 
@@ -382,14 +382,14 @@ void fn_S4_16FC(void);
 void fn_S4_1772(void);
 
 /* fn_S8_0F0C: creates an object of type $18 at the player (fn_S8_0F1A) and plays sound $24. */
-void fn_S8_0F0C(Regs *r) { set_w(&r->d[0], 0x18); fn_S8_0F1A(r); mz_seg(4), fn_S4_16FC(); }
+void fn_S8_0F0C(Regs *r) { set_w(&r->d[0], 0x18); fn_S8_0F1A(r); mz_seg_of(4, 0x16FC), fn_S4_16FC(); }
 
 /* fn_S8_0E52: when G_20FE reaches 0: G_20F8 = 0, G_20D8 = 7 and sound $2A. */
 void fn_S8_0E52(Regs *r) {
     cc_nz_w(r, g16(0x20FE));
     if (g16(0x20FE)) return;
     sg16(0x20F8, 0); sg16(0x20D8, 7);
-    mz_seg(4), fn_S4_1772();
+    mz_seg_of(4, 0x1772), fn_S4_1772();
 }
 
 /* fn_S8_139E / 13B6 / 13D2 / 13EE: player moves (fn_S8_140A) backwards / forwards / sideways, as
@@ -449,12 +449,12 @@ void fn_S8_27CC(uint32_t h) {
     w16(p + 4, 0); w16(p + 8, 0); w16(p + 2, 0); w16(p + 6, 0);
     for (int16_t i = 0; i < 10; i++) {
         uint32_t e = p + (uint32_t)(0x46 * i);
-        mz_seg(2), fn_S2_0332(buf, e + 0x118);
+        mz_seg_of(2, 0x0332), fn_S2_0332(buf, e + 0x118);
         w16(e + 0x158, 0); w32(e + 0x15A, 0);
     }
     for (int i = 0; i < 6; i++) {
         uint32_t e = p + (uint32_t)(0x46 * i);
-        mz_seg(2), fn_S2_0332(GADDR(builtin[i].name), e + 0x118);
+        mz_seg_of(2, 0x0332), fn_S2_0332(GADDR(builtin[i].name), e + 0x118);
         w16(e + 0x158, builtin[i].level); w32(e + 0x15A, builtin[i].score);
     }
     for (int16_t i = 0; i < 8; i++) w8(p + 0x10 + (uint32_t)i, 0x20);
@@ -476,8 +476,8 @@ static void effect_frame(Regs *r, uint16_t pal, uint32_t model, uint32_t entry_o
     sg16(0x20A6, 4);
     set_w(&r->d[0], g16(0x2156)); add_w(r, &r->d[0], 4); sg16(0x20A4, (uint16_t)r->d[0]);
     sg16(0x20AA, set);
-    mz_seg(2), fn_S2_1CF6(r);
-    mz_seg(2), fn_S2_4DC4(r);
+    mz_seg_of(2, 0x1CF6), fn_S2_1CF6(r);
+    mz_seg_of(2, 0x4DC4), fn_S2_4DC4(r);
 }
 
 /* fn_S8_0CFE: the full-view effect sequence driven by G_20D8: 1..6 counts down showing frames
@@ -502,7 +502,7 @@ void fn_S8_0CFE(Regs *r) {
         effect_frame(r, 10, 0x1D7C, sxw(r->d[0]), 7);
         set_w(&r->d[0], g16(0x20D8)); add_w(r, &r->d[0], 1);
         cc_cmp_w(r, 0x13, (uint16_t)r->d[0]);
-        if ((int16_t)r->d[0] >= 0x13) { mz_seg(4), fn_S4_434E(r); sg16(0x20D8, 0x84); cc_nz_w(r, 0x84); }
+        if ((int16_t)r->d[0] >= 0x13) { mz_seg_of(4, 0x434E), fn_S4_434E(r); sg16(0x20D8, 0x84); cc_nz_w(r, 0x84); }
         else { sg16(0x20D8, (uint16_t)r->d[0]); cc_nz_w(r, (uint16_t)r->d[0]); }
         return;
     }
@@ -515,8 +515,8 @@ void fn_S8_0CFE(Regs *r) {
         sg16(0x20A6, 4);
         set_w(&r->d[0], g16(0x2156)); add_w(r, &r->d[0], 4); sg16(0x20A4, (uint16_t)r->d[0]);
         sg16(0x20AA, 1);
-        mz_seg(2), fn_S2_1CF6(r);
-        mz_seg(2), fn_S2_4DC4(r);
+        mz_seg_of(2, 0x1CF6), fn_S2_1CF6(r);
+        mz_seg_of(2, 0x4DC4), fn_S2_4DC4(r);
         return;
     }
     cc_cmp_w(r, 0x84, (uint16_t)t);

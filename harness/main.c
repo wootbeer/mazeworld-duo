@@ -1,5 +1,6 @@
 /* Harness entry: boots the original application under Musashi. */
 #include "hx.h"
+void mz_select_original(void);
 #include "m68k.h"
 #include <stdarg.h>
 #include <stdlib.h>
@@ -300,6 +301,7 @@ int main(int argc, char **argv) {
     hx_log("game: \"%s\" (creator %c%c%c%c) from %s", g_appname, app->creator >> 24, app->creator >> 16, app->creator >> 8, app->creator, g_appfile);
     wr16(LM_CurApRefNum, 2);
     wr8(LM_CurApName, (uint8_t)strlen(g_appname)); memcpy(g_mem + LM_CurApName + 1, g_appname, strlen(g_appname));
+    if (app->creator == FOURCC('M','z','w','l')) mz_select_original();   /* Mazeworld Original */
     traps_init();
     seg_init();
     if (sublist) { int sub_enable(const char *list); sub_enable(sublist); }

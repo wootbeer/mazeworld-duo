@@ -337,7 +337,7 @@ void fn_S3_038E(int32_t num, uint32_t str);
 void fn_S2_03A0(uint32_t msg, int16_t num, int8_t fatal) {
     MZ_FRAME;
     uint32_t text = mz_local(256);
-    mz_seg(3), fn_S3_038E((int32_t)num, text);
+    mz_seg_of(3, 0x038E), fn_S3_038E((int32_t)num, text);
     mac_ParamText(msg, text, GADDR(0x2428), GADDR(0x2426));
     mac_StopAlert(0x80, 0);
     if (fatal) mac_ExitToShell();
@@ -785,7 +785,7 @@ void fn_S2_4BF8(void) {
     mac_TextSize(9); mac_TextFont((int16_t)g16(0x2244)); mac_TextMode(0);
     mac_MoveTo((int16_t)(g16(0x2118) + h), (int16_t)(g16(0x211A) + v));
     mac_DrawString(GADDR(0x1402));
-    mz_seg(3), fn_S3_038E((int32_t)(int16_t)g16(0x225E), text);
+    mz_seg_of(3, 0x038E), fn_S3_038E((int32_t)(int16_t)g16(0x225E), text);
     mac_DrawString(text);
     mac_DrawString(GADDR(0x13F4));
     sg16(0x1432, g16(0x225E));
@@ -1351,7 +1351,7 @@ void fn_S2_0376(Regs *r) {
         if (!((uint16_t)r->d[0] & 0x8000)) {
             w16(r->a[2] + sxw(r->d[3]) + 0x26, 0xFFFF);
             set_w(&r->d[0], (uint16_t)r->d[3]);
-            mz_seg(7), fn_S7_2E9A(r);
+            mz_seg_of(7, 0x2E9A), fn_S7_2E9A(r);
         }
         sub_w(r, &r->d[3], 0x40);
     } while ((uint16_t)r->d[3]);
@@ -1496,7 +1496,7 @@ void fn_S2_5810(Regs *r) {
         set_w(&r->d[0], r16(o + 2));
         r->a[0] = o;
         r->d[1] = r->d[3];
-        mz_seg(7), fn_S7_2D1C(r);
+        mz_seg_of(7, 0x2D1C), fn_S7_2D1C(r);
     next:
         set_w(&r->d[0], r16(r->a[4])); r->a[4] += 2;
     }
@@ -1599,7 +1599,7 @@ void fn_S2_3872(uint32_t pgw) {
 static void panel_number(int32_t value, int16_t k, int16_t h, int16_t v) {
     MZ_FRAME;
     uint32_t str = mz_local(0x100), box = mz_local(8);
-    mz_seg(3), fn_S3_038E(value, str);
+    mz_seg_of(3, 0x038E), fn_S3_038E(value, str);
     int16_t gap = (int16_t)(k * (int16_t)g16(0x2122));
     w16(box + 2, (uint16_t)(h + g16(0x2128)));
     w16(box + 6, (uint16_t)(h + g16(0x2124)));
