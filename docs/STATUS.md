@@ -5,7 +5,7 @@
   For Original, `GADDR` translates the C code's global offsets (`mz_gmap`: each offset moves with
   the nearest global at or above it), `mz_jt` the jump-table addresses, and `mz_seg_of` loads the
   segment the called function is in. A translated function runs for Original when it and all its
-  callees match exactly (95 of them); `tools/verify_original.sh` checks them per call and end to
+  callees match exactly (87 of them); `tools/verify_original.sh` checks them per call and end to
   end on Original's tests and recordings. The rest (the renderer, sound, the shell's menus) differs
   for real and is step 3. `tools/diff_pair.py fn_Sx_xxxx` shows how a pair differs.
 

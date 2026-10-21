@@ -30,7 +30,7 @@ def load(d):
                 funcs[cur].append((n, g, j, callee[0] if callee else None))
     return funcs
 
-def header(a, out, pairs):
+def header(a, out, pairs, callee):
     """game/orig_map.h: every Catacombs global (unmapped ones 0, so their neighbours' ranges end at
     them), the jump-table slots, and every function pair, flagged when the translated function can
     run for Original as it is: an exact pair whose callees all qualify too."""
@@ -41,8 +41,10 @@ def header(a, out, pairs):
         if f in memo or f in stack: return memo.get(f, True)
         p = pairs.get(f)
         # exact, and a callee in the caller's segment stays in it (no load call there in the C code)
-        r = bool(p) and p[1] == 1.0 and all(ok(c, stack + (f,)) and (seg(c) != seg(f) or seg(pairs[c][0]) == seg(p[0]))
-                                            for c in calls.get(f, ()))
+        # (short functions pair by their text alone, so the calls must agree: in Original the call
+        # goes to the function paired with the callee)
+        r = bool(p) and p[1] == 1.0 and callee.get(f, p[0]) == p[0] and \
+            all(ok(c, stack + (f,)) and (seg(c) != seg(f) or seg(pairs[c][0]) == seg(p[0])) for c in calls.get(f, ()))
         memo[f] = r
         return r
     subs = set()
@@ -101,7 +103,7 @@ def main():
         if len(c) > 1: out['conflicts'].append({'catacombs': f'G_{p:04X}', 'original': {f'G_{x:04X}': m for x, m in c.items()}})
     for p, c in sorted(jmap.items()): out['jt'][p] = c.most_common(1)[0][0]
     if '--header' in sys.argv:
-        header(a, out, pairs)
+        header(a, out, pairs, {k: c.most_common(1)[0][0] for k, c in fmap.items()})
     else:
         print(json.dumps(out, indent=1))
     sys.stderr.write(f"{len(pairs)} function pairs ({sum(1 for v in pairs.values() if v[1] == 1.0)} exact), "
