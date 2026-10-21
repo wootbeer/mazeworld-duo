@@ -25,7 +25,7 @@ $(GEN)/m68kops.o: $(GEN)/m68kops.c musashi_conf.h
 	$(CC) $(CFLAGS) -w -c -o $@ $<
 
 GAME    = ../game
-game_%.o: $(GAME)/%.c $(GAME)/mz.h $(GAME)/mzasm.h $(GAME)/fns.h
+game_%.o: $(GAME)/%.c $(GAME)/mz.h $(GAME)/mzasm.h $(GAME)/fns.h $(GAME)/orig_map.h
 	$(CC) $(CFLAGS) -DMZ_HARNESS -I$(GAME) -c -o $@ $<
 
 gen/subs.c $(GAME)/fns.h: $(GAME)/subs.txt ../tools/gen_subs.py
@@ -69,7 +69,7 @@ WFLAGS   = -O2 -g0 -Wno-unused-parameter -I. -I$(GEN) -I$(MUSASHI) -DMUSASHI_CNF
 WOBJ     = $(addprefix $(WB)/,$(PLAYOBJ))
 $(WB)/%.o: %.c ; @mkdir -p $(WB) $(WB)/gen; $(WCC) $(WFLAGS) -c -o $@ $<
 $(WB)/gen/%.o: gen/%.c ; @mkdir -p $(WB)/gen; $(WCC) $(WFLAGS) -w -c -o $@ $<
-$(WB)/game_%.o: $(GAME)/%.c ; @mkdir -p $(WB); $(WCC) $(WFLAGS) -DMZ_HARNESS -I$(GAME) -c -o $@ $<
+$(WB)/game_%.o: $(GAME)/%.c $(GAME)/orig_map.h ; @mkdir -p $(WB); $(WCC) $(WFLAGS) -DMZ_HARNESS -I$(GAME) -c -o $@ $<
 $(WB)/arc_%.o: ../archive/%.c ; @mkdir -p $(WB); $(WCC) $(WFLAGS) -c -o $@ $<
 $(WB)/mactb_%.o: $(MACTB)/%.c ; @mkdir -p $(WB); $(WCC) $(WFLAGS) -c -o $@ $<
 $(WB)/m68kcpu.o: $(MUSASHI)/m68kcpu.c $(GEN)/m68kops.h ; @mkdir -p $(WB); $(WCC) $(WFLAGS) -w -c -o $@ $<

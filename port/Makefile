@@ -26,7 +26,7 @@ $(GAME)/fns.h $(H)/gen/subs.c: $(GAME)/subs.txt ../tools/gen_subs.py
 
 B = build
 $(B)/tb_%.o: $(H)/%.c $(H)/hx.h ; @mkdir -p $(B); $(CC) $(CFLAGS) -c -o $@ $<
-$(B)/game_%.o: $(GAME)/%.c $(GAME)/mz.h ; @mkdir -p $(B); $(CC) $(CFLAGS) -c -o $@ $<
+$(B)/game_%.o: $(GAME)/%.c $(GAME)/mz.h $(GAME)/orig_map.h ; @mkdir -p $(B); $(CC) $(CFLAGS) -c -o $@ $<
 $(B)/mactb_%.o: $(MACTB)/%.c ; @mkdir -p $(B); $(CC) $(CFLAGS) -c -o $@ $<
 $(B)/arc_%.o: ../archive/%.c ; @mkdir -p $(B); $(CC) $(CFLAGS) -c -o $@ $<
 $(B)/softfloat.o: $(MUSASHI)/softfloat/softfloat.c ; @mkdir -p $(B); $(CC) $(CFLAGS) -w -c -o $@ $<
@@ -47,7 +47,7 @@ SDLW     = ../third_party/sdl2-mingw/x86_64-w64-mingw32
 W        = build-win
 WFLAGS   = -O2 -Wall -Wno-unused-parameter -I. -I$(H) -I$(H)/gen -I$(MUSASHI) -I$(GAME) -DMUSASHI_CNF='"musashi_conf.h"' -DMZ_PORT -I$(SDLW)/include/SDL2 -Dmain=SDL_main
 $(W)/tb_%.o: $(H)/%.c $(H)/hx.h ; @mkdir -p $(W); $(WCC) $(WFLAGS) -c -o $@ $<
-$(W)/game_%.o: $(GAME)/%.c $(GAME)/mz.h ; @mkdir -p $(W); $(WCC) $(WFLAGS) -c -o $@ $<
+$(W)/game_%.o: $(GAME)/%.c $(GAME)/mz.h $(GAME)/orig_map.h ; @mkdir -p $(W); $(WCC) $(WFLAGS) -c -o $@ $<
 $(W)/mactb_%.o: $(MACTB)/%.c ; @mkdir -p $(W); $(WCC) $(WFLAGS) -c -o $@ $<
 $(W)/arc_%.o: ../archive/%.c ; @mkdir -p $(W); $(WCC) $(WFLAGS) -c -o $@ $<
 $(W)/softfloat.o: $(MUSASHI)/softfloat/softfloat.c ; @mkdir -p $(W); $(WCC) $(WFLAGS) -w -c -o $@ $<
