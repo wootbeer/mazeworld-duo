@@ -15,7 +15,8 @@
 
 typedef struct { uint32_t tick; int down; uint8_t code; uint8_t ch; int kind; int16_t x, y; } Step;   /* kind 0 key, 1 mouse button, 2 mouse move, 3 relative move */
 static int16_t mouse_x = 320, mouse_y = 240; static int mouse_down;
-static Step steps[4096];
+#define MAXSTEPS (1 << 20)          /* a recorded session of hours fits */
+static Step steps[MAXSTEPS];
 void input_live_move(int dx, int dy);
 void input_live_menu(int menu, int item);
 void input_live_key(uint8_t code, uint8_t ch, int down, int repeat);
@@ -100,26 +101,26 @@ int input_load(const char *path) {
           } }
         { unsigned kc, kch; char how[8];
           if (sscanf(line, "%u key %x %x %7s", &t, &kc, &kch, how) == 4) {
-              if (nsteps < 4096) steps[nsteps++] = (Step){t, strcmp(how, "up") != 0, (uint8_t)kc, (uint8_t)kch, !strcmp(how, "auto") ? 6 : 5, 0, 0};
+              if (nsteps < MAXSTEPS) steps[nsteps++] = (Step){t, strcmp(how, "up") != 0, (uint8_t)kc, (uint8_t)kch, !strcmp(how, "auto") ? 6 : 5, 0, 0};
               continue;
           } }
         if (sscanf(line, "%u %15s %d %d", &t, act, &mx, &my) == 4 && !strcmp(act, "menu")) {
-            if (nsteps < 4096) steps[nsteps++] = (Step){t, 0, 0, 0, 4, (int16_t)mx, (int16_t)my};
+            if (nsteps < MAXSTEPS) steps[nsteps++] = (Step){t, 0, 0, 0, 4, (int16_t)mx, (int16_t)my};
             continue;
         }
         if (sscanf(line, "%u %15s %d %d", &t, act, &mx, &my) == 4 && !strcmp(act, "mmove")) {
-            if (nsteps < 4096) steps[nsteps++] = (Step){t, 0, 0, 0, 3, (int16_t)mx, (int16_t)my};
+            if (nsteps < MAXSTEPS) steps[nsteps++] = (Step){t, 0, 0, 0, 3, (int16_t)mx, (int16_t)my};
             continue;
         }
         if (sscanf(line, "%u %15s %d %d", &t, act, &mx, &my) == 4 && (!strcmp(act, "move") || !strcmp(act, "click"))) {
-            if (nsteps + 3 > 4096) break;
+            if (nsteps + 3 > MAXSTEPS) break;
             steps[nsteps++] = (Step){t, 0, 0, 0, 2, (int16_t)mx, (int16_t)my};
             if (!strcmp(act, "click")) { steps[nsteps++] = (Step){t, 1, 0, 0, 1, 0, 0}; steps[nsteps++] = (Step){t + 2, 0, 0, 0, 1, 0, 0}; }
             continue;
         }
         if (sscanf(line, "%u %15s", &t, act) == 2 && !strcmp(act, "type")) {
             char *p = strstr(line, "type") + 4; while (*p == ' ') p++;
-            for (; *p && *p != '\n' && *p != '\r' && nsteps + 2 <= 4096; p++, t += 4) {
+            for (; *p && *p != '\n' && *p != '\r' && nsteps + 2 <= MAXSTEPS; p++, t += 4) {
                 char lc[2] = {(char)tolower((unsigned char)*p), 0};
                 int k = -1;
                 for (size_t i = 0; i < sizeof keys / sizeof keys[0]; i++) if (!strcmp(keys[i].n, *p == ' ' ? "space" : lc)) k = (int)i;
@@ -130,7 +131,7 @@ int input_load(const char *path) {
             continue;
         }
         if (sscanf(line, "%u %15s", &t, act) == 2 && (!strcmp(act, "mousedown") || !strcmp(act, "mouseup"))) {
-            if (nsteps < 4096) steps[nsteps++] = (Step){t, !strcmp(act, "mousedown"), 0, 0, 1, 0, 0};
+            if (nsteps < MAXSTEPS) steps[nsteps++] = (Step){t, !strcmp(act, "mousedown"), 0, 0, 1, 0, 0};
             continue;
         }
         if (sscanf(line, "%u %15s %15s", &t, act, key) != 3) continue;
@@ -138,7 +139,7 @@ int input_load(const char *path) {
         for (size_t i = 0; i < sizeof keys / sizeof keys[0]; i++) if (!strcmp(keys[i].n, key)) k = (int)i;
         if (k < 0) { fprintf(stderr, "input script: unknown key '%s'\n", key); fclose(f); return -1; }
         int n = !strcmp(act, "tap") ? 2 : 1;
-        for (int j = 0; j < n && nsteps < 4096; j++) {
+        for (int j = 0; j < n && nsteps < MAXSTEPS; j++) {
             Step *s = &steps[nsteps++];
             s->tick = t + (uint32_t)j * 2; s->code = keys[k].code; s->ch = keys[k].ch; s->kind = 0;
             s->down = !strcmp(act, "down") || (n == 2 && j == 0);
