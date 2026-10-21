@@ -332,6 +332,20 @@ uint8_t fn_S8_0000(void) {
  * keys arm G_2171 when released, and pressing one then sets G_2172 (one shot per press). The task
  * re-arms itself (vblCount 1). D0-D2 are left holding the key map. */
 void fn_S8_1814(Regs *r) {
+    if (mz_original) {                                      /* Original (fn_S8_6606): mouse turning */
+        uint32_t task = r->a[0], m = g32(0x4E0E), c = g32(0x4E12);
+        uint16_t h = r16(m + 2), v = r16(m);
+        sog16(0x5756, (uint16_t)(og16(0x5756) + h - g16(0x2186)));
+        sog16(0x5754, (uint16_t)(og16(0x5754) + v - g16(0x2184)));
+        set_w(&r->d[0], (uint16_t)(v - g16(0x2184)));
+        w16(c + 2, g16(0x2186)); w16(c, g16(0x2184));    /* recentre the mouse */
+        w32(m, r32(c));
+        w8(g32(0x4E0A), r8(g32(0x4E06)));
+        w16(task + 0xA, 1);
+        r->a[0] = task; r->a[1] = m;
+        r->ccr = (uint8_t)(r->ccr & CCR_X);
+        return;
+    }
     MZ_FRAME;
     uint32_t task = r->a[0], km = mz_local(16);
     mac_GetKeys(km);

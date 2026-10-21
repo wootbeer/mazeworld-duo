@@ -338,7 +338,7 @@
 8  0136  u8 fn_S8_0136(i16 level)  nocheck both
 8  03AE  u8 fn_S8_03AE(void)  nocheck
 8  0000  u8 fn_S8_0000(void)  nocheck
-8  1814  regs fn_S8_1814  ignore=ccr nocheck
+8  1814  regs fn_S8_1814  ignore=ccr nocheck both
 8  606C  ptr fn_S8_606C(ptr r)  nocheck
 8  610C  ptr fn_S8_610C(ptr r)  nocheck
 8  513C  i16 fn_S8_513C(void)  nocheck both

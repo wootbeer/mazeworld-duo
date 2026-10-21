@@ -48,8 +48,8 @@ void vbl_trap(uint8_t num) {
 static void call_task(uint32_t addr, uint32_t task) {
     Regs r; memset(&r, 0, sizeof r);
     r.a[0] = task; r.a[5] = A5_ADDR; r.a[7] = reg(M68K_REG_A7);
-    if (addr == A5_ADDR + 0x72) fn_S8_1814(&r);
-    else if (addr == A5_ADDR + 0x92) fn_S8_47E0(&r);
+    if (addr == mz_jt(0x72)) fn_S8_1814(&r);
+    else if (addr == mz_jt(0x92)) fn_S8_47E0(&r);
     else hx_fault("VBL task at %06X: not a known routine", addr);
 }
 
