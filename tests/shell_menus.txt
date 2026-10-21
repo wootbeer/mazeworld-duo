@@ -1,0 +1,12 @@
+# Menu choices from the shell (clicks on the menu bar, answered by MenuSelect): View > Low
+# Resolution, Sound > Reduced Sound, File > Clear High Scores (its alert: Return), Apple > About
+# (the instructions: Escape), then play.
+60 menu 131 7
+100 menu 132 2
+140 menu 129 5
+200 tap return
+260 menu 128 1
+320 tap escape
+380 tap space
+420 down kp8
+480 up kp8

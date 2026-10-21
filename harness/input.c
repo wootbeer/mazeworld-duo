@@ -3,6 +3,8 @@
  *                <tick> type <text>   (taps each character, one every 4 ticks; letters, digits, space)
  *                <tick> setg <global> <value>   |   at S<seg>:<off> setg <global> <value>   (test setup)
  *                <tick> move x y   |   <tick> click x y   |   <tick> mousedown   |   <tick> mouseup
+ *                <tick> menu <menu> <item>   (a menu choice: a click on the menu bar, MenuSelect answers it)
+ *                <tick> mmove dx dy   (the mouse moved by dx, dy: as the mouse driver, MTemp and RawMouse move)
  * Keys: space return enter escape tab delete shift kp0..kp9 a..z 0..9 left right up down
  * A key going down posts a keyDown event and sets its KeyMap bit; up posts keyUp and clears it. */
 #include "hx.h"
@@ -10,9 +12,11 @@
 #include <stdlib.h>
 #include <ctype.h>
 
-typedef struct { uint32_t tick; int down; uint8_t code; uint8_t ch; int kind; int16_t x, y; } Step;   /* kind 0 key, 1 mouse button, 2 mouse move */
+typedef struct { uint32_t tick; int down; uint8_t code; uint8_t ch; int kind; int16_t x, y; } Step;   /* kind 0 key, 1 mouse button, 2 mouse move, 3 relative move */
 static int16_t mouse_x = 320, mouse_y = 240; static int mouse_down;
 static Step steps[4096];
+void input_live_move(int dx, int dy);
+void input_live_menu(int menu, int item);
 static int nsteps, next_step;
 
 typedef struct { uint16_t what; uint32_t message; uint32_t when; uint16_t modifiers; uint32_t where; } Ev;
@@ -77,6 +81,14 @@ int input_load(const char *path) {
               if (ntpokes < 16) tpokes[ntpokes++] = (TickPoke){tk, g, (uint16_t)v, 0};
               continue;
           } }
+        if (sscanf(line, "%u %15s %d %d", &t, act, &mx, &my) == 4 && !strcmp(act, "menu")) {
+            if (nsteps < 4096) steps[nsteps++] = (Step){t, 0, 0, 0, 4, (int16_t)mx, (int16_t)my};
+            continue;
+        }
+        if (sscanf(line, "%u %15s %d %d", &t, act, &mx, &my) == 4 && !strcmp(act, "mmove")) {
+            if (nsteps < 4096) steps[nsteps++] = (Step){t, 0, 0, 0, 3, (int16_t)mx, (int16_t)my};
+            continue;
+        }
         if (sscanf(line, "%u %15s %d %d", &t, act, &mx, &my) == 4 && (!strcmp(act, "move") || !strcmp(act, "click"))) {
             if (nsteps + 3 > 4096) break;
             steps[nsteps++] = (Step){t, 0, 0, 0, 2, (int16_t)mx, (int16_t)my};
@@ -139,6 +151,8 @@ void input_poll(uint32_t tick) {
     while (next_step < nsteps && steps[next_step].tick <= tick) {
         Step *s = &steps[next_step++];
         if (s->kind == 2) { mouse_x = s->x; mouse_y = s->y; set_mouse_lowmem(); hx_log("input: tick %u mouse at (%d,%d)", tick, s->x, s->y); continue; }
+        if (s->kind == 4) { input_live_menu(s->x, s->y); hx_log("input: tick %u menu %d item %d", tick, s->x, s->y); continue; }
+        if (s->kind == 3) { input_live_move(s->x, s->y); hx_log("input: tick %u mouse moved by (%d,%d)", tick, s->x, s->y); continue; }
         if (s->kind == 1) {
             mouse_down = s->down; set_mouse_lowmem();
             int n = (qt + 1) & 63;
@@ -178,6 +192,22 @@ void input_live_key(uint8_t code, uint8_t ch, int down, int repeat) {
 void input_live_keybit(uint8_t code, int down) {
     uint32_t kb = LM_KeyMap + (code >> 3); uint8_t bit = (uint8_t)(1 << (code & 7));
     if (down) wr8(kb, rd8(kb) | bit); else wr8(kb, rd8(kb) & ~bit);
+}
+/* the mouse moved by (dx, dy), as the mouse driver reports it: MTemp and RawMouse move (a game that
+ * re-centres the mouse reads the movement from MTemp) and the cursor follows */
+void input_live_move(int dx, int dy) {
+    for (uint32_t a = 0x0828; a <= 0x082C; a += 4) { wr16(a, (uint16_t)(rd16(a) + dy)); wr16(a + 2, (uint16_t)(rd16(a + 2) + dx)); }
+    mouse_y = (int16_t)rd16(0x082C); mouse_x = (int16_t)rd16(0x082E);
+    wr32(0x0830, rd32(0x082C));
+    wr8(0x08CE, rd8(0x08CF));                                /* CrsrNew = CrsrCouple */
+}
+/* a menu choice: a mouse-down on the menu bar (and its release), which the game passes to
+ * MenuSelect; MenuSelect returns this item (harness/menu.c) */
+void input_live_menu(int menu, int item) {
+    void menu_choose(int menu, int item); menu_choose(menu, item);
+    int16_t x = mouse_x, y = mouse_y;
+    mouse_x = 30; mouse_y = 5; post(1, 0); post(2, 0);
+    mouse_x = x; mouse_y = y;
 }
 void input_live_mouse(int x, int y) { mouse_x = (int16_t)x; mouse_y = (int16_t)y; set_mouse_lowmem(); }
 void input_live_button(int down) { mouse_down = down; set_mouse_lowmem(); post(down ? 1 : 2, 0); }

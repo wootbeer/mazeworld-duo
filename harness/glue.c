@@ -283,6 +283,8 @@ void     mac_EnableItem(uint32_t menu, int16_t item)  { pascal_trap(0xA939, 0, "
 void     mac_DisableItem(uint32_t menu, int16_t item) { pascal_trap(0xA93A, 0, "lw", menu, (uint32_t)(uint16_t)item); }
 void     mac_CheckItem(uint32_t menu, int16_t item, int checked) { pascal_trap(0xA945, 0, "lww", menu, (uint32_t)(uint16_t)item, checked ? 0x100u : 0u); }
 uint32_t mac_MenuKey(int16_t ch)                      { return pascal_trap(0xA93E, 4, "w", (uint32_t)(uint16_t)ch); }
+int16_t  mac_FindWindow(uint32_t pt, uint32_t pwin)  { return (int16_t)pascal_trap(0xA92C, 2, "ll", pt, pwin); }
+uint32_t mac_MenuSelect(uint32_t pt)                { return pascal_trap(0xA93D, 4, "l", pt); }
 void     mac_HiliteMenu(int16_t menu)                 { pascal_trap(0xA938, 0, "w", (uint32_t)(uint16_t)menu); }
 void     mac_AppendResMenu(uint32_t menu, uint32_t type) { pascal_trap(0xA94D, 0, "ll", menu, type); }
 void     mac_DrawMenuBar(void)                     { pascal_trap(0xA937, 0, ""); }

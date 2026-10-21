@@ -1,0 +1,3479 @@
+# monkey script seed=23 ticks=14400 game=original
+60 click 320 240
+120 mousedown
+123 mouseup
+135 mousedown
+138 mouseup
+143 mmove 1 1
+145 mmove -2 1
+149 mmove -3 0
+153 mmove -3 -1
+154 mmove 0 2
+155 mmove 1 2
+158 mmove -3 0
+159 mmove 1 1
+161 mmove 1 0
+164 mmove 1 1
+167 mmove -1 3
+168 mmove 0 0
+172 mmove 1 2
+174 mmove -2 0
+177 mmove 1 0
+180 mmove -7 6
+183 mmove -11 6
+186 mmove -7 6
+190 mmove -7 5
+193 mmove -10 4
+194 mmove -8 5
+197 mmove -7 5
+198 mmove -8 5
+202 mmove -11 4
+206 mmove -8 4
+208 mmove -10 4
+211 mmove 2 -9
+215 mmove 3 -12
+216 mmove 4 -9
+218 mmove 5 -10
+220 mmove 2 -12
+222 mmove 6 -8
+224 mmove 4 -12
+228 mmove 3 -12
+232 mmove 4 -9
+234 mmove 6 -9
+235 mmove 3 -8
+238 mmove 5 -9
+241 mmove 6 -8
+242 mmove 4 -12
+263 mmove 6 -1
+266 mmove 9 3
+267 mmove 6 3
+271 mmove 8 1
+272 mmove 7 2
+273 mmove 6 2
+275 mmove 5 0
+279 mmove 8 -1
+283 mmove 7 2
+285 mmove 9 3
+296 mousedown
+299 mouseup
+304 mmove -11 4
+308 mmove -9 3
+312 mmove -9 3
+315 mmove -9 2
+319 mmove -11 4
+323 mmove -7 3
+326 mmove -11 4
+328 mmove -9 2
+331 mmove -11 5
+335 mmove -11 3
+339 mmove -11 1
+342 mmove -11 2
+346 mmove -11 4
+347 mmove -9 2
+350 mmove -7 2
+356 mousedown
+359 mmove 24 24
+364 mouseup
+387 mousedown
+390 mmove -24 24
+395 mouseup
+401 mousedown
+404 mmove 24 -24
+409 mouseup
+414 tap space
+444 click 320 240
+459 tap space
+489 click 320 240
+503 mousedown
+506 mmove 24 -24
+511 mouseup
+524 mmove -3 8
+525 mmove -1 4
+527 mmove -1 4
+529 mmove -2 5
+543 mousedown
+546 mmove 24 -24
+551 mouseup
+572 mmove 2 1
+575 mmove 4 -2
+578 mmove 4 -1
+579 mmove 4 0
+582 mmove 2 1
+584 mmove 2 -1
+588 mmove 4 -3
+589 mmove 3 0
+593 mmove 2 1
+597 mmove 3 -2
+600 mmove 1 -1
+604 mmove 2 0
+607 mmove 5 0
+608 mmove 5 1
+612 mmove 5 -2
+616 mmove 2 0
+617 mmove 4 -3
+621 mmove 4 -1
+622 mmove 1 0
+626 mmove 3 -1
+632 mousedown
+635 mmove -24 -24
+640 mouseup
+662 mousedown
+665 mouseup
+682 mmove -6 -11
+685 mmove -9 -8
+686 mmove -5 -8
+688 mmove -5 -11
+691 mmove -7 -10
+694 mmove -6 -9
+697 mmove -7 -12
+699 mmove -5 -8
+701 mmove -9 -11
+702 mmove -7 -10
+703 mmove -5 -12
+704 mmove -9 -9
+705 mmove -5 -10
+708 mmove -5 -8
+712 mmove -9 -11
+713 mmove -8 -11
+730 mmove -4 -3
+731 mmove -4 -2
+735 mmove -8 -6
+741 mousedown
+744 mmove -24 24
+749 mouseup
+773 mmove 4 6
+774 mmove 7 5
+777 mmove 8 3
+779 mmove 5 5
+780 mmove 5 4
+782 mmove 8 3
+786 mmove 8 4
+788 mmove 8 7
+790 mmove 4 5
+791 mmove 8 4
+792 mmove 8 6
+795 mmove 4 4
+799 mmove 6 3
+801 mmove 5 5
+805 mmove 7 4
+807 mmove 8 7
+819 mmove 7 -11
+822 mmove 6 -11
+826 mmove 6 -10
+829 mmove 8 -10
+833 mmove 8 -9
+834 mmove 9 -8
+835 mmove 9 -7
+851 mousedown
+854 mmove -24 -24
+859 mouseup
+868 mmove 8 -10
+870 mmove 8 -10
+874 mmove 9 -9
+881 mmove 7 4
+884 mmove 7 5
+886 mmove 4 5
+889 mmove 8 3
+893 mmove 7 5
+894 mmove 7 3
+897 mmove 5 3
+898 mmove 8 7
+900 mmove 6 6
+902 mmove 8 3
+905 mmove 6 4
+907 mmove 5 7
+909 mmove 7 5
+913 mmove 6 5
+915 mmove 8 6
+916 mmove 7 5
+917 mmove 4 3
+919 mmove 4 4
+920 mmove 7 5
+933 mmove 3 -1
+935 mmove 3 -1
+938 mmove 3 -4
+940 mmove -1 -1
+944 mmove -1 -3
+948 mmove -1 -2
+952 mmove 0 0
+954 mmove 0 -4
+957 mmove 3 -3
+958 mmove 1 -1
+959 mmove 1 -2
+963 mmove 3 -1
+984 tap space
+1014 click 320 240
+1037 mousedown
+1040 mmove -24 -24
+1045 mouseup
+1055 mousedown
+1058 mouseup
+1061 mousedown
+1064 mouseup
+1070 mousedown
+1073 mouseup
+1084 mmove -5 -6
+1086 mmove -2 -8
+1088 mmove -2 -7
+1090 mmove -5 -4
+1092 mmove -5 -8
+1093 mmove -4 -6
+1094 mmove -1 -8
+1098 mmove -3 -4
+1102 mmove -5 -7
+1105 mmove -5 -7
+1109 mmove -8 -12
+1113 mmove -5 -10
+1117 mmove -6 -8
+1118 mmove -9 -8
+1120 mmove -9 -10
+1124 mmove -9 -8
+1128 mmove -8 -10
+1129 mmove -7 -8
+1131 mmove -6 -10
+1132 mmove -8 -10
+1155 tap space
+1185 click 320 240
+1214 mousedown
+1217 mmove -24 24
+1222 mouseup
+1233 mmove 8 -11
+1237 mmove 12 -10
+1241 mmove 9 -9
+1242 mmove 12 -12
+1250 mmove -6 7
+1251 mmove -6 5
+1252 mmove -6 3
+1254 mmove -9 5
+1256 mmove -5 6
+1273 mmove -6 -7
+1275 mmove -5 -5
+1277 mmove -4 -8
+1278 mmove -6 -4
+1282 mmove -6 -4
+1284 mmove -5 -7
+1288 mmove -7 -4
+1292 mmove -6 -7
+1296 mmove -3 -5
+1297 mmove -7 -5
+1300 mmove -3 -5
+1303 mmove -7 -7
+1306 mmove -6 -6
+1315 mmove 10 1
+1317 mmove 6 1
+1318 mmove 6 2
+1319 mmove 7 0
+1320 mmove 7 3
+1321 mmove 8 1
+1324 mmove 10 0
+1326 mmove 8 2
+1328 mmove 10 1
+1332 mmove 7 2
+1335 mmove 6 2
+1339 mmove 7 1
+1360 mmove 8 -5
+1364 mmove 8 -5
+1367 mmove 5 -5
+1368 mmove 7 -8
+1369 mmove 8 -8
+1370 mmove 6 -4
+1372 mmove 4 -5
+1374 mmove 7 -6
+1387 mousedown
+1390 mouseup
+1411 mousedown
+1414 mmove -24 24
+1419 mouseup
+1435 mmove 0 -5
+1438 mmove 2 -7
+1440 mmove -1 -5
+1442 mmove 1 -8
+1446 mmove 2 -4
+1447 mmove 0 -8
+1451 mmove 1 -8
+1453 mmove 3 -8
+1455 mmove 3 -4
+1458 mmove 1 -8
+1460 mmove 2 -6
+1461 mmove 2 -7
+1465 mmove 2 -5
+1466 mmove 0 -5
+1469 mmove 2 -8
+1477 mmove -4 -12
+1478 mmove -6 -12
+1479 mmove -4 -11
+1482 mmove -7 -9
+1485 mmove -6 -11
+1487 mmove -6 -8
+1488 mmove -7 -10
+1492 mmove -8 -9
+1494 mmove -7 -12
+1495 mmove -4 -8
+1499 mmove -4 -11
+1503 mmove -5 -10
+1507 mmove -8 -10
+1509 mmove -4 -12
+1527 mmove 1 3
+1529 mmove 1 3
+1533 mmove 0 4
+1536 mmove 2 5
+1537 mmove 0 2
+1541 mmove 2 5
+1544 mmove 2 6
+1546 mmove 2 2
+1548 mmove 4 5
+1552 mmove 0 2
+1556 mmove 3 2
+1557 mmove 4 6
+1561 mmove 2 3
+1563 mmove 2 5
+1564 mmove 0 2
+1567 mmove 2 2
+1571 mmove 3 4
+1574 mousedown
+1577 mmove -24 -24
+1582 mouseup
+1595 mmove 5 -4
+1597 mmove 6 0
+1599 mmove 9 -2
+1603 mmove 7 -1
+1607 mmove 5 -4
+1612 mousedown
+1615 mmove -24 24
+1620 mouseup
+1643 tap space
+1673 click 320 240
+1693 mmove -7 -4
+1695 mmove -7 0
+1698 mmove -6 -3
+1700 mmove -7 -2
+1702 mmove -10 -3
+1706 mmove -10 -2
+1708 mmove -7 0
+1711 mmove -6 -4
+1714 mmove -8 0
+1718 mmove -8 -3
+1721 mmove -10 -3
+1724 mmove -10 0
+1726 mmove -7 -3
+1743 mmove 3 -11
+1745 mmove 4 -8
+1749 mmove 4 -7
+1753 mmove 5 -7
+1757 mmove 5 -9
+1760 mmove 4 -7
+1764 mmove 2 -11
+1770 mmove 0 -10
+1774 mmove 2 -10
+1777 mmove 1 -12
+1780 mmove 3 -10
+1782 mmove -1 -11
+1784 mmove 0 -12
+1788 mmove 0 -13
+1791 mmove 3 -12
+1795 mmove 2 -13
+1798 mmove 3 -10
+1800 mmove -1 -13
+1801 mmove -1 -12
+1805 mmove 0 -13
+1823 mmove 8 -2
+1825 mmove 5 -2
+1828 mmove 4 1
+1829 mmove 4 2
+1831 mmove 8 0
+1834 mmove 4 0
+1838 mmove 7 -2
+1839 mmove 5 -2
+1848 mousedown
+1851 mmove 24 -24
+1856 mouseup
+1876 mmove -1 6
+1877 mmove 0 6
+1879 mmove 1 7
+1880 mmove 2 5
+1881 mmove 1 4
+1884 mmove 2 7
+1887 mmove 3 6
+1890 mmove 1 6
+1893 mmove 0 5
+1895 mmove 3 5
+1898 mmove -1 7
+1899 mmove 0 5
+1904 mmove 10 -4
+1907 mmove 6 -7
+1909 mmove 8 -5
+1910 mmove 8 -6
+1911 mmove 9 -5
+1915 mmove 10 -7
+1917 mmove 9 -7
+1919 mmove 7 -4
+1921 mmove 9 -6
+1925 mmove 6 -7
+1929 mmove 8 -6
+1933 mmove 9 -4
+1935 mmove 9 -5
+1938 mmove 8 -7
+1939 mmove 6 -7
+1943 mmove 7 -3
+1945 mmove 10 -3
+1949 mmove 8 -5
+1952 mmove 10 -5
+1954 mmove 6 -6
+1957 mmove -8 -6
+1961 mmove -8 -9
+1963 mmove -11 -9
+1964 mmove -9 -10
+1965 mmove -12 -10
+1967 mmove -11 -6
+1968 mmove -12 -9
+1969 mmove -10 -9
+1973 mmove -11 -6
+1976 mmove -10 -9
+1977 mmove -11 -9
+1980 mmove -8 -8
+2001 mmove -8 0
+2005 mmove -9 0
+2009 mmove -10 -3
+2013 mmove -9 0
+2016 mmove -8 -3
+2019 mmove -8 0
+2022 mmove -12 -1
+2025 mmove -9 -1
+2029 mmove -11 -2
+2044 mmove -9 -9
+2045 mmove -6 -9
+2048 mmove -8 -10
+2068 mmove -4 5
+2070 mmove -4 2
+2071 mmove -4 2
+2072 mousedown
+2075 mouseup
+2087 mousedown
+2090 mouseup
+2093 mousedown
+2096 mouseup
+2115 mmove -10 5
+2118 mmove -11 6
+2119 mmove -11 2
+2120 mmove -7 6
+2122 mmove -8 6
+2125 mmove -9 5
+2129 mmove -8 4
+2130 mmove -9 3
+2132 mmove -7 5
+2136 mmove -7 2
+2138 mmove -10 3
+2145 mousedown
+2148 mmove 24 24
+2153 mouseup
+2161 mmove 7 -2
+2163 mmove 5 -1
+2167 mmove 3 -3
+2170 mmove 6 -4
+2172 mmove 4 -3
+2175 mmove 6 -5
+2179 mmove 6 -3
+2183 mmove 6 -1
+2184 mmove 7 -2
+2187 mmove 7 -2
+2191 mmove 6 -1
+2195 mmove 7 -2
+2198 mmove 7 -2
+2202 mmove 7 -2
+2206 mmove 6 -3
+2209 mmove 3 -2
+2210 mmove 6 -4
+2215 mmove -5 2
+2217 mmove -8 2
+2218 mmove -6 0
+2220 mmove -7 2
+2223 mmove -5 2
+2226 mmove -6 -13
+2229 mmove -5 -12
+2233 mmove -9 -11
+2253 mmove -3 1
+2254 mmove -5 1
+2255 mmove -6 -3
+2258 mmove -6 -1
+2260 mmove -4 0
+2263 mmove -5 -3
+2267 mmove -4 1
+2270 mmove -6 0
+2274 mmove -3 -2
+2275 mmove -5 -1
+2278 mmove -6 -1
+2279 mmove -3 0
+2282 mmove -5 -1
+2283 mmove -6 1
+2285 mmove -2 0
+2303 mmove 8 -5
+2304 mmove 4 -2
+2307 mmove 5 -4
+2310 mmove 4 -5
+2313 mmove 5 -4
+2315 mmove 7 -4
+2319 mmove 6 -4
+2323 mmove 8 -6
+2327 mmove 5 -2
+2329 mmove 6 -4
+2333 mmove 6 -3
+2335 mmove 5 -2
+2353 mmove -5 2
+2354 mmove -8 4
+2356 mmove -4 4
+2359 mmove -5 3
+2360 mmove -7 1
+2363 mmove -6 4
+2366 mmove -7 4
+2370 mmove -5 1
+2371 mmove -8 2
+2373 mmove -8 3
+2374 mmove -4 1
+2388 mmove 4 -10
+2390 mmove 5 -12
+2394 mmove 4 -12
+2396 mmove 2 -8
+2400 mmove 5 -10
+2401 mmove 5 -10
+2408 mmove -2 0
+2411 mmove -1 0
+2415 mmove -1 2
+2416 mmove -2 1
+2418 mmove -1 0
+2422 mmove -4 0
+2423 mmove -3 -2
+2424 mmove -1 0
+2427 mmove -3 -2
+2431 mmove -1 0
+2435 mmove -5 2
+2439 mmove -2 -1
+2440 mmove -4 2
+2443 mmove -5 -1
+2444 mmove -3 2
+2447 mmove -3 0
+2450 mmove -1 -2
+2452 mmove -5 -1
+2453 mmove -2 0
+2465 mmove 11 -6
+2466 mmove 8 -8
+2468 mmove 11 -5
+2469 mmove 11 -5
+2472 mmove 9 -9
+2475 mmove 11 -8
+2479 mmove 9 -8
+2481 mmove 11 -8
+2483 mmove 9 -9
+2485 mmove 7 -6
+2488 mmove 9 -6
+2492 mmove 11 -6
+2495 mmove 0 -8
+2499 mmove -1 -7
+2502 mmove 1 -9
+2503 mmove -1 -7
+2504 mmove -2 -7
+2506 mmove 0 -6
+2510 mmove -2 -8
+2512 mmove -3 -6
+2516 mmove -1 -7
+2517 mmove -2 -7
+2520 mmove 1 -8
+2522 mmove -1 -7
+2529 mousedown
+2532 mouseup
+2536 mmove -7 2
+2540 mmove -5 0
+2541 mmove -4 -2
+2543 mmove -4 -1
+2547 mmove -5 2
+2549 mmove -7 1
+2550 mmove -8 1
+2552 mmove -5 1
+2554 mmove -6 -1
+2556 mmove -4 2
+2558 mmove -8 -2
+2571 mousedown
+2574 mouseup
+2579 mmove 11 6
+2583 mmove 8 5
+2585 mmove 7 5
+2589 mmove 10 3
+2593 mmove 10 6
+2609 mmove 7 1
+2610 mmove 11 5
+2613 mmove 10 4
+2616 mmove 9 2
+2620 mmove 8 3
+2623 mmove 9 4
+2624 mmove 8 1
+2626 mmove 9 2
+2630 mmove 7 1
+2632 mmove 7 5
+2636 mmove 11 2
+2638 mmove 9 5
+2641 mmove 11 4
+2642 mmove 10 1
+2646 mmove 9 4
+2648 mmove 8 1
+2672 mmove 0 6
+2673 mmove 0 7
+2675 mmove -4 8
+2679 mmove -1 4
+2680 mmove -1 5
+2683 mmove -2 8
+2684 mmove -2 5
+2685 mmove -3 7
+2691 mousedown
+2694 mouseup
+2697 mousedown
+2700 mouseup
+2718 mmove 3 4
+2722 mmove 3 6
+2724 mmove 4 8
+2725 mmove 2 6
+2727 mmove 2 8
+2730 mmove 2 6
+2733 mmove 5 7
+2736 mmove 5 7
+2739 mmove 5 6
+2740 mmove 4 5
+2742 mmove 5 6
+2754 mmove 9 -2
+2758 mmove 9 -4
+2760 mmove 6 -2
+2761 mmove 6 -1
+2762 mmove 7 -4
+2764 mmove 7 -3
+2767 mmove 10 -3
+2770 mmove 10 -3
+2773 mmove 8 -3
+2776 mmove 10 -2
+2777 mmove 6 -3
+2799 mmove 0 -9
+2802 mmove 4 -9
+2805 mmove 2 -5
+2806 mmove 1 -8
+2809 mmove 1 -8
+2812 mmove 3 -9
+2816 mmove 2 -9
+2818 mmove 3 -5
+2830 mmove -1 -14
+2833 mmove -2 -13
+2834 mmove -2 -12
+2837 mmove 0 -13
+2839 mmove -3 -10
+2841 mmove -2 -12
+2842 mmove 0 -14
+2848 mmove 4 -8
+2852 mmove 1 -8
+2855 mmove 4 -7
+2858 mmove 0 -9
+2859 mmove 0 -7
+2862 mmove 2 -9
+2863 mmove 4 -10
+2867 mmove 3 -6
+2871 mmove 0 -7
+2874 mmove 3 -10
+2877 mmove 4 -6
+2878 mmove 1 -6
+2881 mmove 0 -7
+2884 mmove 0 -7
+2888 mmove 4 -6
+2891 mmove 2 -9
+2893 mmove 3 -10
+2897 mmove 8 -3
+2901 mmove 6 -1
+2902 mmove 6 0
+2906 mmove 6 -4
+2910 mmove 10 0
+2914 mmove 6 -4
+2916 mmove 7 -2
+2920 mmove 8 0
+2924 mmove 8 -3
+2928 mmove 9 -4
+2929 mmove 6 -4
+2931 mmove 9 0
+2938 mmove -7 2
+2941 mmove -7 6
+2944 mmove -6 6
+2948 mmove -7 4
+2949 mmove -6 4
+2952 mmove -9 5
+2969 mmove -4 1
+2970 mmove -5 1
+2973 mmove -5 1
+2977 mmove -7 -1
+2980 mmove -4 1
+2981 mmove -4 -2
+2982 mmove -6 -2
+2985 mmove -5 -1
+2986 mmove -5 -1
+2988 mmove -8 2
+2990 mmove -5 0
+2992 mmove -4 0
+2993 mmove -7 1
+2996 mmove -7 -1
+2997 mmove -6 -2
+3001 mmove -8 -2
+3005 mmove -6 1
+3008 mmove -4 -2
+3019 mmove 3 -11
+3021 mmove 4 -8
+3023 mmove 2 -7
+3025 mmove 0 -11
+3028 mmove 0 -8
+3049 mmove -1 -6
+3050 mmove -1 -3
+3051 mmove -1 -2
+3054 mmove -1 -2
+3055 mmove 2 -5
+3059 mmove 0 -3
+3069 mousedown
+3072 mouseup
+3091 mmove 9 -9
+3092 mmove 8 -9
+3094 mmove 9 -8
+3095 mmove 12 -7
+3099 mmove 11 -10
+3101 mmove 11 -8
+3103 mmove 10 -8
+3104 mmove 9 -6
+3108 mmove 8 -10
+3110 mmove 9 -7
+3111 mmove 8 -8
+3113 mmove 11 -6
+3117 mmove 12 -7
+3118 mmove 12 -10
+3121 mmove 10 -7
+3123 mmove 12 -10
+3124 mmove 11 -6
+3126 mmove 9 -6
+3127 mmove 10 -10
+3141 mmove -5 -5
+3144 mmove -5 -5
+3148 mmove -3 -5
+3149 mmove -5 -6
+3150 mmove -5 -9
+3153 mmove -2 -6
+3157 mmove -2 -9
+3158 mmove -5 -9
+3159 mmove -4 -6
+3160 mmove -4 -9
+3163 mmove -3 -8
+3167 mmove -4 -7
+3169 mmove -3 -9
+3170 mmove -4 -8
+3171 mmove -3 -6
+3173 mmove -4 -8
+3174 mmove -5 -5
+3175 mmove -3 -5
+3176 mmove -1 -8
+3197 mmove 1 -10
+3199 mmove 2 -12
+3200 mmove 0 -13
+3201 mmove 0 -9
+3203 mmove 2 -10
+3207 mmove -2 -11
+3223 mmove 7 -11
+3227 mmove 3 -12
+3231 mmove 4 -13
+3232 mmove 3 -13
+3236 mmove 4 -11
+3239 mmove 4 -13
+3241 mmove 3 -13
+3243 mmove 3 -10
+3245 mmove 6 -9
+3247 mmove 4 -11
+3248 mmove 6 -12
+3249 mmove 7 -11
+3253 mmove 3 -12
+3256 mmove 5 -13
+3260 mmove 5 -9
+3263 mmove 6 -12
+3265 mmove 7 -12
+3267 mmove 6 -10
+3284 mousedown
+3287 mouseup
+3302 mmove -5 -9
+3306 mmove -1 -10
+3309 mmove -5 -11
+3311 mmove -3 -9
+3314 mmove -2 -11
+3315 mmove -4 -8
+3318 mmove -1 -11
+3319 mmove -3 -11
+3320 mmove -4 -10
+3324 mmove -4 -9
+3326 mmove -2 -8
+3328 mmove -5 -10
+3332 mmove -3 -8
+3335 mmove -4 -9
+3336 mmove -1 -9
+3338 mmove -2 -8
+3341 mmove -1 -11
+3343 mmove -4 -8
+3363 mousedown
+3366 mmove 24 24
+3371 mouseup
+3387 mmove 9 -5
+3391 mmove 9 -6
+3395 mmove 11 -2
+3396 mmove 10 -5
+3398 mmove 12 -6
+3401 mmove 10 -4
+3404 mmove 10 -2
+3406 mmove 8 -5
+3409 mmove 11 -5
+3411 mmove 10 -3
+3415 mmove 8 -5
+3419 mmove 12 -4
+3423 mmove 12 -6
+3425 mmove 9 -5
+3444 mmove -1 -8
+3447 mmove -2 -9
+3450 mmove -2 -8
+3454 mmove 0 -10
+3455 mmove -2 -7
+3456 mmove 0 -10
+3457 mmove -2 -7
+3461 mmove -3 -10
+3465 mmove 0 -8
+3466 mmove -3 -7
+3467 mmove 0 -7
+3482 mmove 10 5
+3483 mmove 9 3
+3486 mmove 8 5
+3487 mmove 7 5
+3490 mmove 8 3
+3494 mmove 6 3
+3498 mmove 7 3
+3501 mmove 10 3
+3502 mmove 8 2
+3506 mmove 8 4
+3507 mmove 6 2
+3511 mmove 9 4
+3524 mousedown
+3527 mouseup
+3548 mousedown
+3551 mmove -24 24
+3556 mouseup
+3561 mousedown
+3564 mmove 24 -24
+3569 mouseup
+3577 mmove -5 2
+3578 mmove -4 4
+3581 mmove -3 5
+3585 mmove -4 4
+3589 mmove -7 6
+3593 mmove -6 2
+3595 mmove -5 3
+3596 mmove -7 3
+3597 mmove -6 3
+3598 mmove -3 2
+3600 mmove -3 4
+3602 mmove -3 3
+3605 mmove -4 3
+3609 mmove -7 6
+3611 mmove -5 4
+3615 mmove -6 5
+3616 mmove -4 5
+3617 mmove -4 6
+3628 mousedown
+3631 mouseup
+3648 mousedown
+3651 mmove 24 24
+3656 mouseup
+3661 mmove -11 -10
+3662 mmove -8 -8
+3665 mmove -8 -10
+3667 mmove -12 -7
+3671 mmove -11 -10
+3675 mmove -8 -10
+3678 mmove -8 -8
+3679 mmove -12 -8
+3682 mmove -12 -8
+3683 mmove -10 -11
+3703 mmove -7 -12
+3706 mmove -7 -9
+3707 mmove -9 -10
+3710 mmove -8 -8
+3713 mmove -9 -10
+3715 mmove -5 -9
+3719 mmove -8 -8
+3723 mmove -8 -10
+3725 mmove -7 -10
+3739 mousedown
+3742 mouseup
+3751 mmove 9 2
+3753 mmove 9 5
+3755 mmove 7 5
+3759 mmove 6 1
+3760 mmove 7 2
+3762 mmove 8 4
+3765 mmove 9 1
+3768 mmove 8 3
+3771 mmove 7 4
+3775 mmove 5 2
+3776 mmove 5 1
+3778 mmove 6 4
+3780 mmove 9 2
+3781 mmove 9 3
+3782 mmove 9 4
+3785 mmove 5 3
+3786 mmove 9 1
+3789 mmove 6 3
+3791 mmove 5 2
+3797 mousedown
+3800 mouseup
+3820 mmove 0 -13
+3823 mmove 1 -11
+3826 mmove 3 -13
+3828 mmove 2 -10
+3830 mmove 1 -13
+3831 mmove 0 -11
+3835 mmove 3 -13
+3854 mousedown
+3857 mmove -24 24
+3862 mouseup
+3878 mousedown
+3881 mmove -24 -24
+3886 mouseup
+3906 mousedown
+3909 mouseup
+3927 mmove 1 -7
+3930 mmove 4 -6
+3931 mmove 4 -10
+3937 mmove -3 7
+3938 mmove -6 5
+3939 mmove -5 7
+3941 mmove -4 6
+3942 mmove -5 4
+3945 mmove -6 7
+3949 mmove -7 5
+3950 mmove -5 5
+3954 mmove -5 6
+3955 mmove -7 4
+3959 mmove -6 4
+3962 mmove -6 5
+3966 mmove -4 6
+3970 mmove -6 8
+3988 mmove -6 3
+3991 mmove -8 6
+3995 mmove -10 5
+3999 mmove -10 3
+4000 mmove -10 3
+4001 mmove -8 4
+4004 mmove -6 3
+4007 mmove -9 3
+4008 mmove -6 7
+4009 mmove -10 4
+4010 mmove -9 4
+4012 mmove -9 6
+4013 mmove -6 5
+4014 mmove -9 6
+4017 mmove -8 6
+4021 mmove -9 5
+4026 mmove -6 4
+4030 mmove -9 3
+4031 mmove -5 0
+4035 mmove -6 0
+4039 mmove -5 2
+4040 mmove -9 0
+4044 mmove -7 2
+4045 mmove -6 1
+4047 mmove -5 2
+4051 mmove -9 0
+4052 mmove -5 3
+4054 mmove -6 4
+4055 mmove -9 4
+4057 mmove -8 2
+4075 mmove 9 -7
+4076 mmove 9 -9
+4079 mmove 10 -7
+4080 mmove 8 -6
+4082 mmove 11 -8
+4083 mmove 8 -7
+4087 mmove 7 -8
+4090 mmove 10 -10
+4092 mmove 10 -8
+4096 mmove 8 -10
+4099 mmove 8 -6
+4100 mmove 10 -7
+4104 mmove 7 -10
+4108 mmove 10 -10
+4111 mmove 9 -10
+4113 mmove 9 -9
+4129 mmove 9 -3
+4133 mmove 7 -3
+4135 mmove 11 -3
+4139 mmove 7 -2
+4142 mmove 7 -3
+4146 mmove 7 -1
+4159 mousedown
+4162 mouseup
+4176 mmove 9 -5
+4180 mmove 6 -1
+4183 mmove 5 -2
+4185 mmove 6 -2
+4188 mmove 6 -4
+4190 mmove 9 -5
+4192 mmove 9 -3
+4195 mmove 7 -5
+4197 mmove 9 -4
+4200 mmove 6 -1
+4203 mmove 9 -3
+4205 mmove 7 -5
+4206 mmove 7 -3
+4207 mmove 6 -3
+4209 mmove 6 -1
+4211 mmove 6 -2
+4223 mousedown
+4226 mouseup
+4236 mmove 10 5
+4240 mmove 11 7
+4244 mmove 10 4
+4248 mmove 7 7
+4252 mmove 8 6
+4256 mmove 8 5
+4258 mmove 10 6
+4261 mmove 8 8
+4278 mmove 4 1
+4282 mmove 5 1
+4285 mmove 6 -3
+4286 mmove 7 1
+4290 mmove 8 0
+4292 mmove 5 -1
+4295 mmove 8 -3
+4299 mmove 7 1
+4303 mmove 4 -2
+4306 mmove 8 -3
+4309 mmove 8 -1
+4310 mmove 4 -3
+4311 mmove 4 1
+4314 mmove 4 -1
+4316 mmove 5 -2
+4320 mmove 6 -1
+4337 mmove 6 -11
+4341 mmove 5 -10
+4345 mmove 6 -12
+4348 mmove 7 -12
+4352 mmove 5 -11
+4355 mmove 5 -11
+4357 mmove 7 -10
+4361 mmove 8 -11
+4365 mmove 7 -11
+4367 mmove 5 -12
+4370 mmove 6 -8
+4372 mmove 6 -12
+4373 mmove 5 -11
+4374 mmove 8 -11
+4377 mmove 6 -10
+4379 mmove 5 -11
+4382 mmove 7 -8
+4385 mmove 5 -12
+4389 mmove 5 -11
+4402 mousedown
+4405 mmove 24 -24
+4410 mouseup
+4427 mousedown
+4430 mouseup
+4434 mmove -1 -3
+4435 mmove -2 -1
+4436 mmove -5 -2
+4437 mmove -5 -3
+4438 mmove -5 -2
+4439 mmove -3 -1
+4440 mmove -2 -3
+4442 mmove -5 -3
+4459 mmove 5 6
+4461 mmove 5 5
+4463 mmove 5 4
+4464 mmove 4 4
+4466 mmove 4 6
+4467 mmove 5 7
+4471 mmove 2 8
+4479 mousedown
+4482 mmove -24 24
+4487 mouseup
+4495 mmove -7 2
+4497 mmove -6 4
+4499 mmove -7 2
+4502 mmove -3 3
+4503 mmove -3 0
+4507 mmove -6 3
+4510 mmove -3 0
+4515 mousedown
+4518 mouseup
+4541 mmove 7 3
+4544 mmove 5 0
+4547 mmove 5 3
+4549 mmove 8 0
+4553 mmove 6 0
+4554 mmove 7 1
+4555 mmove 7 0
+4558 mmove 6 1
+4562 mmove 5 0
+4563 mmove 8 2
+4564 mmove 8 3
+4584 mmove 6 -9
+4585 mmove 7 -9
+4587 mmove 10 -5
+4588 mmove 8 -9
+4591 mmove 7 -6
+4594 mmove 7 -9
+4598 mmove 8 -9
+4600 mmove 10 -6
+4603 mmove 6 -5
+4607 mmove 7 -6
+4610 mmove 10 -8
+4612 mmove 7 -9
+4613 mmove 6 -6
+4617 mmove 7 -9
+4618 mmove 6 -6
+4622 mmove 6 -6
+4623 mmove 6 -7
+4626 mmove 8 -7
+4647 mmove 3 -9
+4650 mmove 2 -11
+4654 mmove 6 -9
+4657 mmove 6 -8
+4661 mmove 2 -9
+4663 mmove 2 -9
+4667 mmove 5 -10
+4671 mmove 4 -9
+4672 mmove 4 -10
+4676 mmove 4 -9
+4677 mmove 4 -8
+4679 mmove 4 -12
+4680 mmove 4 -9
+4683 mmove 2 -12
+4702 mousedown
+4705 mmove -24 -24
+4710 mouseup
+4717 mousedown
+4720 mmove -24 -24
+4725 mouseup
+4747 mousedown
+4750 mmove 24 -24
+4755 mouseup
+4774 mmove 2 -3
+4777 mmove -1 -4
+4781 mmove -2 -4
+4782 mmove 2 -4
+4785 mmove 1 -5
+4789 mmove 0 -4
+4793 mmove -1 0
+4796 mmove -4 -2
+4800 mmove -2 -3
+4802 mmove -1 -3
+4803 mmove 0 -3
+4804 mmove -1 -2
+4805 mmove 0 -1
+4807 mmove 0 -1
+4811 mmove -1 -2
+4830 mmove 5 -1
+4832 mmove 4 -2
+4833 mmove 4 -1
+4834 mmove 1 -1
+4835 mmove 3 2
+4836 mmove 4 -2
+4838 mmove 1 0
+4842 mmove 3 1
+4845 mmove 4 -1
+4849 mmove 5 2
+4852 mmove 5 -1
+4855 mmove 2 2
+4859 mmove 1 -2
+4863 mousedown
+4866 mouseup
+4871 mmove 7 -10
+4875 mmove 4 -8
+4879 mmove 8 -9
+4880 mmove 5 -11
+4883 mmove 5 -8
+4887 mmove 8 -7
+4889 mmove 5 -10
+4890 mmove 4 -9
+4894 mmove 5 -9
+4915 mousedown
+4918 mouseup
+4940 mousedown
+4943 mmove 24 -24
+4948 mouseup
+4955 mmove -4 3
+4957 mmove 0 3
+4958 mmove 0 5
+4960 mmove -3 4
+4964 mmove 0 4
+4968 mmove 0 5
+4970 mmove -2 2
+4971 mmove -2 4
+4974 mmove -3 3
+4977 mmove -3 6
+4993 mousedown
+4996 mouseup
+5011 mousedown
+5014 mmove 24 -24
+5019 mouseup
+5023 mmove 0 -6
+5027 mmove 0 -9
+5030 mmove -1 -6
+5032 mmove -3 -10
+5035 mmove 0 -10
+5041 mousedown
+5044 mouseup
+5062 mousedown
+5065 mouseup
+5068 mmove -10 0
+5071 mmove -8 0
+5072 mmove -6 -1
+5075 mmove -7 2
+5077 mmove -8 1
+5080 mmove -10 -1
+5082 mmove -7 0
+5088 mousedown
+5091 mouseup
+5108 mmove 6 0
+5112 mmove 3 -2
+5115 mmove 5 0
+5116 mmove 6 1
+5117 mmove 5 2
+5122 mmove 9 6
+5124 mmove 9 7
+5125 mmove 8 7
+5126 mmove 8 4
+5127 mmove 11 4
+5128 mmove 12 5
+5130 mmove 8 7
+5133 mmove 11 4
+5136 mmove 10 6
+5139 mmove 8 4
+5143 mmove 8 7
+5147 mmove 11 4
+5151 mmove 10 6
+5153 mmove 12 4
+5154 mmove 8 4
+5158 mmove 8 6
+5161 mmove 11 4
+5162 mmove 8 6
+5165 mmove 10 8
+5168 mmove 12 8
+5181 mousedown
+5184 mmove -24 -24
+5189 mouseup
+5196 mousedown
+5199 mmove 24 -24
+5204 mouseup
+5211 mmove 4 -9
+5215 mmove 5 -10
+5217 mmove 5 -8
+5221 mmove 2 -8
+5225 mmove 5 -6
+5246 mmove -5 -2
+5250 mmove -5 -3
+5253 mmove -6 -5
+5255 mmove -3 -6
+5256 mmove -7 -4
+5259 mmove -4 -6
+5263 mmove -7 -2
+5264 mmove -3 -3
+5267 mmove -7 -4
+5268 mmove -5 -5
+5272 mmove -4 -4
+5289 mousedown
+5292 mouseup
+5300 mousedown
+5303 mmove 24 -24
+5308 mouseup
+5316 mmove 4 3
+5318 mmove 6 4
+5321 mmove 4 3
+5324 mmove 3 1
+5326 mmove 3 1
+5328 mmove 3 3
+5329 mmove 6 3
+5332 mmove 5 4
+5335 mmove 5 2
+5338 mmove 5 2
+5339 mmove 7 3
+5342 mmove 4 1
+5343 mmove 7 2
+5347 mmove 4 4
+5349 mmove 7 1
+5353 mmove 4 1
+5357 tap space
+5387 click 320 240
+5402 mousedown
+5405 mouseup
+5427 mmove 0 3
+5431 mmove 4 4
+5432 mmove 2 6
+5436 mmove 0 3
+5440 mmove 0 4
+5441 mmove 1 6
+5443 mmove 4 7
+5454 mmove 4 -11
+5456 mmove 2 -10
+5458 mmove 4 -11
+5460 mmove 1 -8
+5464 mmove 3 -10
+5466 mmove 1 -11
+5467 mmove 1 -11
+5471 mmove 3 -10
+5475 mmove 2 -10
+5476 mmove 1 -12
+5477 mmove 5 -10
+5480 mmove 3 -11
+5482 mmove 5 -8
+5503 mousedown
+5506 mmove 24 -24
+5511 mouseup
+5535 mousedown
+5538 mmove 24 -24
+5543 mouseup
+5552 mmove -4 -1
+5553 mmove -4 2
+5554 mmove -4 -1
+5558 mmove -1 -1
+5560 mmove -2 -1
+5562 mmove -4 2
+5565 mmove -1 0
+5567 mmove -4 -1
+5569 mmove -2 -2
+5572 mmove -1 0
+5575 mmove -2 -2
+5584 mmove 3 -5
+5585 mmove 5 -6
+5588 mmove 2 -7
+5590 mmove 2 -6
+5594 mmove 2 -4
+5597 mmove 2 -6
+5600 mmove 5 -3
+5604 mmove 5 -3
+5606 mmove 5 -5
+5608 mmove 4 -3
+5611 mmove 3 -3
+5620 mmove -5 -7
+5621 mmove -6 -7
+5625 mmove -7 -6
+5626 mmove -4 -6
+5629 mmove -4 -8
+5632 mmove -3 -8
+5633 mmove -7 -9
+5647 mmove 9 5
+5648 mmove 5 4
+5650 mmove 7 4
+5653 mmove 6 5
+5655 mmove 7 2
+5657 mmove 7 4
+5659 mmove 7 6
+5663 mmove 6 3
+5665 mmove 6 5
+5668 mmove 5 6
+5670 mmove 6 3
+5672 mmove 5 4
+5685 mousedown
+5688 mmove 24 24
+5693 mouseup
+5698 mmove -6 5
+5702 mmove -7 5
+5704 mmove -5 6
+5706 mmove -5 3
+5709 mmove -7 5
+5711 mmove -7 6
+5713 mmove -6 5
+5714 mmove -9 3
+5716 mmove -6 3
+5718 mmove -7 6
+5720 mmove -6 4
+5722 mmove -9 6
+5724 mmove -8 3
+5728 mmove -6 6
+5732 mmove -6 0
+5733 mmove -8 -4
+5736 mmove -7 -4
+5739 mmove -6 0
+5741 mmove -10 -1
+5744 mmove -9 -2
+5748 mmove -10 0
+5752 mmove -7 -3
+5756 mmove -7 -1
+5758 mmove -7 -2
+5762 mmove -10 0
+5766 mmove -8 -1
+5769 mmove -6 -4
+5772 mmove -7 -2
+5773 mmove -9 -1
+5777 mmove -9 -3
+5779 mmove -10 -4
+5782 mmove -6 -1
+5784 mmove -8 -4
+5787 mmove -10 0
+5804 mousedown
+5807 mouseup
+5822 mousedown
+5825 mouseup
+5846 mousedown
+5849 mmove -24 24
+5854 mouseup
+5862 mousedown
+5865 mmove -24 24
+5870 mouseup
+5877 tap space
+5907 click 320 240
+5924 mousedown
+5927 mmove 24 24
+5932 mouseup
+5936 mmove 5 5
+5940 mmove 5 4
+5944 mmove 1 5
+5945 mmove 4 3
+5953 mousedown
+5956 mouseup
+5971 mmove -1 0
+5975 mmove -2 -3
+5978 mmove -2 -1
+5982 mmove 0 -1
+5986 mmove 1 -1
+5989 mmove 1 -1
+5991 mmove 0 -1
+5993 mmove 2 -2
+5997 mmove 1 -2
+6000 mmove 1 0
+6002 mmove 0 -1
+6005 mmove 2 -3
+6007 mmove 0 -2
+6009 mmove 0 -1
+6012 mmove -2 -1
+6019 mousedown
+6022 mmove -24 24
+6027 mouseup
+6035 mmove -3 -12
+6036 mmove -2 -8
+6037 mmove -3 -8
+6041 mmove -5 -10
+6042 mmove -2 -8
+6044 mmove -2 -11
+6047 mmove -5 -11
+6055 mmove 10 3
+6059 mmove 6 4
+6063 mmove 8 3
+6066 mmove 8 2
+6068 mmove 6 0
+6071 mmove 7 4
+6074 mmove 9 3
+6076 mmove 6 1
+6078 mmove 9 2
+6080 mmove 8 1
+6082 mmove 1 -7
+6084 mmove -1 -7
+6086 mmove -1 -6
+6090 mmove 0 -8
+6091 mmove -2 -6
+6095 mmove -3 -5
+6098 mmove 1 -8
+6099 mmove -3 -4
+6102 mmove -1 -5
+6104 mmove -3 -6
+6112 mmove 3 -3
+6115 mmove 0 -1
+6118 mmove 0 -1
+6121 mmove 0 -5
+6122 mmove 4 -1
+6125 mmove 3 -2
+6126 mmove 3 -3
+6128 mmove 3 -3
+6131 mmove 0 -2
+6132 mmove 3 -3
+6134 mmove 3 -9
+6135 mmove 0 -8
+6137 mmove 1 -6
+6138 mmove 2 -5
+6139 mmove -1 -9
+6140 mmove 0 -6
+6144 mmove 0 -8
+6146 mmove 3 -5
+6148 mmove 1 -9
+6151 mmove 2 -8
+6152 mmove 1 -5
+6155 mmove 0 -7
+6157 mmove 3 -7
+6161 mmove 3 -7
+6163 mmove 0 -5
+6167 mmove 1 -7
+6171 mmove 3 -7
+6173 mmove 1 -5
+6175 mmove 0 -5
+6190 mmove -4 1
+6192 mmove -5 2
+6196 mmove -8 2
+6199 mmove -8 4
+6201 mmove -4 2
+6203 mmove -4 2
+6205 mmove -4 3
+6218 mmove -1 2
+6221 mmove 2 1
+6222 mmove 0 3
+6226 mmove 1 3
+6228 mmove -1 1
+6248 mmove 1 1
+6251 mmove 1 3
+6255 mmove 3 3
+6257 mmove 3 3
+6261 mmove 3 1
+6265 mmove 5 4
+6266 mmove 2 5
+6270 mmove 4 2
+6274 mmove 4 2
+6276 mmove 4 5
+6278 mmove 3 2
+6282 mmove 1 4
+6285 mmove 2 4
+6287 mmove 4 1
+6290 mmove 2 2
+6311 mousedown
+6314 mouseup
+6318 mousedown
+6321 mmove -24 24
+6326 mouseup
+6345 mmove -6 -7
+6347 mmove -6 -6
+6349 mmove -3 -3
+6353 mmove -2 -5
+6356 mmove -6 -3
+6359 mmove -3 -7
+6363 mmove -4 -6
+6367 mmove -3 -3
+6370 mmove -6 -6
+6380 tap space
+6410 click 320 240
+6428 mousedown
+6431 mmove 24 -24
+6436 mouseup
+6443 mmove 1 2
+6445 mmove 5 2
+6447 mmove 4 3
+6469 mmove -1 4
+6473 mmove 0 4
+6476 mmove 0 3
+6480 mmove -3 3
+6482 mmove -1 0
+6486 mmove -3 4
+6487 mmove -3 2
+6488 mmove 0 3
+6491 mmove 0 2
+6494 mmove 1 4
+6496 mmove -3 4
+6498 mmove -3 2
+6499 mmove 1 0
+6502 mmove 1 1
+6505 mmove -1 2
+6508 mmove 0 0
+6510 mmove 1 4
+6532 mmove -7 -3
+6533 mmove -8 -4
+6535 mmove -8 -2
+6537 mmove -9 -1
+6539 mmove -5 -5
+6541 mmove -5 -2
+6545 mmove -5 -4
+6549 mmove -9 -4
+6551 mmove -7 -5
+6555 mmove -7 -1
+6556 mmove -9 -3
+6558 mmove -5 -2
+6575 mmove 7 -11
+6579 mmove 5 -10
+6583 mmove 6 -10
+6604 mmove -9 -14
+6606 mmove -11 -11
+6610 mmove -12 -12
+6611 mmove -12 -12
+6614 mmove -8 -10
+6617 mmove -12 -12
+6618 mmove -11 -12
+6622 mmove -8 -10
+6625 mmove -10 -11
+6627 mmove -8 -10
+6628 mmove -11 -14
+6629 mmove -10 -10
+6633 mmove -10 -11
+6636 mmove -12 -14
+6637 mmove -9 -10
+6641 mmove -10 -12
+6643 mmove -11 -13
+6646 mmove -11 -11
+6649 mmove -11 -14
+6654 mmove 4 -8
+6655 mmove 6 -10
+6658 mmove 2 -9
+6662 mmove 4 -7
+6665 mmove 2 -10
+6669 mmove 5 -9
+6673 mmove 3 -8
+6676 mmove 5 -8
+6677 mmove 2 -7
+6680 mmove 5 -11
+6682 mmove 4 -8
+6683 mmove 3 -11
+6686 mmove 2 -11
+6704 mmove 9 -6
+6705 mmove 9 -2
+6707 mmove 8 -6
+6710 mmove 12 -3
+6713 mmove 10 -4
+6732 mmove 2 -5
+6734 mmove -1 -4
+6738 mmove -1 -5
+6742 mmove 2 -8
+6743 mmove -1 -7
+6747 mmove 2 -8
+6750 mmove -1 -8
+6751 mmove 2 -7
+6753 mmove 0 -7
+6754 mmove 1 -4
+6760 mousedown
+6763 mmove -24 24
+6768 mouseup
+6774 mousedown
+6777 mmove -24 -24
+6782 mouseup
+6797 mmove 6 -10
+6798 mmove 10 -11
+6799 mmove 6 -13
+6802 mmove 8 -11
+6804 mmove 7 -12
+6807 mmove 9 -11
+6810 mmove 7 -11
+6828 mousedown
+6831 mouseup
+6849 mousedown
+6852 mmove 24 24
+6857 mouseup
+6866 mmove -5 3
+6869 mmove -5 1
+6873 mmove -6 0
+6876 mmove -8 0
+6879 mmove -6 0
+6880 mmove -7 4
+6884 mmove -9 2
+6886 mmove -7 3
+6890 mmove -6 3
+6891 mmove -8 4
+6894 mmove -8 0
+6897 mmove -8 4
+6901 mmove -7 0
+6902 mmove -5 1
+6903 mmove -7 1
+6907 mmove -5 0
+6928 mousedown
+6931 mmove 24 24
+6936 mouseup
+6945 mousedown
+6948 mouseup
+6961 mousedown
+6964 mouseup
+6984 mmove 8 -7
+6987 mmove 8 -5
+6991 mmove 10 -5
+6994 mmove 9 -5
+6996 mmove 9 -7
+6998 mmove 7 -6
+7000 mmove 8 -5
+7001 mmove 10 -8
+7002 mmove 10 -8
+7003 mmove 11 -9
+7007 mmove 11 -5
+7009 mmove 9 -5
+7012 mmove 10 -9
+7014 mmove 9 -5
+7029 mmove 3 -10
+7033 mmove 2 -10
+7036 mmove 0 -9
+7037 mmove -1 -12
+7039 mmove 0 -12
+7042 mmove 3 -11
+7045 mmove 3 -12
+7047 mmove 1 -11
+7054 mmove -11 1
+7057 mmove -10 4
+7061 mmove -11 4
+7065 mmove -8 4
+7067 mmove -8 2
+7069 mmove -10 4
+7073 mmove -12 2
+7075 mmove -8 3
+7079 mmove -8 1
+7099 tap space
+7129 click 320 240
+7158 mousedown
+7161 mmove -24 -24
+7166 mouseup
+7174 mousedown
+7177 mouseup
+7186 mmove 3 5
+7187 mmove 3 3
+7189 mmove 0 2
+7193 mmove 2 5
+7208 mmove 3 -4
+7210 mmove 2 -7
+7212 mmove 0 -4
+7214 mmove 1 -6
+7218 mmove 1 -5
+7221 mmove 3 -4
+7224 mmove 2 -3
+7225 mmove 0 -5
+7233 mousedown
+7236 mouseup
+7253 mmove -10 -13
+7255 mmove -8 -11
+7259 mmove -9 -11
+7261 mmove -12 -9
+7263 mmove -12 -12
+7267 mmove -12 -13
+7270 mmove -9 -9
+7272 mmove -9 -13
+7284 mmove 3 1
+7287 mmove 5 -1
+7288 mmove 7 0
+7291 mmove 3 1
+7295 mmove 4 0
+7297 mmove 6 1
+7301 mmove 4 2
+7305 mmove 5 2
+7306 mmove 4 2
+7309 mmove 3 -1
+7313 mmove 6 2
+7332 mmove 10 -8
+7333 mmove 6 -10
+7337 mmove 10 -8
+7340 mmove 10 -11
+7344 mmove 8 -8
+7347 mmove 7 -8
+7348 mmove 7 -11
+7359 mmove 2 -8
+7362 mmove 0 -11
+7363 mmove 0 -10
+7365 mmove 1 -7
+7375 mousedown
+7378 mmove -24 24
+7383 mouseup
+7401 mmove 5 -1
+7405 mmove 4 -2
+7407 mmove 1 -1
+7408 mmove 5 -1
+7410 mmove 2 -3
+7414 mmove 4 1
+7418 mmove 4 1
+7421 mmove 5 1
+7423 mmove 5 0
+7424 mmove 4 -3
+7428 mmove 3 -2
+7432 mmove 2 -2
+7434 mmove 2 -2
+7436 mmove 3 -3
+7439 mmove 4 0
+7441 mmove 1 -2
+7445 mmove 4 -3
+7457 mmove -7 1
+7459 mmove -9 -3
+7460 mmove -6 -2
+7463 mmove -8 -1
+7466 mmove -10 0
+7468 mmove -7 -3
+7469 mmove -7 1
+7470 mmove -7 -3
+7474 mmove -9 1
+7478 mmove -8 -3
+7482 mmove -7 -2
+7486 mmove -9 -2
+7487 mmove -6 -2
+7490 mmove -9 -3
+7493 mmove -10 -1
+7496 mmove -6 0
+7511 mousedown
+7514 mouseup
+7527 mousedown
+7530 mmove -24 24
+7535 mouseup
+7555 mmove -9 -8
+7556 mmove -11 -4
+7558 mmove -11 -7
+7560 mmove -11 -8
+7561 mmove -10 -8
+7564 mmove -8 -4
+7566 mmove -10 -8
+7569 mmove -8 -8
+7573 mmove -10 -5
+7577 mmove -8 -8
+7581 mmove -10 -8
+7582 mmove -10 -8
+7585 mmove -9 -4
+7593 mmove -9 2
+7596 mmove -11 0
+7599 mmove -8 2
+7602 mmove -11 -1
+7605 mmove -11 2
+7607 mmove -12 -1
+7611 mmove -10 -1
+7614 mmove -9 -1
+7633 mmove -9 5
+7634 mmove -12 5
+7637 mmove -8 5
+7644 mmove 1 7
+7645 mmove 2 7
+7646 mmove 3 7
+7650 mmove 2 7
+7652 mmove 3 3
+7654 mmove 0 7
+7657 mmove 1 4
+7661 mmove -1 7
+7665 mmove 0 5
+7667 mmove 0 3
+7670 mmove 0 3
+7674 mmove 0 4
+7675 mmove 2 5
+7677 mmove 0 3
+7683 mmove -10 -10
+7687 mmove -11 -10
+7689 mmove -9 -13
+7693 mmove -10 -12
+7696 mmove -7 -12
+7700 mmove -11 -10
+7702 mmove -7 -10
+7705 mmove -8 -13
+7709 mmove -10 -10
+7711 mmove -7 -12
+7714 mmove -7 -13
+7717 mmove -7 -9
+7719 mmove -11 -9
+7722 mmove -8 -13
+7726 mmove -8 -9
+7728 mmove -9 -12
+7731 mmove -10 -12
+7733 mmove -10 -9
+7742 mmove -3 4
+7744 mmove -2 1
+7745 mmove -3 2
+7748 mmove -4 2
+7752 mmove 0 2
+7754 mmove -4 3
+7758 mmove -3 0
+7759 mmove -1 2
+7761 mmove 0 1
+7762 mmove 0 3
+7776 mousedown
+7779 mmove 24 24
+7784 mouseup
+7792 mmove -3 2
+7795 mmove -5 2
+7798 mmove -3 5
+7799 mmove -3 1
+7802 mmove -6 2
+7803 mmove -3 1
+7805 mmove -4 1
+7806 mmove -3 1
+7807 mmove -4 2
+7812 mmove -5 -2
+7815 mmove -7 -2
+7819 mmove -6 1
+7823 mmove -6 -1
+7826 mmove -9 -3
+7830 mmove -8 -1
+7833 mmove -8 -1
+7834 mmove -7 -1
+7837 mmove -5 0
+7838 mmove -8 -2
+7842 mmove -7 1
+7843 mmove -5 -3
+7858 mousedown
+7861 mouseup
+7884 mousedown
+7887 mmove -24 -24
+7892 mouseup
+7901 mmove -5 -9
+7903 mmove -8 -11
+7905 mmove -6 -10
+7914 mmove 3 -10
+7918 mmove 1 -12
+7920 mmove 3 -9
+7921 mmove 4 -12
+7922 mmove 5 -13
+7923 mmove 5 -10
+7925 mmove 3 -13
+7927 mousedown
+7930 mouseup
+7946 mmove -8 -9
+7950 mmove -11 -12
+7951 mmove -8 -10
+7953 mmove -8 -11
+7955 mmove -11 -12
+7958 mmove -10 -10
+7961 mmove -7 -9
+7962 mmove -11 -12
+7963 mmove -8 -10
+7967 mmove -9 -10
+7969 mmove -8 -12
+7971 mmove -8 -10
+7976 mmove -8 -10
+7977 mmove -8 -9
+7979 mmove -10 -8
+7982 mmove -11 -11
+7990 mousedown
+7993 mouseup
+8008 mmove 2 -2
+8012 mmove 5 0
+8013 mmove 3 1
+8015 mmove 2 1
+8017 mmove 4 -1
+8020 mmove 2 -1
+8023 mmove 4 2
+8025 mmove 4 0
+8029 mmove 6 -2
+8031 mmove 6 2
+8033 mmove 2 2
+8042 mousedown
+8045 mouseup
+8054 mousedown
+8057 mmove 24 -24
+8062 mouseup
+8085 mmove 0 -9
+8088 mmove 1 -10
+8092 mmove -1 -12
+8093 mmove 1 -9
+8094 mmove 1 -9
+8096 mmove -2 -9
+8099 mmove -3 -10
+8102 mmove 1 -12
+8105 mmove 1 -13
+8108 mmove 1 -13
+8111 mmove -2 -12
+8112 mmove 1 -11
+8132 mousedown
+8135 mouseup
+8156 mmove 8 -7
+8159 mmove 10 -7
+8162 mmove 12 -6
+8163 mmove 11 -9
+8167 mmove 10 -9
+8171 mmove 12 -8
+8172 mmove 10 -9
+8175 mmove 9 -10
+8179 mmove 8 -7
+8180 mmove 8 -8
+8184 mmove 9 -9
+8186 mmove 9 -9
+8190 mmove 9 -10
+8192 mmove 8 -8
+8193 mmove 12 -9
+8196 mmove 11 -10
+8200 mmove 9 -8
+8204 tap space
+8234 click 320 240
+8263 tap space
+8293 click 320 240
+8316 mousedown
+8319 mmove -24 24
+8324 mouseup
+8328 mmove 7 -2
+8330 mmove 8 -4
+8332 mmove 9 -5
+8333 mmove 9 -3
+8334 mmove 6 -4
+8336 mmove 7 -5
+8337 mmove 10 -3
+8345 mousedown
+8348 mouseup
+8362 mmove 8 -1
+8365 mmove 5 -5
+8366 mmove 7 -2
+8367 mmove 8 -1
+8369 mmove 8 -5
+8371 mmove 7 -1
+8372 mmove 6 -4
+8376 mmove 9 -3
+8395 mmove -6 -9
+8398 mmove -7 -7
+8402 mmove -7 -11
+8404 mmove -6 -7
+8408 mmove -5 -7
+8409 mmove -7 -9
+8411 mmove -5 -8
+8413 mmove -5 -7
+8415 mmove -7 -11
+8418 mmove -4 -7
+8419 mmove -8 -10
+8423 mmove -5 -10
+8429 mmove 0 -4
+8431 mmove -3 -1
+8432 mmove 1 -4
+8434 mmove -2 -4
+8436 mmove -3 -2
+8439 mmove 1 -4
+8441 mmove 0 0
+8443 mmove -1 -1
+8445 mmove 1 -2
+8448 mmove 0 -1
+8451 mmove 1 -4
+8454 mmove -3 -4
+8458 mmove -1 -4
+8462 mmove -3 0
+8463 mmove -1 -3
+8467 mmove 1 0
+8471 mmove -2 -1
+8473 mmove -2 -4
+8485 mousedown
+8488 mmove -24 -24
+8493 mouseup
+8516 mmove -4 -6
+8520 mmove -3 -7
+8524 mmove -5 -8
+8527 mmove -4 -9
+8529 mmove -4 -9
+8530 mmove -4 -7
+8533 mmove -3 -7
+8544 mousedown
+8547 mmove -24 24
+8552 mouseup
+8560 mousedown
+8563 mmove 24 24
+8568 mouseup
+8592 mousedown
+8595 mouseup
+8604 mmove -7 -7
+8608 mmove -7 -6
+8610 mmove -4 -10
+8612 mmove -7 -10
+8615 mmove -5 -7
+8618 mmove -5 -7
+8620 mmove -8 -8
+8623 mmove -8 -10
+8631 mmove 7 -11
+8632 mmove 8 -8
+8634 mmove 10 -8
+8636 mousedown
+8639 mouseup
+8658 mmove 2 4
+8660 mmove 3 1
+8661 mmove 4 1
+8663 mmove 4 1
+8667 mmove 3 3
+8669 mmove 3 1
+8673 mmove 4 3
+8676 mmove 3 1
+8679 mmove 4 1
+8682 mmove 1 2
+8684 mmove 1 3
+8688 mmove 4 4
+8692 mmove 1 5
+8695 mmove 1 3
+8696 mmove 3 5
+8700 mmove -10 4
+8703 mmove -7 4
+8706 mmove -10 8
+8707 mmove -9 8
+8708 mmove -10 7
+8710 mmove -9 6
+8712 mmove -6 7
+8713 mmove -10 6
+8716 mmove -7 5
+8720 mmove -8 6
+8723 mmove -9 5
+8724 mmove -10 6
+8727 mmove -9 8
+8730 mmove -10 6
+8731 mmove -6 8
+8734 mmove -9 4
+8737 mmove -6 6
+8741 mmove -6 5
+8744 mmove -7 8
+8747 mmove -6 5
+8770 mousedown
+8773 mouseup
+8782 mousedown
+8785 mouseup
+8805 mousedown
+8808 mouseup
+8811 mmove 1 -7
+8813 mmove 1 -9
+8817 mmove 2 -5
+8818 mmove 5 -9
+8832 mmove 3 -10
+8834 mmove 7 -11
+8837 mmove 3 -9
+8838 mmove 3 -7
+8857 mousedown
+8860 mmove 24 24
+8865 mouseup
+8870 mousedown
+8873 mmove -24 -24
+8878 mouseup
+8882 mousedown
+8885 mmove 24 -24
+8890 mouseup
+8895 mmove -9 -12
+8896 mmove -6 -10
+8899 mmove -9 -12
+8907 mousedown
+8910 mouseup
+8926 mmove -10 -14
+8930 mmove -12 -14
+8934 mmove -10 -12
+8937 mmove -12 -12
+8940 mmove -9 -10
+8942 mmove -12 -14
+8943 mmove -12 -12
+8946 mmove -10 -13
+8950 mmove -12 -12
+8953 mmove -8 -14
+8957 mmove -12 -10
+8960 mmove -12 -13
+8963 mmove -11 -11
+8967 mmove -12 -14
+8970 mmove -8 -12
+8972 mmove -8 -11
+8975 mmove -11 -11
+8977 mmove -11 -11
+8986 mmove 9 -9
+8987 mmove 11 -7
+8991 mmove 7 -10
+8994 mmove 11 -9
+8996 mmove 10 -8
+8998 mmove 8 -8
+9001 mmove 9 -8
+9005 mmove 9 -10
+9008 mmove 11 -7
+9010 mmove 5 -5
+9014 mmove 3 -4
+9017 mmove 6 -3
+9020 mmove 6 -6
+9023 mmove 6 -5
+9027 mmove 3 -2
+9031 mmove 4 -2
+9034 mmove 4 -4
+9036 mmove 6 -4
+9042 mmove -7 -4
+9045 mmove -10 -6
+9049 mmove -11 -6
+9053 mmove -9 -7
+9055 mmove -11 -5
+9057 mmove -9 -7
+9059 mmove -7 -7
+9061 mmove -7 -5
+9063 mmove -11 -3
+9065 mmove -7 -7
+9066 mmove -10 -3
+9070 mmove -7 -5
+9079 mmove -5 1
+9080 mmove -4 0
+9082 mmove -4 1
+9083 mmove -5 4
+9086 mmove -3 4
+9087 mmove -2 3
+9090 mmove -4 0
+9093 mmove -6 2
+9095 mmove -6 0
+9096 mmove -2 1
+9099 mmove -2 1
+9103 mmove -6 2
+9107 mmove -3 2
+9110 mmove -4 4
+9114 mmove -5 0
+9118 mmove -3 2
+9120 mmove -6 3
+9121 mmove -6 4
+9123 mmove -3 0
+9145 mousedown
+9148 mouseup
+9156 mmove -8 6
+9160 mmove -7 6
+9163 mmove -7 5
+9167 mmove -10 7
+9171 mmove -6 3
+9173 mmove -10 4
+9175 mmove -8 3
+9176 mmove -6 7
+9180 mmove -9 5
+9183 mmove -8 6
+9184 mmove -7 6
+9186 mmove -6 5
+9190 mmove -6 7
+9191 mmove -7 3
+9202 mmove 0 1
+9205 mmove -3 1
+9207 mmove -2 2
+9210 mmove 0 0
+9214 mmove -4 2
+9218 mmove -4 0
+9222 mmove -2 0
+9225 mmove -1 0
+9226 mmove -1 1
+9228 mmove -1 -1
+9231 mmove -3 -1
+9233 mmove -1 3
+9234 mmove -3 -1
+9236 mmove -1 3
+9237 mmove -1 -1
+9241 mmove -4 2
+9243 mmove -4 -1
+9245 mmove -1 -1
+9247 mmove -2 1
+9250 mmove -3 1
+9255 mmove 3 2
+9259 mmove 5 3
+9263 mmove 3 2
+9267 mmove 5 1
+9269 mmove 5 2
+9271 mmove 3 2
+9275 mmove 5 2
+9278 mmove 5 2
+9282 mmove 6 5
+9283 mmove 5 5
+9284 mmove 7 3
+9287 mmove 3 5
+9289 mmove 3 2
+9293 mmove 5 2
+9297 mmove 3 4
+9299 mmove 5 4
+9321 mmove 2 -9
+9325 mmove 5 -11
+9328 mmove 2 -10
+9332 mmove 5 -11
+9335 mmove 5 -9
+9336 mmove 4 -13
+9339 mmove 2 -10
+9345 mmove 9 -1
+9349 mmove 9 -4
+9353 mmove 8 -5
+9354 mmove 11 -5
+9355 mmove 8 -1
+9359 mmove 8 -4
+9362 mmove 10 -2
+9364 mmove 11 -4
+9365 mmove 10 -1
+9370 mmove 6 1
+9374 mmove 4 3
+9376 mmove 5 2
+9377 mmove 2 0
+9381 mmove 6 3
+9383 mmove 5 3
+9386 mmove 4 1
+9390 mmove 2 2
+9392 mmove 5 3
+9393 mmove 3 2
+9397 mmove 6 -1
+9398 mmove 3 0
+9400 mmove 4 -1
+9404 mmove 3 1
+9406 mmove 2 3
+9409 mmove 6 3
+9411 mmove 6 1
+9423 mousedown
+9426 mouseup
+9446 mousedown
+9449 mmove -24 -24
+9454 mouseup
+9475 mmove -5 1
+9479 mmove -3 -2
+9483 mmove -7 0
+9486 mmove -6 -2
+9490 mmove -7 2
+9493 mmove -7 0
+9494 mmove -7 -1
+9498 mmove -4 -2
+9502 mmove -6 -2
+9503 mmove -3 -1
+9504 mmove -3 0
+9507 mmove -3 2
+9511 mmove -7 2
+9515 mmove -4 1
+9517 mmove -4 -2
+9518 mmove -6 2
+9540 mmove -6 2
+9541 mmove -4 3
+9544 mmove -6 0
+9547 mmove -8 1
+9551 mmove -6 0
+9553 mmove -6 1
+9557 mmove -8 1
+9560 mmove -8 -1
+9564 mmove -8 2
+9582 mousedown
+9585 mouseup
+9600 mousedown
+9603 mouseup
+9622 mmove -3 -5
+9626 mmove 0 -8
+9628 mmove 0 -5
+9632 mmove -1 -6
+9634 mmove -1 -8
+9637 mmove -4 -9
+9638 mmove -3 -8
+9640 mmove 0 -6
+9642 mmove 0 -5
+9644 mmove -1 -8
+9647 mmove 0 -7
+9651 mmove 0 -5
+9652 mmove -4 -7
+9654 mmove -2 -8
+9656 mmove -1 -6
+9659 mmove 0 -7
+9660 mmove -1 -5
+9672 mmove -10 5
+9675 mmove -9 4
+9679 mmove -10 3
+9681 mmove -9 2
+9683 mmove -10 5
+9684 mmove -8 4
+9688 mmove -6 4
+9690 mmove -6 5
+9694 mmove -9 5
+9695 mmove -7 6
+9698 mmove -10 5
+9702 mmove -9 5
+9706 mmove -9 6
+9708 mmove -8 3
+9709 mmove -7 6
+9712 mmove -6 5
+9714 mmove -6 3
+9718 mmove -6 4
+9722 mmove -7 3
+9723 mmove -8 6
+9737 mmove 7 0
+9739 mmove 3 0
+9741 mmove 7 0
+9742 mmove 6 0
+9743 mmove 5 0
+9746 mmove 5 3
+9748 mmove 5 0
+9752 mmove 4 -1
+9754 mmove 5 0
+9755 mmove 3 1
+9757 mmove 5 0
+9760 mmove 4 0
+9761 mmove 6 3
+9762 mmove 6 2
+9763 mmove 6 3
+9766 mmove 6 1
+9768 mmove 6 2
+9769 mmove 4 2
+9771 mmove 5 2
+9774 mmove 7 1
+9777 mmove -2 -4
+9778 mmove 0 -2
+9782 mmove 2 -4
+9784 mmove 2 -4
+9787 mmove 1 -4
+9791 mmove -2 -5
+9794 mmove 0 -4
+9807 mmove 1 -9
+9811 mmove 0 -9
+9815 mmove -1 -6
+9817 mmove 2 -8
+9821 mmove -1 -10
+9822 mmove 1 -6
+9824 mmove 0 -7
+9827 mmove -2 -10
+9828 mmove -1 -10
+9829 mmove -1 -9
+9846 mmove 11 3
+9849 mmove 10 3
+9850 mmove 12 2
+9854 mmove 9 2
+9857 mmove 8 5
+9861 mmove 8 5
+9863 mmove 10 5
+9865 mmove 9 5
+9867 mmove 9 2
+9871 mmove 11 4
+9874 mmove 9 3
+9878 mmove 12 4
+9879 mmove 9 5
+9882 mmove 12 3
+9903 mousedown
+9906 mouseup
+9910 mmove 6 -5
+9914 mmove 5 -3
+9915 mmove 5 -2
+9925 mousedown
+9928 mmove 24 24
+9933 mouseup
+9957 mousedown
+9960 mmove -24 24
+9965 mouseup
+9985 mmove 6 -4
+9989 mmove 5 -6
+9991 mmove 8 -3
+9995 mmove 8 -4
+9998 mmove 9 -2
+9999 mmove 9 -4
+10000 mmove 6 -4
+10003 mmove 6 -6
+10021 mmove 1 1
+10024 mmove 1 5
+10028 mmove 1 1
+10032 mmove 3 1
+10035 mmove 0 2
+10039 mmove 3 5
+10042 mmove 4 2
+10052 mmove -1 -6
+10056 mmove 1 -10
+10057 mmove 0 -10
+10061 mmove 1 -8
+10063 mmove 0 -10
+10066 mmove 3 -6
+10070 mmove 0 -7
+10072 mmove 3 -7
+10075 mmove 2 -8
+10079 mmove 2 -10
+10081 mmove 3 -9
+10085 mmove 0 -10
+10087 mmove 2 -8
+10090 mmove 3 -8
+10093 mmove 1 -10
+10097 mousedown
+10100 mmove 24 -24
+10105 mouseup
+10112 mmove -11 0
+10114 mmove -11 1
+10117 mmove -8 1
+10120 mmove -10 1
+10123 mmove -9 1
+10126 mmove -12 -3
+10128 mmove -9 -2
+10149 mousedown
+10152 mmove -24 -24
+10157 mouseup
+10168 mmove 2 -4
+10170 mmove 6 -2
+10171 mmove 5 -2
+10174 mmove 2 -3
+10177 mmove 6 -4
+10197 mousedown
+10200 mouseup
+10220 mousedown
+10223 mmove -24 24
+10228 mouseup
+10235 mousedown
+10238 mmove 24 -24
+10243 mouseup
+10264 mousedown
+10267 mmove -24 24
+10272 mouseup
+10285 mmove 7 -6
+10289 mmove 8 -5
+10292 mmove 8 -3
+10295 mmove 4 -4
+10298 mmove 4 -3
+10304 mousedown
+10307 mmove -24 -24
+10312 mouseup
+10323 mousedown
+10326 mouseup
+10332 mmove 12 -8
+10335 mmove 9 -7
+10338 mmove 12 -8
+10341 mmove 12 -7
+10345 mmove 11 -8
+10349 mmove 8 -7
+10350 mmove 8 -5
+10353 mmove 8 -7
+10354 mmove 8 -6
+10355 mmove 12 -8
+10357 mmove 10 -4
+10360 mmove 11 -8
+10362 mmove 8 -6
+10363 mmove 11 -8
+10366 mmove 12 -8
+10369 mmove 9 -8
+10371 mmove 12 -5
+10374 mmove 9 -6
+10375 mmove 12 -6
+10378 mmove 8 -8
+10386 mmove 2 -9
+10387 mmove 0 -6
+10389 mmove -2 -7
+10390 mmove -2 -6
+10392 mmove 0 -7
+10394 mmove 1 -9
+10397 mmove 0 -8
+10401 mmove -2 -8
+10420 mmove 0 5
+10424 mmove -3 4
+10427 mmove -3 5
+10430 mmove -2 5
+10432 mmove -2 2
+10435 mmove -3 5
+10439 mmove -2 4
+10440 mmove -1 5
+10444 mmove -2 6
+10446 mmove -4 5
+10448 mmove -4 3
+10451 mmove -4 6
+10453 mmove 0 4
+10473 mmove 5 -8
+10474 mmove 9 -9
+10476 mmove 5 -7
+10479 mmove 7 -7
+10482 mmove 8 -11
+10485 mmove 5 -11
+10489 mmove 5 -8
+10493 mmove 5 -9
+10497 mmove 5 -8
+10505 mmove -1 -14
+10509 mmove 1 -10
+10513 mmove -3 -13
+10516 mmove -1 -13
+10518 mmove -1 -14
+10522 mmove 1 -14
+10523 mmove -2 -12
+10525 mmove 1 -10
+10529 mmove -3 -11
+10531 mmove -3 -12
+10532 mmove -1 -14
+10534 mmove 1 -11
+10535 mmove -1 -12
+10538 mmove 1 -10
+10541 mmove -2 -10
+10561 mousedown
+10564 mouseup
+10583 mmove -4 -4
+10586 mmove -4 -5
+10587 mmove -1 -4
+10590 mmove -4 -3
+10606 mousedown
+10609 mouseup
+10612 mmove 1 3
+10616 mmove 3 1
+10620 mmove 2 4
+10623 mmove 3 2
+10626 mmove 1 1
+10630 mmove 2 4
+10631 mmove 3 3
+10634 mmove 2 2
+10635 mmove 2 2
+10636 mmove 0 0
+10638 mmove 3 0
+10641 mmove 3 1
+10642 mmove -1 3
+10645 mmove 2 1
+10649 mmove 2 4
+10650 mmove 3 4
+10651 mmove 2 0
+10670 mousedown
+10673 mmove -24 24
+10678 mouseup
+10687 mousedown
+10690 mmove -24 24
+10695 mouseup
+10715 mmove 8 6
+10716 mmove 5 8
+10720 mmove 5 8
+10723 mmove 5 4
+10726 mmove 7 6
+10730 mmove 5 5
+10732 mmove 9 6
+10735 mmove 8 4
+10737 mmove 5 4
+10739 mmove 7 5
+10740 mmove 7 6
+10742 mmove 9 8
+10744 mmove 8 5
+10751 mousedown
+10754 mouseup
+10760 mmove 6 -13
+10761 mmove 8 -10
+10762 mmove 5 -10
+10765 mmove 9 -11
+10778 mousedown
+10781 mmove 24 24
+10786 mouseup
+10791 mmove -4 -9
+10792 mmove -3 -11
+10794 mmove -5 -11
+10798 mmove -2 -7
+10818 mmove -12 3
+10821 mmove -8 1
+10823 mmove -9 -1
+10826 mmove -9 0
+10827 mmove -11 1
+10829 mmove -8 1
+10830 mmove -9 0
+10833 mmove -8 0
+10834 mmove -11 -1
+10835 mmove -8 1
+10837 mmove -12 2
+10839 mmove -8 3
+10840 mmove -8 -1
+10841 mmove -12 1
+10843 mmove -9 1
+10847 mmove -9 3
+10850 mmove -12 2
+10854 mmove -8 0
+10858 mmove -8 1
+10864 mmove 3 0
+10867 mmove 3 1
+10869 mmove 0 1
+10873 mmove 0 1
+10874 mmove 3 0
+10875 mmove 2 -1
+10879 mmove 0 0
+10883 mmove 0 3
+10894 tap space
+10924 click 320 240
+10948 tap space
+10978 click 320 240
+11002 mousedown
+11005 mmove -24 24
+11010 mouseup
+11030 mmove 7 4
+11032 mmove 5 7
+11033 mmove 4 4
+11034 mmove 8 6
+11038 mmove 7 6
+11041 mmove 4 5
+11044 mmove 6 4
+11046 mmove 5 3
+11047 mmove 5 3
+11048 mmove 8 6
+11051 mmove 4 3
+11053 mmove 8 6
+11057 mmove 5 6
+11077 mmove -1 2
+11079 mmove 0 4
+11082 mmove 2 2
+11083 mmove -1 5
+11084 mmove -2 4
+11085 mmove 2 3
+11086 mmove 2 1
+11087 mmove 0 4
+11090 mmove -2 4
+11092 mmove 0 2
+11105 tap space
+11135 click 320 240
+11161 tap space
+11191 click 320 240
+11212 mmove -1 -8
+11216 mmove -2 -10
+11220 mmove -3 -9
+11222 mmove -4 -8
+11223 mmove 0 -9
+11227 mmove -4 -7
+11228 mmove -4 -10
+11232 mmove -2 -10
+11236 mmove -2 -11
+11247 mmove -1 -12
+11248 mmove -2 -9
+11252 mmove -5 -9
+11258 mousedown
+11261 mmove -24 24
+11266 mouseup
+11290 mousedown
+11293 mmove 24 -24
+11298 mouseup
+11311 mmove 4 -4
+11315 mmove 3 -3
+11316 mmove 2 -2
+11317 mmove 1 -2
+11318 mmove 3 -2
+11319 mmove 2 -2
+11323 mmove 4 -3
+11324 mmove 0 -6
+11325 mmove 2 -2
+11328 mmove 1 -5
+11329 mmove 1 -3
+11330 mmove 3 -2
+11332 mmove 4 -4
+11335 mmove 2 -3
+11337 mmove 3 -4
+11338 mmove 0 -5
+11341 mmove 3 -2
+11345 mmove 4 -2
+11349 mmove 1 -5
+11357 mmove -2 -11
+11361 mmove -2 -12
+11363 mmove -4 -11
+11367 mmove -5 -11
+11371 mmove -4 -11
+11373 mmove -4 -13
+11374 mmove -2 -10
+11375 mmove -3 -11
+11379 mmove -4 -11
+11382 mmove -4 -11
+11385 mmove -5 -12
+11386 mmove -3 -12
+11392 mousedown
+11395 mmove -24 -24
+11400 mouseup
+11405 mmove -9 4
+11407 mmove -9 5
+11410 mmove -6 8
+11412 mmove -5 7
+11414 mmove -9 4
+11416 mmove -6 8
+11418 mmove -9 8
+11422 mmove -7 6
+11425 mmove 2 2
+11428 mmove 1 -2
+11432 mmove 3 2
+11444 mmove -8 -6
+11447 mmove -8 -6
+11451 mmove -4 -8
+11452 mmove -7 -7
+11456 mmove -8 -6
+11457 mmove -5 -6
+11459 mmove -8 -7
+11460 mmove -7 -10
+11464 mmove -5 -7
+11465 mmove -5 -10
+11466 mmove -5 -7
+11467 mmove -8 -7
+11471 mmove -7 -6
+11474 mmove -5 -6
+11476 mmove -4 -7
+11477 mmove -4 -6
+11480 mmove -5 -10
+11481 mmove -6 -10
+11492 mmove -10 -3
+11493 mmove -10 -2
+11497 mmove -9 -4
+11501 mmove 8 -11
+11502 mmove 7 -10
+11506 mmove 8 -11
+11508 mmove 4 -10
+11510 mmove 4 -11
+11511 mmove 4 -12
+11513 mmove 7 -13
+11518 mmove -8 -8
+11521 mmove -11 -5
+11523 mmove -10 -4
+11525 mmove -12 -8
+11527 mmove -8 -5
+11529 mmove -12 -8
+11530 mmove -9 -8
+11534 mmove -11 -4
+11535 mmove -9 -4
+11538 mmove -12 -8
+11542 mmove -11 -6
+11558 mmove 5 -2
+11561 mmove 2 -5
+11562 mmove 2 -3
+11566 mmove 3 -2
+11569 mmove 4 -3
+11570 mmove 4 -4
+11572 mmove 4 -6
+11576 mmove 4 -6
+11578 mmove 3 -4
+11581 mmove 4 -5
+11583 mmove 2 -5
+11584 mmove 4 -6
+11586 mmove 6 -3
+11587 mmove 6 -2
+11590 mmove 3 -2
+11592 mmove 5 -2
+11593 mmove 6 -2
+11597 mmove 4 -5
+11615 tap space
+11645 click 320 240
+11667 mmove 1 -12
+11668 mmove 1 -10
+11669 mmove 0 -11
+11671 mmove -3 -11
+11675 mmove -3 -10
+11677 mmove -2 -11
+11678 mmove -2 -13
+11679 mmove 0 -11
+11681 mmove -3 -11
+11684 mmove -1 -12
+11688 mmove -3 -11
+11689 mmove 1 -10
+11694 mmove 2 3
+11696 mmove 3 4
+11699 mmove 4 5
+11700 mmove 5 5
+11701 mmove 4 3
+11721 mmove -1 4
+11724 mmove -5 2
+11726 mmove -2 4
+11730 mmove -1 4
+11734 mmove -2 4
+11736 mmove -4 3
+11739 mmove -4 2
+11743 mmove -3 6
+11745 mmove -4 6
+11749 mmove -5 3
+11751 mmove -4 2
+11763 mmove 11 4
+11765 mmove 7 3
+11768 mmove 9 1
+11769 mmove 7 4
+11772 mmove 9 2
+11774 mmove 11 0
+11775 mmove 10 3
+11776 mmove 11 4
+11780 mmove 11 3
+11784 mmove 10 4
+11788 mmove 10 1
+11792 mmove 8 1
+11806 mousedown
+11809 mouseup
+11820 mmove -11 0
+11822 mmove -7 0
+11824 mmove -9 3
+11827 mmove -10 4
+11830 mmove -10 1
+11834 mmove -9 2
+11838 mmove -8 2
+11841 mmove -10 2
+11842 mmove -9 3
+11846 mmove -8 4
+11863 mousedown
+11866 mouseup
+11884 mousedown
+11887 mmove 24 -24
+11892 mouseup
+11915 mmove 5 -6
+11917 mmove 4 -5
+11921 mmove 3 -6
+11924 mmove 7 -5
+11928 mmove 5 -6
+11931 mmove 6 -6
+11933 mmove 6 -6
+11936 mmove 3 -6
+11938 mmove 4 -6
+11942 mmove 4 -6
+11952 mousedown
+11955 mmove 24 -24
+11960 mouseup
+11969 mmove 1 -8
+11971 mmove 3 -7
+11975 mmove 1 -10
+11979 mmove 4 -9
+11983 mmove 0 -7
+11984 mmove 0 -9
+11988 mmove 4 -6
+11992 mmove 3 -10
+12001 mmove -3 -2
+12003 mmove -3 -3
+12005 mmove -5 -4
+12006 mmove -4 -4
+12008 mmove -2 -1
+12011 mmove -4 -2
+12012 mmove -3 -1
+12013 mmove -4 -4
+12016 mmove -2 -5
+12023 mousedown
+12026 mmove -24 24
+12031 mouseup
+12047 mmove 11 -11
+12051 mmove 12 -12
+12052 mmove 12 -12
+12053 mmove 9 -9
+12057 mmove 11 -13
+12061 mmove 9 -10
+12062 mmove 11 -11
+12063 mmove 10 -9
+12064 mmove 10 -12
+12066 mmove 8 -9
+12068 mmove 12 -12
+12070 mmove 8 -9
+12071 mmove 8 -9
+12075 mmove 11 -12
+12076 mmove 10 -12
+12079 mmove 11 -11
+12081 mmove 10 -12
+12084 mmove 12 -13
+12101 mousedown
+12104 mouseup
+12119 mmove -4 -9
+12120 mmove -8 -9
+12123 mmove -7 -7
+12126 mmove -8 -10
+12130 mmove -8 -9
+12131 mmove -8 -10
+12135 mmove -7 -9
+12138 mmove -6 -7
+12142 mmove -8 -9
+12144 mmove -4 -9
+12146 mmove -8 -8
+12151 mousedown
+12154 mouseup
+12168 mousedown
+12171 mmove 24 -24
+12176 mouseup
+12200 mousedown
+12203 mouseup
+12207 mousedown
+12210 mmove 24 -24
+12215 mouseup
+12239 mmove 9 -2
+12243 mmove 8 -1
+12244 mmove 10 -4
+12247 mmove 12 -5
+12248 mmove 8 -3
+12251 mmove 9 -1
+12254 mmove 8 -4
+12255 mmove 10 -4
+12256 mmove 9 -2
+12260 mmove 9 -4
+12261 mmove 9 -4
+12263 mmove 12 -4
+12266 mmove 10 -3
+12270 mmove 11 -4
+12271 mmove 11 -5
+12272 mmove 9 -1
+12273 mmove 9 -2
+12279 mousedown
+12282 mmove 24 -24
+12287 mouseup
+12302 mmove 5 -8
+12303 mmove 4 -8
+12307 mmove 6 -9
+12310 mmove 5 -6
+12312 mmove 5 -8
+12315 mmove 2 -6
+12317 mmove 6 -7
+12319 mmove 6 -6
+12321 mmove 2 -9
+12323 mmove 5 -8
+12325 mmove 2 -8
+12327 mmove 5 -8
+12331 mmove 4 -5
+12332 mmove 5 -9
+12336 mmove 4 -6
+12339 mmove 2 -8
+12340 mmove 4 -8
+12341 mmove 6 -5
+12344 mmove 6 -8
+12368 mmove -1 -10
+12369 mmove 0 -9
+12370 mmove 0 -10
+12373 mmove 2 -9
+12376 mmove 0 -9
+12379 mmove -1 -6
+12382 mmove -2 -10
+12385 mmove -1 -8
+12398 mmove -7 -13
+12400 mmove -3 -13
+12402 mmove -5 -12
+12404 mmove -6 -13
+12405 mmove -3 -12
+12408 mmove -7 -9
+12410 mmove -3 -13
+12411 mmove -6 -10
+12415 mmove -5 -12
+12417 mmove -6 -11
+12419 mmove -4 -11
+12420 mmove -3 -12
+12424 mmove -6 -11
+12426 mmove -3 -12
+12427 mmove -5 -12
+12450 mmove -8 -11
+12452 mmove -9 -9
+12453 mmove -8 -9
+12456 mmove -5 -10
+12459 mmove -7 -9
+12461 mmove -8 -10
+12462 mmove -8 -11
+12463 mmove -8 -11
+12467 mmove -5 -9
+12471 mmove -8 -11
+12473 mmove -7 -8
+12477 mmove -7 -9
+12479 mmove -8 -9
+12481 mmove -7 -8
+12492 mousedown
+12495 mouseup
+12516 mmove 10 1
+12520 mmove 6 2
+12523 mmove 9 -1
+12525 mmove 9 1
+12546 mmove -2 -3
+12548 mmove -1 -2
+12551 mmove -3 1
+12553 mmove -2 -3
+12556 mmove 0 1
+12559 mmove 1 -1
+12561 mmove -2 -3
+12563 mmove -2 -2
+12566 mmove -2 -2
+12570 mmove 0 1
+12573 mmove -1 -2
+12574 mmove 1 1
+12580 mmove 1 8
+12584 mmove -1 6
+12588 mmove 1 8
+12589 mmove 3 7
+12591 mmove -1 8
+12599 mmove -12 1
+12601 mmove -10 -1
+12605 mmove -8 -2
+12609 mmove -10 -2
+12622 mmove -7 2
+12623 mmove -11 2
+12626 mmove -7 2
+12629 mmove -7 2
+12630 mmove -8 0
+12634 mmove -10 4
+12637 mmove -8 2
+12638 mmove -8 0
+12640 mmove -8 4
+12643 mmove -9 0
+12644 mmove -7 0
+12646 mmove -7 3
+12648 mmove -10 2
+12651 mmove -7 1
+12655 mmove -7 2
+12656 mmove -9 4
+12673 mousedown
+12676 mmove -24 -24
+12681 mouseup
+12692 mmove -5 -10
+12693 mmove -8 -11
+12696 mmove -5 -10
+12699 mmove -9 -12
+12701 mmove -9 -11
+12705 mmove -5 -11
+12709 mmove -6 -13
+12710 mmove -9 -10
+12714 mmove -5 -12
+12716 mmove -5 -11
+12740 mmove -10 -3
+12741 mmove -8 -2
+12743 mmove -10 -3
+12746 mmove -10 -2
+12749 mmove -10 -1
+12753 mmove -10 0
+12754 mmove -9 -2
+12756 mmove -8 -2
+12759 mmove -10 -3
+12761 mmove -10 0
+12762 mmove -8 1
+12763 mmove -8 1
+12767 mmove -9 -2
+12770 mmove -10 -3
+12773 mmove -8 0
+12777 mmove -7 0
+12781 mmove -9 -3
+12783 mmove -6 0
+12785 mmove -8 1
+12788 mousedown
+12791 mouseup
+12795 mousedown
+12798 mmove -24 24
+12803 mouseup
+12824 mmove -8 -11
+12826 mmove -5 -12
+12828 mmove -9 -12
+12829 mmove -5 -14
+12832 mmove -9 -13
+12833 mmove -5 -13
+12834 mmove -5 -10
+12837 mmove -6 -13
+12852 mousedown
+12855 mmove -24 -24
+12860 mouseup
+12883 mmove 6 -9
+12885 mmove 8 -9
+12888 mmove 7 -6
+12906 mmove -7 3
+12907 mmove -5 4
+12908 mmove -7 3
+12910 mmove -6 2
+12912 mmove -8 3
+12916 mmove -8 4
+12918 mmove -5 3
+12922 mmove -5 2
+12926 mmove -4 3
+12928 mmove -8 2
+12930 mmove -8 6
+12934 mmove -5 4
+12935 mmove -4 6
+12936 mmove -4 2
+12937 mmove -8 4
+12943 mousedown
+12946 mmove -24 24
+12951 mouseup
+12967 mmove 3 -5
+12969 mmove 5 -5
+12972 mmove 5 -4
+12974 mmove 6 -2
+12978 mmove 2 -5
+12982 mmove 6 -4
+12985 mmove 3 -4
+12989 mmove 2 -4
+12992 mmove 2 -2
+12994 mmove 6 -5
+12995 mmove 6 -1
+12996 mmove 4 -5
+12998 mmove 2 -1
+12999 mmove 5 -3
+13001 mmove 6 -5
+13002 mmove 6 -3
+13010 mmove 4 -3
+13013 mmove 4 -3
+13014 mmove 4 -4
+13015 mmove 7 -3
+13019 mmove 8 -3
+13020 mmove 8 -3
+13024 mmove 5 -7
+13025 mmove 5 -7
+13026 mmove 6 -3
+13027 mmove 5 -3
+13029 mmove 6 -6
+13030 mmove 8 -7
+13041 mmove 5 3
+13045 mmove 7 3
+13047 mmove 8 2
+13049 mmove 9 2
+13060 mmove -7 7
+13064 mmove -9 7
+13068 mmove -11 5
+13069 mmove -11 6
+13071 mmove -9 5
+13072 mmove -10 5
+13074 mmove -11 4
+13075 mmove -9 4
+13077 mmove -11 5
+13078 mmove -7 7
+13079 mmove -8 7
+13081 mmove -10 8
+13085 mmove -10 4
+13089 mmove -9 5
+13091 mmove -7 6
+13094 mmove -9 4
+13096 mmove -8 6
+13097 mmove -7 6
+13101 mmove -10 7
+13103 mmove -11 7
+13107 mousedown
+13110 mouseup
+13115 mmove -3 -6
+13119 mmove -5 -6
+13121 mmove -6 -8
+13125 mmove -4 -7
+13126 mmove -3 -5
+13128 mmove -5 -7
+13131 mmove -4 -8
+13135 mmove -5 -5
+13136 mmove -4 -5
+13137 mmove -6 -4
+13141 mmove -7 -8
+13143 mmove -7 -8
+13147 mmove -3 -5
+13151 mmove -4 -6
+13154 mmove -6 -5
+13165 mousedown
+13168 mmove -24 -24
+13173 mouseup
+13195 mousedown
+13198 mmove -24 -24
+13203 mouseup
+13225 mmove -3 -1
+13228 mmove -4 -1
+13229 mmove -1 0
+13232 mmove -3 -3
+13236 mmove -3 -1
+13240 mmove -3 -3
+13245 mmove 8 -7
+13246 mmove 6 -6
+13247 mmove 5 -7
+13249 mmove 5 -7
+13252 mmove 6 -3
+13255 mmove 4 -6
+13257 mmove 6 -5
+13259 mmove 7 -5
+13262 mmove 8 -6
+13263 mmove 6 -7
+13264 mmove 8 -7
+13267 mmove 6 -4
+13270 mmove 7 -4
+13274 mmove 7 -4
+13287 mousedown
+13290 mouseup
+13313 mmove -7 4
+13315 mmove -7 8
+13316 mmove -9 4
+13317 mmove -9 6
+13321 mmove -10 5
+13324 mmove -10 7
+13326 mmove -8 5
+13329 mmove -7 8
+13333 mmove -6 7
+13337 mmove -8 8
+13338 mmove -9 7
+13342 mmove -10 8
+13346 mmove -8 8
+13348 mmove -6 8
+13350 mmove -10 4
+13354 mmove -10 4
+13356 mmove -9 5
+13359 mmove -9 6
+13360 mmove -8 4
+13371 mmove -2 6
+13372 mmove -1 5
+13375 mmove -2 4
+13377 mmove -1 5
+13383 mmove 3 4
+13386 mmove 3 3
+13387 mmove 3 3
+13388 mmove 3 3
+13391 mmove 7 4
+13392 mmove 4 4
+13394 mmove 6 5
+13395 mmove 5 6
+13399 mmove 4 2
+13402 mmove 7 2
+13405 mmove 3 2
+13407 mmove 7 2
+13408 mmove 7 6
+13409 mmove 7 6
+13418 mousedown
+13421 mmove 24 24
+13426 mouseup
+13430 mmove -6 -6
+13432 mmove -4 -5
+13433 mmove -7 -6
+13435 mmove -4 -8
+13436 mmove -4 -6
+13440 mmove -7 -6
+13444 mmove -4 -6
+13447 mmove -6 -5
+13448 mmove -4 -6
+13452 mmove -7 -7
+13455 mmove -8 -6
+13459 mmove -8 -5
+13472 mmove -9 3
+13475 mmove -10 5
+13476 mmove -10 3
+13478 mmove -8 3
+13479 mmove -10 4
+13483 mmove -12 2
+13486 mmove -11 3
+13487 mmove -10 6
+13499 mousedown
+13502 mouseup
+13511 mmove 3 5
+13512 mmove 6 5
+13513 mmove 3 5
+13516 mmove 3 3
+13520 mmove 3 5
+13523 mmove 6 2
+13526 mmove 2 2
+13530 mmove 5 5
+13531 mmove 6 2
+13535 mmove 5 6
+13538 mmove 4 4
+13539 mmove 3 5
+13542 mmove 4 5
+13546 mmove 6 3
+13556 mousedown
+13559 mouseup
+13568 tap space
+13598 click 320 240
+13619 mmove -1 -9
+13623 mmove 1 -10
+13626 mmove -2 -9
+13627 mmove -3 -10
+13630 mmove -2 -12
+13633 mmove 0 -9
+13635 mmove 0 -13
+13645 mousedown
+13648 mouseup
+13667 mmove 12 4
+13670 mmove 12 2
+13673 mmove 9 2
+13676 mmove 12 0
+13680 mmove 9 3
+13684 mmove 12 2
+13686 mmove 11 4
+13689 mmove 10 2
+13690 mmove 11 4
+13694 mmove 11 4
+13705 mmove -9 -11
+13709 mmove -11 -8
+13710 mmove -10 -11
+13714 mmove -9 -10
+13727 mmove -5 -6
+13728 mmove -7 -8
+13731 mmove -5 -5
+13733 mmove -5 -9
+13735 mmove -6 -5
+13737 mmove -6 -5
+13741 mmove -7 -7
+13744 mmove -6 -8
+13746 mmove -6 -7
+13750 mmove -7 -9
+13752 mmove -6 -9
+13754 mmove -9 -8
+13756 mmove -6 -5
+13757 mmove -7 -8
+13759 mmove -9 -5
+13774 mmove 2 -9
+13775 mmove 1 -9
+13776 mmove 0 -6
+13777 mmove -1 -6
+13780 mmove 1 -5
+13781 mmove 0 -9
+13784 mmove 1 -7
+13788 mmove 2 -5
+13789 mmove 0 -9
+13792 mmove 1 -7
+13796 mmove -1 -8
+13799 mmove -1 -7
+13819 mmove -9 -13
+13822 mmove -8 -13
+13825 mmove -9 -12
+13827 mmove -9 -11
+13828 mmove -10 -10
+13830 mmove -11 -10
+13831 mmove -8 -9
+13835 mmove -10 -10
+13836 mmove -12 -12
+13840 mmove -12 -9
+13842 mmove -10 -12
+13846 mmove -10 -11
+13850 mmove -8 -9
+13851 mmove -10 -10
+13854 mmove -11 -12
+13857 mmove -10 -13
+13859 mmove -9 -11
+13861 mousedown
+13864 mouseup
+13873 mousedown
+13876 mouseup
+13898 mmove -5 -13
+13902 mmove -8 -11
+13905 mmove -4 -12
+13909 mmove -4 -9
+13912 mmove -8 -9
+13913 mmove -8 -9
+13914 mmove -5 -10
+13918 mmove -7 -9
+13920 mmove -5 -10
+13943 mmove -10 -10
+13945 mmove -8 -9
+13949 mmove -7 -9
+13953 mmove -8 -10
+13955 mmove -8 -11
+13959 mmove -6 -12
+13961 mmove -6 -11
+13962 mmove -6 -9
+13963 mmove -8 -9
+13965 mmove -9 -9
+13969 mmove -10 -10
+13972 mmove -9 -12
+13976 mmove -8 -9
+13977 mmove -8 -12
+13979 mmove -7 -12
+13981 mmove -6 -10
+13984 mmove -9 -10
+13986 mmove -10 -13
+13999 mmove 5 -2
+14003 mmove 8 -2
+14005 mmove 4 -3
+14009 mmove 8 -3
+14010 mmove 7 -1
+14014 mmove 7 -3
+14018 mmove 8 1
+14022 mmove 5 -1
+14026 mmove 7 1
+14027 mmove 5 -3
+14028 mmove 6 -1
+14031 mmove 5 -1
+14034 mmove 6 -3
+14035 mmove 5 -3
+14036 mmove 7 -1
+14059 mmove 8 5
+14061 mmove 5 4
+14064 mmove 9 6
+14066 mmove 8 5
+14069 mmove 9 6
+14070 mmove 7 6
+14072 mmove 5 4
+14075 mmove 7 4
+14076 mmove 9 4
+14089 mmove -10 5
+14091 mmove -11 5
+14092 mmove -11 5
+14093 mmove -12 3
+14095 mmove -9 5
+14096 mmove -8 6
+14098 mmove -9 5
+14100 mmove -11 4
+14108 mmove 3 -7
+14110 mmove 3 -6
+14112 mmove 2 -6
+14116 mmove 4 -8
+14118 mmove 2 -4
+14119 mmove 5 -8
+14121 mmove 6 -4
+14125 mmove 4 -5
+14129 mmove 3 -6
+14131 mmove 4 -7
+14133 mmove 6 -5
+14137 mmove 5 -8
+14139 mmove 4 -4
+14140 mmove 6 -6
+14143 mmove 3 -5
+14166 mmove 7 -6
+14168 mmove 7 -5
+14169 mmove 9 -7
+14172 mmove 8 -5
+14174 mmove 8 -5
+14178 mmove 8 -6
+14180 mmove 9 -3
+14181 mmove 5 -4
+14182 mmove 5 -6
+14185 mmove 7 -4
+14187 mmove 6 -7
+14191 mousedown
+14194 mmove -24 -24
+14199 mouseup
+14208 mmove 1 2
+14212 mmove 4 5
+14213 mmove 1 4
+14217 mmove 3 5
+14221 mmove 3 2
+14223 mmove 4 5
+14226 mmove 4 4
+14227 mmove 1 5
+14230 mmove 4 3
+14233 mmove 2 4
+14237 mmove 0 6
+14238 mmove 3 6
+14242 mmove 2 5
+14254 mousedown
+14257 mmove 24 24
+14262 mouseup
+14267 mousedown
+14270 mmove 24 24
+14275 mouseup
+14286 mmove 5 0
+14289 mmove 1 0
+14292 mmove 1 -1
+14295 mmove 5 2
+14297 mmove 3 0
+14298 mmove 1 2
+14300 mmove 5 1
+14303 mmove 2 2
+14312 mmove 3 -4
+14316 mmove 1 -4
+14317 mmove 0 -4
+14318 mmove 1 -3
+14319 mmove 0 -5
+14322 mmove 3 -5
+14343 mousedown
+14346 mouseup
+14360 mmove -10 -3
+14363 mmove -6 -4
+14365 mmove -8 -5
+14369 mmove -7 -6
+14371 mmove -7 -6
+14374 mmove -10 -5
+14377 mmove -6 -3
+14379 mmove -8 -2
+14383 mmove -6 -2
+14386 mmove -9 -5
+14387 mmove -7 -2
+14398 mousedown
+14401 mouseup

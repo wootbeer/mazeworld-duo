@@ -1,6 +1,7 @@
 /* In-memory Mac file system for deterministic runs.
  * Volume -1. Directory 30 = the application folder (original files, read-only host-backed).
- * Directories 19..22 = System/Preferences/Temp/other (empty at start). Everything created lives in RAM. */
+ * Directories 19..22 = System/Preferences/Temp/other (empty at start), 24 = saved games (Standard File).
+ * Everything created lives in RAM; the port mirrors chosen saved-game files to the host (vfs_host_*). */
 #include "hx.h"
 #include "m68k.h"
 #include <stdlib.h>
@@ -16,11 +17,24 @@ typedef struct {
     uint8_t *rsrc; uint32_t rlen, rcap;
     uint8_t finfo[16];
     int readonly;                                   /* files from the game's archive */
+    char *hostpath;                                 /* the port: the host file this one is saved to */
 } VFile;
 typedef struct { int used; int file; int fork; uint32_t mark; } FCB;   /* fork 0 data, 1 rsrc */
 
 static VFile vf[MAXFILES];
 static FCB fcb[MAXFCB];
+
+/* the port's file dialogs: given a default name (save) or not (load), the host file the player chose;
+ * NULL in the test rig, which answers Standard File itself */
+int (*vfs_host_choose)(int save, const char *defname, char *path, size_t n);
+static char *pending_host; static uint8_t pending_name[64];   /* the port: a new save's host file, linked when the game creates it */
+/* a saved-game file mirrored to the host is written back when the game closes it or swaps it in */
+static void host_sync(int f) {
+    if (f < 0 || !vf[f].used || !vf[f].hostpath) return;
+    FILE *h = fopen(vf[f].hostpath, "wb"); if (!h) return;
+    if (vf[f].dlen) fwrite(vf[f].data, 1, vf[f].dlen, h);
+    fclose(h);
+}
 
 /* File reference numbers are offsets into the FCB buffer, as on a Mac (some code finds a file's
  * volume from its FCB: FCBSPtr $34E, FSFCBLen $3F6, fcbVPtr +$14 -> vcbVRefNum +$4E). */
@@ -89,6 +103,7 @@ static FCB *fcb_of(int16_t ref) {
 }
 
 int rs_open_mem(const uint8_t *buf, uint32_t len, const char *macname);
+const char *hx_where(void);
 
 /* FSSpec dispatcher (HighLevelFSDispatch, selector in D0 low nibble) */
 void vfs_hlfs(uint16_t w, uint32_t trap_pc, const char *where) {
@@ -115,6 +130,7 @@ void vfs_hlfs(uint16_t w, uint32_t trap_pc, const char *where) {
         read_spec(spec, &dir, nm);
         if (find(dir, nm) >= 0) { wr16(reg(M68K_REG_A7), (uint16_t)-48); break; }
         f = add(dir, nm);
+        if (pending_host && dir == 24 && name_eq(nm, pending_name)) { vf[f].hostpath = pending_host; pending_host = NULL; }
         uint8_t *fi = vf[f].finfo; fi[0] = type >> 24; fi[1] = type >> 16; fi[2] = type >> 8; fi[3] = type; fi[4] = cr >> 24; fi[5] = cr >> 16; fi[6] = cr >> 8; fi[7] = cr;
         hx_log("FSpCreate(dir %d \"%.*s\") at %s", dir, nm[0], nm + 1, where);
         wr16(reg(M68K_REG_A7), 0); break; }
@@ -156,6 +172,7 @@ void vfs_hlfs(uint16_t w, uint32_t trap_pc, const char *where) {
         vf[a].rsrc = vf[b].rsrc; vf[a].rlen = vf[b].rlen; vf[a].rcap = vf[b].rcap;
         vf[b].data = t.data; vf[b].dlen = t.dlen; vf[b].dcap = t.dcap;
         vf[b].rsrc = t.rsrc; vf[b].rlen = t.rlen; vf[b].rcap = t.rcap;
+        host_sync(a); host_sync(b);
         hx_log("FSpExchangeFiles(\"%.*s\", \"%.*s\") at %s", nm[0], nm + 1, nm2[0], nm2 + 1, where);
         wr16(reg(M68K_REG_A7), 0); break; }
     default:
@@ -177,7 +194,7 @@ void vfs_pb(uint8_t trapnum, const char *where) {
     if (!c) { err = -51; goto done; }
     uint32_t *len, *cap; uint8_t **buf = fork_buf(c, &len, &cap);
     switch (trapnum) {
-    case 0x01: c->used = 0; break;                                    /* PBClose */
+    case 0x01: c->used = 0; host_sync(c->file); break;                /* PBClose */
     case 0x02: case 0x03: {                                            /* PBRead / PBWrite */
         uint16_t mode = rd16(pb + 44); int32_t off = (int32_t)rd32(pb + 46);
         uint32_t pos = (mode & 3) == 1 ? (uint32_t)off : (mode & 3) == 2 ? *len + off : (mode & 3) == 3 ? c->mark + off : c->mark;
@@ -222,4 +239,67 @@ const uint8_t *vfs_get_file(int32_t dir, const char *macname, uint32_t *dlen) {
     int i = find(dir, nm);
     if (i < 0) return NULL;
     *dlen = vf[i].dlen; return vf[i].data;
+}
+
+/* ---------- Standard File (Pack3): CustomPutFile (7) and CustomGetFile (8) ----------
+ * The rig answers by itself, deterministically: a save goes into the saved-games folder (24) under
+ * the suggested name; a load takes the most recently saved game there (none: cancelled). The port
+ * asks the player (vfs_host_choose) and mirrors the chosen host file in that folder.
+ * The dialog hooks and filters the game passes are not called (the port's dialogs are native). */
+static uint8_t last_saved[64];                         /* the rig: the name of the last game saved */
+static void reply(uint32_t r, int good, int replacing, const uint8_t *nm, uint32_t type) {
+    for (int i = 0; i < 88; i++) wr8(r + (uint32_t)i, 0);
+    wr8(r, good ? 1 : 0); wr8(r + 1, replacing ? 1 : 0); wr32(r + 2, type);
+    if (good) { wr16(r + 6, (uint16_t)-1); wr32(r + 8, 24); hx_track(r + 12, 64); memcpy(g_mem + r + 12, nm, nm[0] + 1u); }
+}
+/* the port: the dir-24 file standing for a host file (its contents read in when loading) */
+static int file_from_host(const char *path, int save) {
+    const char *b = path + strlen(path);
+    while (b > path && b[-1] != '/' && b[-1] != '\\') b--;
+    uint8_t nm[64]; size_t L = strlen(b); if (L > 31) L = 31; nm[0] = (uint8_t)L; memcpy(nm + 1, b, L);
+    int f = find(24, nm); if (f < 0) f = add(24, nm); if (f < 0) return -1;
+    free(vf[f].hostpath); vf[f].hostpath = strdup(path);
+    if (!save) {
+        FILE *h = fopen(path, "rb"); if (!h) return -1;
+        fseek(h, 0, SEEK_END); long n = ftell(h); fseek(h, 0, SEEK_SET);
+        free(vf[f].data); vf[f].data = malloc(n > 0 ? (size_t)n : 1); vf[f].dlen = vf[f].dcap = (uint32_t)(n > 0 ? n : 0);
+        if (n > 0 && fread(vf[f].data, 1, (size_t)n, h) != (size_t)n) { fclose(h); return -1; }
+        fclose(h);
+    }
+    return f;
+}
+void vfs_pack3(void) {
+    uint16_t sel = pop16();
+    if (sel == 7) {                                         /* CustomPutFile */
+        pop32(); pop32(); pop32(); pop32(); pop32(); pop32(); pop16();   /* data, activate, list, filter, hook, where, dlgID */
+        uint32_t r = pop32(), def = pop32(); pop32();                  /* reply, defaultName, prompt */
+        char dn[64]; memcpy(dn, g_mem + def + 1, rd8(def) > 63 ? 63 : rd8(def)); dn[rd8(def) > 63 ? 63 : rd8(def)] = 0;
+        uint8_t nm[64]; int good = 1, existed;
+        if (vfs_host_choose) {
+            char path[1024];
+            int f = vfs_host_choose(1, dn, path, sizeof path) ? -1 : file_from_host(path, 1);
+            good = f >= 0;
+            if (good) { memcpy(nm, vf[f].name, 64); existed = vf[f].dlen > 0; }
+            else { nm[0] = 0; existed = 0; }
+            /* the game creates the file itself: an entry the port made stays only as its host link */
+            if (good && !existed) { free(pending_host); pending_host = vf[f].hostpath; vf[f].hostpath = NULL; vf[f].used = 0;
+                                    free(vf[f].data); vf[f].data = NULL; memcpy(pending_name, nm, 64); }
+        } else {
+            size_t L = strlen(dn); nm[0] = (uint8_t)L; memcpy(nm + 1, dn, L);
+            existed = find(24, nm) >= 0;
+            memcpy(last_saved, nm, 64);
+        }
+        reply(r, good, existed, nm, 0);
+        hx_log("CustomPutFile(\"%s\") -> %s", dn, good ? "saved-games folder" : "cancelled");
+    } else if (sel == 8) {                                  /* CustomGetFile */
+        pop32(); pop32(); pop32(); pop32(); pop32(); pop32(); pop16();   /* data, activate, list, filter, hook, where, dlgID */
+        uint32_t r = pop32(), types = pop32(); int16_t nt = (int16_t)pop16(); pop32();   /* reply, typeList, numTypes, fileFilter */
+        int f = -1;
+        if (vfs_host_choose) { char path[1024]; if (!vfs_host_choose(0, "", path, sizeof path)) f = file_from_host(path, 0); }
+        else if (last_saved[0]) f = find(24, last_saved);
+        uint32_t type = nt > 0 ? rd32(types) : 0;
+        if (f >= 0 && vf[f].finfo[0]) type = (uint32_t)vf[f].finfo[0] << 24 | (uint32_t)vf[f].finfo[1] << 16 | (uint32_t)vf[f].finfo[2] << 8 | vf[f].finfo[3];
+        reply(r, f >= 0, 0, f >= 0 ? vf[f].name : (const uint8_t *)"", type);
+        hx_log("CustomGetFile -> %s", f >= 0 ? "a saved game" : "cancelled");
+    } else hx_fault("Pack3 (Standard File) selector %u at %s", sel, hx_where());
 }

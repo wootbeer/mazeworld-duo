@@ -1,4 +1,21 @@
-# Status — step 7: the native port
+# Status — Mazeworld Original, step 1 (in progress)
+
+- Original runs in the rig through the shell and play: `tests/mwo_monkey_21..24.txt` (random play
+  by mouse, 14400 ticks each) and `tests/mwo_shell.txt` (window sizes, Options, About, Read
+  Instructions, Register with a wrong code, New Game, Save Game As, Load Game) run without a
+  missing Toolbox call. Code reached: 42% (segments 4, 6, 9 and 11, creature behaviours of later
+  areas, not yet).
+- Shared rig and port additions: relative mouse movement in scripts (`mmove dx dy`, MTemp /
+  RawMouse as the mouse driver moves them); menu choices (`menu M I`: a click on the menu bar,
+  MenuSelect answers it; the port's native menu uses the same path, so the original's own menu
+  code runs); real alerts (Alert / StopAlert / NoteAlert / CautionAlert from ALRT + DITL, waiting
+  for a button); Tab between edit fields; DrawChar; SetWTitle; Standard File (CustomPutFile /
+  CustomGetFile: the rig answers deterministically, the port will show the Windows Save / Open
+  dialogs and mirror the chosen file).
+- A port fix found this way: alerts never showed in the port (Clear High Scores silently
+  answered Cancel). `tests/shell_menus.txt` covers Catacombs' menus and its alert.
+
+# Step 7: the native port
 
 - The whole of Mazeworld Catacombs now runs as C. `port/` builds it without any 68k code or
   emulator: the game's C code over the same Toolbox layer as the test rig (`harness/` traps, heap,

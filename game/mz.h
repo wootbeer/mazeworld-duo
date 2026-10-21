@@ -209,6 +209,8 @@ void     mac_DisableItem(uint32_t menu, int16_t item);
 void     mac_CheckItem(uint32_t menu, int16_t item, int checked);
 uint32_t mac_MenuKey(int16_t ch);
 void     mac_HiliteMenu(int16_t menu);
+int16_t  mac_FindWindow(uint32_t pt, uint32_t pwin);
+uint32_t mac_MenuSelect(uint32_t pt);
 void     mac_AppendResMenu(uint32_t menu, uint32_t type);
 void     mac_DrawMenuBar(void);
 void     mac_ParamText(uint32_t p0, uint32_t p1, uint32_t p2, uint32_t p3);

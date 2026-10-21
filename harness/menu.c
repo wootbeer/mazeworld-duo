@@ -18,6 +18,8 @@ typedef void (*TrapFn)(uint16_t w);
 void traps_register_tb(uint16_t n, TrapFn f);
 
 static uint32_t menu_list;   /* the current menu bar (SetMenuBar) */
+static uint32_t menu_choice; /* the item the next MenuSelect returns (a script's or the port's menu choice) */
+void menu_choose(int menu, int item) { menu_choice = (uint32_t)menu << 16 | (uint32_t)item; }
 
 static int nmenus(uint32_t list) { return list ? (int16_t)rd16(rd32(list)) : 0; }
 static uint32_t menu_at(uint32_t list, int i) { return rd32(rd32(list) + 2 + 4u * (uint32_t)i); }
@@ -86,10 +88,24 @@ static void t_MenuKey(uint16_t w) {
     RETL(0);
 }
 static void t_HiliteMenu(uint16_t w) { (void)w; ARGW(); }
+/* MenuSelect(pt): the pending choice, if that item is enabled in its MENU record (an item past the
+ * record's items counts as enabled with its menu: the port's own items); else 0 */
+static void t_MenuSelect(uint16_t w) {
+    (void)w; ARGL();
+    uint32_t c = menu_choice; menu_choice = 0;
+    int id = (int)(c >> 16), item = (int)(c & 0xFFFF), ok = 0;
+    for (int i = 0; i < nmenus(menu_list) && c; i++) {
+        uint32_t m = menu_at(menu_list, i);
+        if (!m || (int16_t)rd16(rd32(m)) != id) continue;
+        uint32_t flags = rd32(rd32(m) + 10);
+        ok = (flags & 1) && (item_info(m, item) ? item < 32 && (flags >> item & 1) : 1);
+    }
+    RETL(ok ? c : 0);
+}
 
 void menu_register(void) {
     traps_register_tb(0x1C0, t_GetNewMBar); traps_register_tb(0x13C, t_SetMenuBar);
     traps_register_tb(0x149, t_GetMenuHandle); traps_register_tb(0x139, t_EnableItem);
     traps_register_tb(0x13A, t_DisableItem); traps_register_tb(0x145, t_CheckItem);
-    traps_register_tb(0x13E, t_MenuKey); traps_register_tb(0x138, t_HiliteMenu);
+    traps_register_tb(0x13E, t_MenuKey); traps_register_tb(0x138, t_HiliteMenu); traps_register_tb(0x13D, t_MenuSelect);
 }

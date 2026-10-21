@@ -251,15 +251,6 @@ static void tb_ParamText(uint16_t w) {
     (void)w; uint32_t p3 = ARGL(), p2 = ARGL(), p1 = ARGL(), p0 = ARGL();
     pstr_copy(param_text[0], p0); pstr_copy(param_text[1], p1); pstr_copy(param_text[2], p2); pstr_copy(param_text[3], p3);
 }
-static void tb_Alert(uint16_t w) {
-    (void)w; ARGL(); int16_t id = ARGW();
-    static const char *kind[] = {"Alert", "StopAlert", "NoteAlert", "CautionAlert"};
-    int k = (w & 0x3FF) - 0x185; if (k < 0 || k > 3) k = 0;
-    char t[4][257];
-    for (int i = 0; i < 4; i++) { memcpy(t[i], param_text[i] + 1, param_text[i][0]); t[i][param_text[i][0]] = 0; }
-    hx_log("%s(%d) at %s: ^0=\"%s\" ^1=\"%s\" ^2=\"%s\" ^3=\"%s\"", kind[k], id, loc_str(cur_trap_pc), t[0], t[1], t[2], t[3]);
-    RETW(1);
-}
 
 /* ---------- Folder Manager ---------- */
 static void tb_AliasDispatch(uint16_t w) {
@@ -275,6 +266,7 @@ static void tb_AliasDispatch(uint16_t w) {
 /* ---------- File Manager (vfs.c) ---------- */
 void vfs_hlfs(uint16_t w, uint32_t trap_pc, const char *where);
 void vfs_pb(uint8_t trapnum, const char *where);
+static void tb_Pack3(uint16_t w) { (void)w; void vfs_pack3(void); vfs_pack3(); }
 static void tb_HLFS(uint16_t w) { vfs_hlfs(w, cur_trap_pc, loc_str(cur_trap_pc)); }
 static void os_FilePB(uint16_t w) { vfs_pb(w & 0xFF, loc_str(cur_trap_pc)); }
 
@@ -378,11 +370,12 @@ void traps_init(void) {
     reg_tb(0x175, tb_TickCount); reg_tb(0x061, tb_Random); reg_tb(0x06E, tb_InitGraf); reg_tb(0x176, tb_GetKeys); reg_tb(0x174, tb_Button); reg_tb(0x173, tb_Button); /* StillDown */ reg_tb(0x172, tb_GetMouse);
     reg_tb(0x060, tb_WaitNextEvent); reg_tb(0x170, tb_GetNextEvent); reg_tb(0x171, tb_EventAvail);
     reg_tb(0x1EE, tb_Pack7); reg_tb(0x1EB, tb_Pack4); reg_tb(0x08F, tb_OSDispatch);
-    reg_tb(0x18B, tb_ParamText); reg_tb(0x185, tb_Alert); reg_tb(0x186, tb_Alert); reg_tb(0x187, tb_Alert); reg_tb(0x188, tb_Alert);
+    reg_tb(0x18B, tb_ParamText);
     reg_tb(0x023, tb_AliasDispatch); reg_tb(0x252, tb_HLFS);
     reg_os(0x01, os_FilePB); reg_os(0x02, os_FilePB); reg_os(0x03, os_FilePB); reg_os(0x11, os_FilePB);
     reg_os(0x12, os_FilePB); reg_os(0x18, os_FilePB); reg_os(0x44, os_FilePB); reg_os(0x13, os_noerr); /* FlushVol */
     /* Segment Loader */
+    reg_tb(0x1EA, tb_Pack3);
     reg_tb(0x1F0, tb_LoadSeg); reg_tb(0x1F1, tb_UnloadSeg); reg_tb(0x1F4, tb_ExitToShell);
     qd_register();
     void snd_register(void); snd_register();

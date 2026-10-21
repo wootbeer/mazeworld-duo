@@ -291,16 +291,20 @@ static int txmode(uint32_t port) {
     if (m != 1) { static int warned; if (!warned++) hx_log("text mode %d drawn as srcOr at %s", m, hx_where()); }
     return 1;
 }
-static void t_DrawString(uint16_t w) {
-    (void)w; uint32_t sp = ARGL(), port = the_port();
+static void draw_text(const uint8_t *text, int len);
+static void t_DrawString(uint16_t w) { (void)w; uint32_t sp = ARGL(); draw_text(g_mem + sp + 1, rd8(sp)); }
+static void t_DrawChar(uint16_t w) { (void)w; uint8_t c = (uint8_t)pop16(); draw_text(&c, 1); }
+/* text at the pen in the port's font, size, face and mode; the pen moves past it */
+static void draw_text(const uint8_t *text, int len) {
+    uint32_t port = the_port();
     if (!is_cport(port)) return;
     MtbRect clip = port_clip(port); MtbPix8 pm = pix_of(port_pixmap(port));
     int v = (int16_t)rd16(port + CP_PnLoc), h = (int16_t)rd16(port + CP_PnLoc + 2);
     {   int asc, desc, lead, wmax, sz = (int16_t)rd16(port + CP_TxSize);
         mtb_font_metrics(sz, &asc, &desc, &lead, &wmax);
-        int tw = mtb_text_width(sz, rd8(port + CP_TxFace), g_mem + sp + 1, rd8(sp));
+        int tw = mtb_text_width(sz, rd8(port + CP_TxFace), text, len);
         track_pix(&pm, (MtbRect){(int16_t)(v - asc), (int16_t)h, (int16_t)(v + desc + 2), (int16_t)(h + tw)}, &clip); }
-    h = mtb_draw_text8(&pm, &clip, h, v, g_mem + sp + 1, rd8(sp), (int16_t)rd16(port + CP_TxSize), rd8(port + CP_TxFace),
+    h = mtb_draw_text8(&pm, &clip, h, v, text, len, (int16_t)rd16(port + CP_TxSize), rd8(port + CP_TxFace),
                        txmode(port), (uint8_t)rd32(port + CP_FgColor), (uint8_t)rd32(port + CP_BkColor));
     wr16(port + CP_PnLoc + 2, (uint16_t)h);
 }
@@ -518,12 +522,13 @@ uint32_t qd_front_window(void) { return window_list; }   /* for the port's shell
 /* FindWindow(pt, VAR window): which part of which window a global point is in: inMenuBar (1) above
  * MBarHeight, else the front-most visible window whose structure holds it: inContent (3), or
  * inSysWindow (2) for a desk accessory, or inDrag (4) on its frame; else inDesk (0).
- * FIDELITY: windows here have no title bars or close boxes, so a frame click is reported as inDrag. */
+ * FIDELITY: windows here have no title bars or close boxes, so a frame click is reported as inDrag;
+ * the menu bar is the top 20 rows (nothing is drawn there). */
 static void t_FindWindow(uint16_t w) {
     (void)w; uint32_t pwin = ARGL(), pt = ARGL();
     int16_t v = (int16_t)(pt >> 16), h = (int16_t)pt;
     wr32(pwin, 0);
-    if (v < (int16_t)rd16(0x0BAA)) { RETW(1); return; }
+    if (v < 20) { RETW(1); return; }
     for (uint32_t x = window_list; x; x = rd32(x + W_Next)) {
         if (!rd8(x + W_Visible)) continue;
         MtbRect sr = rgn_box(rd32(x + W_StrucRgn)), cr = rgn_box(rd32(x + W_ContRgn));
@@ -566,6 +571,14 @@ static void t_SelectWindow(uint16_t w) {
     for (int i = 0; i < MAXPAL; i++) if (pals[i].h && pals[i].win == win) pal_activate(i);
 }
 static void t_FrontWindow(uint16_t w) { (void)w; RETL(window_list); }
+/* SetWTitle(window, title): the title handle (W_TitleHandle) gets the new Pascal string; the
+ * rig's windows have no title bars, so nothing is drawn */
+static void t_SetWTitle(uint16_t w) {
+    (void)w; uint32_t title = ARGL(), win = ARGL();
+    uint32_t h = rd32(win + W_TitleHandle), n = rd8(title) + 1u;
+    if (!h) { h = mm_new_handle(n, 0); wr32(win + W_TitleHandle, h); } else mm_set_handle_size(h, n);
+    if (h && rd32(h)) { hx_track(rd32(h), n); memmove(g_mem + rd32(h), g_mem + title, n); }
+}
 static void t_GetWRefCon(uint16_t w) { (void)w; RETL(rd32(ARGL() + W_RefCon)); }
 static void t_SetWRefCon(uint16_t w) { (void)w; uint32_t d = ARGL(), win = ARGL(); wr32(win + W_RefCon, d); }
 static void t_MoveWindow(uint16_t w) {
@@ -616,7 +629,7 @@ void qd_register(void) {
     traps_register_tb(0x0DC, t_CopyRgn); traps_register_tb(0x0E5, t_UnionRgn); traps_register_tb(0x0EC, t_CopyBits);
     traps_register_tb(0x31D, t_QDExtensions);
     traps_register_tb(0x246, t_GetNewCWindow); traps_register_tb(0x115, t_ShowHide); traps_register_tb(0x116, t_ShowHide);
-    traps_register_tb(0x11F, t_SelectWindow); traps_register_tb(0x124, t_FrontWindow); traps_register_tb(0x12C, t_FindWindow); traps_register_tb(0x1BC, t_GetPicture); traps_register_tb(0x0F6, t_DrawPicture); traps_register_tb(0x117, t_GetWRefCon);
+    traps_register_tb(0x11F, t_SelectWindow); traps_register_tb(0x124, t_FrontWindow); traps_register_tb(0x12C, t_FindWindow); traps_register_tb(0x11A, t_SetWTitle); traps_register_tb(0x083, t_DrawChar); traps_register_tb(0x1BC, t_GetPicture); traps_register_tb(0x0F6, t_DrawPicture); traps_register_tb(0x117, t_GetWRefCon);
     traps_register_tb(0x118, t_SetWRefCon); traps_register_tb(0x11B, t_MoveWindow); traps_register_tb(0x11D, t_SizeWindow);
     traps_register_tb(0x070, t_LocalGlobal); traps_register_tb(0x071, t_LocalGlobal);
     traps_register_tb(0x128, t_InvalRect); traps_register_tb(0x12A, t_Pop4); traps_register_tb(0x122, t_Pop4); traps_register_tb(0x123, t_Pop4); /* Inval/ValidRect, Begin/EndUpdate */

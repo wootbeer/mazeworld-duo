@@ -1,9 +1,10 @@
 /* The port's shell: what the original's menus do (docs/SHELL.md), for the native menu bar.
  *
  * Menu commands reach the game the way a Mac's do: as an event the shell loop (fn_S8_2A4A) takes
- * from the event queue. A command chosen in the native menu is posted as a mouse-down event that
- * carries the menu and item (the original's MenuSelect result); a command-key press arrives as a
- * key event (fn_S8_2C36) and is looked up like the original's MenuKey. Either way the command then
+ * from the event queue. A command chosen in the native menu is posted as a click on the menu bar,
+ * and the MenuSelect trap returns that item (the Toolbox layer, harness/menu.c); a command-key press
+ * arrives as a key event (fn_S8_2C36) and goes through MenuKey. The test rig's scripts choose menu
+ * items the same way, so both run the original's own path. Either way the command then
  * runs inside the shell loop, through the game's own handlers (fn_S8_3344, fn_S8_338A, ...), so the
  * game is exactly as it would be after the same choice on a Mac.
  *
@@ -19,8 +20,8 @@
 
 uint32_t qd_front_window(void);
 void input_live_event(uint16_t what, uint32_t msg, uint32_t where);
+void input_live_menu(int menu, int item);
 
-#define MENU_CMD 0x80000000u   /* marks a mouse-down event as a native menu command */
 
 /* is the high-score window (the shell's) in front? (fn_S8_2E10: a desk accessory or a window
  * with a reference constant, i.e. the game's, disables everything but Quit, fn_S8_2E4C) */
@@ -73,7 +74,7 @@ int shell_item_state(int menu, int item, int *checked) {
 
 void shell_choose(int menu, int item) {
     if (menu == MENU_FILE && item == 7) { shell_request_quit(); return; }
-    input_live_event(1, MENU_CMD | (uint32_t)menu << 16 | (uint32_t)item, 0xFFFFFFFFu);
+    input_live_menu(menu, item);                            /* a click on the menu bar; MenuSelect answers it */
 }
 /* Quit, from anywhere (also the window's close box): the 'quit' Apple event, which also ends play
  * (fn_S8_10EC) and is then handled by the shell loop (fn_S8_2D12) */
@@ -106,15 +107,6 @@ static void dispatch(uint32_t cmd) {
     mac_HiliteMenu(0);
 }
 
-/* is the item enabled in the game's MENU record (what MenuSelect would allow)? */
-static int record_enabled(int menu, int item) {
-    uint32_t m = mac_GetMenuHandle((int16_t)menu);
-    if (!m) return 0;
-    uint32_t flags = r32(deref(m) + 10);
-    if (menu == MENU_OPTIONS) item = 1;                     /* the dialog's item stands for its check boxes */
-    return (flags & 1) && item < 32 && (flags >> item & 1);
-}
-
 /* fn_S8_2C36 with the command key: the menus brought up to date (fn_S8_2E10), then MenuKey finds the
  * enabled item with that key equivalent */
 void shell_menu_key(uint32_t ev) {
@@ -122,23 +114,15 @@ void shell_menu_key(uint32_t ev) {
     dispatch(mac_MenuKey((int16_t)(int8_t)r8(ev + 5)));
 }
 
-/* fn_S8_2BA8: a mouse-down: a native menu command, or a click in the high-score window's content
- * (fn_S8_2D26). Its frame (inDrag: DragWindow) and the rest of the screen do nothing in the port. */
+/* fn_S8_2BA8: a mouse-down: FindWindow; on the menu bar the menus are brought up to date
+ * (fn_S8_2E10) and MenuSelect's choice runs; in the high-score window's content, fn_S8_2D26. A desk
+ * accessory (SystemClick) and the window frame (DragWindow) have nothing to do in the port. */
 void shell_mouse_down(uint32_t ev) {
-    uint32_t msg = r32(ev + 2);
-    if (msg & MENU_CMD) {                                   /* as MenuSelect: after fn_S8_2E10, enabled items only */
-        int menu = (int)(msg >> 16 & 0x7FFF), item = (int)(msg & 0xFFFF);
-        fn_S8_2E10();
-        dispatch(record_enabled(menu, item) ? (uint32_t)menu << 16 | (uint32_t)item : 0);
-        return;
-    }
-    uint32_t w = qd_front_window();
-    if (!w || w != g32(0x2232)) return;
-    int16_t v = (int16_t)r16(ev + 10), h = (int16_t)r16(ev + 12);
-    /* FindWindow's inContent: the window's content region (global coordinates), its bounding box */
-    uint32_t box = deref(r32(w + 0x76)) + 2;
-    int16_t top = (int16_t)r16(box), left = (int16_t)r16(box + 2), bottom = (int16_t)r16(box + 4), right = (int16_t)r16(box + 6);
-    if (v >= top && v < bottom && h >= left && h < right) fn_S8_2D26(w, ev);
+    MZ_FRAME;
+    uint32_t pw = mz_local(4);
+    int16_t part = mac_FindWindow(r32(ev + 10), pw);
+    if (part == 1) { fn_S8_2E10(); dispatch(mac_MenuSelect(r32(ev + 10))); }
+    else if (part == 3) fn_S8_2D26(r32(pw), ev);
 }
 
 /* fn_S8_3B6E: the 'quit' Apple event's handler; the others ('oapp', 'odoc') do nothing here */

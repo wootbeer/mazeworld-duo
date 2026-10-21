@@ -1,0 +1,37 @@
+# Mazeworld Original's shell by menu: window sizes, Options, About, Read Instructions (paged with the
+# arrows), Register (a name and a wrong code: the alert), New Game; then a moment of play.
+40 tap return
+80 menu 131 1
+120 menu 131 4
+160 menu 132 2
+200 menu 132 1
+240 menu 128 1
+300 tap return
+360 menu 128 2
+420 tap right
+460 tap right
+500 tap escape
+560 menu 128 4
+620 type tester
+700 tap tab
+720 type 12345678
+800 tap return
+860 click 380 385
+920 down cmd
+922 tap n
+926 up cmd
+1000 tap return
+1040 click 320 240
+1060 mmove 0 -10
+1070 mmove 0 -10
+1080 mmove 5 -10
+1150 tap space
+1180 down cmd
+1182 tap s
+1186 up cmd
+1300 down cmd
+1302 tap o
+1306 up cmd
+1400 click 320 240
+1460 mmove 0 -10
+1470 mmove 0 -10

@@ -6,7 +6,7 @@ cd "$(dirname "$0")/.."
 MODE=${1:-full}
 GAME=original/mazeworld-catacombs-105.hqx
 make -s -C harness && make -s -C port || exit 1
-set -- "explore.txt 640" "highscore.txt 3400" "monkey_5.txt 14400" "instructions.txt 1500" "instructions_mouse.txt 400" "shell_clicks.txt 700" "shell_keys.txt 800"
+set -- "explore.txt 640" "highscore.txt 3400" "monkey_5.txt 14400" "instructions.txt 1500" "instructions_mouse.txt 400" "shell_clicks.txt 700" "shell_keys.txt 800" "shell_menus.txt 600"
 [ "$MODE" = full ] && set -- "$@" "monkey_1.txt 14400" "monkey_2.txt 14400" "monkey_3.txt 14400" "monkey_4.txt 14400" "monkey_6.txt 14400" "level04.txt 14400" "level08.txt 14400" "level12.txt 14400"
 fail=0
 for t in "$@"; do

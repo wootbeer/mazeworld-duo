@@ -122,17 +122,9 @@ static uint32_t new_control(uint32_t d, uint32_t it) {
     wr8(c + C_Title, (uint8_t)len); { hx_track(c + C_Title + 1, (uint32_t)((size_t)len)); memcpy(g_mem + c + C_Title + 1, g_mem + it + 14, (size_t)len); }
     return h;
 }
-static void t_GetNewDialog(uint16_t w) {
-    (void)w; uint32_t behind = ARGL(), storage = ARGL(); int16_t id = ARGW();
-    uint32_t r = rs_get(FOURCC('D','L','O','G'), id, 0);
-    if (!r) { hx_log("GetNewDialog(%d) at %s: no DLOG", id, hx_where()); RETL(0); return; }
-    uint32_t a = rd32(r);
-    int16_t proc = (int16_t)rd16(a + 8), ditl = (int16_t)rd16(a + 18);
-    uint32_t dr = rs_get(FOURCC('D','I','T','L'), ditl, 0);
-    if (!dr) { hx_log("GetNewDialog(%d) at %s: no DITL %d", id, hx_where(), ditl); RETL(0); return; }
-    if (rs_get(FOURCC('d','c','t','b'), id, 0)) hx_log("GetNewDialog(%d): dctb colour table ignored", id);
-    if (proc != 1) hx_log("GetNewDialog(%d): window definition %d drawn as a modal dialog box", id, proc);
-    uint32_t d = qd_new_window(storage, D_SIZE, qd_auto_position(rd_rect(a), qd_template_position(r, 20)), 8, rd8(a + 10), rd8(a + 12), rd32(a + 14), behind, WK_DIALOG);
+/* a dialog record with its items from DITL handle dr (GetNewDialog, Alert) */
+static uint32_t build_dialog(uint32_t storage, MtbRect rect, uint32_t dr, int visible, int goaway, uint32_t refcon, uint32_t behind) {
+    uint32_t d = qd_new_window(storage, D_SIZE, rect, 8, visible, goaway, refcon, behind, WK_DIALOG);
     /* the item list is a copy of the DITL with each item's handle filled in */
     uint32_t n = (uint32_t)mm_handle_size(dr), ih = mm_new_handle(n, 0);
     { hx_track(rd32(ih), (uint32_t)(n)); memmove(g_mem + rd32(ih), g_mem + rd32(dr), n); }
@@ -151,6 +143,19 @@ static void t_GetNewDialog(uint16_t w) {
     }
     for (int k = 0; k < 8; k++) if (!dialogs[k].d) { dialogs[k].d = d; dialogs[k].allocated = storage == 0; break; }
     if (rd8(d + W_Visible)) qd_post_update(d);
+    return d;
+}
+static void t_GetNewDialog(uint16_t w) {
+    (void)w; uint32_t behind = ARGL(), storage = ARGL(); int16_t id = ARGW();
+    uint32_t r = rs_get(FOURCC('D','L','O','G'), id, 0);
+    if (!r) { hx_log("GetNewDialog(%d) at %s: no DLOG", id, hx_where()); RETL(0); return; }
+    uint32_t a = rd32(r);
+    int16_t proc = (int16_t)rd16(a + 8), ditl = (int16_t)rd16(a + 18);
+    uint32_t dr = rs_get(FOURCC('D','I','T','L'), ditl, 0);
+    if (!dr) { hx_log("GetNewDialog(%d) at %s: no DITL %d", id, hx_where(), ditl); RETL(0); return; }
+    if (rs_get(FOURCC('d','c','t','b'), id, 0)) hx_log("GetNewDialog(%d): dctb colour table ignored", id);
+    if (proc != 1) hx_log("GetNewDialog(%d): window definition %d drawn as a modal dialog box", id, proc);
+    uint32_t d = build_dialog(storage, qd_auto_position(rd_rect(a), qd_template_position(r, 20)), dr, rd8(a + 10), rd8(a + 12), rd32(a + 14), behind);
     hx_log("GetNewDialog(%d) at %s: %d items, DITL %d", id, hx_where(), n_items(d), ditl);
     RETL(d);
 }
@@ -274,17 +279,24 @@ static int edit_key(uint32_t d, uint8_t ch) {   /* returns the edit item number,
     if (ef < 0) return 0;
     uint32_t h = rd32(item_at(d, ef + 1));
     int n = mm_handle_size(h);
+    if (ch == '\t') {                                     /* Tab: the next edit text item, round */
+        int k = ef + 1;
+        for (int i = 1; i <= n_items(d); i++) {
+            int no = (ef + i) % n_items(d) + 1;
+            if ((rd8(item_at(d, no) + 12) & 0x7F) == MTB_DI_EDIT) { k = no; break; }
+        }
+        wr16(d + D_EditField, (uint16_t)(k - 1));
+        return 0;
+    }
     if (ch == 0x08) { if (n > 0) mm_set_handle_size(h, (uint32_t)(n - 1)); }
     else if (ch >= 0x20 && ch != 0x7F) { mm_set_handle_size(h, (uint32_t)(n + 1)); wr8(rd32(h) + (uint32_t)n, ch); }
     else return 0;   /* arrows, tab and other control keys: no edit */
     draw_item(d, ef + 1);
     return ef + 1;
 }
-static void t_ModalDialog(uint16_t w) {
-    (void)w;
-    uint32_t sp = reg(A7), pitem = rd32(sp), filter = rd32(sp + 4);
-    uint32_t d = qd_front_window();
-    if (!is_dialog(d)) { hx_fault("ModalDialog at %s with no dialog in front", hx_where()); return; }
+/* one pass of a modal dialog d: draws it if needed, then takes the events due (the filter first,
+ * if any): the item hit, -1 if the filter answered (the item is in *pitem), or 0 (nothing yet) */
+static int modal_events(uint32_t d, uint32_t filter, uint32_t pitem) {
     if (qd_take_update_for(d)) draw_dialog(d);
     input_poll(hx_ticks());
     uint32_t ev = HX_SCRATCH; int hit = 0;
@@ -327,6 +339,24 @@ static void t_ModalDialog(uint16_t w) {
             if (no && !(rd8(item_at(d, no) + 12) & MTB_DI_DISABLED)) hit = no;
         }
     }
+    #undef FILTER
+    return hit;
+}
+/* nothing to do yet: a tick passes and the trap runs again */
+static void modal_wait(const char *what) {
+    if (!input_pending()) {
+        g_stop = 1; snprintf(g_stop_reason, sizeof g_stop_reason, "waiting in %s at %s, input script done", what, hx_where());
+        return;
+    }
+    vbl_advance(1);
+    if (!hx_trap_retry()) hx_fault("%s called by address at %s: cannot wait", what, hx_where());
+}
+static void t_ModalDialog(uint16_t w) {
+    (void)w;
+    uint32_t sp = reg(A7), pitem = rd32(sp), filter = rd32(sp + 4);
+    uint32_t d = qd_front_window();
+    if (!is_dialog(d)) { hx_fault("ModalDialog at %s with no dialog in front", hx_where()); return; }
+    int hit = modal_events(d, filter, pitem);
     if (hit) {
         ARGL(); ARGL();
         if (hit > 0) wr16(pitem, (uint16_t)hit);
@@ -334,13 +364,35 @@ static void t_ModalDialog(uint16_t w) {
         hx_log("ModalDialog at %s: item %d", hx_where(), hit);
         return;
     }
-    /* nothing to do yet: let a tick pass and run the trap again */
-    if (!input_pending()) {
-        g_stop = 1; snprintf(g_stop_reason, sizeof g_stop_reason, "waiting in ModalDialog at %s, input script done", hx_where());
+    modal_wait("ModalDialog");
+}
+
+/* Alert / StopAlert / NoteAlert / CautionAlert(id, filter): a modal dialog from 'ALRT' id (its
+ * rectangle, DITL, and stage 1's default button: item 2 if its bold bit is set, else 1), shown
+ * until a button is hit; then disposed, and the item returned.
+ * FIDELITY: the alert icon is not drawn, the alert sound is not played, every alert is stage 1. */
+static uint32_t alert_d;
+static void t_Alert(uint16_t w) {
+    uint32_t sp = reg(A7), filter = rd32(sp); int16_t id = (int16_t)rd16(sp + 4);
+    if (!alert_d) {
+        uint32_t r = rs_get(FOURCC('A','L','R','T'), id, 0), dr = r ? rs_get(FOURCC('D','I','T','L'), (int16_t)rd16(rd32(r) + 8), 0) : 0;
+        if (!dr) { ARGL(); ARGW(); hx_log("Alert(%d) at %s: no ALRT / DITL", id, hx_where()); RETW(-1); return; }
+        uint32_t a = rd32(r);
+        uint16_t pos = mm_handle_size(r) >= 14 ? rd16(a + 12) : 0;
+        alert_d = build_dialog(0, qd_auto_position(rd_rect(a), pos ? pos : 0x300A), dr, 1, 0, 0, 0xFFFFFFFFu);
+        wr16(alert_d + D_ADefItem, (rd16(a + 10) & 8) ? 2 : 1);
+        hx_log("Alert(%d) at %s", id, hx_where());
+    }
+    int hit = modal_events(alert_d, filter, HX_SCRATCH + 0x40);
+    if (hit) {
+        if (hit < 0) hit = (int16_t)rd16(HX_SCRATCH + 0x40);
+        ARGL(); ARGW();
+        close_dialog(alert_d, 1); alert_d = 0;
+        hx_log("Alert(%d): item %d", id, hit);
+        RETW(hit);
         return;
     }
-    vbl_advance(1);
-    if (!hx_trap_retry()) hx_fault("ModalDialog called by address at %s: cannot wait", hx_where());
+    modal_wait("Alert");
 }
 
 typedef void (*TrapFn)(uint16_t w);
@@ -351,6 +403,7 @@ void dlg_register(void) {
     traps_register_tb(0x190, t_GetDialogItemText); traps_register_tb(0x18F, t_SetDialogItemText);
     traps_register_tb(0x17E, t_SelectDialogItemText); traps_register_tb(0x181, t_DrawDialog);
     traps_register_tb(0x15D, t_HiliteControl); traps_register_tb(0x163, t_SetControlValue); traps_register_tb(0x160, t_GetControlValue);
+    traps_register_tb(0x185, t_Alert); traps_register_tb(0x186, t_Alert); traps_register_tb(0x187, t_Alert); traps_register_tb(0x188, t_Alert);
     traps_register_tb(0x157, t_ShowControl); traps_register_tb(0x158, t_HideControl);
     traps_register_tb(0x183, t_DisposeDialog); traps_register_tb(0x182, t_DisposeDialog);
     traps_register_tb(0x12D, t_CloseWindow); traps_register_tb(0x114, t_CloseWindow);
