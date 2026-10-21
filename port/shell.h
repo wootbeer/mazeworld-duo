@@ -3,7 +3,7 @@
 #define SHELL_H
 enum { MENU_APPLE = 128, MENU_FILE, MENU_EDIT, MENU_VIEW, MENU_SOUND, MENU_OPTIONS };
 /* the port's own menus (the front end handles them; the game never sees them) */
-enum { MENU_PORT_VOLUME = 200, MENU_PORT_GAME };
+enum { MENU_PORT_VOLUME = 200, MENU_PORT_GAME, MENU_PORT_CONTROLS };
 /* the Options menu's items: the original dialog's check boxes (the port's own options will follow) */
 enum { OPT_DIRECT = 1, OPT_NOSYNC, OPT_DISTRIBUTE };
 int  shell_playing(void);       /* is the game window in front (play in progress)? */

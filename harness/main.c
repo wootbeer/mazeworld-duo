@@ -255,6 +255,7 @@ int main(int argc, char **argv) {
         else if (!strcmp(argv[i], "-subcheck") && i + 1 < argc) { extern int g_sub_checkmode; g_sub_checkmode = 1; sublist = argv[++i]; }
         else if (!strcmp(argv[i], "-fuzz") && i + 1 < argc) { fuzzspec = argv[++i]; }
         else if (!strcmp(argv[i], "-uninit")) uninit_on = 1;
+        else if (!strcmp(argv[i], "-alt")) { extern int mz_alt_controls; mz_alt_controls = 1; }   /* Original: the port's keyboard controls (with -sub) */
         else if (!strcmp(argv[i], "-watch") && i + 1 < argc) { sscanf(argv[++i], "%x-%x", &watch_lo, &watch_hi); }
         else if (!strcmp(argv[i], "-ticks") && i + 1 < argc) g_max_ticks = max_ticks = (uint32_t)strtoul(argv[++i], 0, 0);
         else usage();

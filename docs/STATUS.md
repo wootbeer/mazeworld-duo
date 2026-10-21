@@ -348,5 +348,6 @@ nothing visible. The same rule applies to Mazeworld Original.
   them, so each is tested as it is written.
 
 - **The port's own options** in the Options menu, off by default: 32-bit output, other graphics
-  options (WASD, mouse turning and classic arrow keys are done).
+  options (WASD, mouse turning and classic arrow keys are done; for Original too, with click-to-fire
+  and abilities on 1-4 — `mz_alt_controls`, harness `-alt` — or its classic mouse by option).
 - **Switching between Catacombs and Original** from the menu, once Original is supported.

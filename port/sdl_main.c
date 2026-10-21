@@ -2,6 +2,7 @@
  * and (on Windows) the native menu bar. The game itself runs in port_run_game(); everything here
  * happens in port_tick(), once per tick of game time, while the game waits for that tick. */
 #include "../harness/hx.h"
+#include "../game/mz.h"
 #include "port.h"
 #include "shell.h"
 #include <SDL.h>
@@ -24,6 +25,7 @@ extern int input_live;
 void input_live_key(uint8_t code, uint8_t ch, int down, int repeat);
 void input_live_mouse(int x, int y);
 void input_live_button(int down);
+void input_live_move(int dx, int dy);
 void qd_screen_argb(uint32_t *out);
 extern void (*snd_live_out)(const int16_t *s, int n);
 
@@ -61,7 +63,8 @@ static struct {
     int volume;                 /* percent of the game's output */
     int x, y, w, h, full;       /* the window: position and client size when not fullscreen (w 0: none saved) */
     char archive[1024];         /* the game archive the player chose, if it is not next to the program */
-} settings = {100, 0, 0, 0, 0, 0, ""};
+    int orig_classic;           /* Mazeworld Original: its own mouse movement and gestures, not the keys */
+} settings = {100, 0, 0, 0, 0, 0, "", 0};
 static char settings_path[1024];
 
 /* The games the port knows, by their application's creator code. An archive given on the command
@@ -96,7 +99,11 @@ static void sound_out(const int16_t *in, int n) {
  *   arrow keys the classic controls: up / down forward and back, left / right turn (keypad 8 2 7 9)
  *   left mouse button  fire (Space)
  * and in play the mouse turns: its sideways movement adds to the game's turn counter G_217E, as
- * holding Q or E does once per tick (2 units = one of the 64 directions; mouse_look()). */
+ * holding Q or E does once per tick (2 units = one of the 64 directions; mouse_look()).
+ * Mazeworld Original gets the same keys and mouse turning (mz_alt_controls: the game reads the keys
+ * in its VBL task, the turning goes to mz_alt_move), a click fires the chosen ability and 1-4
+ * choose it; or, with Options > Classic Mouse Controls, its own: the mouse moves and turns, and a
+ * drag with the button held chooses the ability, fired on release. */
 void input_live_keybit(uint8_t code, int down);
 static const struct { SDL_Scancode sc; uint8_t as; } extra[] = {
     {SDL_SCANCODE_S, 0x07},       /* X: back */
@@ -142,8 +149,8 @@ static void mouse_look(void) {
     if (pay > ahead) pay = ahead;
     int units = mouse_px < 0 ? -pay : pay;
     mouse_px -= units * MOUSE_PER_UNIT;
-    uint32_t g = A5_ADDR - 0x217E;
-    wr16(g, (uint16_t)(rd16(g) + units));
+    if (mz_original) mz_alt_move[0] = (int16_t)(mz_alt_move[0] + units);
+    else { uint32_t g = A5_ADDR - 0x217E; wr16(g, (uint16_t)(rd16(g) + units)); }
 }
 
 static void key(const SDL_KeyboardEvent *e, int down) {
@@ -188,6 +195,7 @@ static void build_menus(HWND hwnd) {
     static const char *const volume[] = {"&100%", "&75%", "&50%", "&25%", "&Mute", NULL};
     HMENU options = CreatePopupMenu();
     AppendMenuA(options, MF_POPUP, (UINT_PTR)popup(MENU_PORT_VOLUME, volume), "&Volume");
+    AppendMenuA(options, MF_STRING, (UINT_PTR)CMD(MENU_PORT_CONTROLS, 1), "&Classic Mouse Controls (Mazeworld Original)");
     AppendMenuA(options, MF_SEPARATOR, 0, NULL);
     AppendMenuA(options, MF_POPUP, (UINT_PTR)popup(MENU_OPTIONS, legacy), "&Legacy");
     AppendMenuA(bar, MF_POPUP, (UINT_PTR)options, "&Options");
@@ -198,11 +206,13 @@ static void build_menus(HWND hwnd) {
 static const int volume_levels[] = {100, 75, 50, 25, 0};
 static int port_item_state(int menu, int item, int *checked) {
     if (menu == MENU_PORT_GAME) { *checked = item - 1 == running; return 0; }   /* switching comes with the second game */
+    if (menu == MENU_PORT_CONTROLS) { *checked = settings.orig_classic; return 1; }
     *checked = menu == MENU_PORT_VOLUME && item >= 1 && item <= 5 && settings.volume == volume_levels[item - 1];
     return 1;
 }
 static void port_choose(int menu, int item) {
     if (menu == MENU_PORT_VOLUME && item >= 1 && item <= 5) { settings.volume = volume_levels[item - 1]; settings_save(); }
+    if (menu == MENU_PORT_CONTROLS) { settings.orig_classic = !settings.orig_classic; settings_save(); }
 }
 /* checks and greys each item as the original's menu bar would be just then */
 static void update_popup(HMENU m) {
@@ -284,12 +294,15 @@ static void events(void) {
             extra_keys();
             break;
         case SDL_MOUSEMOTION:
-            if (captured) mouse_px += e.motion.xrel;
+            if (captured && mz_original && settings.orig_classic) input_live_move(e.motion.xrel, e.motion.yrel);
+            else if (captured) mouse_px += e.motion.xrel;
             else input_live_mouse(e.motion.x, e.motion.y);
             break;
         case SDL_MOUSEBUTTONDOWN: case SDL_MOUSEBUTTONUP:
             if (captured) {
-                if (e.button.button == SDL_BUTTON_LEFT) { mouse_fire = e.type == SDL_MOUSEBUTTONDOWN; extra_keys(); }
+                if (e.button.button != SDL_BUTTON_LEFT) break;
+                if (mz_original) input_live_button(e.type == SDL_MOUSEBUTTONDOWN);   /* Original reads the button itself */
+                else { mouse_fire = e.type == SDL_MOUSEBUTTONDOWN; extra_keys(); }
                 break;
             }
             if (e.button.button == SDL_BUTTON_LEFT) {
@@ -308,6 +321,7 @@ static void events(void) {
 
 void port_tick(uint32_t tick) {
     events();
+    mz_alt_controls = mz_original && !settings.orig_classic;
     mouse_look();
     /* the Mac's ticks are 1/60 s: wait for this one's time; after a stall (a menu held open,
      * the window dragged) start counting again rather than racing to catch up */
@@ -336,6 +350,7 @@ static void settings_load(void) {
         if (sscanf(line, "volume=%d", &v) == 1 && v >= 0 && v <= 100) settings.volume = v;
         else if (sscanf(line, "window=%d,%d,%d,%d", &settings.x, &settings.y, &settings.w, &settings.h) == 4) {}
         else if (sscanf(line, "fullscreen=%d", &v) == 1) settings.full = v != 0;
+        else if (sscanf(line, "original_classic_mouse=%d", &v) == 1) settings.orig_classic = v != 0;
         else if (!strncmp(line, "archive=", 8)) {
             snprintf(settings.archive, sizeof settings.archive, "%s", line + 8);
             settings.archive[strcspn(settings.archive, "\r\n")] = 0;
@@ -348,6 +363,7 @@ static void settings_save(void) {
     fprintf(f, "volume=%d\n", settings.volume);
     if (settings.w) fprintf(f, "window=%d,%d,%d,%d\nfullscreen=%d\n", settings.x, settings.y, settings.w, settings.h, settings.full);
     if (settings.archive[0]) fprintf(f, "archive=%s\n", settings.archive);
+    fprintf(f, "original_classic_mouse=%d\n", settings.orig_classic);
     fclose(f);
 }
 static void prefs_load(void) { if (prefs_path[0]) port_prefs_load(prefs_path); }

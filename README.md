@@ -94,6 +94,9 @@ tools/verify_port.sh      # the port against the original on all 11 scripted gam
   left / right turn); Q / E turn. The original's keypad and letter keys (Q W E, A D, X) all still
   work. Escape leaves play. Ctrl stands in for the Mac's Command key (Ctrl+G play, Ctrl+N new
   game, Ctrl+1 to Ctrl+4 view size, Ctrl+Q quit). Alt+Enter toggles fullscreen.
+- **Mazeworld Original** (once supported) gets the same keys and mouse turning; left click fires the
+  chosen ability and 1 to 4 choose it. Options > Classic Mouse Controls brings back its own: the
+  mouse moves and turns, and a drag with the button held picks the ability, fired on release.
 - **Menus:** the original's (Help > About is its instructions), plus Options > Volume and
   Options > Legacy (the original Options dialog's three speed settings for 1990s Macs).
 - **Preferences:** the game's preferences and high scores are kept in

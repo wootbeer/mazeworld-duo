@@ -188,6 +188,18 @@ void fo_S8_132A(void) {
         else if ((int16_t)og16(0x71F2) < -5) { fn_S8_139E(&r); sog16(0x71F2, (uint16_t)(og16(0x71F2) + 5)); }
     }
 }
+/* port option (mz_alt_controls): the keys' and mouse's movement, a step each 2 units (the remainder
+ * kept), as Catacombs' fn_S8_0E80: turn right / left, forward / back, sideways */
+void fn_S8_13D2(Regs *r);
+void fn_S8_13EE(Regs *r);
+static void alt_moves(void) {
+    Regs r = {{0}, {0}, 0};
+    static void (*const fn[3][2])(Regs *) = {{fn_S8_1376, fn_S8_138A}, {fn_S8_139E, fn_S8_13B6}, {fn_S8_13EE, fn_S8_13D2}};
+    for (int k = 0; k < 3; k++) {
+        while (mz_alt_move[k] >= 2)  { fn[k][0](&r); mz_alt_move[k] -= 2; }
+        while (mz_alt_move[k] <= -2) { fn[k][1](&r); mz_alt_move[k] += 2; }
+    }
+}
 /* fo_S8_1152: each frame: the frame count G_56C4; with health G_56EA the second gauge G_56E6 grows
  * every 4th frame and health every 16th (both to $8E); without, G_56E6 = 0 and G_56E0 = 7. The
  * mood (G_71FE on, not yet set G_71F8): the counters G_71FA (frames) and G_71FC (frames with the
@@ -206,7 +218,8 @@ void fo_S8_1152(void) {
         if (dx < 5 && dx > -5 && dy < 5 && dy > -5) { sog16(0x71FC, (uint16_t)(og16(0x71FC) + 1)); clamp_max(0x71FC, 0x7D00); }
         if ((int16_t)og16(0x71FC) >= 1 || (int16_t)og16(0x71FA) >= 2) { fo_S8_121A(); sog8(0x71F8, 1); }
     }
-    if (og8(0x71F8)) fo_S8_1282(); else fo_S8_132A();
+    if (mz_alt_controls) alt_moves();
+    else if (og8(0x71F8)) fo_S8_1282(); else fo_S8_132A();
 }
 
 /* fo_S8_0F5A: the full-view pictures while G_56E0 counts (each over the whole view): 1-6 the dying

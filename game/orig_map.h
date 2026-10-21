@@ -698,7 +698,7 @@ static const uint16_t orig_funcs[][5] = {   /* Catacombs segment, offset; Origin
     {8, 0x15C0, 8, 0x1B14, 1},
     {8, 0x172A, 8, 0x6514, 1},
     {8, 0x17D0, 8, 0x65C2, 1},
-    {8, 0x1814, 8, 0x6606, 0},
+    {8, 0x1814, 8, 0x6606, 1},
     {8, 0x190C, 8, 0x55DC, 0},
     {8, 0x1A9C, 8, 0x576C, 0},
     {8, 0x1B0E, 8, 0x57DE, 0},

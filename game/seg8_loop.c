@@ -29,7 +29,12 @@ void fn_S8_1192(uint32_t ev) {
  * button reads the mood and fires, fo_S8_145E). */
 void fo_S8_145E(void);
 void fn_S8_10EC(uint32_t ev) {
-    if (mz_original) switch (r16(ev)) {                     /* Original (fn_S8_1696): the mouse button */
+    if (mz_original && mz_alt_controls) switch (r16(ev)) {  /* port option: a click fires, 1-4 choose */
+    case 1: if (!og16(0x56E0)) fo_S8_145E(); return;
+    case 2: return;
+    case 3: { uint8_t c = r8(ev + 5); if (c >= '1' && c <= '4' && !(r8(ev + 0xE) & 1)) sog16(0x56E2, (uint16_t)(c - '0')); break; }
+    }
+    else if (mz_original) switch (r16(ev)) {                /* Original (fn_S8_1696): the mouse button */
     case 1:                                                   /* mouseDown: the mood is to be read */
         sog8(0x71FE, 1); sog8(0x71F8, 0); sog16(0x71FC, 0); sog16(0x71FA, 0);
         return;
@@ -331,9 +336,20 @@ uint8_t fn_S8_0000(void) {
  * forward / back G_2180, sideways G_2182, each from the arrow keys, keypad and letter keys; the fire
  * keys arm G_2171 when released, and pressing one then sets G_2172 (one shot per press). The task
  * re-arms itself (vblCount 1). D0-D2 are left holding the key map. */
+/* the keys' movement, one unit a tick each: turn (- left, + right), forward / back, sideways */
+static void key_moves(uint32_t k0, uint32_t k1, uint32_t k2, int16_t *turn, int16_t *fwd, int16_t *side) {
+#define KEY(k, n) (((k) >> (n)) & 1)
+    if (KEY(k0, 20) || KEY(k1, 24) || KEY(k2, 1))  --*turn;
+    if (KEY(k0, 21) || KEY(k1, 26) || KEY(k2, 3))  ++*fwd;
+    if (KEY(k0, 22) || KEY(k0, 7)  || KEY(k2, 4))  ++*turn;
+    if (KEY(k0, 24) || KEY(k1, 30) || KEY(k2, 14)) --*side;
+    if (KEY(k0, 26) || KEY(k1, 29) || KEY(k2, 0))  ++*side;
+    if (KEY(k0, 31) || KEY(k1, 19) || KEY(k2, 12)) --*fwd;
+}
 void fn_S8_1814(Regs *r) {
-    if (mz_original) {                                      /* Original (fn_S8_6606): mouse turning */
-        uint32_t task = r->a[0], m = g32(0x4E0E), c = g32(0x4E12);
+    uint32_t task = r->a[0];
+    if (mz_original) {                                      /* Original (fn_S8_6606): mouse movement */
+        uint32_t m = g32(0x4E0E), c = g32(0x4E12);
         uint16_t h = r16(m + 2), v = r16(m);
         sog16(0x5756, (uint16_t)(og16(0x5756) + h - g16(0x2186)));
         sog16(0x5754, (uint16_t)(og16(0x5754) + v - g16(0x2184)));
@@ -344,20 +360,22 @@ void fn_S8_1814(Regs *r) {
         w16(task + 0xA, 1);
         r->a[0] = task; r->a[1] = m;
         r->ccr = (uint8_t)(r->ccr & CCR_X);
+        if (mz_alt_controls) {                              /* port option: the keys move */
+            MZ_FRAME;
+            uint32_t km = mz_local(16);
+            mac_GetKeys(km);
+            key_moves(r32(km), r32(km + 4), r32(km + 8), &mz_alt_move[0], &mz_alt_move[1], &mz_alt_move[2]);
+        }
         return;
     }
     MZ_FRAME;
-    uint32_t task = r->a[0], km = mz_local(16);
+    uint32_t km = mz_local(16);
     mac_GetKeys(km);
     uint32_t k0 = r32(km), k1 = r32(km + 4), k2 = r32(km + 8);
-#define KEY(k, n) (((k) >> (n)) & 1)
     sg16(0x217C, (uint16_t)(g16(0x217C) + 1));
-    if (KEY(k0, 20) || KEY(k1, 24) || KEY(k2, 1))  sg16(0x217E, (uint16_t)(g16(0x217E) - 1));
-    if (KEY(k0, 21) || KEY(k1, 26) || KEY(k2, 3))  sg16(0x2180, (uint16_t)(g16(0x2180) + 1));
-    if (KEY(k0, 22) || KEY(k0, 7)  || KEY(k2, 4))  sg16(0x217E, (uint16_t)(g16(0x217E) + 1));
-    if (KEY(k0, 24) || KEY(k1, 30) || KEY(k2, 14)) sg16(0x2182, (uint16_t)(g16(0x2182) - 1));
-    if (KEY(k0, 26) || KEY(k1, 29) || KEY(k2, 0))  sg16(0x2182, (uint16_t)(g16(0x2182) + 1));
-    if (KEY(k0, 31) || KEY(k1, 19) || KEY(k2, 12)) sg16(0x2180, (uint16_t)(g16(0x2180) - 1));
+    int16_t turn = (int16_t)g16(0x217E), fwd = (int16_t)g16(0x2180), side = (int16_t)g16(0x2182);
+    key_moves(k0, k1, k2, &turn, &fwd, &side);
+    sg16(0x217E, (uint16_t)turn); sg16(0x2180, (uint16_t)fwd); sg16(0x2182, (uint16_t)side);
     if (KEY(k1, 28) || KEY(k2, 20) || KEY(k1, 9) || KEY(k1, 0)) {
         if (g8(0x2171)) { sg8(0x2172, 1); sg8(0x2171, 0); }
     } else sg8(0x2171, 1);

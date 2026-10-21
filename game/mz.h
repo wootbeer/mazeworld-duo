@@ -34,6 +34,11 @@ static inline void w32(uint32_t a, uint32_t v) { MZ_WHOOK(a, 4); a &= 0xFFFFFF; 
  * them to that build's: game/games.c) */
 extern const uint16_t *mz_gmap;
 extern int mz_original;
+/* Original with Catacombs-style controls (a port option; the rig never sets it): the keys move and
+ * turn (mz_alt_move: turn, forward, sideways units, 2 a step), the mouse only turns, a click fires
+ * the chosen ability and 1-4 choose it, instead of the mouse moving and its gestures choosing */
+extern int mz_alt_controls;
+extern int16_t mz_alt_move[3];
 void     mz_select_original(void);
 uint32_t mz_jt(uint16_t off);          /* jump-table entry `off` above A5 */
 uint32_t mz_orig_func(int seg, uint16_t off);
