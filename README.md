@@ -53,6 +53,11 @@ tools/run_harness.sh original -script tests/mwo_start.txt -ticks 400 -idle 10000
 harness/mzharness -o build/run -script tests/explore.txt -ticks 640 -shots 3 original/mazeworld-catacombs-105.hqx
 ```
 
+Recording a test by playing: `make -C harness mzplay` (or `mzplay.exe` with MinGW), then
+`harness/mzplay -o build/out -play tests/recordings/mine.txt original/Mazeworld_v.1.0.3.sit`
+runs the original game in a window and records what you do; the last line of the recording says
+which `-ticks` replays it exactly.
+
 Input scripts (`tests/*.txt`) drive the harness: `<tick> down|up|tap <key>`, `<tick> type <text>`,
 `<tick> move|click x y`, `<tick> mousedown|mouseup`. `tools/gen_monkey.py <seed> <ticks>` makes random-play
 scripts for coverage; `tests/highscore.txt` ends a game with a new high score and types a name into the dialog.

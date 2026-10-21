@@ -32,7 +32,7 @@ $(B)/arc_%.o: ../archive/%.c ; @mkdir -p $(B); $(CC) $(CFLAGS) -c -o $@ $<
 $(B)/softfloat.o: $(MUSASHI)/softfloat/softfloat.c ; @mkdir -p $(B); $(CC) $(CFLAGS) -w -c -o $@ $<
 $(B)/subs.o: $(H)/gen/subs.c ; @mkdir -p $(B); $(CC) $(CFLAGS) -c -o $@ $<
 $(B)/%.o: %.c port.h shell.h ; @mkdir -p $(B); $(CC) $(CFLAGS) -c -o $@ $<
-$(B)/sdl_main.o: sdl_main.c port.h shell.h ; @mkdir -p $(B); $(CC) $(CFLAGS) $(shell sdl2-config --cflags) -c -o $@ $<
+$(B)/sdl_main.o: sdl_main.c port.h shell.h sdlkeys.h ; @mkdir -p $(B); $(CC) $(CFLAGS) $(shell sdl2-config --cflags) -c -o $@ $<
 
 mzport-headless: $(call objs,$(B)) $(B)/headless.o
 	$(CC) -o $@ $^ -lm

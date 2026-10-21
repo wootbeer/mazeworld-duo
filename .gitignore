@@ -22,3 +22,6 @@ third_party/deark/
 port/*.hqx
 port/*.sit
 port/*.bin
+harness/mzplay
+harness/wbuild/
+harness/main_play.o

@@ -4,6 +4,7 @@
  *                <tick> setg <global> <value>   |   at S<seg>:<off> setg <global> <value>   (test setup)
  *                <tick> move x y   |   <tick> click x y   |   <tick> mousedown   |   <tick> mouseup
  *                <tick> menu <menu> <item>   (a menu choice: a click on the menu bar, MenuSelect answers it)
+ *                <tick> key <code> <char> down|up|auto   (a key by Mac key code and character, hex: recordings)
  *                <tick> mmove dx dy   (the mouse moved by dx, dy: as the mouse driver, MTemp and RawMouse move)
  * Keys: space return enter escape tab delete shift kp0..kp9 a..z 0..9 left right up down
  * A key going down posts a keyDown event and sets its KeyMap bit; up posts keyUp and clears it. */
@@ -17,6 +18,7 @@ static int16_t mouse_x = 320, mouse_y = 240; static int mouse_down;
 static Step steps[4096];
 void input_live_move(int dx, int dy);
 void input_live_menu(int menu, int item);
+void input_live_key(uint8_t code, uint8_t ch, int down, int repeat);
 static int nsteps, next_step;
 
 typedef struct { uint16_t what; uint32_t message; uint32_t when; uint16_t modifiers; uint32_t where; } Ev;
@@ -55,6 +57,12 @@ int input_has_pc_hooks(void) { return npokes > 0; }
  * original or C, is running then) */
 typedef struct { uint32_t tick, g; uint16_t v; int done; } TickPoke;
 static TickPoke tpokes[16]; static int ntpokes;
+/* called as each tick begins: the script's pokes and steps due by then are applied (so input
+ * reaches the game at the same point whether replayed or played live), then the live front end's
+ * turn (input_play_hook: pacing, the window, the real keyboard and mouse) */
+void (*input_play_hook)(uint32_t tick);
+static FILE *rec;   /* recording live input (input_record) */
+void input_poll(uint32_t tick);
 void input_tick_hook(uint32_t tick) {
     for (int i = 0; i < ntpokes; i++)
         if (!tpokes[i].done && tick >= tpokes[i].tick) {
@@ -62,7 +70,16 @@ void input_tick_hook(uint32_t tick) {
             wr16(A5_ADDR - tpokes[i].g, tpokes[i].v);
             hx_log("input script: G_%04X = %u at tick %u", tpokes[i].g, tpokes[i].v, tick);
         }
+    input_poll(tick);
+    if (input_play_hook) input_play_hook(tick);
+    if (rec) fflush(rec);
 }
+
+/* recording live input as a script (the playable test build): each live input is written with
+ * the tick it arrived on, so the script replays the session exactly */
+int input_record(const char *path) { rec = fopen(path, "w"); if (rec) fprintf(rec, "# recorded session\n"); return rec ? 0 : -1; }
+static uint32_t now_tick(void) { return rd32(LM_Ticks); }
+void input_record_end(uint32_t ticks) { if (rec) { fprintf(rec, "# ends: replay with -ticks %u\n", ticks); fflush(rec); } }
 
 int input_load(const char *path) {
     FILE *f = fopen(path, "r");
@@ -79,6 +96,11 @@ int input_load(const char *path) {
           unsigned tk;
           if (sscanf(line, " %u setg %x %u", &tk, &g, &v) == 3) {
               if (ntpokes < 16) tpokes[ntpokes++] = (TickPoke){tk, g, (uint16_t)v, 0};
+              continue;
+          } }
+        { unsigned kc, kch; char how[8];
+          if (sscanf(line, "%u key %x %x %7s", &t, &kc, &kch, how) == 4) {
+              if (nsteps < 4096) steps[nsteps++] = (Step){t, strcmp(how, "up") != 0, (uint8_t)kc, (uint8_t)kch, !strcmp(how, "auto") ? 6 : 5, 0, 0};
               continue;
           } }
         if (sscanf(line, "%u %15s %d %d", &t, act, &mx, &my) == 4 && !strcmp(act, "menu")) {
@@ -151,6 +173,7 @@ void input_poll(uint32_t tick) {
     while (next_step < nsteps && steps[next_step].tick <= tick) {
         Step *s = &steps[next_step++];
         if (s->kind == 2) { mouse_x = s->x; mouse_y = s->y; set_mouse_lowmem(); hx_log("input: tick %u mouse at (%d,%d)", tick, s->x, s->y); continue; }
+        if (s->kind == 5 || s->kind == 6) { int r = rec != NULL; FILE *k = rec; rec = NULL; input_live_key(s->code, s->ch, s->down, s->kind == 6); rec = r ? k : NULL; continue; }
         if (s->kind == 4) { input_live_menu(s->x, s->y); hx_log("input: tick %u menu %d item %d", tick, s->x, s->y); continue; }
         if (s->kind == 3) { input_live_move(s->x, s->y); hx_log("input: tick %u mouse moved by (%d,%d)", tick, s->x, s->y); continue; }
         if (s->kind == 1) {
@@ -182,6 +205,7 @@ static void post(uint16_t what, uint32_t msg) {
 }
 /* a key going down (repeat: an auto-key event) or up: Mac key code and character */
 void input_live_key(uint8_t code, uint8_t ch, int down, int repeat) {
+    if (rec) fprintf(rec, "%u key %02X %02X %s\n", now_tick(), code, ch, repeat ? "auto" : down ? "down" : "up");
     uint32_t kb = LM_KeyMap + (code >> 3); uint8_t bit = (uint8_t)(1 << (code & 7));
     if (down) wr8(kb, rd8(kb) | bit); else wr8(kb, rd8(kb) & ~bit);
     if (!repeat) hx_log("input: key %02X %s", code, down ? "down" : "up");
@@ -196,6 +220,7 @@ void input_live_keybit(uint8_t code, int down) {
 /* the mouse moved by (dx, dy), as the mouse driver reports it: MTemp and RawMouse move (a game that
  * re-centres the mouse reads the movement from MTemp) and the cursor follows */
 void input_live_move(int dx, int dy) {
+    if (rec) fprintf(rec, "%u mmove %d %d\n", now_tick(), dx, dy);
     for (uint32_t a = 0x0828; a <= 0x082C; a += 4) { wr16(a, (uint16_t)(rd16(a) + dy)); wr16(a + 2, (uint16_t)(rd16(a + 2) + dx)); }
     mouse_y = (int16_t)rd16(0x082C); mouse_x = (int16_t)rd16(0x082E);
     wr32(0x0830, rd32(0x082C));
@@ -209,8 +234,15 @@ void input_live_menu(int menu, int item) {
     mouse_x = 30; mouse_y = 5; post(1, 0); post(2, 0);
     mouse_x = x; mouse_y = y;
 }
-void input_live_mouse(int x, int y) { mouse_x = (int16_t)x; mouse_y = (int16_t)y; set_mouse_lowmem(); }
-void input_live_button(int down) { mouse_down = down; set_mouse_lowmem(); post(down ? 1 : 2, 0); }
+void input_live_mouse(int x, int y) {
+    if (x == mouse_x && y == mouse_y) return;
+    if (rec) fprintf(rec, "%u move %d %d\n", now_tick(), x, y);
+    mouse_x = (int16_t)x; mouse_y = (int16_t)y; set_mouse_lowmem();
+}
+void input_live_button(int down) {
+    if (rec) fprintf(rec, "%u %s\n", now_tick(), down ? "mousedown" : "mouseup");
+    mouse_down = down; set_mouse_lowmem(); post(down ? 1 : 2, 0);
+}
 /* any other event (the native shell's menu commands, suspend / resume, high-level events) */
 void input_live_event(uint16_t what, uint32_t msg, uint32_t where) {
     int n = (qt + 1) & 63;

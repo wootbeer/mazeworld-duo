@@ -5,6 +5,10 @@
 #include <stdlib.h>
 #include <string.h>
 #include <sys/stat.h>
+#ifdef _WIN32
+#include <direct.h>
+#define mkdir(p, m) _mkdir(p)
+#endif
 
 uint8_t *g_mem;
 int g_stop;
@@ -107,12 +111,12 @@ static void wlog_write(uint32_t a, uint32_t v, int n) {
 }
 uint32_t watch_lo, watch_hi;
 #define NWATCH 1024
-static struct { uint32_t pc; uint32_t n; uint32_t vals[4]; } wstat[NWATCH]; static int nwstat;
+static struct { uint32_t pc; uint32_t n; uint32_t vals[4]; } watch_stats[NWATCH]; static int nwatch_stats;
 static void watch_range(uint32_t a, uint32_t v) {
     if (!watch_hi || (a & 0xFFFFFF) < watch_lo || (a & 0xFFFFFF) >= watch_hi) return;
     uint32_t pc = m68k_get_reg(NULL, M68K_REG_PPC);
-    for (int i = 0; i < nwstat; i++) if (wstat[i].pc == pc) { if (wstat[i].n < 4) wstat[i].vals[wstat[i].n] = a & 0xFFFFFF; wstat[i].n++; return; }
-    if (nwstat < NWATCH) { wstat[nwstat].pc = pc; wstat[nwstat].n = 1; wstat[nwstat].vals[0] = a & 0xFFFFFF; nwstat++; }
+    for (int i = 0; i < nwatch_stats; i++) if (watch_stats[i].pc == pc) { if (watch_stats[i].n < 4) watch_stats[i].vals[watch_stats[i].n] = a & 0xFFFFFF; watch_stats[i].n++; return; }
+    if (nwatch_stats < NWATCH) { watch_stats[nwatch_stats].pc = pc; watch_stats[nwatch_stats].n = 1; watch_stats[nwatch_stats].vals[0] = a & 0xFFFFFF; nwatch_stats++; }
     (void)v;
 }
 void m68k_write_memory_8(unsigned int a, unsigned int v) { watch_write(a, 1); watch_range(a, v); wlog_write(a, v, 1); g_mem_written = 1; wr8(a, (uint8_t)v); }
@@ -232,7 +236,8 @@ static void usage(void) {
 int input_load(const char *path);
 uint32_t hx_ticks(void);
 int main(int argc, char **argv) {
-    const char *script = NULL, *sublist = NULL, *fuzzspec = NULL; uint32_t max_ticks = 0;
+    const char *script = NULL, *play = NULL, *sublist = NULL, *fuzzspec = NULL; uint32_t max_ticks = 0;
+    (void)play;
     extern uint32_t g_max_ticks;
     int i = 1;
     for (; i < argc && argv[i][0] == '-'; i++) {
@@ -241,6 +246,9 @@ int main(int argc, char **argv) {
         else if (!strcmp(argv[i], "-idle") && i + 1 < argc) g_idle_limit = atoi(argv[++i]);
         else if (!strcmp(argv[i], "-o") && i + 1 < argc) g_outdir = argv[++i];
         else if (!strcmp(argv[i], "-script") && i + 1 < argc) script = argv[++i];
+#ifdef HX_PLAY
+        else if (!strcmp(argv[i], "-play") && i + 1 < argc) play = argv[++i];
+#endif
         else if (!strcmp(argv[i], "-shots") && i + 1 < argc) g_shot_every = atoi(argv[++i]);
         else if (!strcmp(argv[i], "-sub") && i + 1 < argc) sublist = argv[++i];
         else if (!strcmp(argv[i], "-subcheck") && i + 1 < argc) { extern int g_sub_checkmode; g_sub_checkmode = 1; sublist = argv[++i]; }
@@ -298,6 +306,10 @@ int main(int argc, char **argv) {
     if (fuzzspec) { int sub_fuzz(const char *spec); if (sub_fuzz(fuzzspec)) { fprintf(stderr, "bad -fuzz spec %s (name:count:d4,d5,...)\n", fuzzspec); return 2; } }
     if (getenv("MZ_WLOG")) { char wp[512]; snprintf(wp, sizeof wp, "%s/writes.txt", g_outdir); wlogf = fopen(wp, "w"); wlog_from = (uint32_t)atoi(getenv("MZ_WLOG")); }
     if (script && input_load(script)) { fprintf(stderr, "cannot load input script %s\n", script); return 2; }
+#ifdef HX_PLAY
+    { int play_start(const char *recording);   /* play.c: the window; the session is recorded */
+      if (play) { if (play_start(play)) return 2; max_insns = ~0ull; } }
+#endif
 
     m68k_init();
     m68k_set_cpu_type(M68K_CPU_TYPE_68020);
@@ -350,9 +362,9 @@ int main(int argc, char **argv) {
         }
     }
     hx_log("pc=%06X (%s%d:%04X) instructions=%llu", pc, sn ? "S" : "?", sn, sn ? off : 0, (unsigned long long)g_insn_count);
-    for (int k = 0; k < nwstat; k++) {
-        uint32_t o = 0; int s5 = seg_of(wstat[k].pc, &o);
-        hx_log("watch: writer S%d:%04X (%06X) %u writes, first addresses %06X %06X %06X %06X", s5, o, wstat[k].pc, wstat[k].n, wstat[k].vals[0], wstat[k].vals[1], wstat[k].vals[2], wstat[k].vals[3]);
+    for (int k = 0; k < nwatch_stats; k++) {
+        uint32_t o = 0; int s5 = seg_of(watch_stats[k].pc, &o);
+        hx_log("watch: writer S%d:%04X (%06X) %u writes, first addresses %06X %06X %06X %06X", s5, o, watch_stats[k].pc, watch_stats[k].n, watch_stats[k].vals[0], watch_stats[k].vals[1], watch_stats[k].vals[2], watch_stats[k].vals[3]);
     }
     {   /* A5 world snapshot: globals (below A5) + jump table area */
         char gp[512]; snprintf(gp, sizeof gp, "%s/a5world.bin", g_outdir);

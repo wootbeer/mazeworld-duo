@@ -51,3 +51,31 @@ mzharness: $(OBJ)
 
 clean:
 	rm -f *.o $(GEN)/*.o $(GEN)/m68kops.* $(GEN)/m68kmake mzharness
+
+# ---------- the playable test build (mzplay): the rig in a window, recording what you play ----------
+PLAYOBJ = $(filter-out main.o,$(OBJ)) main_play.o play.o
+main_play.o: main.c hx.h $(GEN)/m68kops.h
+	$(CC) $(CFLAGS) -DHX_PLAY -c -o $@ $<
+play.o: play.c hx.h ../port/sdlkeys.h
+	$(CC) $(CFLAGS) $(shell sdl2-config --cflags) -c -o $@ $<
+mzplay: $(PLAYOBJ)
+	$(CC) -o $@ $(PLAYOBJ) $(shell sdl2-config --libs) -lm
+
+# Windows (MinGW, SDL2 from third_party/sdl2-mingw): mzplay.exe
+WCC     ?= x86_64-w64-mingw32-gcc
+SDLW     = ../third_party/sdl2-mingw/x86_64-w64-mingw32
+WB       = wbuild
+WFLAGS   = -O2 -g0 -Wno-unused-parameter -I. -I$(GEN) -I$(MUSASHI) -DMUSASHI_CNF='"musashi_conf.h"' -I$(SDLW)/include/SDL2
+WOBJ     = $(addprefix $(WB)/,$(PLAYOBJ))
+$(WB)/%.o: %.c ; @mkdir -p $(WB) $(WB)/gen; $(WCC) $(WFLAGS) -c -o $@ $<
+$(WB)/gen/%.o: gen/%.c ; @mkdir -p $(WB)/gen; $(WCC) $(WFLAGS) -w -c -o $@ $<
+$(WB)/game_%.o: $(GAME)/%.c ; @mkdir -p $(WB); $(WCC) $(WFLAGS) -DMZ_HARNESS -I$(GAME) -c -o $@ $<
+$(WB)/arc_%.o: ../archive/%.c ; @mkdir -p $(WB); $(WCC) $(WFLAGS) -c -o $@ $<
+$(WB)/mactb_%.o: $(MACTB)/%.c ; @mkdir -p $(WB); $(WCC) $(WFLAGS) -c -o $@ $<
+$(WB)/m68kcpu.o: $(MUSASHI)/m68kcpu.c $(GEN)/m68kops.h ; @mkdir -p $(WB); $(WCC) $(WFLAGS) -w -c -o $@ $<
+$(WB)/m68kdasm.o: $(MUSASHI)/m68kdasm.c ; @mkdir -p $(WB); $(WCC) $(WFLAGS) -w -c -o $@ $<
+$(WB)/softfloat.o: $(MUSASHI)/softfloat/softfloat.c ; @mkdir -p $(WB); $(WCC) $(WFLAGS) -w -c -o $@ $<
+$(WB)/main_play.o: main.c ; @mkdir -p $(WB); $(WCC) $(WFLAGS) -DHX_PLAY -Dmain=SDL_main -c -o $@ $<
+$(WB)/port_shell.o: ../port/shell.c ; @mkdir -p $(WB); $(WCC) $(WFLAGS) -I$(GAME) -c -o $@ $<
+mzplay.exe: $(WOBJ)
+	$(WCC) -o $@ $(WOBJ) -static -L$(SDLW)/lib -lmingw32 -lSDL2main -lSDL2 -mconsole -lm -ldinput8 -ldxguid -ldxerr8 -luser32 -lgdi32 -lwinmm -limm32 -lole32 -loleaut32 -lshell32 -lsetupapi -lversion -luuid -lhid

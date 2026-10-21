@@ -1,0 +1,57 @@
+# recorded session
+181 mousedown
+181 mouseup
+249 mmove 0 -3
+251 mmove 0 -3
+254 mmove 0 -3
+255 mmove 0 -3
+258 mmove 0 -3
+260 mmove 0 -3
+263 mmove 0 -3
+264 mmove 0 -3
+267 mmove 0 -3
+270 mmove 0 -3
+271 mmove 0 -3
+274 mmove 0 -3
+275 mmove 0 -3
+279 mmove 0 -3
+280 mmove 0 -3
+283 mmove 0 -3
+286 mmove 0 -3
+288 mmove 0 -3
+291 mmove 0 -3
+293 mmove 0 -3
+297 mmove 0 -3
+299 mmove 0 -3
+300 mmove 0 -3
+303 mmove 0 -3
+306 mmove 0 -3
+309 mmove 0 -3
+311 mmove 0 -3
+312 mmove 0 -3
+315 mmove 0 -3
+318 mmove 0 -3
+321 mmove 0 -3
+323 mmove 0 -3
+326 mmove 0 -3
+328 mmove 0 -3
+330 mmove 0 -3
+333 mmove 0 -3
+335 mmove 0 -3
+337 mmove 0 -3
+341 mmove 0 -3
+343 mmove 0 -3
+346 mmove 4 0
+347 mmove 4 0
+350 mmove 4 0
+352 mmove 4 0
+355 mmove 4 0
+357 mmove 4 0
+359 mmove 4 0
+362 mmove 4 0
+363 mmove 4 0
+366 mmove 4 0
+369 mousedown
+369 mmove -15 -15
+382 mouseup
+# ends: replay with -ticks 443

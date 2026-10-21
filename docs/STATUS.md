@@ -12,6 +12,13 @@
   for a button); Tab between edit fields; DrawChar; SetWTitle; Standard File (CustomPutFile /
   CustomGetFile: the rig answers deterministically, the port will show the Windows Save / Open
   dialogs and mirror the chosen file).
+- The playable test build, `mzplay` (`make -C harness mzplay` / `mzplay.exe`): the rig running the
+  original game in a window you can play (F1 captures the mouse); everything is recorded as a test
+  script with the tick it happened on (`<tick> key <code> <char> down|up|auto`, `mmove`, `move`,
+  `mousedown` / `mouseup`), and closing the window ends the run at the next tick, so the recording
+  replays exactly (checked: live and replayed globals, heap and screen identical, also with the
+  Windows build). Script steps now take effect when their tick begins. Recordings go in
+  `tests/recordings/`.
 - A port fix found this way: alerts never showed in the port (Clear High Scores silently
   answered Cancel). `tests/shell_menus.txt` covers Catacombs' menus and its alert.
 
