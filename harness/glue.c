@@ -296,6 +296,15 @@ void     mac_FrameRect(uint32_t rect)              { pascal_trap(0xA8A1, 0, "l",
 void     mac_EraseRect(uint32_t rect)              { pascal_trap(0xA8A3, 0, "l", rect); }
 void     mac_MoveTo(int16_t h, int16_t v)          { pascal_trap(0xA893, 0, "ww", (uint32_t)(uint16_t)h, (uint32_t)(uint16_t)v); }
 void     mac_DrawChar(int16_t ch)                  { pascal_trap(0xA883, 0, "w", (uint32_t)(uint16_t)ch); }
+int16_t  mac_CautionAlert(int16_t id, uint32_t filter) { return (int16_t)pascal_trap(0xA988, 2, "wl", (uint32_t)(uint16_t)id, filter); }
+void     mac_SetWTitle(uint32_t w, uint32_t title)  { pascal_trap(0xA91A, 0, "ll", w, title); }
+/* Standard File (Pack3): the hooks and lists the game passes are not used (the dialogs are the host's) */
+void mac_CustomPutFile(uint32_t prompt, uint32_t name, uint32_t reply, uint32_t where, uint32_t filter) {
+    pascal_trap(0xA9EA, 0, "lllwllllllw", prompt, name, reply, 0u, where, 0u, filter, 0u, 0u, 0u, 7u);
+}
+void mac_CustomGetFile(int16_t ntypes, uint32_t types, uint32_t reply, uint32_t where, uint32_t filter) {
+    pascal_trap(0xA9EA, 0, "lwllwllllllw", 0u, (uint32_t)(uint16_t)ntypes, types, reply, 0u, where, 0u, filter, 0u, 0u, 0u, 8u);
+}
 void     mac_Move(int16_t dh, int16_t dv)          { pascal_trap(0xA894, 0, "ww", (uint32_t)(uint16_t)dh, (uint32_t)(uint16_t)dv); }
 void     mac_LineTo(int16_t h, int16_t v)          { pascal_trap(0xA891, 0, "ww", (uint32_t)(uint16_t)h, (uint32_t)(uint16_t)v); }
 void     mac_Line(int16_t dh, int16_t dv)          { pascal_trap(0xA892, 0, "ww", (uint32_t)(uint16_t)dh, (uint32_t)(uint16_t)dv); }

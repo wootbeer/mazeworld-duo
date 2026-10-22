@@ -459,6 +459,22 @@ void fo_S8_132A(void);
 void fo_S8_1152(void);
 void fo_S8_0F5A(void);
 void fo_S8_145E(void);
+void fo_S8_2AE2(void);
+void fo_S8_2BA8(void);
+void fo_S8_2B68(void);
+void fo_S8_31FA(void);
+void fo_S8_305A(uint32_t name, int16_t err);
+int16_t fo_S8_2F34(uint32_t spec);
+void fo_S8_2EC6(void);
+void fo_S8_2C2E(void);
+void fo_S8_2A2A(int16_t item);
+void fo_S8_2A78(int16_t item);
+void fo_S8_2AA8(int16_t item);
+void fo_S8_2972(uint32_t m);
+void fo_S8_20EA(uint32_t h);
+int16_t fo_S8_44A8(uint32_t pgw, uint32_t gdh);
+void fo_S8_4D26(void);
+uint8_t fo_S8_472E(int16_t size);
 
 static void w_fn_S4_36F2(void) {
     setreg(M68K_REG_D0, (uint32_t)(uint16_t)fn_S4_36F2());
@@ -1514,6 +1530,63 @@ static void w_fo_S8_0F5A(void) {
 static void w_fo_S8_145E(void) {
     fo_S8_145E();
 }
+static void w_fo_S8_2AE2(void) {
+    fo_S8_2AE2();
+}
+static void w_fo_S8_2BA8(void) {
+    fo_S8_2BA8();
+}
+static void w_fo_S8_2B68(void) {
+    fo_S8_2B68();
+}
+static void w_fo_S8_31FA(void) {
+    fo_S8_31FA();
+}
+static void w_fo_S8_305A(void) {
+    uint32_t sp = reg(M68K_REG_A7);
+    fo_S8_305A((uint32_t)rd32(sp + 4), (int16_t)rd16(sp + 8));
+}
+static void w_fo_S8_2F34(void) {
+    uint32_t sp = reg(M68K_REG_A7);
+    uint32_t r = (uint16_t)fo_S8_2F34((uint32_t)rd32(sp + 4)); setreg(M68K_REG_D0, (reg(M68K_REG_D0) & 0xFFFF0000u) | r);
+}
+static void w_fo_S8_2EC6(void) {
+    fo_S8_2EC6();
+}
+static void w_fo_S8_2C2E(void) {
+    fo_S8_2C2E();
+}
+static void w_fo_S8_2A2A(void) {
+    uint32_t sp = reg(M68K_REG_A7);
+    fo_S8_2A2A((int16_t)rd16(sp + 4));
+}
+static void w_fo_S8_2A78(void) {
+    uint32_t sp = reg(M68K_REG_A7);
+    fo_S8_2A78((int16_t)rd16(sp + 4));
+}
+static void w_fo_S8_2AA8(void) {
+    uint32_t sp = reg(M68K_REG_A7);
+    fo_S8_2AA8((int16_t)rd16(sp + 4));
+}
+static void w_fo_S8_2972(void) {
+    uint32_t sp = reg(M68K_REG_A7);
+    fo_S8_2972((uint32_t)rd32(sp + 4));
+}
+static void w_fo_S8_20EA(void) {
+    uint32_t sp = reg(M68K_REG_A7);
+    fo_S8_20EA((uint32_t)rd32(sp + 4));
+}
+static void w_fo_S8_44A8(void) {
+    uint32_t sp = reg(M68K_REG_A7);
+    uint32_t r = (uint16_t)fo_S8_44A8((uint32_t)rd32(sp + 4), (uint32_t)rd32(sp + 8)); setreg(M68K_REG_D0, (reg(M68K_REG_D0) & 0xFFFF0000u) | r);
+}
+static void w_fo_S8_4D26(void) {
+    fo_S8_4D26();
+}
+static void w_fo_S8_472E(void) {
+    uint32_t sp = reg(M68K_REG_A7);
+    setreg(M68K_REG_D0, (uint32_t)(uint8_t)fo_S8_472E((int16_t)rd16(sp + 4)));
+}
 
 typedef struct { int seg; uint32_t off; const char *name; void (*fn)(void); int regs; uint32_t d0mask; int argbytes; int nocheck; int pops; uint32_t ignore; int orig; } SubEntry;
 const SubEntry g_subs[] = {
@@ -1969,5 +2042,21 @@ const SubEntry g_subs[] = {
     {8, 0x1152, "fo_S8_1152", w_fo_S8_1152, 0, 0x0u, 0, 0, 0, 0x0u, 1},
     {8, 0x0F5A, "fo_S8_0F5A", w_fo_S8_0F5A, 0, 0x0u, 0, 0, 0, 0x0u, 1},
     {8, 0x145E, "fo_S8_145E", w_fo_S8_145E, 0, 0x0u, 0, 0, 0, 0x0u, 1},
+    {8, 0x2AE2, "fo_S8_2AE2", w_fo_S8_2AE2, 0, 0x0u, 0, 1, 0, 0x0u, 1},
+    {8, 0x2BA8, "fo_S8_2BA8", w_fo_S8_2BA8, 0, 0x0u, 0, 1, 0, 0x0u, 1},
+    {8, 0x2B68, "fo_S8_2B68", w_fo_S8_2B68, 0, 0x0u, 0, 1, 0, 0x0u, 1},
+    {8, 0x31FA, "fo_S8_31FA", w_fo_S8_31FA, 0, 0x0u, 0, 1, 0, 0x0u, 1},
+    {8, 0x305A, "fo_S8_305A", w_fo_S8_305A, 0, 0x0u, 6, 1, 0, 0x0u, 1},
+    {8, 0x2F34, "fo_S8_2F34", w_fo_S8_2F34, 0, 0xFFFFu, 4, 1, 0, 0x0u, 1},
+    {8, 0x2EC6, "fo_S8_2EC6", w_fo_S8_2EC6, 0, 0x0u, 0, 1, 0, 0x0u, 1},
+    {8, 0x2C2E, "fo_S8_2C2E", w_fo_S8_2C2E, 0, 0x0u, 0, 1, 0, 0x0u, 1},
+    {8, 0x2A2A, "fo_S8_2A2A", w_fo_S8_2A2A, 0, 0x0u, 2, 1, 0, 0x0u, 1},
+    {8, 0x2A78, "fo_S8_2A78", w_fo_S8_2A78, 0, 0x0u, 2, 1, 0, 0x0u, 1},
+    {8, 0x2AA8, "fo_S8_2AA8", w_fo_S8_2AA8, 0, 0x0u, 2, 0, 0, 0x0u, 1},
+    {8, 0x2972, "fo_S8_2972", w_fo_S8_2972, 0, 0x0u, 4, 0, 0, 0x0u, 1},
+    {8, 0x20EA, "fo_S8_20EA", w_fo_S8_20EA, 0, 0x0u, 4, 0, 0, 0x0u, 1},
+    {8, 0x44A8, "fo_S8_44A8", w_fo_S8_44A8, 0, 0xFFFFu, 8, 1, 0, 0x0u, 1},
+    {8, 0x4D26, "fo_S8_4D26", w_fo_S8_4D26, 0, 0x0u, 0, 0, 0, 0x38u, 1},
+    {8, 0x472E, "fo_S8_472E", w_fo_S8_472E, 0, 0xFFFFFFFFu, 2, 1, 0, 0x0u, 1},
     {0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0}
 };

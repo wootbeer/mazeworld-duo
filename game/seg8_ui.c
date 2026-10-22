@@ -546,6 +546,7 @@ static const uint32_t layout_scale[4] = { 0x3F866666, 0x3FC147AE, 0x40000000, 0x
  * rebuilds the tables (fn_S8_5884) and the offscreen worlds. G_22B6 = the size, or -1 on failure
  * (returns 0). */
 uint8_t fn_S8_527A(int16_t size) {
+    if (mz_original) return fo_S8_472E(size);              /* Original: its own layouts */
     if (size >= 1 && size <= 4) {
         for (int k = 0; k < 24; k++) sg16(layout_globals[k], layout_values[size - 1][k]);
         sg32(0x214C, layout_scale[size - 1]);

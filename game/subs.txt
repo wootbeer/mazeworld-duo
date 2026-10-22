@@ -358,7 +358,7 @@
 8  3D66  void fn_S8_3D66(void)  nocheck
 8  3C0C  void fn_S8_3C0C(void)  nocheck
 8  577A  u8 fn_S8_577A(void)  d0=zext nocheck
-8  527A  u8 fn_S8_527A(i16 size)  nocheck
+8  527A  u8 fn_S8_527A(i16 size)  nocheck both
 8  48A2  u8 fn_S8_48A2(i16 size, ptr rect)  nocheck
 8  2480  void fn_S8_2480(void)  nocheck both
 8  25BE  void fn_S8_25BE(void)  nocheck both
@@ -378,7 +378,7 @@
 8  394A  void fn_S8_394A(void)  nocheck
 8  39EE  void fn_S8_39EE(void)
 8  33E2  void fn_S8_33E2(i16 item)  nocheck
-8  4ACE  u8 fn_S8_4ACE(i16 size)  nocheck
+8  4ACE  u8 fn_S8_4ACE(i16 size)  nocheck both
 8  338A  void fn_S8_338A(i16 item)  nocheck
 8  2D26  void fn_S8_2D26(ptr w, ptr ev)  nocheck
 8  2B86  void fn_S8_2B86(ptr ev)  nocheck
@@ -479,3 +479,20 @@
 8  1152  void fo_S8_1152(void)  orig
 8  0F5A  void fo_S8_0F5A(void)  orig
 8  145E  void fo_S8_145E(void)  orig
+# Original's shell (game/orig_shell.c)
+8  2AE2  void fo_S8_2AE2(void)  orig nocheck
+8  2BA8  void fo_S8_2BA8(void)  orig nocheck
+8  2B68  void fo_S8_2B68(void)  orig nocheck
+8  31FA  void fo_S8_31FA(void)  orig nocheck
+8  305A  void fo_S8_305A(ptr name, i16 err)  orig nocheck
+8  2F34  i16 fo_S8_2F34(ptr spec)  orig nocheck
+8  2EC6  void fo_S8_2EC6(void)  orig nocheck
+8  2C2E  void fo_S8_2C2E(void)  orig nocheck
+8  2A2A  void fo_S8_2A2A(i16 item)  orig nocheck
+8  2A78  void fo_S8_2A78(i16 item)  orig nocheck
+8  2AA8  void fo_S8_2AA8(i16 item)  orig
+8  2972  void fo_S8_2972(ptr m)  orig
+8  20EA  void fo_S8_20EA(ptr h)  orig
+8  44A8  i16 fo_S8_44A8(ptr pgw, ptr gdh)  orig nocheck
+8  4D26  void fo_S8_4D26(void)  orig ignore=d3,d4,d5
+8  472E  u8 fo_S8_472E(i16 size)  orig nocheck d0=zext

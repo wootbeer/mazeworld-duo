@@ -54,7 +54,7 @@ void fn_S8_33E2(int16_t item) {
  * Returns 0 if not even size 1 works (the caller quits). */
 uint8_t fn_S8_4ACE(int16_t size) {
     mz_seg_of(2, 0x3872), fn_S2_3872(GADDR(0x22C4));
-    fn_S2_3872(GADDR(0x22C0));
+    if (!mz_original) fn_S2_3872(GADDR(0x22C0));            /* Original (fn_S8_4216) has no automap world */
     uint8_t reserved = fn_S8_61AA();
     if (!reserved) mz_seg_of(2, 0x03A0), fn_S2_03A0(GADDR(0x3BF4), 0, 0);
     mac_SetCursor(deref(mac_GetCursor(4)));                 /* watch */
