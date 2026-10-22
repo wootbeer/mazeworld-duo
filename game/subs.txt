@@ -89,7 +89,7 @@
 8  15C0  regs fn_S8_15C0
 4  1C88  regs fn_S4_1C88
 4  3B10  void fn_S4_3B10(void)
-8  3492  void fn_S8_3492(void)
+8  3492  void fn_S8_3492(void)  both
 8  083A  regs fn_S8_083A both
 8  0946  regs fn_S8_0946 both
 4  2CC8  void fn_S4_2CC8(ptr h)
@@ -307,7 +307,7 @@
 4  3BF8  void fn_S4_3BF8(void)  nocheck
 4  3CE8  void fn_S4_3CE8(void)  nocheck
 4  3F02  void fn_S4_3F02(void)  nocheck
-2  01FA  ptr fn_S2_01FA(i16 id)  nocheck
+2  01FA  ptr fn_S2_01FA(i16 id)  nocheck both
 2  3872  void fn_S2_3872(ptr pgw)  nocheck
 2  48D2  void fn_S2_48D2(void)
 4  0000  void fn_S4_0000(i32 x, i32 y, ptr other, ptr cells, ptr gw)
@@ -380,7 +380,7 @@
 8  33E2  void fn_S8_33E2(i16 item)  nocheck
 8  4ACE  u8 fn_S8_4ACE(i16 size)  nocheck both
 8  338A  void fn_S8_338A(i16 item)  nocheck
-8  2D26  void fn_S8_2D26(ptr w, ptr ev)  nocheck
+8  2D26  void fn_S8_2D26(ptr w, ptr ev)  nocheck both
 8  2B86  void fn_S8_2B86(ptr ev)  nocheck
 8  2B5E  void fn_S8_2B5E(ptr ev)  nocheck
 8  2C36  void fn_S8_2C36(ptr ev)  nocheck
@@ -394,8 +394,8 @@
 8  295A  i16 fn_S8_295A(ptr h)  nocheck
 8  21AA  void fn_S8_21AA(void)  nocheck
 # the instructions dialog (game/seg8_help.c)
-8  190C  void fn_S8_190C(i16 page)  nocheck
-8  1A9C  void fn_S8_1A9C(i16 page)
+8  190C  void fn_S8_190C(i16 page)  nocheck both
+8  1A9C  void fn_S8_1A9C(i16 page)  both
 8  1B0E  pascal void fn_S8_1B0E(ptr dlg, i16 item)
 8  1D5C  pascal bool fn_S8_1D5C(ptr dlg, ptr ev, ptr pitem)
 8  1ED0  void fn_S8_1ED0(void)
@@ -481,7 +481,6 @@
 8  145E  void fo_S8_145E(void)  orig
 # Original's shell (game/orig_shell.c)
 8  2AE2  void fo_S8_2AE2(void)  orig nocheck
-8  2BA8  void fo_S8_2BA8(void)  orig nocheck
 8  2B68  void fo_S8_2B68(void)  orig nocheck
 8  31FA  void fo_S8_31FA(void)  orig nocheck
 8  305A  void fo_S8_305A(ptr name, i16 err)  orig nocheck
@@ -493,6 +492,18 @@
 8  2AA8  void fo_S8_2AA8(i16 item)  orig
 8  2972  void fo_S8_2972(ptr m)  orig
 8  20EA  void fo_S8_20EA(ptr h)  orig
+8  2008  ptr fo_S8_2008(u8 load)  orig nocheck
+8  210C  i16 fo_S8_210C(ptr h)  orig nocheck
 8  44A8  i16 fo_S8_44A8(ptr pgw, ptr gdh)  orig nocheck
 8  4D26  void fo_S8_4D26(void)  orig ignore=d3,d4,d5
 8  472E  u8 fo_S8_472E(i16 size)  orig nocheck d0=zext
+8  6760  u8 fo_S8_6760(ptr code, ptr name)  orig d0=zext
+8  6668  u8 fo_S8_6668(ptr pcode, ptr pname)  orig
+8  68FA  void fo_S8_68FA(void)  orig nocheck
+8  3C0E  void fo_S8_3C0E(i16 line, ptr text)  orig
+8  39AA  void fo_S8_39AA(void)  orig
+8  3AB8  void fo_S8_3AB8(void)  orig
+8  3B3E  void fo_S8_3B3E(void)  orig
+8  3BB8  void fo_S8_3BB8(void)  orig
+8  05CC  u8 fo_S8_05CC(i16 n)  orig nocheck d0=zext
+8  57DE  pascal void fo_S8_57DE(ptr dlg, i16 item)  orig nocheck

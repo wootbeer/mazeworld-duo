@@ -222,7 +222,9 @@ map:
 
 /* fn_S8_3492: resets the player state for a new game, seeds G_0082 from the clock (low-memory Time)
  * and sets G_225A to 5 + Random() mod 6 (Random taken as unsigned). */
+void fo_S8_2BA8(void);
 void fn_S8_3492(void) {
+    if (mz_original) { fo_S8_2BA8(); return; }             /* Original: a new 'mazr' game */
     sg8(0x21B4, 1); sg8(0x21B3, 0); sg8(0x220C, 1);
     sg32(0x2206, 0xF80000); sg32(0x2202, 0xF80000);
     sg16(0x220A, 1); sg16(0x2208, 0x30); sg8(0x21FE, 1);

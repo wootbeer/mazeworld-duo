@@ -200,3 +200,282 @@ uint8_t fo_S8_472E(int16_t size) {
     sog16(0x5892, (uint16_t)size);
     return 1;
 }
+
+/* ---------- the preferences ---------- */
+
+/* fo_S8_2008: the preferences ($114 bytes: the window size and screen, the mode) from the file
+ * named by 'STR#' 128 #1 in the Preferences folder, if `load`; else, or if missing or the wrong
+ * size, the defaults (fo_S8_20EA). Sets G_5894 from it. Returns the handle (0 if out of memory). */
+uint32_t fo_S8_2008(uint8_t load) {
+    MZ_FRAME;
+    uint32_t h = mz_local(4), name = mz_local(0x100), vref = mz_local(2), dir = mz_local(4), spec = mz_local(0x46);
+    w32(h, 0);
+    int ok = 0;
+    if (load) {
+        mz_seg_of(3, 0x03BA), fn_S3_03BA(name, 0x80, 1);
+        int16_t err = fn_S3_0400((int16_t)0x8000, 0x70726566, 0, vref, dir);   /* kOnSystemDisk, 'pref' */
+        if (!err) err = mac_FSMakeFSSpec((int16_t)r16(vref), (int32_t)r32(dir), name, spec);
+        if (!err) err = fn_S8_36F4(spec, h);
+        ok = !err && r32(h) && (mz_seg_of(3, 0x020E), fn_S3_020E(r32(h))) == 0x114;
+    }
+    if (!ok) {
+        if (r32(h)) mac_DisposeHandle(r32(h));
+        w32(h, mac_NewHandle(0x114));
+        if (r32(h)) fo_S8_20EA(r32(h));
+    }
+    if (r32(h)) {
+        mac_HLock(r32(h));
+        sog8(0x5894, r8(deref(r32(h)) + 0xA));
+        mac_HUnlock(r32(h));
+    }
+    return r32(h);
+}
+/* fo_S8_210C: saves the preferences in h (the mode, the window size and screen) to the file named
+ * by 'STR#' 128 #1 in the Preferences folder. Returns the error. */
+int16_t fo_S8_210C(uint32_t h) {
+    MZ_FRAME;
+    mac_HLock(h);
+    uint32_t p = deref(h);
+    w8(p + 0xA, og8(0x5894));
+    w16(p, og16(0x5892));
+    uint32_t g = deref(og32(0x5898));
+    w32(p + 2, r32(g + 0x22)); w32(p + 6, r32(g + 0x26));
+    mac_HUnlock(h);
+    uint32_t name = mz_local(0x100), vref = mz_local(2), dir = mz_local(4), spec = mz_local(0x46);
+    mz_seg_of(3, 0x03BA), fn_S3_03BA(name, 0x80, 1);
+    int16_t err = fn_S3_0400((int16_t)0x8000, 0x70726566, 0, vref, dir);
+    if (!err) {
+        err = mac_FSMakeFSSpec((int16_t)r16(vref), (int32_t)r32(dir), name, spec);
+        if (err == -43) err = 0;                            /* fnfErr: a new file */
+    }
+    if (!err) err = fn_S8_3522(spec, h, 0x4D7A776C, 0x50524546);          /* 'Mzwl', 'PREF' */
+    return err;
+}
+
+/* ---------- registration ---------- */
+
+/* fo_S8_6760: is the 8-character registration code (its first four characters a seed, its last four
+ * a check) right for the name (a Pascal string)? 1 / 0 */
+uint8_t fo_S8_6760(uint32_t code, uint32_t name) {
+    uint8_t buf[0x100], acc[4];
+    int16_t n = r8(name), i;
+    for (i = 0; i < n; i++) buf[i] = r8(name + 1 + (uint32_t)i);
+    buf[i] = 0x0A; n++;
+    for (i = 0; i < 4; i++) acc[i] = r8(code + (uint32_t)i);
+    for (i = 0; i < n; i++) {
+        int lower = (int8_t)buf[i] >= 'a' && (int8_t)buf[i] <= 'z';
+        acc[i % 4] = (uint8_t)(acc[i % 4] + buf[i] + i % 4 + (lower ? 0xE0 : 0));
+    }
+    for (i = 0; i < 4; i++) { uint8_t v = (uint8_t)(acc[i] % 36); acc[i] = (uint8_t)(v > 9 ? v - 10 + 'A' : v + '0'); }
+    for (i = 0; i < 4; i++) if (acc[i] != r8(code + 4 + (uint32_t)i)) return 0;
+    return 1;
+}
+/* fo_S8_6668: the registration (record G_5814: code at +$C, name at +$14): 1 and, where asked, the
+ * code (as a Pascal string) and the name; or 0 and the texts G_0018 / G_000E */
+uint8_t fo_S8_6668(uint32_t pcode, uint32_t pname) {
+    uint32_t h = og32(0x5814);
+    mac_HLock(h);
+    uint32_t p = deref(h);
+    uint8_t ok = fo_S8_6760(p + 0xC, p + 0x14);
+    if (!ok) {
+        if (pcode) mz_seg_of(2, 0x0332), fn_S2_0332(OADDR(0x18), pcode);
+        if (pname) mz_seg_of(2, 0x0332), fn_S2_0332(OADDR(0x0E), pname);
+    } else {
+        if (pcode) { w8(pcode, 8); for (uint32_t k = 0; k < 8; k++) w8(pcode + 1 + k, r8(deref(h) + 0xC + k)); }
+        if (pname) for (uint32_t k = 0; k <= r8(deref(h) + 0x14); k++) w8(pname + k, r8(deref(h) + 0x14 + k));
+    }
+    mac_HUnlock(h);
+    return ok;
+}
+/* fo_S8_68FA: Apple > Register: dialog 302 (items 3 the name, 4 the code) until Cancel (2) or an OK
+ * (1) with a right code (8 characters, upper-cased), which is kept in G_5814; a wrong one is alert 133 */
+void fo_S8_68FA(void) {
+    MZ_FRAME;
+    uint32_t port = mz_local(4), kind = mz_local(2), box = mz_local(8), hit = mz_local(2);
+    uint32_t hname = mz_local(4), hcode = mz_local(4), hx = mz_local(4);
+    uint32_t name = mz_local(0x100), code = mz_local(0x100);
+    mac_GetPort(port);
+    uint32_t d = mac_GetNewDialog(0x12E, 0, 0xFFFFFFFFu);
+    if (!d) return;
+    mac_SetPort(d);
+    mac_ShowWindow(d);
+    mac_GetDialogItem(d, 1, kind, hx, box);
+    mac_GetDialogItem(d, 2, kind, hx, box);
+    mac_GetDialogItem(d, 3, kind, hname, box);
+    mac_GetDialogItem(d, 4, kind, hcode, box);
+    for (int done = 0; !done; ) {
+        mac_ModalDialog(0, hit);
+        int16_t item = (int16_t)r16(hit);
+        if (item == 2) { done = 1; continue; }
+        if (item != 1) continue;
+        mac_GetDialogItemText(r32(hname), name);
+        mac_GetDialogItemText(r32(hcode), code);
+        for (uint32_t k = 1; k <= r8(code); k++) { uint8_t c = r8(code + k); if (c >= 'a' && c <= 'z') w8(code + k, (uint8_t)(c - 0x20)); }
+        if (r8(code) != 8 || !fo_S8_6760(code + 1, name)) { mac_Alert(0x85, 0); continue; }
+        uint32_t p = deref(og32(0x5814));
+        for (uint32_t k = 0; k < 8; k++) w8(p + 0xC + k, r8(code + 1 + k));
+        for (uint32_t k = 0; k < (uint32_t)r8(name) + 1; k++) w8(deref(og32(0x5814)) + 0x14 + k, r8(name + k));
+        done = 1;
+    }
+    mac_SetPort(r32(port));
+    mac_DisposeDialog(d);
+}
+
+/* ---------- the main window's screens ---------- */
+
+/* fo_S8_3C0E: centred text (a C string) in the main window G_5804, on lines `line` to line + 2 of a
+ * 32-line grid over its height G_5746 */
+void fo_S8_3C0E(int16_t line, uint32_t text) {
+    MZ_FRAME;
+    uint32_t r = mz_local(8);
+    mac_TextFont((int16_t)og16(0x5816));
+    w16(r, (uint16_t)(int16_t)((int32_t)(int16_t)og16(0x5746) * line / 32));
+    w16(r + 4, (uint16_t)(int16_t)((int32_t)(int16_t)(line + 2) * (int16_t)og16(0x5746) / 32));
+    w16(r + 2, 0); w16(r + 6, og16(0x5748));
+    mac_TETextBox(text, (int32_t)(mz_seg_of(2, 0x0252), fn_S2_0252(text)), r, 1);
+}
+/* the window black, white text of size G_56F2 */
+static void screen_begin(void) {
+    MZ_FRAME;
+    uint32_t r = mz_local(8), w = og32(0x5804);
+    mac_SetPort(w);
+    w32(r, r32(w + 0x10)); w32(r + 4, r32(w + 0x14));
+    mac_ClipRect(r);
+    mac_PmForeColor(0); mac_PaintRect(r);
+    mac_PmForeColor(0xF); mac_PmBackColor(0);
+    mac_TextSize((int16_t)og16(0x56F2));
+}
+static void lines(const uint16_t *l, int n) { for (int i = 0; i < n; i += 2) fo_S8_3C0E((int16_t)l[i], OADDR(l[i + 1])); }
+/* fo_S8_39AA: the title screen: with a registration, its texts and the owner's name; else the
+ * shareware texts */
+void fo_S8_39AA(void) {
+    MZ_FRAME;
+    static const uint16_t reg[] = {4, 0x661A, 7, 0x65F8, 0x11, 0x65E8, 0x18, 0x65BE};
+    static const uint16_t unreg[] = {3, 0x6590, 8, 0x656E, 0xA, 0x6540, 0xC, 0x6510, 0xE, 0x64E0, 0x10, 0x64B2, 0x12, 0x6486, 0x18, 0x645C, 0x1C, 0x6440};
+    uint32_t name = mz_local(0x100);
+    screen_begin();
+    if (fo_S8_6668(0, name)) {
+        lines(reg, 8);
+        w8(name + 1 + r8(name), 0);
+        fo_S8_3C0E(0x1A, name + 1);
+    } else lines(unreg, 18);
+}
+/* fo_S8_3AB8: the level's end (G_5786: 0 one text pair, 1 another) */
+void fo_S8_3AB8(void) {
+    static const uint16_t l0[] = {0xC, 0x641C, 0x16, 0x6402}, l1[] = {0xA, 0x63E0, 0xC, 0x63AE};
+    screen_begin();
+    if (og16(0x5786) == 0) lines(l0, 4);
+    else if (og16(0x5786) == 1) lines(l1, 4);
+}
+/* fo_S8_3B3E / fo_S8_3BB8: the paused game's screen; the screen when the game cannot be shown */
+void fo_S8_3B3E(void) {
+    static const uint16_t l[] = {0xA, 0x638C, 0xC, 0x635E, 0xE, 0x632E, 0x10, 0x6306, 0x12, 0x62DE};
+    screen_begin(); lines(l, 10);
+}
+void fo_S8_3BB8(void) {
+    static const uint16_t l[] = {6, 0x62B4, 8, 0x628C};
+    screen_begin(); lines(l, 4);
+}
+
+/* fo_S8_05CC: the palette of colour set n ('clut' 200 + n on a colour screen, else 210 + n) for the
+ * main and game windows and the offscreen world; it replaces G_57F6. 0 if it cannot be made. */
+uint8_t fo_S8_05CC(int16_t n) {
+    int colour = mac_TestDeviceAttribute(og32(0x5898), 0);
+    uint32_t pal = (mz_seg_of(2, 0x01FA), fn_S2_01FA)((int16_t)(n + (colour ? 0xC8 : 0xD2)));
+    if (!pal) return 0;
+    mac_NSetPalette(og32(0x5804), pal, 0x100);
+    if (!og8(0x57D0)) mac_NSetPalette(og32(0x5800), pal, 0x100);
+    if (og32(0x589C)) mac_NSetPalette(og32(0x589C), pal, 0x100);
+    mac_DisposePalette(og32(0x57F6));
+    sog32(0x57F6, pal);
+    return 1;
+}
+
+/* ---------- the instructions ---------- */
+
+/* fo_S8_57DE (JT 10): the instructions dialog's (G_080A) user item 4, the page G_080C in white on
+ * black: 1 picture 129 and the title texts (with the owner's name when registered), 2-19 headings,
+ * underlined / bold lines and text boxes, as listed below. */
+enum { END, SZ, BX, IN, MV, FC, DS, TP, BT, TXL, TXC };
+#define TX(just) ((just) ? TXC : TXL)
+static const uint16_t page_ops[] = {
+    /*  2 */ SZ, 0xC, BX, IN, 0xA, TX(0), 0x3666, END,
+    /*  3 */ SZ, 0xC, BX, IN, 0xA, MV, 0x16, FC, 0x4, DS, 0x77A, FC, 0x0, TP, 0x2A, BT, 0x8A, TX(0), 0x33EE, MV, 0xA6, FC, 0x1, DS, 0x714, FC, 0x0, TP, 0xBA, BT, 0x11A, TX(0), 0x323A, END,
+    /*  4 */ SZ, 0xC, BX, IN, 0xA, MV, 0x16, FC, 0x4, DS, 0x706, FC, 0x0, MV, 0x36, FC, 0x1, DS, 0x6A0, FC, 0x0, TP, 0x4A, BT, 0xEA, TX(0), 0x3104, END,
+    /*  5 */ SZ, 0xC, BX, IN, 0xA, MV, 0x16, FC, 0x4, DS, 0x68C, FC, 0x0, MV, 0x36, FC, 0x1, DS, 0x626, FC, 0x0, TP, 0x3A, BT, 0x9A, TX(0), 0x2E34, MV, 0xB6, FC, 0x1, DS, 0x612, FC, 0x0, TP, 0xBA, BT, 0x11A, TX(0), 0x2CAE, END,
+    /*  6 */ SZ, 0xC, BX, IN, 0xA, MV, 0x16, FC, 0x4, DS, 0x604, FC, 0x0, MV, 0x26, FC, 0x1, DS, 0x59E, FC, 0x0, TP, 0x2A, BT, 0x11A, TX(0), 0x2B28, END,
+    /*  7 */ SZ, 0xC, BX, IN, 0xA, MV, 0x16, FC, 0x4, DS, 0x590, FC, 0x0, MV, 0x36, FC, 0x1, DS, 0x52A, FC, 0x0, TP, 0x3A, BT, 0xAA, TX(0), 0x26DA, TP, 0xAA, BT, 0x12A, TX(0), 0x253A, END,
+    /*  8 */ SZ, 0xC, BX, IN, 0xA, MV, 0x16, FC, 0x4, DS, 0x51A, FC, 0x0, MV, 0x36, FC, 0x1, DS, 0x4B4, FC, 0x0, TP, 0x4A, BT, 0xBA, TX(0), 0x22F0, END,
+    /*  9 */ SZ, 0xC, BX, IN, 0xA, MV, 0x16, FC, 0x4, DS, 0x4A8, FC, 0x0, MV, 0x36, FC, 0x1, DS, 0x442, FC, 0x0, TP, 0x3A, BT, 0x11A, TX(0), 0x2118, END,
+    /* 10 */ SZ, 0xC, BX, IN, 0xA, MV, 0x16, FC, 0x4, DS, 0x428, FC, 0x0, MV, 0x36, FC, 0x1, DS, 0x3C2, FC, 0x0, TP, 0x3A, BT, 0x6A, TX(0), 0x1D44, MV, 0x86, FC, 0x1, DS, 0x3AA, FC, 0x0, TP, 0x8A, BT, 0x12A, TX(0), 0x1CA2, END,
+    /* 11 */ SZ, 0xC, BX, IN, 0xA, MV, 0x16, FC, 0x4, DS, 0x39C, FC, 0x0, MV, 0x36, FC, 0x1, DS, 0x336, FC, 0x0, TP, 0x4A, BT, 0xFA, TX(0), 0x1A58, END,
+    /* 12 */ SZ, 0xC, BX, IN, 0xA, MV, 0x16, FC, 0x4, DS, 0x316, FC, 0x0, MV, 0x36, FC, 0x1, DS, 0x2B0, FC, 0x0, TP, 0x4A, BT, 0xCA, TX(0), 0x17A0, END,
+    /* 13 */ SZ, 0xC, BX, IN, 0xA, MV, 0x16, FC, 0x4, DS, 0x29E, FC, 0x0, MV, 0x36, FC, 0x1, DS, 0x238, FC, 0x0, TP, 0x4A, BT, 0x11A, TX(0), 0x15C8, END,
+    /* 14 */ SZ, 0xC, BX, IN, 0xA, MV, 0x16, FC, 0x4, DS, 0x218, FC, 0x0, MV, 0x36, FC, 0x1, DS, 0x1B2, FC, 0x0, TP, 0x4A, BT, 0x12A, TX(0), 0x1380, END,
+    /* 15 */ SZ, 0xC, BX, IN, 0xA, MV, 0x16, FC, 0x4, DS, 0x19A, FC, 0x0, MV, 0x36, FC, 0x1, DS, 0x134, FC, 0x0, TP, 0x4A, BT, 0x12A, TX(0), 0x1074, END,
+    /* 16 */ SZ, 0xA, BX, IN, 0xA, MV, 0x16, FC, 0x5, DS, 0x112, FC, 0x0, TP, 0x25, BT, 0x10A, TX(0), 0x5F4A, SZ, 0xA, MV, 0x11A, FC, 0x1, DS, 0x102, END,
+    /* 17 */ SZ, 0xA, BX, IN, 0xA, MV, 0x16, FC, 0x5, DS, 0xE2, FC, 0x0, TP, 0x25, BT, 0x12A, TX(0), 0x5C0A, END,
+    /* 18 */ SZ, 0xA, BX, IN, 0xA, MV, 0x16, FC, 0x4, DS, 0xB2, FC, 0x0, TP, 0x2A, BT, 0x12A, TX(0), 0x0D3A, END,
+    /* 19 */ SZ, 0xC, BX, IN, 0xA, MV, 0x16, FC, 0x1, DS, 0x96, FC, 0x0, TP, 0x1A, BT, 0x11A, TX(0), 0x08B6, END,
+};
+static const uint16_t page_start[] = {0, 8, 42, 70, 112, 140, 174, 202, 230, 272, 300, 328, 356, 384, 412, 440, 460, 480};
+static void text_box(uint32_t r, uint16_t g, int16_t just) {
+    mac_TETextBox(OADDR(g), (int32_t)(mz_seg_of(2, 0x0252), fn_S2_0252(OADDR(g))), r, just);
+}
+void fo_S8_57DE(uint32_t dlg, int16_t item) {
+    (void)dlg; (void)item;                                  /* it always draws item 4 of G_080A */
+    MZ_FRAME;
+    uint32_t kind = mz_local(2), h = mz_local(4), box = mz_local(8), port = mz_local(4);
+    uint32_t pen = mz_local(18), r = mz_local(8), d = og32(0x080A);
+    mac_GetDialogItem(d, 4, kind, h, box);
+    mac_GetPort(port);
+    mac_SetPort(d);
+    mac_GetPenState(pen);
+    mac_PenNormal();
+    mac_ForeColor(33);                                      /* blackColor */
+    mac_PaintRect(box);
+    mac_ForeColor(30);                                      /* whiteColor */
+    mac_BackColor(33);
+    mac_TextFont((int16_t)og16(0x5816));
+    int16_t page = (int16_t)og16(0x080C);
+    if (page == 1) {
+        uint32_t pic = mac_GetPicture(0x81);
+        if (pic) {
+            uint32_t pr = mz_local(8), dr = mz_local(8);
+            w32(dr, r32(d + 0x10)); w32(dr + 4, r32(d + 0x14));
+            w16(dr + 4, 0x64);
+            w32(pr, r32(deref(pic) + 2)); w32(pr + 4, r32(deref(pic) + 6));
+            mac_OffsetRect(pr, (int16_t)(r16(dr + 2) - r16(pr + 2)), (int16_t)(r16(dr) - r16(pr)));
+            mac_OffsetRect(pr, (int16_t)((int16_t)(r16(dr + 6) - r16(pr + 6)) / 2),
+                               (int16_t)((int16_t)(r16(dr + 4) - r16(pr + 4)) / 2));
+            mac_DrawPicture(pic, pr);
+        }
+        mac_TextSize(9);
+        w32(r, r32(box)); w32(r + 4, r32(box + 4));
+        w16(r, 0x64); w16(r + 4, 0x78); text_box(r, 0x3740, 1);
+        w16(r, 0xAF); w16(r + 4, 0xEB); text_box(r, 0x372C, 1);
+        uint32_t name = mz_local(0x100);
+        if (fo_S8_6668(0, name)) {
+            w16(r, 0x104); w16(r + 4, 0x110); text_box(r, 0x3692, 1);
+            w16(r, 0x112); w16(r + 4, 0x11E);
+            mac_TETextBox(name + 1, r8(name), r, 1);
+        } else { w16(r, 0x104); w16(r + 4, 0x110); text_box(r, 0x3682, 1); }
+    } else if (page >= 2 && page <= 0x13) {
+        for (const uint16_t *op = page_ops + page_start[page - 2]; *op != END; ) {
+            switch (*op++) {
+            case SZ: mac_TextSize((int16_t)*op++); break;
+            case BX: w32(r, r32(box)); w32(r + 4, r32(box + 4)); break;
+            case IN: mac_InsetRect(r, (int16_t)*op, (int16_t)*op); op++; break;
+            case MV: mac_MoveTo((int16_t)r16(r + 2), (int16_t)*op++); break;
+            case FC: mac_TextFace((int16_t)*op++); break;
+            case DS: mac_DrawString(OADDR(*op++)); break;
+            case TP: w16(r, *op++); break;
+            case BT: w16(r + 4, *op++); break;
+            case TXL: text_box(r, *op++, 0); break;
+            case TXC: text_box(r, *op++, 1); break;
+            }
+        }
+    }
+    mac_SetPenState(pen);
+    mac_SetPort(r32(port));
+}

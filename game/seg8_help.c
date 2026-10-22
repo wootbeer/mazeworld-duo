@@ -30,7 +30,9 @@ static void title_line(uint32_t r, int16_t top, int16_t bottom, uint16_t g) {
  * Page 1: picture 129 centred in the top 100 rows of the dialog, and four centred lines
  * (G_4DA4, G_4D86, G_4C5E, G_4C9A). Pages 2-24: the heading G_4B32 with the page number - 1,
  * underlined, and the text of 'TEXT' 126 + page. */
+void fo_S8_57DE(uint32_t dlg, int16_t item);
 void fn_S8_1B0E(uint32_t dlg, int16_t item) {
+    if (mz_original) { fo_S8_57DE(dlg, item); return; }    /* Original: its own pages */
     (void)dlg; (void)item;                                  /* it always draws item 4 of G_4BC2 */
     MZ_FRAME;
     uint32_t kind = mz_local(2), h = mz_local(4), box = mz_local(8), port = mz_local(4);

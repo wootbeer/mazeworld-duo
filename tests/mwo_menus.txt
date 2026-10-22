@@ -1,20 +1,42 @@
-# Mazeworld Original's menus not covered elsewhere: Options (both modes), window sizes, a new game
-# with play, Quit cancelled at the caution alert, then Quit.
-40 tap return
-100 menu 132 2
-140 menu 132 1
-180 menu 131 2
-240 menu 131 3
-300 menu 131 1
-360 menu 129 1
-420 click 320 240
-480 mmove 10 -10
-520 tap escape
-600 down cmd
-602 tap q
-606 up cmd
-660 click 309 252
-720 down cmd
-722 tap q
-726 up cmd
-780 tap return
+# Mazeworld Original's menus not covered elsewhere: About and the instructions paged to the end,
+# Options (both modes), window sizes, a new game with play, Quit cancelled at the caution alert,
+# then Quit.
+130 menu 128 2
+160 tap right
+180 tap right
+200 tap right
+220 tap right
+240 tap right
+260 tap right
+280 tap right
+300 tap right
+320 tap right
+340 tap right
+360 tap right
+380 tap right
+400 tap right
+420 tap right
+440 tap right
+460 tap right
+480 tap right
+500 tap escape
+540 menu 128 1
+560 tap right
+580 tap escape
+660 menu 132 2
+700 menu 132 1
+740 menu 131 2
+800 menu 131 3
+860 menu 131 1
+920 menu 129 1
+980 click 320 240
+1040 mmove 10 -10
+1080 tap escape
+1160 down cmd
+1162 tap q
+1166 up cmd
+1220 click 309 252
+1280 down cmd
+1282 tap q
+1286 up cmd
+1340 tap return

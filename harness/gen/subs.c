@@ -460,7 +460,6 @@ void fo_S8_1152(void);
 void fo_S8_0F5A(void);
 void fo_S8_145E(void);
 void fo_S8_2AE2(void);
-void fo_S8_2BA8(void);
 void fo_S8_2B68(void);
 void fo_S8_31FA(void);
 void fo_S8_305A(uint32_t name, int16_t err);
@@ -472,9 +471,21 @@ void fo_S8_2A78(int16_t item);
 void fo_S8_2AA8(int16_t item);
 void fo_S8_2972(uint32_t m);
 void fo_S8_20EA(uint32_t h);
+uint32_t fo_S8_2008(uint8_t load);
+int16_t fo_S8_210C(uint32_t h);
 int16_t fo_S8_44A8(uint32_t pgw, uint32_t gdh);
 void fo_S8_4D26(void);
 uint8_t fo_S8_472E(int16_t size);
+uint8_t fo_S8_6760(uint32_t code, uint32_t name);
+uint8_t fo_S8_6668(uint32_t pcode, uint32_t pname);
+void fo_S8_68FA(void);
+void fo_S8_3C0E(int16_t line, uint32_t text);
+void fo_S8_39AA(void);
+void fo_S8_3AB8(void);
+void fo_S8_3B3E(void);
+void fo_S8_3BB8(void);
+uint8_t fo_S8_05CC(int16_t n);
+void fo_S8_57DE(uint32_t dlg, int16_t item);
 
 static void w_fn_S4_36F2(void) {
     setreg(M68K_REG_D0, (uint32_t)(uint16_t)fn_S4_36F2());
@@ -1533,9 +1544,6 @@ static void w_fo_S8_145E(void) {
 static void w_fo_S8_2AE2(void) {
     fo_S8_2AE2();
 }
-static void w_fo_S8_2BA8(void) {
-    fo_S8_2BA8();
-}
 static void w_fo_S8_2B68(void) {
     fo_S8_2B68();
 }
@@ -1576,6 +1584,14 @@ static void w_fo_S8_20EA(void) {
     uint32_t sp = reg(M68K_REG_A7);
     fo_S8_20EA((uint32_t)rd32(sp + 4));
 }
+static void w_fo_S8_2008(void) {
+    uint32_t sp = reg(M68K_REG_A7);
+    setreg(M68K_REG_D0, (uint32_t)fo_S8_2008((uint8_t)rd8(sp + 4)));
+}
+static void w_fo_S8_210C(void) {
+    uint32_t sp = reg(M68K_REG_A7);
+    uint32_t r = (uint16_t)fo_S8_210C((uint32_t)rd32(sp + 4)); setreg(M68K_REG_D0, (reg(M68K_REG_D0) & 0xFFFF0000u) | r);
+}
 static void w_fo_S8_44A8(void) {
     uint32_t sp = reg(M68K_REG_A7);
     uint32_t r = (uint16_t)fo_S8_44A8((uint32_t)rd32(sp + 4), (uint32_t)rd32(sp + 8)); setreg(M68K_REG_D0, (reg(M68K_REG_D0) & 0xFFFF0000u) | r);
@@ -1586,6 +1602,41 @@ static void w_fo_S8_4D26(void) {
 static void w_fo_S8_472E(void) {
     uint32_t sp = reg(M68K_REG_A7);
     setreg(M68K_REG_D0, (uint32_t)(uint8_t)fo_S8_472E((int16_t)rd16(sp + 4)));
+}
+static void w_fo_S8_6760(void) {
+    uint32_t sp = reg(M68K_REG_A7);
+    setreg(M68K_REG_D0, (uint32_t)(uint8_t)fo_S8_6760((uint32_t)rd32(sp + 4), (uint32_t)rd32(sp + 8)));
+}
+static void w_fo_S8_6668(void) {
+    uint32_t sp = reg(M68K_REG_A7);
+    uint32_t r = (uint8_t)fo_S8_6668((uint32_t)rd32(sp + 4), (uint32_t)rd32(sp + 8)); setreg(M68K_REG_D0, (reg(M68K_REG_D0) & 0xFFFFFF00u) | r);
+}
+static void w_fo_S8_68FA(void) {
+    fo_S8_68FA();
+}
+static void w_fo_S8_3C0E(void) {
+    uint32_t sp = reg(M68K_REG_A7);
+    fo_S8_3C0E((int16_t)rd16(sp + 4), (uint32_t)rd32(sp + 6));
+}
+static void w_fo_S8_39AA(void) {
+    fo_S8_39AA();
+}
+static void w_fo_S8_3AB8(void) {
+    fo_S8_3AB8();
+}
+static void w_fo_S8_3B3E(void) {
+    fo_S8_3B3E();
+}
+static void w_fo_S8_3BB8(void) {
+    fo_S8_3BB8();
+}
+static void w_fo_S8_05CC(void) {
+    uint32_t sp = reg(M68K_REG_A7);
+    setreg(M68K_REG_D0, (uint32_t)(uint8_t)fo_S8_05CC((int16_t)rd16(sp + 4)));
+}
+static void w_fo_S8_57DE(void) {
+    uint32_t sp = reg(M68K_REG_A7);
+    fo_S8_57DE((uint32_t)rd32(sp + 6), (int16_t)rd16(sp + 4));
 }
 
 typedef struct { int seg; uint32_t off; const char *name; void (*fn)(void); int regs; uint32_t d0mask; int argbytes; int nocheck; int pops; uint32_t ignore; int orig; } SubEntry;
@@ -2043,7 +2094,6 @@ const SubEntry g_subs[] = {
     {8, 0x0F5A, "fo_S8_0F5A", w_fo_S8_0F5A, 0, 0x0u, 0, 0, 0, 0x0u, 1},
     {8, 0x145E, "fo_S8_145E", w_fo_S8_145E, 0, 0x0u, 0, 0, 0, 0x0u, 1},
     {8, 0x2AE2, "fo_S8_2AE2", w_fo_S8_2AE2, 0, 0x0u, 0, 1, 0, 0x0u, 1},
-    {8, 0x2BA8, "fo_S8_2BA8", w_fo_S8_2BA8, 0, 0x0u, 0, 1, 0, 0x0u, 1},
     {8, 0x2B68, "fo_S8_2B68", w_fo_S8_2B68, 0, 0x0u, 0, 1, 0, 0x0u, 1},
     {8, 0x31FA, "fo_S8_31FA", w_fo_S8_31FA, 0, 0x0u, 0, 1, 0, 0x0u, 1},
     {8, 0x305A, "fo_S8_305A", w_fo_S8_305A, 0, 0x0u, 6, 1, 0, 0x0u, 1},
@@ -2055,8 +2105,20 @@ const SubEntry g_subs[] = {
     {8, 0x2AA8, "fo_S8_2AA8", w_fo_S8_2AA8, 0, 0x0u, 2, 0, 0, 0x0u, 1},
     {8, 0x2972, "fo_S8_2972", w_fo_S8_2972, 0, 0x0u, 4, 0, 0, 0x0u, 1},
     {8, 0x20EA, "fo_S8_20EA", w_fo_S8_20EA, 0, 0x0u, 4, 0, 0, 0x0u, 1},
+    {8, 0x2008, "fo_S8_2008", w_fo_S8_2008, 0, 0xFFFFFFFFu, 2, 1, 0, 0x0u, 1},
+    {8, 0x210C, "fo_S8_210C", w_fo_S8_210C, 0, 0xFFFFu, 4, 1, 0, 0x0u, 1},
     {8, 0x44A8, "fo_S8_44A8", w_fo_S8_44A8, 0, 0xFFFFu, 8, 1, 0, 0x0u, 1},
     {8, 0x4D26, "fo_S8_4D26", w_fo_S8_4D26, 0, 0x0u, 0, 0, 0, 0x38u, 1},
     {8, 0x472E, "fo_S8_472E", w_fo_S8_472E, 0, 0xFFFFFFFFu, 2, 1, 0, 0x0u, 1},
+    {8, 0x6760, "fo_S8_6760", w_fo_S8_6760, 0, 0xFFFFFFFFu, 8, 0, 0, 0x0u, 1},
+    {8, 0x6668, "fo_S8_6668", w_fo_S8_6668, 0, 0xFFu, 8, 0, 0, 0x0u, 1},
+    {8, 0x68FA, "fo_S8_68FA", w_fo_S8_68FA, 0, 0x0u, 0, 1, 0, 0x0u, 1},
+    {8, 0x3C0E, "fo_S8_3C0E", w_fo_S8_3C0E, 0, 0x0u, 6, 0, 0, 0x0u, 1},
+    {8, 0x39AA, "fo_S8_39AA", w_fo_S8_39AA, 0, 0x0u, 0, 0, 0, 0x0u, 1},
+    {8, 0x3AB8, "fo_S8_3AB8", w_fo_S8_3AB8, 0, 0x0u, 0, 0, 0, 0x0u, 1},
+    {8, 0x3B3E, "fo_S8_3B3E", w_fo_S8_3B3E, 0, 0x0u, 0, 0, 0, 0x0u, 1},
+    {8, 0x3BB8, "fo_S8_3BB8", w_fo_S8_3BB8, 0, 0x0u, 0, 0, 0, 0x0u, 1},
+    {8, 0x05CC, "fo_S8_05CC", w_fo_S8_05CC, 0, 0xFFFFFFFFu, 2, 1, 0, 0x0u, 1},
+    {8, 0x57DE, "fo_S8_57DE", w_fo_S8_57DE, 0, 0x0u, 6, 1, 6, 0x0u, 1},
     {0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0}
 };

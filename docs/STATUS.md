@@ -15,6 +15,14 @@
 - The map (`tools/map_builds.py`): globals that only near pairs show can be wrong; the ones found
   wrong are fixed in its MANUAL table (and the rig stops when C code reaches a Catacombs global
   Original lacks). Identical twin functions (the same code on other tables) are left unpaired.
+- Original's shell (`game/orig_shell.c`): the File menu (New / Load / Save Game As / Quit, with the
+  'mazr' game file), Window Size and Options, the screen layouts and offscreen world, the
+  preferences, Register (its code check) and the title / pause / level-end screens, the
+  instructions' 19 pages and the colour sets; `tests/mwo_menus.txt` covers the menus. Still 68k
+  (each waits for the play loop, which the shell loop, the update event and the instructions'
+  filter all reach): the shell loop and event dispatch (fn_S8_21E8, 2256, 2346, 23D4, 2524, 244A,
+  62AC), starting play (3796), the main window's update (38EE) and the start-up (1C0C); not run
+  by any test yet: Print Order Form (3284) and the Apple-event handlers (3482, 35FC, 36F8, 3454).
 - Left to do: the play loop (fn_S8_0E2A, fn_S8_0000), the creatures' behaviour (segments 9, 10,
   11), sound (Original's own, segment 4 / 9 driver calls), the level change and save files.
   For the port: Original's projection reads the word at low memory $30 (a bug: an exception
