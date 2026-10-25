@@ -249,7 +249,9 @@ int16_t fn_S8_295A(uint32_t h) {
  * (G_2242), the palette (G_2224), the renderer's memory, a new game, the sounds, the main window;
  * then the shell loop; on Quit the preferences are saved (alert on error) and everything freed.
  * Each failure on the way is a fatal alert. */
+void fo_S8_1C0C(void);
 void fn_S8_21AA(void) {
+    if (mz_original) { fo_S8_1C0C(); return; }               /* Original: its own (game/orig_shell.c) */
     MZ_FRAME;
     Regs r = {{0}, {0}, 0};
     fn_S8_25A8(); fn_S8_26A2(); fn_S8_2480(); fn_S8_25BE();

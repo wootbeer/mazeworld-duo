@@ -672,3 +672,40 @@ void fo_menu(int16_t menu, int16_t item) {
     case 0x84: fo_S8_2AA8(item); break;
     }
 }
+
+/* fo_S8_1C0C (JT 19): the program: Toolbox set-up, menus, system checks, Apple events, the font
+ * (G_71AA into G_5816; alert G_71A2 if missing), window storage (G_580C, G_5808), preferences
+ * (G_5814, fo_S8_2008), the palette (G_57F6), the renderer's memory, the game (fo_S8_2AE2), level
+ * 1's graphics, the panel's starting values, the main window at the preferences' size and screen;
+ * then the shell loop; on Quit the preferences are saved (alert on error). */
+void fo_S8_1C0C(void) {
+    MZ_FRAME;
+    Regs r = {{0}, {0}, 0};
+    fn_S8_25A8(); fn_S8_26A2(); fn_S8_2480(); fn_S8_25BE();
+    mac_GetFNum(OADDR(0x71AA), OADDR(0x5816));
+    if (!og16(0x5816)) mz_seg_of(2, 0x03DC), fn_S2_03DC(OADDR(0x71A2), 0);
+    sog32(0x580C, mac_NewPtr(0x9C)); if (!og32(0x580C)) alert(0x711C, 0, 1);
+    sog32(0x5808, mac_NewPtr(0x9C)); if (!og32(0x5808)) alert(0x7102, 0, 1);
+    sog32(0x5814, fo_S8_2008(1)); if (!og32(0x5814)) alert(0x70E8, 0, 1);
+    int colour = mac_TestDeviceAttribute(mac_GetMainDevice(), 0);
+    sog32(0x57F6, (mz_seg_of(2, 0x01FA), fn_S2_01FA(colour ? 0xC8 : 0xD2)));
+    if (!og32(0x57F6)) alert(0x70A0, 0, 1);
+    sog32(0x589C, 0);
+    int16_t err = fn_S8_04FA();
+    if (err) alert(0x595E, err, 1);
+    fo_S8_2AE2();
+    fn_S8_0136(1);
+    fn_S8_2A32(&r);
+    mz_seg_of(2, 0x39F8), fn_S2_39F8(&r);                   /* fn_S2_2F98: the panel's starting values */
+    sog16(0x56EE, 0); sog16(0x56EA, 0x8E); sog16(0x56E6, 0x8E); sog16(0x56E2, 3);
+    uint32_t p = deref(og32(0x5814));
+    if (!fn_S8_48A2((int16_t)r16(p), p + 2)) mac_ExitToShell();
+    sog32(0x37C4, r32(0x020C));                             /* seed from the clock (Time) */
+    fn_S8_2A4A();
+    err = fo_S8_210C(og32(0x5814));
+    if (err) {
+        uint32_t what = mz_local(0x100);
+        mz_seg_of(3, 0x03BA), fn_S3_03BA(what, 0x80, 1);
+        fn_S8_37E6(what, err);
+    }
+}

@@ -49,12 +49,14 @@ MANUAL = {
     0x1DA8: 0x53AC,   # the 50 graphics pointers (fn_S8_02F0 / fn_S8_0452, through A1)
     0x1EE0: 0x54EC,   # the map's handle (fn_S8_04FA / fn_S8_08E8: NewHandle $8000; locked into G_53D4)
     0x215C: 0x573E,   # the view's right edge (fn_S2_040A / fn_S2_03B0, with G_215A..G_215E)
+    0x20F8: 0x56E6,   # the second gauge (fn_S8_0F1A / fn_S8_14B4); the program's pairing would move it
 }
 
 MANUAL_FUNCS = {   # pairs the matching cannot find (checked by hand: same callers, callees and traps)
     'fn_S2_040A': 'fn_S2_03B0',   # the frame onto the window
     'fn_S2_4F1C': 'fn_S2_41E8',   # the wall outline
     'fn_S8_0A24': 'fn_S8_0E2A',   # one frame of play
+    'fn_S8_21AA': 'fn_S8_1C0C',   # the program (Original: no sound, the 'mazr' game)
     'fn_S7_3FA6': 'fn_S7_1D90',   # weighing a neighbour cell (exact; Original has more copies)
     'fn_S7_0E46': 'fn_S7_03FE',   # a shot's flight (Original: four steps)
     'fn_S8_02F0': 'fn_S8_0452',   # lock / unlock the 50 graphics handles

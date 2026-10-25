@@ -392,7 +392,8 @@
 8  3658  i16 fn_S8_3658(i16 ref, ptr h)  nocheck
 8  3522  i16 fn_S8_3522(ptr spec, ptr h, u32 creator, u32 type)  nocheck
 8  295A  i16 fn_S8_295A(ptr h)  nocheck
-8  21AA  void fn_S8_21AA(void)  nocheck
+8  21AA  void fn_S8_21AA(void)  nocheck both
+8  2F98  internal fo_S8_1C0C  orig
 # the instructions dialog (game/seg8_help.c)
 8  190C  void fn_S8_190C(i16 page)  nocheck both
 8  1A9C  void fn_S8_1A9C(i16 page)  both
@@ -564,3 +565,5 @@
 8  2346  internal shell_mouse_down  orig
 8  2524  internal fo_menu  orig
 8  29AE  internal fo_menu  orig
+1  0004  internal port_run_game  orig
+1  0228  internal (empty)  orig
