@@ -67,7 +67,7 @@ static void one_tick(uint32_t tick) {
     int ncb = snd_tick(tick, cbp, cbc, cba, SCRATCH, 32);
     for (int i = 0; i < nd; i++) call_task(rd32(due[i] + 6), due[i]);
     for (int i = 0; i < ncb; i++) {
-        if (cbp[i] != A5_ADDR + 0x1FA) hx_fault("sound callback at %06X: not a known routine", cbp[i]);
+        if (cbp[i] != mz_jt(0x1FA)) hx_fault("sound callback at %06X: not a known routine", cbp[i]);
         fn_S4_42E6(cbc[i], cba[i]);
     }
 }

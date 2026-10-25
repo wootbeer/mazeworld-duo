@@ -7,6 +7,7 @@
 #include "../game/mzasm.h"
 #include "../archive/arc.h"
 #include "port.h"
+#include "../game/mz.h"
 #include <stdarg.h>
 #include <stdlib.h>
 #include <string.h>
@@ -81,6 +82,10 @@ int port_boot(const char *archive, const char *logpath, char *err, size_t errlen
     wr32(LM_ApplZone, HEAP_BASE); wr32(LM_TheZone, HEAP_BASE); wr32(LM_SysZone, HEAP_BASE);
     wr32(LM_HeapEnd, HEAP_END); wr32(LM_ApplLimit, HEAP_END); wr32(LM_ScrnBase, SCREEN_BASE);
     wr32(LM_Time, 0xAF8B7E00u);  /* the harness's fixed clock (the port sets the real time in port_main) */
+    /* the exception vectors as the rig has them: Mazeworld Original reads them through nil pointers
+     * (its projection the word at $30, its game loop the long at $20), so they must hold the same */
+    for (uint32_t v = 2; v < 64; v++) wr32(4 * v, 0x00FF0010u);
+    wr32(0x28, 0x00FF0000u);
     heap_init();
     qd_init();
     static ArcSet arc;
@@ -88,6 +93,7 @@ int port_boot(const char *archive, const char *logpath, char *err, size_t errlen
     const ArcFile *app = NULL;
     for (int k = 0; k < arc.n; k++) if (arc.files[k].type == FOURCC('A','P','P','L') && arc.files[k].rlen) { app = &arc.files[k]; break; }
     if (!app) { snprintf(err, errlen, "%s contains no application", archive); return -1; }
+    { void mz_select_original(void); if (app->creator == FOURCC('M','z','w','l')) mz_select_original(); }   /* Mazeworld Original */
     const char *slash = strrchr(app->path, '/');
     snprintf(g_appname, sizeof g_appname, "%.63s", slash ? slash + 1 : app->path);
     size_t dirlen = slash ? (size_t)(slash - app->path + 1) : 0;
@@ -152,8 +158,8 @@ uint32_t hx_call_pascal(uint32_t proc, int retbytes, int nargs, const uint32_t *
     (void)retbytes; (void)sizes;
     uint32_t sp = reg(M68K_REG_A7);
     uint32_t res = 0;
-    if (proc == A5_ADDR + 0xA2 && nargs == 2) fn_S8_1B0E(v[0], (int16_t)v[1]);              /* JT 16 */
-    else if (proc == A5_ADDR + 0xAA && nargs == 3) res = fn_S8_1D5C(v[0], v[1], v[2]) ? 0x0100 : 0;   /* JT 17: a Boolean */
+    if (proc == mz_jt(0xA2) && nargs == 2) fn_S8_1B0E(v[0], (int16_t)v[1]);              /* JT 16 */
+    else if (proc == mz_jt(0xAA) && nargs == 3) res = fn_S8_1D5C(v[0], v[1], v[2]) ? 0x0100 : 0;   /* JT 17: a Boolean */
     else hx_fault("call from the Toolbox to %06X: not a known routine", proc);
     setreg(M68K_REG_A7, sp);
     return res;
