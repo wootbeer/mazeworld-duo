@@ -29,9 +29,10 @@
   (`game/orig_gen_*.c`, operations in `game/asm68.h`; regenerate, do not edit). The tests reach a
   part of that code and match the original on every call; the rest is translated the same way but
   not yet run by a test (a longer recording would reach more of it).
-- Left to do: the play loop (fn_S8_0E2A, fn_S8_0000, fn_S2_031C), the rest of the shell (its loop
-  and event dispatch, which wait for the play loop), sound (Original's own, segment 4 / 9 driver
-  calls), the level change and save files.
+- Now all C: the play loop, the shell loop, start-up, the menus and saved games; the port runs
+  Original with no 68k code. In the rig only fn_S3_0000 / 026A and fn_S2_2F98 (a few start-up
+  instructions) still run as 68k. Not reached by any test yet: Apple events, Load / Save Game on a
+  real file, and whatever creature code the recordings do not reach (a longer recording would).
   For the port: Original's projection reads the word at low memory $30 (a bug: an exception
   vector, in the rig the fault gate's address), so the port's low memory must hold the same.
 
