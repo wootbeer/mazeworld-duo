@@ -542,3 +542,10 @@
 10 43A0  internal g_pic_random  orig
 10 43B8  internal g_ring  orig
 7  007C  regs fo_S7_007C  orig ignore=all
+2  4C94  internal fn_S2_5810  orig
+2  3F44  internal fo_S2_3E04  orig
+2  44BE  internal fo_S2_41E8  orig
+2  44F4  internal fo_S2_41E8  orig
+1  014E  internal (C division)  orig
+1  0190  internal (C division)  orig
+1  01BE  internal (C division)  orig
