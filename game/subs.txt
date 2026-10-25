@@ -552,3 +552,13 @@
 10 2C7C  regs fo_S10_2C7C  orig ignore=all
 10 0028  regs fo_S10_0028  orig ignore=all
 7  0F78  regs fo_S7_0F78  orig ignore=d0,d1,d2,a0,a1,ccr
+10 3C60  internal (orig_gen_*.c)  orig
+10 3E22  internal (orig_gen_*.c)  orig
+10 3BA8  internal (orig_gen_*.c)  orig
+10 3B08  internal (orig_gen_*.c)  orig
+10 3DC0  internal (orig_gen_*.c)  orig
+10 16FC  internal (orig_gen_*.c)  orig
+10 3B7C  internal (orig_gen_*.c)  orig
+10 3B9C  internal (orig_gen_*.c)  orig
+10 1168  internal (orig_gen_*.c)  orig
+10 115A  internal (orig_gen_*.c)  orig
