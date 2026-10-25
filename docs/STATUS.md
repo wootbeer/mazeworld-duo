@@ -23,8 +23,15 @@
   filter all reach): the shell loop and event dispatch (fn_S8_21E8, 2256, 2346, 23D4, 2524, 244A,
   62AC), starting play (3796), the main window's update (38EE) and the start-up (1C0C); not run
   by any test yet: Print Order Form (3284) and the Apple-event handlers (3482, 35FC, 36F8, 3454).
-- Left to do: the play loop (fn_S8_0E2A, fn_S8_0000), the creatures' behaviour (segments 9, 10,
-  11), sound (Original's own, segment 4 / 9 driver calls), the level change and save files.
+- The creatures: the smaller behaviours by hand (`game/orig_creatures.c`); the two long ones
+  (fn_S10_0028, fn_S10_2C7C) and the dispatcher fn_S7_0F78 with every behaviour it reaches that no
+  C covered yet (segments 4, 9, 11) translated instruction by instruction by `tools/asm2c.py`
+  (`game/orig_gen_*.c`, operations in `game/asm68.h`; regenerate, do not edit). The tests reach a
+  part of that code and match the original on every call; the rest is translated the same way but
+  not yet run by a test (a longer recording would reach more of it).
+- Left to do: the play loop (fn_S8_0E2A, fn_S8_0000, fn_S2_031C), the rest of the shell (its loop
+  and event dispatch, which wait for the play loop), sound (Original's own, segment 4 / 9 driver
+  calls), the level change and save files.
   For the port: Original's projection reads the word at low memory $30 (a bug: an exception
   vector, in the rig the fault gate's address), so the port's low memory must hold the same.
 

@@ -58,7 +58,14 @@ int seg_load(int n) {
 int seg_is_loaded(int n) { return n > 0 && n < MAXSEG && segs[n].loaded; }
 
 /* where segment n's code is (loading it first), for data kept in a code segment */
-uint32_t mz_seg_base(int n) { mz_seg(n); return n > 0 && n < MAXSEG ? segs[n].base : 0; }
+int rt_in_check_phase(void); void rt_skip_compare(int why); void rt_abandon(int why);
+uint32_t mz_seg_base(int n) {
+    /* in the C phase of a check, a segment the original has yet to load cannot be read: the call is
+     * not compared (as for code in it) and the C version stops here */
+    if (!seg_is_loaded(n) && rt_in_check_phase()) { rt_skip_compare(n); rt_abandon(1); }
+    mz_seg(n);
+    return n > 0 && n < MAXSEG ? segs[n].base : 0;
+}
 
 int seg_of(uint32_t pc, uint32_t *off) {
     for (int n = 1; n < MAXSEG; n++) {
