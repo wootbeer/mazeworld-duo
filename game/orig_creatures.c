@@ -535,3 +535,228 @@ void fo_S10_21DC(Regs *r) {
     w16(o + 0x16, (uint16_t)r->d[7]);
     r->a[7] += 6; r->a[6] = a6;
 }
+
+/* ---------- fn_S10_400A ----------
+ * A circling guard: it goes round a ring of 36 points (fn_S10_43B8), and when the player is near
+ * (within 8, G_382E) and facing it (fn_S7_1472 of its heading against the player's, < $10)
+ * counts +$1A = $1E down to attacking (5-6: it jumps onto the player, life - $28) or, near
+ * record 1, it is drawn in (8: four steps of the ring, at distance < 3 of record 1 the map word
+ * $40 = $1D02 and 9-11: a straight run of +$1A steps, a wait, then turning towards the player);
+ * 3-4 dying (pictures 7, 4, $C, then removed and the map word $40 = $1D01); 7 walking the path
+ * of three points (fn_S10_4324) until near the player. Event 1 kills it in states 0 and 7-11. */
+static void g_target(uint16_t x, uint16_t y) { sog16(0x381C, x); sog16(0x3818, y); }
+static void g_record1(void) { uint32_t t = og32(0x53C8); g_target(r16(t + 0x44), r16(t + 0x48)); }
+static void g_step(Regs *r) {                               /* fn_S7_14E8, fn_S7_1540, fn_S7_1578 */
+    mz_seg_of(7, 0x36F4), fn_S7_36F4(r);
+    fn_S7_374C(r);
+    fn_S7_3784(r);
+}
+static void g_pic_random(Regs *r) {                          /* fn_S10_43A0 */
+    w16(r->a[4] + 0x18, 5);
+    random_d0(r);
+    if (!((uint16_t)r->d[0] & 0x1F)) w16(r->a[4] + 0x18, 7);
+}
+static void g_ring(Regs *r) {                                /* fn_S10_43B8 */
+    static const uint16_t ring[72] = {
+        0x58, 0x26, 0x4F, 0x27, 0x47, 0x29, 0x3F, 0x2D, 0x38, 0x32, 0x32, 0x38, 0x2D, 0x3F, 0x29, 0x47, 0x27, 0x4F,
+        0x26, 0x58, 0x27, 0x61, 0x29, 0x69, 0x2D, 0x71, 0x32, 0x78, 0x38, 0x7E, 0x3F, 0x83, 0x47, 0x87, 0x4F, 0x89,
+        0x58, 0x8A, 0x61, 0x89, 0x69, 0x87, 0x71, 0x83, 0x78, 0x7E, 0x7E, 0x78, 0x83, 0x71, 0x87, 0x69, 0x89, 0x61,
+        0x8A, 0x58, 0x89, 0x4F, 0x87, 0x47, 0x83, 0x3F, 0x7E, 0x38, 0x78, 0x32, 0x71, 0x2D, 0x69, 0x29, 0x61, 0x27};
+    for (;;) {
+        set_w(&r->d[0], r16(r->a[4] + 0x1A));
+        r->a[0] = 0;                                        /* the original's A0 points into its table */
+        g_target(ring[(uint16_t)r->d[0] / 2], ring[(uint16_t)r->d[0] / 2 + 1]);
+        fo_S7_1488(r);
+        if (!((uint16_t)r->d[0] & 0x8000)) { r->a[0] = OADDR(0x4F30); g_step(r); return; }
+        uint16_t n = (uint16_t)(r16(r->a[4] + 0x1A) + 4);
+        w16(r->a[4] + 0x1A, n >= 0x90 ? 0 : n);
+    }
+}
+static int g_path(Regs *r) {                                 /* fn_S10_4324: 0, or -1 at the path's end */
+    static const uint16_t path[8] = {0x88, 0x62, 0x68, 0x62, 0x48, 0x62, 0xFFFF, 0xFFFF};
+    uint16_t i = r16(r->a[4] + 0x1A);
+    g_target(path[i / 2], path[i / 2 + 1]);
+    fo_S7_1488(r);
+    if ((uint16_t)r->d[0] & 0x8000) {
+        i = (uint16_t)(i + 4);
+        w16(r->a[4] + 0x1A, i);
+        sog16(0x381C, path[i / 2]);
+        if (path[i / 2] & 0x8000) { r->d[0] = r->d[1] = 0xFFFFFFFFu; return -1; }
+        sog16(0x3818, path[i / 2 + 1]);
+        fo_S7_1488(r);
+    }
+    uint16_t d = (uint16_t)r->d[0];
+    mz_seg_of(7, 0x36F4), fn_S7_36F4(r);
+    set_w(&r->d[0], d);
+    r->a[0] = OADDR(0x4F30);
+    fn_S7_374C(r); fn_S7_3784(r);
+    r->d[0] = r->d[1] = 0;
+    return 0;
+}
+static void near_d0(Regs *r) { mz_seg_of(7, 0x3128), fn_S7_3128(r); }    /* fn_S7_12BE: G_382E / G_3830 */
+static void guard_think(Regs *r) {
+    uint32_t o = r->a[4];
+    for (;;) {
+        set_w(&r->d[7], (uint16_t)r->d[0]);
+        switch ((uint16_t)r->d[7]) {
+        case 0:
+            near_d0(r);
+            if (og16(0x382E) < 8) { set_w(&r->d[0], 1); continue; }
+            g_record1(); fo_S7_14C0(r);
+            if ((uint16_t)r->d[0] < 6) { set_w(&r->d[0], 8); continue; }
+            if ((uint16_t)r->d[0] >= 9) return;
+            if (r16(og32(0x53C8) + 0x56) == 2) { set_w(&r->d[0], 8); continue; }
+            return;
+        case 1: w16(o + 0x1A, 0x1E); set_w(&r->d[0], 2); continue;
+        case 2: {
+            near_d0(r);
+            if (og16(0x382E) >= 0xC) { set_w(&r->d[0], 5); continue; }
+            set_w(&r->d[0], (uint16_t)((og16(0x3830) ^ 0x20) - og16(0x56DA)));
+            mz_seg_of(7, 0x367E), fn_S7_367E(r);
+            if ((uint16_t)r->d[0] >= 0x10) { set_w(&r->d[0], 5); continue; }
+            uint16_t t = (uint16_t)(r16(o + 0x1A) - 1);
+            w16(o + 0x1A, t);
+            if (t & 0x8000) { set_w(&r->d[0], 3); continue; }
+            return;
+        }
+        case 3: w16(o + 0x1A, 0); set_w(&r->d[0], 4); continue;
+        case 5: w16(o + 0x1A, 6); set_w(&r->d[0], 6); continue;
+        case 7:
+            if (g_path(r) < 0 || g_path(r) < 0) { w16(o + 0x1A, 0x28); set_w(&r->d[0], 0); continue; }
+            near_d0(r);
+            if (og16(0x382E) < 6) { set_w(&r->d[0], 1); continue; }
+            return;
+        case 8:
+            for (int k = 0; k < 4; k++) g_ring(r);
+            g_record1(); fo_S7_14C0(r);
+            if ((uint16_t)r->d[0] >= 3) return;
+            call_d0d1(r, fo_S7_1278, 0x1D02, 0x40);
+            sog16(0x56C0, 0);
+            w16(o + 0x1A, 6);
+            set_w(&r->d[0], 9); continue;
+        case 9: {
+            int16_t n = (int16_t)(r16(o + 0x1A) - 1);
+            set_w(&r->d[3], (uint16_t)n);
+            if (n < 0) { w16(o + 0x1A, 7); set_w(&r->d[0], 0xA); continue; }
+            w16(o + 0x1A, (uint16_t)n);
+            do {
+                r->a[0] = OADDR(0x4F30);
+                set_w(&r->d[0], r16(o + 0xC));
+                g_step(r);
+                set_w(&r->d[3], (uint16_t)((uint16_t)r->d[3] - 1));
+            } while (!((uint16_t)r->d[3] & 0x8000));
+            return;
+        }
+        case 10: {
+            uint16_t t = (uint16_t)(r16(o + 0x1A) - 1);
+            w16(o + 0x1A, t);
+            if (!(t & 0x8000)) return;
+            w16(o + 0x1A, 0x28); set_w(&r->d[0], 0xB); continue;
+        }
+        case 11: {
+            uint16_t t = (uint16_t)(r16(o + 0x1A) - 1);
+            w16(o + 0x1A, t);
+            if (t & 0x8000) { set_w(&r->d[0], 3); continue; }
+            near_d0(r);
+            set_w(&r->d[0], og16(0x3830));
+            if ((uint16_t)r->d[0] & 0x8000) { set_w(&r->d[0], 3); continue; }
+            mz_seg_of(7, 0x36F4), fn_S7_36F4(r);
+            return;
+        }
+        default: return;
+        }
+    }
+}
+void fo_S10_400A(Regs *r) {
+    static const uint16_t ev[] = {1, 3, 0xFFFF};
+    static const uint8_t has_ev[12] = {1, 0, 0, 0, 0, 0, 0, 1, 1, 1, 1, 1};
+    uint32_t o = r->a[4];
+    set_w(&r->d[7], r16(o + 0x16));
+    set_w(&r->d[0], (uint16_t)r->d[7]);
+    guard_think(r);
+    o_event(r, (uint16_t)r->d[7] < 12 && has_ev[(uint16_t)r->d[7]] ? ev : NULL, guard_think);
+    switch ((uint16_t)r->d[7]) {
+    case 0:
+        g_pic_random(r); g_ring(r); g_ring(r);
+        g_record1(); fo_S7_14C0(r);
+        if (!(og16(0x56C4) & ((uint16_t)r->d[0] >= 0xF ? 0x1F : 0x7F))) g_ring(r);
+        break;
+    case 2: g_pic_random(r); set_w(&r->d[0], og16(0x3830)); mz_seg_of(7, 0x36F4), fn_S7_36F4(r); break;
+    case 4: {
+        uint16_t t = (uint16_t)(r16(o + 0x1A) + 1);
+        w16(o + 0x1A, t);
+        if (t < 4) w16(o + 0x18, 7);
+        else if (t < 8) w16(o + 0x18, 4);
+        else if (t < 0xC) w16(o + 0x18, 0xC);
+        else { unlink_obj(r); w16(o + 2, r16(o + 2) | 0x8000); call_d0d1(r, fo_S7_1278, 0x1D01, 0x40); }
+        break;
+    }
+    case 6: {
+        w16(o + 0x26, 1);
+        int16_t t = (int16_t)(r16(o + 0x1A) - 1);
+        w16(o + 0x1A, (uint16_t)(t < 0 ? 0 : t));
+        w16(o + 0x18, 0x10);
+        sog32(0x382C, og32(0x56D8)); sog32(0x3828, og32(0x56D4)); sog16(0x3824, og16(0x56D0));
+        mz_seg_of(7, 0x3784), fn_S7_3784(r);
+        int16_t l = (int16_t)(og16(0x56EA) - 0x28);
+        sog16(0x56EA, (uint16_t)(l < 0 ? 0 : l));
+        break;
+    }
+    case 7: case 8: g_pic_random(r); break;
+    }
+    w16(o + 0x16, (uint16_t)r->d[7]);
+}
+
+/* ---------- fn_S7_007C: the gates between levels ----------
+ * When the player stands in its cell close to it (G_382E < 5) it starts a count of $14 frames
+ * ($A for states $A and up) showing the full-view picture sequence G_384C (G_3840 for type $10)
+ * as G_56DE (G_56E0 = $80), healing in state 2; at the end the level changes (G_57DC the level,
+ * G_57D8 / G_57D4 the arrival point, a step from it in the direction fn_S7_1488 gives towards the
+ * player, G_57DA the heading, G_57DE, G_57F2). States 0-6 lead to fixed points of levels 2, 1, 1
+ * (exactly $58, $50), 5, 4, 2, 2 (state 0 also sets three map words); states $A and up to level 5,
+ * at the centre of the cell G_5248 lists for the paired gate (state ^ 1). (States 7-9 jump into the
+ * original's code after its table: no level has them.) */
+static void gate_go(uint16_t level, uint32_t x, uint32_t y, uint16_t dir) {
+    uint32_t steps = OADDR(0x4DF0) + sxw((uint16_t)(dir << 2));
+    sog16(0x57DC, level);
+    sog32(0x57D8, x + r32(steps + 0x40));
+    sog32(0x57D4, y + r32(steps));
+    sog16(0x57DA, og16(0x56DA)); sog8(0x57DE, 1); sog8(0x57F2, 1);
+}
+void fo_S7_007C(Regs *r) {
+    static const struct { uint16_t level; uint32_t x, y; } to[7] = {
+        {2, 0xF80000, 0x1E80000}, {1, 0x1680000, 0x1480000}, {1, 0, 0}, {5, 0x480000, 0x480000},
+        {4, 0xF80000, 0xC80000}, {2, 0x1B80000, 0x480000}, {2, 0xF80000, 0x1580000}};
+    uint32_t o = r->a[4];
+    int16_t s = (int16_t)r16(o + 0x16);
+    if (!r16(o + 6)) {
+        if (r16(o + 0x30) != og16(0x56D0)) return;
+        mz_seg_of(7, 0x3128), fn_S7_3128(r);
+        if (og16(0x382E) >= 5) return;
+        w16(o + 6, s >= 0xA ? 0xA : 0x14);
+    }
+    if (s == 2) { sog16(0x56EA, heal(og16(0x56EA), 3)); sog16(0x56E6, heal(og16(0x56E6), 6)); }
+    uint32_t pics = OADDR(r16(o + 2) == 0x10 ? 0x3840 : 0x384C);
+    int16_t c = (int16_t)(r16(o + 0xC) + 1);
+    if (c >= 6) c = 0;
+    w16(o + 0xC, (uint16_t)c);
+    sog16(0x56DE, r16(pics + 2 * (uint32_t)c));
+    sog16(0x56E0, 0x80);
+    uint16_t t = (uint16_t)(r16(o + 6) - 1);
+    w16(o + 6, t);
+    if (t) return;
+    g_target(og16(0x56D8), og16(0x56D4));
+    fo_S7_1488(r);
+    uint16_t dir = (uint16_t)r->d[0];
+    if (s >= 0xA) {
+        uint16_t cell = r16(OADDR(0x5248) + sxw((uint16_t)((((uint16_t)(s - 0xA)) ^ 1) << 1)));
+        uint32_t map = og32(0x53D4) + sxw(cell);
+        gate_go(5, (uint32_t)r16(map + 0x1C) << 16, (uint32_t)r16(map + 0x1E) << 16, dir);
+    } else if (s == 2) {
+        sog16(0x57DC, 1); sog32(0x57D8, 0x580000); sog32(0x57D4, 0x500000);
+        sog16(0x57DA, og16(0x56DA)); sog8(0x57DE, 1); sog8(0x57F2, 1);
+    } else if (s >= 0 && s < 7) {
+        gate_go(to[s].level, to[s].x, to[s].y, dir);
+        if (s == 0) for (uint16_t at = 0x80; at <= 0x100; at += 0x40) call_d0d1(r, fo_S7_1278, 1, at);
+    }
+}

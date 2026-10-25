@@ -537,3 +537,8 @@
 10 2A7C  internal o_route  orig
 10 267C  internal fo_S10_21DC  orig
 10 26EE  internal fo_S10_21DC  orig
+10 400A  regs fo_S10_400A  orig ignore=all
+10 4324  internal g_path  orig
+10 43A0  internal g_pic_random  orig
+10 43B8  internal g_ring  orig
+7  007C  regs fo_S7_007C  orig ignore=all
