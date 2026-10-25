@@ -29,8 +29,7 @@ void input_live_move(int dx, int dy);
 void qd_screen_argb(uint32_t *out);
 extern void (*snd_live_out)(const int16_t *s, int n);
 
-#define TITLE "Mazeworld Catacombs"
-#define PREFS_NAME "Mzwl Catacombs Prefs"
+#define TITLE "Mazeworld"
 
 static SDL_Window *win;
 static SDL_Renderer *ren;
@@ -64,18 +63,22 @@ static struct {
     int x, y, w, h, full;       /* the window: position and client size when not fullscreen (w 0: none saved) */
     char archive[1024];         /* the game archive the player chose, if it is not next to the program */
     int orig_classic;           /* Mazeworld Original: its own mouse movement and gestures, not the keys */
-} settings = {100, 0, 0, 0, 0, 0, "", 0};
+    int game;                   /* the game played last */
+    char archive2[1024];        /* Mazeworld Original's archive, if chosen */
+} settings = {100, 0, 0, 0, 0, 0, "", 0, 0, ""};
 static char settings_path[1024];
 
 /* The games the port knows, by their application's creator code. An archive given on the command
  * line, or any archive next to the program, is recognised by the application inside it. */
-static const struct { uint32_t creator; const char *name; int supported; } games[] = {
-    {FOURCC('M','z','w','C'), "Mazeworld Catacombs", 1},
-    {FOURCC('M','z','w','l'), "Mazeworld (Original)", 0},
+static const struct { uint32_t creator; const char *name, *prefs; } games[] = {
+    {FOURCC('M','z','w','C'), "Mazeworld Catacombs", "Mzwl Catacombs Prefs"},
+    {FOURCC('M','z','w','l'), "Mazeworld (Original)", "Mazeworld Prefs"},
 };
 #define NGAMES (int)(sizeof games / sizeof games[0])
 static char found[NGAMES][1024];      /* an archive of each game, if one was found */
 static int running = -1;              /* the game being played */
+static int switch_to = -1;            /* the game to start when this one has quit */
+static char *archive_setting(int g) { return g ? settings.archive2 : settings.archive; }
 
 static void settings_save(void);
 
@@ -163,13 +166,29 @@ static void key(const SDL_KeyboardEvent *e, int down) {
 static HMENU bar;
 static WNDPROC sdl_proc;
 #define CMD(menu, item) (((menu) - 127) * 100 + (item))
+/* items are the game's in order ("": a separator, "-": an item the port leaves out) */
 static HMENU popup(int menu, const char *const *items) {
     HMENU m = CreatePopupMenu();
     for (int i = 0; items[i]; i++) {
+        if (items[i][0] == '-') continue;
         if (!items[i][0]) AppendMenuA(m, MF_SEPARATOR, 0, NULL);
         else AppendMenuA(m, MF_STRING, (UINT_PTR)CMD(menu, i + 1), items[i]);
     }
     return m;
+}
+/* Mazeworld Original's (Print Order Form left out: no printing) */
+static void build_menus_original(HMENU options) {
+    static const char *const help[] = {"&About Mazeworld...", "&Read Instructions...\tCtrl+/", "-", "Re&gister...", NULL};
+    static const char *const file[] = {"&Play Game\tCtrl+G", "", "&New Game\tCtrl+N", "&Load Game...\tCtrl+O", "",
+                                       "&Save Game As...\tCtrl+S", "", "E&xit\tCtrl+Q", NULL};
+    static const char *const size[] = {"&Tiny\tCtrl+1", "&Small\tCtrl+2", "12\" &Monitor\tCtrl+3", "13\" M&onitor\tCtrl+4", NULL};
+    static const char *const opts[] = {"&Fast Graphics Mode", "&Mac Friendly Mode", NULL};
+    AppendMenuA(options, MF_SEPARATOR, 0, NULL);
+    for (int i = 0; opts[i]; i++) AppendMenuA(options, MF_STRING, (UINT_PTR)CMD(MENU_O_OPTIONS, i + 1), opts[i]);
+    AppendMenuA(bar, MF_POPUP, (UINT_PTR)popup(MENU_FILE, file), "&File");
+    AppendMenuA(bar, MF_POPUP, (UINT_PTR)popup(MENU_O_SIZE, size), "&Window Size");
+    AppendMenuA(bar, MF_POPUP, (UINT_PTR)options, "&Options");
+    AppendMenuA(bar, MF_POPUP, (UINT_PTR)popup(MENU_APPLE, help), "&Help");
 }
 static void build_menus(HWND hwnd) {
     static const char *const game[] = {"&About Mazeworld Catacombs...\tCtrl+/", NULL};
@@ -180,22 +199,27 @@ static void build_menus(HWND hwnd) {
     /* the original's Options dialog (performance settings for 1990s Macs), as a Legacy submenu */
     static const char *const legacy[] = {"Draw &Direct to Screen", "Skip Screen &Sync", "Distribute &Mapping", NULL};
     bar = CreateMenu();
-    {   /* Game: the games the port knows; one not supported yet (or not found) is greyed */
+    {   /* Game: the games the port knows; choosing the other one starts it (when found) */
         HMENU game = CreatePopupMenu();
         for (int i = 0; i < NGAMES; i++) {
             char label[128];
-            snprintf(label, sizeof label, "%s%s", games[i].name, !games[i].supported ? "  (coming later)" : !found[i][0] ? "  (archive not found)" : "");
-            AppendMenuA(game, MF_STRING | (i == running ? MF_CHECKED : 0) | (i == running ? 0 : MF_GRAYED), (UINT_PTR)CMD(MENU_PORT_GAME, i + 1), label);
+            snprintf(label, sizeof label, "%s%s", games[i].name, !found[i][0] ? "  (archive not found)" : "");
+            AppendMenuA(game, MF_STRING, (UINT_PTR)CMD(MENU_PORT_GAME, i + 1), label);
         }
         AppendMenuA(bar, MF_POPUP, (UINT_PTR)game, "&Game");
+    }
+    static const char *const volume[] = {"&100%", "&75%", "&50%", "&25%", "&Mute", NULL};
+    HMENU options = CreatePopupMenu();
+    AppendMenuA(options, MF_POPUP, (UINT_PTR)popup(MENU_PORT_VOLUME, volume), "&Volume");
+    if (running == 1) {
+        AppendMenuA(options, MF_STRING, (UINT_PTR)CMD(MENU_PORT_CONTROLS, 1), "&Classic Mouse Controls");
+        build_menus_original(options);
+        SetMenu(hwnd, bar);
+        return;
     }
     AppendMenuA(bar, MF_POPUP, (UINT_PTR)popup(MENU_FILE, file), "&File");
     AppendMenuA(bar, MF_POPUP, (UINT_PTR)popup(MENU_VIEW, view), "&View");
     AppendMenuA(bar, MF_POPUP, (UINT_PTR)popup(MENU_SOUND, sound), "&Sound");
-    static const char *const volume[] = {"&100%", "&75%", "&50%", "&25%", "&Mute", NULL};
-    HMENU options = CreatePopupMenu();
-    AppendMenuA(options, MF_POPUP, (UINT_PTR)popup(MENU_PORT_VOLUME, volume), "&Volume");
-    AppendMenuA(options, MF_STRING, (UINT_PTR)CMD(MENU_PORT_CONTROLS, 1), "&Classic Mouse Controls (Mazeworld Original)");
     AppendMenuA(options, MF_SEPARATOR, 0, NULL);
     AppendMenuA(options, MF_POPUP, (UINT_PTR)popup(MENU_OPTIONS, legacy), "&Legacy");
     AppendMenuA(bar, MF_POPUP, (UINT_PTR)options, "&Options");
@@ -205,7 +229,7 @@ static void build_menus(HWND hwnd) {
 /* the port's own menu items: they change at once, without the game */
 static const int volume_levels[] = {100, 75, 50, 25, 0};
 static int port_item_state(int menu, int item, int *checked) {
-    if (menu == MENU_PORT_GAME) { *checked = item - 1 == running; return 0; }   /* switching comes with the second game */
+    if (menu == MENU_PORT_GAME) { *checked = item - 1 == running; return item - 1 != running && found[item - 1][0]; }
     if (menu == MENU_PORT_CONTROLS) { *checked = settings.orig_classic; return 1; }
     *checked = menu == MENU_PORT_VOLUME && item >= 1 && item <= 5 && settings.volume == volume_levels[item - 1];
     return 1;
@@ -213,6 +237,7 @@ static int port_item_state(int menu, int item, int *checked) {
 static void port_choose(int menu, int item) {
     if (menu == MENU_PORT_VOLUME && item >= 1 && item <= 5) { settings.volume = volume_levels[item - 1]; settings_save(); }
     if (menu == MENU_PORT_CONTROLS) { settings.orig_classic = !settings.orig_classic; settings_save(); }
+    if (menu == MENU_PORT_GAME && item >= 1 && item <= NGAMES && found[item - 1][0]) { switch_to = item - 1; shell_request_quit(); }
 }
 /* checks and greys each item as the original's menu bar would be just then */
 static void update_popup(HMENU m) {
@@ -338,7 +363,6 @@ void port_tick(uint32_t tick) {
 static void prefs_location(void) {
     char *dir = SDL_GetPrefPath("Mazeworld", "Mazeworld Catacombs");
     if (dir) {
-        snprintf(prefs_path, sizeof prefs_path, "%s%s", dir, PREFS_NAME);
         snprintf(settings_path, sizeof settings_path, "%s%s", dir, "port settings.txt");
         SDL_free(dir);
     }
@@ -351,9 +375,11 @@ static void settings_load(void) {
         else if (sscanf(line, "window=%d,%d,%d,%d", &settings.x, &settings.y, &settings.w, &settings.h) == 4) {}
         else if (sscanf(line, "fullscreen=%d", &v) == 1) settings.full = v != 0;
         else if (sscanf(line, "original_classic_mouse=%d", &v) == 1) settings.orig_classic = v != 0;
-        else if (!strncmp(line, "archive=", 8)) {
-            snprintf(settings.archive, sizeof settings.archive, "%s", line + 8);
-            settings.archive[strcspn(settings.archive, "\r\n")] = 0;
+        else if (sscanf(line, "game=%d", &v) == 1) settings.game = v == 1;
+        else if (!strncmp(line, "archive=", 8) || !strncmp(line, "archive2=", 9)) {
+            char *a = line[7] == '=' ? settings.archive : settings.archive2;
+            snprintf(a, sizeof settings.archive, "%s", strchr(line, '=') + 1);
+            a[strcspn(a, "\r\n")] = 0;
         }
     fclose(f);
 }
@@ -363,10 +389,15 @@ static void settings_save(void) {
     fprintf(f, "volume=%d\n", settings.volume);
     if (settings.w) fprintf(f, "window=%d,%d,%d,%d\nfullscreen=%d\n", settings.x, settings.y, settings.w, settings.h, settings.full);
     if (settings.archive[0]) fprintf(f, "archive=%s\n", settings.archive);
+    if (settings.archive2[0]) fprintf(f, "archive2=%s\n", settings.archive2);
+    fprintf(f, "game=%d\n", settings.game);
     fprintf(f, "original_classic_mouse=%d\n", settings.orig_classic);
     fclose(f);
 }
-static void prefs_load(void) { if (prefs_path[0]) port_prefs_load(prefs_path); }
+static void prefs_load(void) {
+    if (settings_path[0]) snprintf(prefs_path, sizeof prefs_path, "%.*s%s", (int)(strlen(settings_path) - strlen("port settings.txt")), settings_path, games[running].prefs);
+    if (prefs_path[0]) port_prefs_load(prefs_path);
+}
 static void prefs_save(void) { if (prefs_path[0]) port_prefs_save(prefs_path); }
 
 /* ---------- start ---------- */
@@ -401,21 +432,41 @@ static void find_games(void) {
     SDL_free(base);
 }
 
-/* No archive next to the program: the player picks one (Windows: the standard Open dialog). */
-static int choose_archive(char *out, size_t n) {
+/* the standard Open / Save dialogs (Windows); 0 if the player chose a file */
+static int file_dialog(int save, const char *filter, const char *title, const char *defname, char *out, size_t n) {
 #ifdef _WIN32
-    char path[1024] = "";
+    char path[1024]; snprintf(path, sizeof path, "%s", defname ? defname : "");
     OPENFILENAMEA o; memset(&o, 0, sizeof o);
-    o.lStructSize = sizeof o;
-    o.lpstrFilter = "Mac game archives (*.hqx, *.sit, *.bin)\0*.hqx;*.sit;*.bin\0All files (*.*)\0*.*\0";
-    o.lpstrFile = path; o.nMaxFile = sizeof path;
-    o.lpstrTitle = "Select the original Mazeworld Catacombs archive";
-    o.Flags = OFN_FILEMUSTEXIST | OFN_PATHMUSTEXIST | OFN_HIDEREADONLY;
-    if (!GetOpenFileNameA(&o)) return -1;
+    o.lStructSize = sizeof o; o.hwndOwner = NULL;
+    o.lpstrFilter = filter; o.lpstrFile = path; o.nMaxFile = sizeof path; o.lpstrTitle = title;
+    o.Flags = OFN_PATHMUSTEXIST | OFN_HIDEREADONLY | OFN_NOCHANGEDIR | (save ? OFN_OVERWRITEPROMPT : OFN_FILEMUSTEXIST);
+    if (!(save ? GetSaveFileNameA(&o) : GetOpenFileNameA(&o))) return -1;
     snprintf(out, n, "%s", path);
     return 0;
 #else
-    (void)out; (void)n; return -1;
+    (void)save; (void)filter; (void)title; (void)defname; (void)out; (void)n; return -1;
+#endif
+}
+/* No archive next to the program: the player picks one. */
+static int choose_archive(char *out, size_t n) {
+    return file_dialog(0, "Mac game archives (*.hqx, *.sit, *.bin)\0*.hqx;*.sit;*.bin\0All files (*.*)\0*.*\0",
+                       "Select an original Mazeworld archive", NULL, out, n);
+}
+/* the game's Load Game / Save Game As (Standard File): a saved game on this computer (vfs.c) */
+extern int (*vfs_host_choose)(int save, const char *defname, char *path, size_t n);
+static int choose_saved_game(int save, const char *defname, char *path, size_t n) {
+    return file_dialog(save, "Saved games (*.*)\0*.*\0", save ? "Save Game As" : "Load Game", defname, path, n);
+}
+/* starts the program again with another game's archive (Game menu) */
+static void relaunch(const char *archive) {
+#ifdef _WIN32
+    char exe[1024], cmd[2200];
+    GetModuleFileNameA(NULL, exe, sizeof exe);
+    snprintf(cmd, sizeof cmd, "\"%s\" \"%s\"", exe, archive);
+    STARTUPINFOA si; PROCESS_INFORMATION pi; memset(&si, 0, sizeof si); si.cb = sizeof si;
+    if (CreateProcessA(NULL, cmd, NULL, NULL, FALSE, 0, NULL, NULL, &si, &pi)) { CloseHandle(pi.hProcess); CloseHandle(pi.hThread); }
+#else
+    (void)archive;
 #endif
 }
 
@@ -443,41 +494,39 @@ int main(int argc, char **argv) {
     prefs_location();
     settings_load();
     find_games();
-    if (!found[0][0] && settings.archive[0] && which_game(settings.archive) == 0)   /* chosen before */
-        snprintf(found[0], sizeof found[0], "%s", settings.archive);
+    for (int g = 0; g < NGAMES; g++)                         /* chosen before */
+        if (!found[g][0] && archive_setting(g)[0] && which_game(archive_setting(g)) == g)
+            snprintf(found[g], sizeof found[g], "%s", archive_setting(g));
     if (argc > 1 && (has_suffix(argv[argc - 1], ".hqx") || has_suffix(argv[argc - 1], ".sit") || has_suffix(argv[argc - 1], ".bin"))) {
         int g = which_game(argv[argc - 1]);
         if (g < 0) {
-            SDL_ShowSimpleMessageBox(SDL_MESSAGEBOX_ERROR, TITLE, "That archive does not contain Mazeworld Catacombs.", NULL);
+            SDL_ShowSimpleMessageBox(SDL_MESSAGEBOX_ERROR, TITLE, "That archive does not contain Mazeworld Catacombs or Mazeworld.", NULL);
             return 1;
         }
         snprintf(found[g], sizeof found[g], "%s", argv[argc - 1]);
         running = g;
-    } else if (found[0][0]) running = 0;
-    if (running >= 0 && !games[running].supported) {
-        char t[256]; snprintf(t, sizeof t, "%s is not supported yet: only Mazeworld Catacombs runs in this version.", games[running].name);
-        SDL_ShowSimpleMessageBox(SDL_MESSAGEBOX_INFORMATION, TITLE, t, NULL);
-        return 1;
-    }
+    } else if (found[settings.game][0]) running = settings.game;
+    else if (found[0][0]) running = 0;
+    else if (found[1][0]) running = 1;
     while (running < 0) {   /* not found: ask for it, and remember it */
         char path[1024];
 #ifdef _WIN32
         SDL_ShowSimpleMessageBox(SDL_MESSAGEBOX_INFORMATION, TITLE,
-            "Mazeworld Catacombs needs the original game archive (Mazeworld Catacombs 1.0.5 as a .hqx, .sit or .bin "
-            "file, under any name).\n\nPlease select it. (Putting it in the same folder as this program also works.)", NULL);
+            "This program needs an original game archive: Mazeworld Catacombs 1.0.5 or Mazeworld 1.0.3, as a .hqx, .sit "
+            "or .bin file, under any name.\n\nPlease select one. (Putting them in the same folder as this program also works.)", NULL);
 #endif
         if (choose_archive(path, sizeof path)) {
             SDL_ShowSimpleMessageBox(SDL_MESSAGEBOX_ERROR, TITLE,
-                "The original game is needed: put the Mazeworld Catacombs 1.0.5 archive (.hqx, .sit or .bin, any name) "
-                "in the same folder as this program, or drop it onto the program.", NULL);
+                "The original game is needed: put the Mazeworld Catacombs 1.0.5 or Mazeworld 1.0.3 archive (.hqx, .sit or "
+                ".bin, any name) in the same folder as this program, or drop it onto the program.", NULL);
             return 1;
         }
         int g = which_game(path);
-        if (g == 0) { snprintf(found[0], sizeof found[0], "%s", path); snprintf(settings.archive, sizeof settings.archive, "%s", path); settings_save(); running = 0; }
-        else SDL_ShowSimpleMessageBox(SDL_MESSAGEBOX_ERROR, TITLE,
-                 g > 0 ? "That is Mazeworld (Original), which is not supported yet. Please select Mazeworld Catacombs."
-                       : "That file does not contain Mazeworld Catacombs. Please select the Mazeworld Catacombs archive.", NULL);
+        if (g >= 0) { snprintf(found[g], sizeof found[g], "%s", path); snprintf(archive_setting(g), sizeof settings.archive, "%s", path); running = g; }
+        else SDL_ShowSimpleMessageBox(SDL_MESSAGEBOX_ERROR, TITLE, "That file does not contain Mazeworld Catacombs or Mazeworld. Please select another.", NULL);
     }
+    settings.game = running;
+    settings_save();
     snprintf(archive, sizeof archive, "%s", found[running]);
     SDL_SetHint(SDL_HINT_RENDER_SCALE_QUALITY, "nearest");
     SDL_SetHint(SDL_HINT_WINDOWS_DPI_AWARENESS, "permonitorv2");
@@ -489,7 +538,7 @@ int main(int argc, char **argv) {
     if (settings.w >= SCREEN_W / 2 && settings.h >= SCREEN_H / 2 && on_a_display(settings.x, settings.y, settings.w, settings.h)) {
         ww = settings.w; wh = settings.h; wx = settings.x; wy = settings.y;
     }
-    win = SDL_CreateWindow(TITLE, wx, wy, ww, wh,
+    win = SDL_CreateWindow(games[running].name, wx, wy, ww, wh,
                            SDL_WINDOW_RESIZABLE | SDL_WINDOW_ALLOW_HIGHDPI);
     if (!win) { fprintf(stderr, "SDL: %s\n", SDL_GetError()); return 1; }
     ren = SDL_CreateRenderer(win, -1, SDL_RENDERER_ACCELERATED);
@@ -509,6 +558,7 @@ int main(int argc, char **argv) {
 
     const char *log = getenv("MZ_LOG");
     if (port_boot(archive, log, err, sizeof err)) { message(TITLE, err, 1); return 1; }
+    vfs_host_choose = choose_saved_game;
     input_live = 1;
     prefs_load();
     if (settings.full) toggle_fullscreen();
@@ -523,5 +573,6 @@ int main(int argc, char **argv) {
     if (audio) SDL_CloseAudioDevice(audio);
     SDL_DestroyRenderer(ren); SDL_DestroyWindow(win);
     SDL_Quit();
+    if (how == 1 && switch_to >= 0) { settings.game = switch_to; settings_save(); relaunch(found[switch_to]); }
     return how == 1 ? 0 : 1;
 }

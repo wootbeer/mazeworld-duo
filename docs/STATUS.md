@@ -107,8 +107,13 @@
   found a port bug: clicks in the high-score window were located with the wrong rectangle.
 - Port front end: Options > Volume (100 / 75 / 50 / 25 % / mute), the window's size, position and
   fullscreen remembered, all in `port settings.txt` beside the game's preferences (which stay
-  byte-for-byte the Mac's); a Game menu (Mazeworld Original listed, greyed until supported; an
-  Original archive given to the program says so); version information in `Mazeworld.exe`.
+  byte-for-byte the Mac's); a Game menu listing both games: choosing the other one quits this one
+  and starts the program again with that archive (the last game played is the one started next);
+  version information in `Mazeworld.exe`.
+- Mazeworld Original in the port: started by its archive's creator ('Mzwl'); its own menu bar
+  (File, Window Size, Options, Help; Print Order Form left out) greyed and checked by its own rules
+  (fn_S8_259A / 2716 / 28EA / 2972, in `port/shell.c`); its preferences file "Mazeworld Prefs";
+  `tools/verify_port.sh` runs its tests too (4 quick, 6 full).
 - The shell keeps the game's menu records as the original does (`fn_S8_2E10`, `2E4C`, `2FB4`,
   `3190`, `3278` translated) and runs a command only if the record has it enabled.
 
@@ -365,4 +370,5 @@ nothing visible. The same rule applies to Mazeworld Original.
 - **The port's own options** in the Options menu, off by default: 32-bit output, other graphics
   options (WASD, mouse turning and classic arrow keys are done; for Original too, with click-to-fire
   and abilities on 1-4 — `mz_alt_controls`, harness `-alt` — or its classic mouse by option).
-- **Switching between Catacombs and Original** from the menu, once Original is supported.
+- **Saved games on Windows**: Original's Load Game / Save Game As use the Windows Open / Save
+  dialogs (`vfs_host_choose`); written, not yet tried on Windows.

@@ -132,13 +132,13 @@ int g_shot_every;
 /* ---------- the preferences file, kept on the host ---------- */
 /* The game finds it in its Preferences folder (dir 20) under the name in 'STR#' 128; the file's
  * contents are the same bytes as on a Mac, so a Mac's preferences file can be used as it is. */
-#define PREFS_NAME "Mzwl Catacombs Prefs"
+#define PREFS_NAME (mz_original ? "Mazeworld Prefs" : "Mzwl Catacombs Prefs")
 void vfs_put_file(int32_t dir, const char *macname, uint32_t type, uint32_t creator, const uint8_t *data, uint32_t dlen);
 const uint8_t *vfs_get_file(int32_t dir, const char *macname, uint32_t *dlen);
 void port_prefs_load(const char *path) {
     FILE *f = fopen(path, "rb"); if (!f) return;
     static uint8_t buf[0x10000]; size_t n = fread(buf, 1, sizeof buf, f); fclose(f);
-    if (n) vfs_put_file(20, PREFS_NAME, FOURCC('p','r','e','f'), FOURCC('M','z','w','C'), buf, (uint32_t)n);
+    if (n) vfs_put_file(20, PREFS_NAME, FOURCC('p','r','e','f'), mz_original ? FOURCC('M','z','w','l') : FOURCC('M','z','w','C'), buf, (uint32_t)n);
 }
 void port_prefs_save(const char *path) {
     uint32_t n = 0; const uint8_t *d = vfs_get_file(20, PREFS_NAME, &n);

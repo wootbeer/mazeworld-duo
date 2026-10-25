@@ -37,7 +37,30 @@ int shell_playing(void) {
     return w && (int16_t)rd16(w + 0x6C) >= 0 && rd32(w + 0x98) != 0 && !g8(0x22C6);
 }
 
+/* Mazeworld Original's menus, by its rules (fn_S8_259A: in the main window fn_S8_2716, else
+ * everything off, fn_S8_25D6; the marks always: Window Size G_5892, fn_S8_28EA; Options G_5894,
+ * fn_S8_2972). Quit stays on: outside the main window it is the 'quit' Apple event. */
+static int orig_item_state(int menu, int item, int *checked) {
+    *checked = 0;
+    if (menu == MENU_O_SIZE) *checked = (int16_t)og16(0x5892) == item;
+    if (menu == MENU_O_OPTIONS) *checked = (item == 2) == (og8(0x5894) != 0);
+    if (menu == MENU_FILE && item == 8) return 1;
+    if (!shell_in_front()) return 0;
+    switch (menu) {
+    case MENU_APPLE: return item >= 1 && item <= 4;
+    case MENU_FILE:
+        if (item == 1) return !og8(0x5787);
+        if (item == 3) return !og8(0x5788);
+        if (item == 6) return !og8(0x5788) && !og8(0x5787) && og8(0x5784);
+        return item == 4;
+    case MENU_O_SIZE: return item >= 1 && item <= 4 && (int16_t)og16(0x574A) >= item;
+    case MENU_O_OPTIONS: return item == 1 || item == 2;
+    }
+    return 0;
+}
+
 int shell_item_state(int menu, int item, int *checked) {
+    if (mz_original) return orig_item_state(menu, item, checked);
     *checked = 0;
     switch (menu) {
     case MENU_VIEW:
@@ -73,7 +96,7 @@ int shell_item_state(int menu, int item, int *checked) {
 /* ---------- from the front end ---------- */
 
 void shell_choose(int menu, int item) {
-    if (menu == MENU_FILE && item == 7) { shell_request_quit(); return; }
+    if (menu == MENU_FILE && item == (mz_original ? 8 : 7) && (!mz_original || !shell_in_front())) { shell_request_quit(); return; }
     input_live_menu(menu, item);                            /* a click on the menu bar; MenuSelect answers it */
 }
 /* Quit, from anywhere (also the window's close box): the 'quit' Apple event, which also ends play
@@ -126,7 +149,8 @@ void shell_mouse_down(uint32_t ev) {
     else if (part == 3) fn_S8_2D26(r32(pw), ev);
 }
 
-/* fn_S8_3B6E: the 'quit' Apple event's handler; the others ('oapp', 'odoc') do nothing here */
+/* fn_S8_3B6E: the 'quit' Apple event's handler (Original: fn_S8_36F8, G_580E); the others ('oapp',
+ * 'odoc', 'pdoc') do nothing here */
 void shell_high_level_event(uint32_t ev) {
     if (r32(ev + 2) == FOURCC('a','e','v','t') && r32(ev + 10) == FOURCC('q','u','i','t')) sg8(0x223C, 1);
 }

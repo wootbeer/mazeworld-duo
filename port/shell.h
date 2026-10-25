@@ -2,6 +2,8 @@
 #ifndef SHELL_H
 #define SHELL_H
 enum { MENU_APPLE = 128, MENU_FILE, MENU_EDIT, MENU_VIEW, MENU_SOUND, MENU_OPTIONS };
+/* Mazeworld Original's: Apple, File and Edit as above, then Window Size and Options */
+enum { MENU_O_SIZE = 131, MENU_O_OPTIONS };
 /* the port's own menus (the front end handles them; the game never sees them) */
 enum { MENU_PORT_VOLUME = 200, MENU_PORT_GAME, MENU_PORT_CONTROLS };
 /* the Options menu's items: the original dialog's check boxes (the port's own options will follow) */
