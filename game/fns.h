@@ -491,4 +491,5 @@ void fo_S10_1B2E(Regs *r);
 void fo_S10_1D96(Regs *r);
 void fo_S10_1CE2(Regs *r);
 void fo_S10_2B92(Regs *r);
+void fo_S10_21DC(Regs *r);
 #endif

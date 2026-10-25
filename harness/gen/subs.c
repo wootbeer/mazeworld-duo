@@ -496,6 +496,7 @@ void fo_S10_1B2E(Regs *r);
 void fo_S10_1D96(Regs *r);
 void fo_S10_1CE2(Regs *r);
 void fo_S10_2B92(Regs *r);
+void fo_S10_21DC(Regs *r);
 
 static void w_fn_S4_36F2(void) {
     setreg(M68K_REG_D0, (uint32_t)(uint16_t)fn_S4_36F2());
@@ -1658,6 +1659,7 @@ static void w_fo_S10_1B2E(void) { Regs r; sub_regs_load(&r); fo_S10_1B2E(&r); su
 static void w_fo_S10_1D96(void) { Regs r; sub_regs_load(&r); fo_S10_1D96(&r); sub_regs_store(&r); }
 static void w_fo_S10_1CE2(void) { Regs r; sub_regs_load(&r); fo_S10_1CE2(&r); sub_regs_store(&r); }
 static void w_fo_S10_2B92(void) { Regs r; sub_regs_load(&r); fo_S10_2B92(&r); sub_regs_store(&r); }
+static void w_fo_S10_21DC(void) { Regs r; sub_regs_load(&r); fo_S10_21DC(&r); sub_regs_store(&r); }
 
 typedef struct { int seg; uint32_t off; const char *name; void (*fn)(void); int regs; uint32_t d0mask; int argbytes; int nocheck; int pops; uint32_t ignore; int orig; } SubEntry;
 const SubEntry g_subs[] = {
@@ -2150,5 +2152,6 @@ const SubEntry g_subs[] = {
     {10, 0x1D96, "fo_S10_1D96", w_fo_S10_1D96, 1, 0xFFFFFFFFu, 0, 0, 0, 0x11FFFu, 1},
     {10, 0x1CE2, "fo_S10_1CE2", w_fo_S10_1CE2, 1, 0xFFFFFFFFu, 0, 0, 0, 0x11FFFu, 1},
     {10, 0x2B92, "fo_S10_2B92", w_fo_S10_2B92, 1, 0xFFFFFFFFu, 0, 0, 0, 0x11FFFu, 1},
+    {10, 0x21DC, "fo_S10_21DC", w_fo_S10_21DC, 1, 0xFFFFFFFFu, 0, 0, 0, 0x11FFFu, 1},
     {0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0}
 };

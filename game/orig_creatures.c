@@ -26,7 +26,7 @@ static void o_hit(Regs *r, const uint16_t *list, think_fn think) {
 }
 /* fn_S7_11FC: an event (+$12): looked up in `list` { event, new state } ..., in increasing order
  * (ending $FFFF), switches to that state; the event is consumed either way */
-__attribute__((unused)) static void o_event(Regs *r, const uint16_t *list, think_fn think) {
+static void o_event(Regs *r, const uint16_t *list, think_fn think) {
     uint16_t ev = r16(r->a[4] + 0x12);
     if (!ev) return;
     for (; list; list += 2) {
@@ -333,4 +333,205 @@ void fo_S10_2B92(Regs *r) {
     }
     mz_seg_of(7, 0x3128), fn_S7_3128(r);
     if (og16(0x382E) < 4) { sog16(0x56EA, heal(og16(0x56EA), 0xA)); sog16(0x56E6, heal(og16(0x56E6), 0xA)); }
+}
+
+/* ---------- finding the way, cell by cell ----------
+ * The object at A4 heads for the cell +$E of the map G_53D4 (cells of $20 bytes, rows of $400:
+ * +$E a "taken" marker, +$10 the distance to the player, +$1C / +$1E the centre). Until it is at
+ * the centre, D0.w is the direction to it ($00 west, $20 east, $10 north, $30 south); there the
+ * neighbours are weighed and the best free one becomes the target (+$10 = the old one), or the
+ * current one stays taken. D0.w = the chosen direction, -1 if none.
+ *  ROUTE_RANDOM (fn_S10_2718 / 27D8): a random weight, more for cells other than the last one;
+ *  ROUTE_FIXED (fn_S10_29AA / 2A7C): fixed preferences, the same bonus;
+ *  ROUTE_CLOSER (fn_S10_2828 / 296E): only cells closer to the player; on the way, if the cell it
+ *  is leaving has become closer than its target, it turns back (D0 = -1). */
+enum { ROUTE_RANDOM, ROUTE_FIXED, ROUTE_CLOSER };
+static uint16_t o_route(Regs *r, int mode) {
+    uint32_t o = r->a[4], map = og32(0x53D4);
+#define CELL(c, f) (map + sxw(c) + (f))
+    uint16_t at = r16(o + 0xE);
+    int16_t dx = (int16_t)(r16(CELL(at, 0x1C)) - r16(o + 4)), dy = (int16_t)(r16(CELL(at, 0x1E)) - r16(o + 8));
+    if (dx || dy) {
+        uint16_t dir = dx ? (dx < 0 ? 0 : 0x20) : (dy < 0 ? 0x10 : 0x30);
+        if (mode != ROUTE_CLOSER) return dir;
+        static const int16_t back[4] = {0x20, 0x400, -0x20, -0x400};   /* the cell behind, by direction 0, $10, $20, $30 */
+        uint16_t prev = (uint16_t)(at + back[dir >> 4]);
+        if (r16(CELL(at, 0x10)) < r16(CELL(prev, 0x10))) return dir;
+        if (!r16(CELL(prev, 0xE))) {
+            w16(CELL(at, 0xE), 0);
+            w16(o + 0x10, at); w16(o + 0xE, prev);
+            w16(CELL(prev, 0xE), 1);
+        }
+        return 0xFFFF;
+    }
+    w16(CELL(at, 0xE), 0);
+    static const int16_t step[3][4] = {{0x400, -0x800, 0x3E0, 0x40}, {-0x400, 0x3E0, 0x40, 0x3E0}, {-0x400, 0x3E0, 0x40, 0x3E0}};
+    static const uint16_t dirs[3][4] = {{0x30, 0x10, 0, 0x20}, {0x10, 0, 0x20, 0x30}, {0x10, 0, 0x20, 0x30}};
+    static const uint16_t pref[3][4] = {{0, 0, 0, 0}, {3, 1, 2, 0}, {4, 5, 6, 7}};
+    uint16_t best = 0, bcell = 0xFFFF, bdir = 0xFFFF, c = at;
+    for (int k = 0; k < 4; k++) {
+        c = (uint16_t)(c + step[mode][k]);
+        if (r16(CELL(c, 0xE))) continue;
+        uint16_t w;
+        if (mode == ROUTE_CLOSER) {
+            if (r16(CELL(c, 0x10)) >= r16(CELL(at, 0x10))) continue;
+            w = pref[mode][k];
+        } else {
+            if (mode == ROUTE_RANDOM) {
+                if (c >= 0x2000) continue;
+                random_d0(r);
+                w = (uint16_t)r->d[0] & 3;
+            } else w = pref[mode][k];
+            w |= c == r16(o + 0x10) ? 4 : 8;
+        }
+        if (w < best) continue;
+        best = w; bcell = c; bdir = dirs[mode][k];
+    }
+    if (!(bcell & 0x8000)) { w16(o + 0x10, r16(o + 0xE)); w16(o + 0xE, bcell); w16(CELL(bcell, 0xE), 1); }
+    else w16(CELL(r16(o + 0xE), 0xE), 1);
+#undef CELL
+    return bdir;
+}
+
+/* ---------- fn_S10_21DC ----------
+ * A hunter on the map's paths: 0 resting (until its cell's distance is $FFFD or more: 12), 1
+ * roaming at random (when it sees the player within $19: 5; on a cell off the map: 6), 2-3 hit by
+ * type $18: $C0 ticks of running away along the distance map (fn_S2_2B3E; faster below y $88), 4
+ * hit by type $1B: 7, dying ($2B, 5 ticks, then removed), 5 chasing the player (its cell
+ * G_381C / G_3818, fn_S7_192A) and pulling (fn_S10_258C) when close (fn_S7_1B1E), 6 back to the
+ * map's paths, 8-9 event $302: waiting on its target cell's distance (with the records 2-4 gone,
+ * back to 1), 10-11 event $303: 5 ticks of the dying picture $1E, removed, 12-13 following the
+ * scent (fn_S7_1B46) and pulling. */
+static void hunter_think(Regs *r) {
+    uint32_t o = r->a[4], map = og32(0x53D4);
+    for (;;) {
+        set_w(&r->d[7], (uint16_t)r->d[0]);
+        uint16_t dist = r16(map + sxw(r16(o + 0xE)) + 0x10);
+        switch ((uint16_t)r->d[7]) {
+        case 0: if (dist >= 0xFFFD) { set_w(&r->d[0], 0xC); continue; } return;
+        case 1:
+            if (r16(o + 0xE) >= 0x2000) { set_w(&r->d[0], 6); continue; }
+            mz_seg_of(7, 0x319E), fn_S7_319E(r);
+            if (og16(0x382E) < 0x19) { set_w(&r->d[0], 5); continue; }
+            return;
+        case 2:
+            w16(o + 0x18, 0xC0);
+            sog16(0x56A8, 0x14); sog16(0x56A6, og16(0x56D0));
+            mz_seg_of(2, 0x366A), fn_S2_366A(r); fn_S2_3568(r);    /* fn_S2_2B3E */
+            set_w(&r->d[0], 3); continue;
+        case 3: {
+            uint16_t t = r16(o + 0x18);
+            if (r16(o + 8) >= 0x88) t = (uint16_t)(t - 2);
+            t = (uint16_t)(t - 1);
+            w16(o + 0x18, t);
+            if (t & 0x8000) { w16(o + 0x10, 0); set_w(&r->d[0], 1); continue; }
+            uint16_t d = o_route(r, ROUTE_CLOSER);
+            set_w(&r->d[0], d);
+            if (d & 0x8000) {
+                uint16_t t2 = (uint16_t)(r16(o + 0x18) - 2);
+                w16(o + 0x18, t2);
+                if (t2 & 0x8000) { w16(o + 0x10, 0); set_w(&r->d[0], 1); continue; }
+            }
+            w16(r->a[6] - 2, d);                            /* for the act (the handler's local) */
+            return;
+        }
+        case 4: w16(o + 0x18, 0); set_w(&r->d[0], 7); continue;
+        case 5:
+            mz_seg_of(7, 0x319E), fn_S7_319E(r);
+            if (og16(0x382E) >= 0x19) { set_w(&r->d[0], 1); continue; }
+            return;
+        case 6:
+            if (r16(o + 0xE) < 0x2000) { set_w(&r->d[0], 1); continue; }
+            mz_seg_of(7, 0x319E), fn_S7_319E(r);
+            if (og16(0x382E) < 0x19) { set_w(&r->d[0], 5); continue; }
+            return;
+        case 8: {
+            if (dist) { set_w(&r->d[0], 9); continue; }
+            uint32_t t = og32(0x53C8);
+            if ((r16(t + 0x82) & 0x8000) && (r16(t + 0xC2) & 0x8000) && (r16(t + 0x102) & 0x8000)) { set_w(&r->d[0], 1); continue; }
+            return;
+        }
+        case 9: if (!dist) { set_w(&r->d[0], 8); continue; } return;
+        case 10: w16(o + 0x18, 5); set_w(&r->d[0], 0xB); continue;
+        case 12: if (!dist) { set_w(&r->d[0], 0); continue; } return;
+        default: return;
+        }
+    }
+}
+static void spin_move(Regs *r, uint16_t d0, int every_other) {   /* fn_S10_2624 / 263A, then fn_S7_1578 if it moved */
+    set_w(&r->d[0], d0);
+    if (every_other) fo_S10_2624(r); else { mz_seg_of(7, 0x0A9C); fn_S7_0A9C(r); }
+    if (!((uint16_t)r->d[0] & 0x8000) && (every_other < 2 || !(uint16_t)r->d[0])) { mz_seg_of(7, 0x3784); fn_S7_3784(r); }
+}
+static int near_player(Regs *r) { mz_seg_of(7, 0x3D2A), fn_S7_3D2A(r); return (uint16_t)r->d[0] != 0; }
+static void pull(Regs *r) { mz_seg_of(7, 0x09EC), fn_S7_09EC(r); }
+static void remove_obj(Regs *r) {
+    w16(og32(0x53D4) + sxw(r16(r->a[4] + 0xE)) + 0xE, 0);
+    unlink_obj(r);
+    w16(r->a[4] + 2, r16(r->a[4] + 2) | 0x8000);
+}
+static void scent_move(Regs *r) {                           /* fn_S7_1B46, fn_S7_1B02, then the move */
+    mz_seg_of(7, 0x3D5C), fn_S7_3D5C(r);
+    uint16_t d = (uint16_t)r->d[0];
+    fn_S7_3D0E(r);
+    spin_move(r, d, 0);
+}
+void fo_S10_21DC(Regs *r) {
+    static const uint16_t h[] = {0x18, 2, 0x1B, 4, 0xFFFF}, h1b[] = {0x1B, 4, 0xFFFF};
+    static const uint16_t e[] = {0x302, 8, 0x303, 10, 0xFFFF}, e3[] = {0x303, 10, 0xFFFF};
+    static const uint16_t *const hits[14] = {NULL, h, NULL, h, NULL, h, h, NULL, h1b, h1b};
+    static const uint16_t *const evs[14] = {e3, e, NULL, e, NULL, e, e, NULL, e3, e3, NULL, NULL, e3, e3};
+    uint32_t o = r->a[4], a6 = r->a[6];
+    r->a[6] = r->a[7] - 4;                                  /* LINK A6, #-2: the local word at -2 */
+    r->a[7] -= 6;
+    set_w(&r->d[7], r16(o + 0x16));
+    set_w(&r->d[0], (uint16_t)r->d[7]);
+    hunter_think(r);
+    uint16_t s = (uint16_t)r->d[7];
+    o_hit(r, s < 14 ? hits[s] : NULL, hunter_think);
+    s = (uint16_t)r->d[7];
+    o_event(r, s < 14 ? evs[s] : NULL, hunter_think);
+    switch ((uint16_t)r->d[7]) {
+    case 0: spin_move(r, 0xFFFF, 1); if (near_player(r)) pull(r); break;
+    case 1: spin_move(r, o_route(r, ROUTE_RANDOM), 2); break;
+    case 3: spin_move(r, r16(r->a[6] - 2), 1); break;
+    case 5:
+        sog16(0x381C, og16(0x56D8)); sog16(0x3818, og16(0x56D4));
+        mz_seg_of(7, 0x3B36), fn_S7_3B36(r);
+        fn_S7_3D0E(r);
+        spin_move(r, og16(0x3812), 1);
+        if (near_player(r) && ((uint16_t)r->d[0] & 0x8000)) pull(r);
+        break;
+    case 6: spin_move(r, o_route(r, ROUTE_FIXED), 1); break;
+    case 7: {
+        w16(o + 0x3A, 0x2B);
+        set_w(&r->d[0], 0xFFFF); fo_S10_2624(r);
+        uint16_t t = (uint16_t)(r16(o + 0x18) + 1);
+        w16(o + 0x18, t);
+        if (t >= 5) remove_obj(r);
+        break;
+    }
+    case 8: spin_move(r, o_route(r, ROUTE_RANDOM), 0); break;
+    case 9: scent_move(r); {          /* fn_S10_267C: the objects of types 3-5 in its cell get event $901 */
+        uint32_t map = og32(0x53D4), t = og32(0x53C8);
+        for (uint32_t k = 1; k <= 10; k++) {
+            uint8_t n = r8(map + sxw(r16(o + 0x30)) + k);
+            if (!n) break;
+            uint16_t ty = r16(t + ((uint32_t)n << 6) + 2);
+            if (ty == 3 || ty == 4 || ty == 5) w16(t + ((uint32_t)n << 6) + 0x12, 0x901);
+        }
+        break; }
+    case 11: {
+        w16(o + 0x3A, 0x1E);
+        set_w(&r->d[0], 0xFFFF); mz_seg_of(7, 0x0A9C); fn_S7_0A9C(r);
+        uint16_t t = (uint16_t)(r16(o + 0x18) - 1);
+        w16(o + 0x18, t);
+        if (t & 0x8000) remove_obj(r);
+        break;
+    }
+    case 12: scent_move(r); if (near_player(r) && ((uint16_t)r->d[0] & 0x8000)) pull(r); break;
+    case 13: spin_move(r, 0xFFFF, 1); if (near_player(r) && ((uint16_t)r->d[0] & 0x8000)) pull(r); break;
+    }
+    w16(o + 0x16, (uint16_t)r->d[7]);
+    r->a[7] += 6; r->a[6] = a6;
 }
