@@ -486,4 +486,9 @@ void fo_S7_0528(Regs *r);
 void fo_S7_0606(Regs *r);
 void fo_S7_06A8(Regs *r);
 void fo_S10_2624(Regs *r);
+void fo_S10_1974(Regs *r);
+void fo_S10_1B2E(Regs *r);
+void fo_S10_1D96(Regs *r);
+void fo_S10_1CE2(Regs *r);
+void fo_S10_2B92(Regs *r);
 #endif

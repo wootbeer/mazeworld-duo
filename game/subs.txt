@@ -513,3 +513,8 @@
 7  0606  regs fo_S7_0606  orig ignore=all
 7  06A8  regs fo_S7_06A8  orig ignore=all
 10 2624  regs fo_S10_2624  orig
+10 1974  regs fo_S10_1974  orig ignore=all
+10 1B2E  regs fo_S10_1B2E  orig ignore=all
+10 1D96  regs fo_S10_1D96  orig ignore=all
+10 1CE2  regs fo_S10_1CE2  orig ignore=all
+10 2B92  regs fo_S10_2B92  orig ignore=all

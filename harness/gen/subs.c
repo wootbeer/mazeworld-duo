@@ -491,6 +491,11 @@ void fo_S7_0528(Regs *r);
 void fo_S7_0606(Regs *r);
 void fo_S7_06A8(Regs *r);
 void fo_S10_2624(Regs *r);
+void fo_S10_1974(Regs *r);
+void fo_S10_1B2E(Regs *r);
+void fo_S10_1D96(Regs *r);
+void fo_S10_1CE2(Regs *r);
+void fo_S10_2B92(Regs *r);
 
 static void w_fn_S4_36F2(void) {
     setreg(M68K_REG_D0, (uint32_t)(uint16_t)fn_S4_36F2());
@@ -1648,6 +1653,11 @@ static void w_fo_S7_0528(void) { Regs r; sub_regs_load(&r); fo_S7_0528(&r); sub_
 static void w_fo_S7_0606(void) { Regs r; sub_regs_load(&r); fo_S7_0606(&r); sub_regs_store(&r); }
 static void w_fo_S7_06A8(void) { Regs r; sub_regs_load(&r); fo_S7_06A8(&r); sub_regs_store(&r); }
 static void w_fo_S10_2624(void) { Regs r; sub_regs_load(&r); fo_S10_2624(&r); sub_regs_store(&r); }
+static void w_fo_S10_1974(void) { Regs r; sub_regs_load(&r); fo_S10_1974(&r); sub_regs_store(&r); }
+static void w_fo_S10_1B2E(void) { Regs r; sub_regs_load(&r); fo_S10_1B2E(&r); sub_regs_store(&r); }
+static void w_fo_S10_1D96(void) { Regs r; sub_regs_load(&r); fo_S10_1D96(&r); sub_regs_store(&r); }
+static void w_fo_S10_1CE2(void) { Regs r; sub_regs_load(&r); fo_S10_1CE2(&r); sub_regs_store(&r); }
+static void w_fo_S10_2B92(void) { Regs r; sub_regs_load(&r); fo_S10_2B92(&r); sub_regs_store(&r); }
 
 typedef struct { int seg; uint32_t off; const char *name; void (*fn)(void); int regs; uint32_t d0mask; int argbytes; int nocheck; int pops; uint32_t ignore; int orig; } SubEntry;
 const SubEntry g_subs[] = {
@@ -2135,5 +2145,10 @@ const SubEntry g_subs[] = {
     {7, 0x0606, "fo_S7_0606", w_fo_S7_0606, 1, 0xFFFFFFFFu, 0, 0, 0, 0x11FFFu, 1},
     {7, 0x06A8, "fo_S7_06A8", w_fo_S7_06A8, 1, 0xFFFFFFFFu, 0, 0, 0, 0x11FFFu, 1},
     {10, 0x2624, "fo_S10_2624", w_fo_S10_2624, 1, 0xFFFFFFFFu, 0, 0, 0, 0x0u, 1},
+    {10, 0x1974, "fo_S10_1974", w_fo_S10_1974, 1, 0xFFFFFFFFu, 0, 0, 0, 0x11FFFu, 1},
+    {10, 0x1B2E, "fo_S10_1B2E", w_fo_S10_1B2E, 1, 0xFFFFFFFFu, 0, 0, 0, 0x11FFFu, 1},
+    {10, 0x1D96, "fo_S10_1D96", w_fo_S10_1D96, 1, 0xFFFFFFFFu, 0, 0, 0, 0x11FFFu, 1},
+    {10, 0x1CE2, "fo_S10_1CE2", w_fo_S10_1CE2, 1, 0xFFFFFFFFu, 0, 0, 0, 0x11FFFu, 1},
+    {10, 0x2B92, "fo_S10_2B92", w_fo_S10_2B92, 1, 0xFFFFFFFFu, 0, 0, 0, 0x11FFFu, 1},
     {0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0}
 };
