@@ -486,6 +486,11 @@ void fo_S8_3B3E(void);
 void fo_S8_3BB8(void);
 uint8_t fo_S8_05CC(int16_t n);
 void fo_S8_57DE(uint32_t dlg, int16_t item);
+void fo_S7_1292(Regs *r);
+void fo_S7_0528(Regs *r);
+void fo_S7_0606(Regs *r);
+void fo_S7_06A8(Regs *r);
+void fo_S10_2624(Regs *r);
 
 static void w_fn_S4_36F2(void) {
     setreg(M68K_REG_D0, (uint32_t)(uint16_t)fn_S4_36F2());
@@ -1638,6 +1643,11 @@ static void w_fo_S8_57DE(void) {
     uint32_t sp = reg(M68K_REG_A7);
     fo_S8_57DE((uint32_t)rd32(sp + 6), (int16_t)rd16(sp + 4));
 }
+static void w_fo_S7_1292(void) { Regs r; sub_regs_load(&r); fo_S7_1292(&r); sub_regs_store(&r); }
+static void w_fo_S7_0528(void) { Regs r; sub_regs_load(&r); fo_S7_0528(&r); sub_regs_store(&r); }
+static void w_fo_S7_0606(void) { Regs r; sub_regs_load(&r); fo_S7_0606(&r); sub_regs_store(&r); }
+static void w_fo_S7_06A8(void) { Regs r; sub_regs_load(&r); fo_S7_06A8(&r); sub_regs_store(&r); }
+static void w_fo_S10_2624(void) { Regs r; sub_regs_load(&r); fo_S10_2624(&r); sub_regs_store(&r); }
 
 typedef struct { int seg; uint32_t off; const char *name; void (*fn)(void); int regs; uint32_t d0mask; int argbytes; int nocheck; int pops; uint32_t ignore; int orig; } SubEntry;
 const SubEntry g_subs[] = {
@@ -2120,5 +2130,10 @@ const SubEntry g_subs[] = {
     {8, 0x3BB8, "fo_S8_3BB8", w_fo_S8_3BB8, 0, 0x0u, 0, 0, 0, 0x0u, 1},
     {8, 0x05CC, "fo_S8_05CC", w_fo_S8_05CC, 0, 0xFFFFFFFFu, 2, 1, 0, 0x0u, 1},
     {8, 0x57DE, "fo_S8_57DE", w_fo_S8_57DE, 0, 0x0u, 6, 1, 6, 0x0u, 1},
+    {7, 0x1292, "fo_S7_1292", w_fo_S7_1292, 1, 0xFFFFFFFFu, 0, 0, 0, 0x0u, 1},
+    {7, 0x0528, "fo_S7_0528", w_fo_S7_0528, 1, 0xFFFFFFFFu, 0, 0, 0, 0x11FFFu, 1},
+    {7, 0x0606, "fo_S7_0606", w_fo_S7_0606, 1, 0xFFFFFFFFu, 0, 0, 0, 0x11FFFu, 1},
+    {7, 0x06A8, "fo_S7_06A8", w_fo_S7_06A8, 1, 0xFFFFFFFFu, 0, 0, 0, 0x11FFFu, 1},
+    {10, 0x2624, "fo_S10_2624", w_fo_S10_2624, 1, 0xFFFFFFFFu, 0, 0, 0, 0x0u, 1},
     {0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0}
 };

@@ -57,3 +57,14 @@ void fo_S7_1488(Regs *r) {
     r->d[0] = r8(r->a[0] + sxw(r->d[1]));
     cc_nz_l(r, r->d[0]);
 }
+
+/* fo_S7_1292 (JT 94): the word at G_53C8 + 2 * D0 + $16 gets the bits D1; D0.w = the new word. A0 = the
+ * table, D2.w = 2 * D0. */
+void fo_S7_1292(Regs *r) {
+    r->a[0] = og32(0x53C8);
+    set_w(&r->d[2], (uint16_t)r->d[0]);
+    lsl_w(r, &r->d[2], 1);
+    set_w(&r->d[0], (uint16_t)(r16(r->a[0] + sxw(r->d[2]) + 0x16) | (uint16_t)r->d[1]));
+    w16(r->a[0] + sxw(r->d[2]) + 0x16, (uint16_t)r->d[0]);
+    cc_nz_w(r, (uint16_t)r->d[0]);
+}

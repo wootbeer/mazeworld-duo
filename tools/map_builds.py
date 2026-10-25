@@ -55,6 +55,8 @@ MANUAL_FUNCS = {   # pairs the matching cannot find (checked by hand: same calle
     'fn_S2_040A': 'fn_S2_03B0',   # the frame onto the window
     'fn_S2_4F1C': 'fn_S2_41E8',   # the wall outline
     'fn_S8_0A24': 'fn_S8_0E2A',   # one frame of play
+    'fn_S7_3FA6': 'fn_S7_1D90',   # weighing a neighbour cell (exact; Original has more copies)
+    'fn_S7_0E46': 'fn_S7_03FE',   # a shot's flight (Original: four steps)
     'fn_S8_02F0': 'fn_S8_0452',   # lock / unlock the 50 graphics handles
     'fn_S8_0360': 'fn_S8_04C2',
     'fn_S8_0136': 'fn_S8_0156',   # mark the level's graphics

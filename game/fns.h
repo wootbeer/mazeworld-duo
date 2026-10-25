@@ -481,4 +481,9 @@ void fo_S8_3B3E(void);
 void fo_S8_3BB8(void);
 uint8_t fo_S8_05CC(int16_t n);
 void fo_S8_57DE(uint32_t dlg, int16_t item);
+void fo_S7_1292(Regs *r);
+void fo_S7_0528(Regs *r);
+void fo_S7_0606(Regs *r);
+void fo_S7_06A8(Regs *r);
+void fo_S10_2624(Regs *r);
 #endif

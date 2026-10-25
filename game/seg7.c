@@ -456,11 +456,11 @@ void fn_S7_0E46(Regs *r) {
     uint32_t a2 = r->a[2];
     r->a[2] = g32(0x1DCC);
     r->d[0] = 0;
-    sg16(0xE0, 1); sg16(0xDE, 0);
+    sg16(0xE0, mz_original ? 0 : 1); sg16(0xDE, 0);           /* Original (fn_S7_03FE): 0, 0 and four steps */
     set_w(&r->d[0], r16(r->a[4] + 0x14));
     if (!(uint16_t)r->d[0]) { w16(r->a[4] + 0x14, 1); cc_nz_w(r, 1); goto out; }
     if ((uint16_t)r->d[0] & 0x8000) goto remove;
-    for (int step = 0; step < 2; step++) {
+    for (int step = 0; step < (mz_original ? 4 : 2); step++) {
         set_w(&r->d[0], r16(r->a[4] + 0xC));
         r->a[0] = GADDR(0x12EA);
         fn_S7_374C(r);
@@ -1103,7 +1103,10 @@ static void pull_axis(Regs *r, uint32_t g, uint32_t field) {
     set_w(&r->d[0], g16(g));
     uint16_t obj = r16(r->a[4] + field);
     cc_cmp_w(r, obj, (uint16_t)r->d[0]);
-    if ((uint16_t)r->d[0] == obj) { w32(r->a[4] + field, g32(g)); cc_nz_l(r, g32(g)); return; }
+    if ((uint16_t)r->d[0] == obj) {
+        if (!mz_original) { w32(r->a[4] + field, g32(g)); cc_nz_l(r, g32(g)); }   /* Original (fn_S10_25EA): the object stays */
+        return;
+    }
     if ((uint16_t)r->d[0] < obj) add_w(r, &r->d[0], 1); else sub_w(r, &r->d[0], 1);
     sg16(g, (uint16_t)r->d[0]);
     cc_nz_w(r, (uint16_t)r->d[0]);
@@ -1115,8 +1118,9 @@ void fn_S7_0A76(Regs *r) { pull_axis(r, 0x20CE, 8); }
  * the player marker (+$C of a G_1DCC cell) follows the player's new cell G_20CA, and life G_20FE
  * drops by 3 (not below 0). */
 void fn_S7_09EC(Regs *r) {
-    for (int k = 0; k < 4; k++) fn_S7_0A52(r);
-    for (int k = 0; k < 4; k++) fn_S7_0A76(r);
+    const int steps = mz_original ? 3 : 4;                  /* Original (fn_S10_258C): 3 steps, life - 2 */
+    for (int k = 0; k < steps; k++) fn_S7_0A52(r);
+    for (int k = 0; k < steps; k++) fn_S7_0A76(r);
     set_w(&r->d[0], g16(0x20D2) & 0x1F0); lsl_w(r, &r->d[0], 1);
     set_w(&r->d[1], g16(0x20CE) & 0x1F0); lsl_w(r, &r->d[1], 6);
     set_w(&r->d[1], (uint16_t)((uint16_t)r->d[1] | (uint16_t)r->d[0]));
@@ -1128,7 +1132,7 @@ void fn_S7_09EC(Regs *r) {
         sg16(0x20CA, (uint16_t)r->d[1]);
     }
     mz_seg_of(2, 0x3500), fn_S2_3500(r);
-    set_w(&r->d[0], g16(0x20FE)); sub_w(r, &r->d[0], 3);
+    set_w(&r->d[0], g16(0x20FE)); sub_w(r, &r->d[0], mz_original ? 2 : 3);
     if ((uint16_t)r->d[0] & 0x8000) r->d[0] = 0;
     sg16(0x20FE, (uint16_t)r->d[0]);
     cc_nz_w(r, (uint16_t)r->d[0]);

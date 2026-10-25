@@ -121,7 +121,7 @@
 4  1746  void fn_S4_1746(void)
 4  175C  void fn_S4_175C(void)
 7  1C9A  regs fn_S7_1C9A
-7  0E46  regs fn_S7_0E46
+7  0E46  regs fn_S7_0E46 both
 4  1158  void fn_S4_1158(i32 x, i32 y)
 8  140A  regs fn_S8_140A both
 4  0FD0  void fn_S4_0FD0(u8 n)
@@ -241,10 +241,10 @@
 7  05AA  regs fn_S7_05AA  ignore=all
 7  319E  regs fn_S7_319E
 7  3D2A  regs fn_S7_3D2A both
-7  0A52  regs fn_S7_0A52
-7  0A76  regs fn_S7_0A76
-7  09EC  regs fn_S7_09EC
-7  0A9C  regs fn_S7_0A9C
+7  0A52  regs fn_S7_0A52 both
+7  0A76  regs fn_S7_0A76 both
+7  09EC  regs fn_S7_09EC both
+7  0A9C  regs fn_S7_0A9C both
 7  072C  regs fn_S7_072C  ignore=all
 7  3722  regs fn_S7_3722
 7  0DE2  regs fn_S7_0DE2
@@ -507,3 +507,9 @@
 8  3BB8  void fo_S8_3BB8(void)  orig
 8  05CC  u8 fo_S8_05CC(i16 n)  orig nocheck d0=zext
 8  57DE  pascal void fo_S8_57DE(ptr dlg, i16 item)  orig nocheck
+# Original's creatures (game/orig_creatures.c)
+7  1292  regs fo_S7_1292  orig
+7  0528  regs fo_S7_0528  orig ignore=all
+7  0606  regs fo_S7_0606  orig ignore=all
+7  06A8  regs fo_S7_06A8  orig ignore=all
+10 2624  regs fo_S10_2624  orig
