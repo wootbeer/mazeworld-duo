@@ -519,3 +519,21 @@
 10 1CE2  regs fo_S10_1CE2  orig ignore=all
 10 2B92  regs fo_S10_2B92  orig ignore=all
 10 21DC  regs fo_S10_21DC  orig ignore=all
+# Original's helpers translated inside their callers (orig_creatures.c)
+7  122E  internal o_hit  orig
+7  11FC  internal o_event  orig
+7  11D4  internal o_shot  orig
+2  2B3E  internal hunter_think  orig
+10 1F4E  internal k3_act  orig
+10 1FCE  internal k3_push  orig
+10 2096  internal k3_act  orig
+10 20C8  internal k3_push_player  orig
+10 20F6  internal k3_push_player  orig
+10 2718  internal o_route  orig
+10 27D8  internal o_route  orig
+10 2828  internal o_route  orig
+10 296E  internal o_route  orig
+10 29AA  internal o_route  orig
+10 2A7C  internal o_route  orig
+10 267C  internal fo_S10_21DC  orig
+10 26EE  internal fo_S10_21DC  orig
