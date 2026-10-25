@@ -45,8 +45,9 @@ __attribute__((unused)) static void o_shot(Regs *r, const uint16_t *e, think_fn 
 static void set_pic(Regs *r, uint16_t p) { w16(r->a[4] + 0x3A, p); }
 static void call_d0d1(Regs *r, void (*f)(Regs *), uint16_t d0, uint16_t d1) { set_w(&r->d[0], d0); set_w(&r->d[1], d1); f(r); }
 
-/* ---------- type 0: the lever (fn_S7_0528) ----------
- * States: 0 up, 1 down, 2-3 moving (4 ticks, then up). Hits by types $17-$1A switch it. */
+/* ---------- type 0 (fn_S7_0528) ----------
+ * States: 0 (picture 0), 1 (picture $1A), 2-3 a 4-tick spell (picture $1B), then 0. Hits by types
+ * $17-$1A switch between them. */
 static void t0_think(Regs *r) {
     for (;;) {
         set_w(&r->d[7], (uint16_t)r->d[0]);
@@ -105,7 +106,7 @@ void fo_S7_0606(Regs *r) {
     set_pic(r, (r16(r->a[4] + 0x16) & 0x8000) ? 0x1C : 0);
 }
 
-/* ---------- type 2: the exit (fn_S7_06A8) ----------
+/* ---------- type 2, the level's exit (fn_S7_06A8) ----------
  * Open once the four records after it are all in state 1 (else picture $E); it cycles through
  * pictures 8-$D (+$16 = 2, 4, .. 12). With the player in its cell at x $56-$5A, y $54-$57 it sets
  * four map words to 1 ($80, $C0, $100, $140) and counts +$18 = 16 frames of the exit picture
