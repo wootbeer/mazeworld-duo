@@ -392,6 +392,7 @@ static void paint_port(uint32_t w, uint32_t r) {
 
 /* fn_S8_3F6A: update of the high-score window G_2232: black, then the table (fn_S8_3FB2). */
 void fn_S8_3F6A(void) {
+    if (mz_original) { fo_S8_38EE(); return; }                 /* Original: its own (game/orig_shell.c) */
     MZ_FRAME;
     uint32_t w = g32(0x2232), r = mz_local(8);
     mac_BeginUpdate(w); mac_SetPort(w);
@@ -469,6 +470,7 @@ void fn_S8_3D66(void) {
  * window, black windows on the other screens and the slot VBL task, plays (fn_S8_0000), and puts it
  * all back; after a game over (G_21B3) enters the score (fn_S8_3D66) and saves (fn_S8_3492). */
 void fn_S8_3C0C(void) {
+    if (mz_original) { fo_S8_3796(); return; }                 /* Original: its own (game/orig_shell.c) */
     MZ_FRAME;
     fn_S8_4CF0(GADDR(0x22BC));
     fn_S8_4D68(GADDR(0x22C4), GADDR(0x22C0), g32(0x22BC));

@@ -88,6 +88,7 @@ void shell_focus(int active) { input_live_event(15, 0x01000000u | (active ? 1u :
 static void dispatch(uint32_t cmd) {
     if (!cmd) return;
     int menu = (int)(cmd >> 16), item = (int)(cmd & 0xFFFF);
+    if (mz_original) { void fo_menu(int16_t menu, int16_t item); fo_menu((int16_t)menu, (int16_t)item); mac_HiliteMenu(0); return; }
     switch (menu) {
     case MENU_APPLE: if (item == 1) fn_S8_190C(1); break;  /* fn_S8_32FE: the instructions (desk accessories: none) */
     case MENU_FILE:                                         /* fn_S8_3344 */

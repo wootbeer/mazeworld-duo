@@ -1463,7 +1463,9 @@ static void obj_tables(void) {
 
 /* fn_S7_2E9A (JT 109): one tick of the object at record offset D0.w of G_1DC4 (A4; G_00F2 = its
  * offset) by its type (+2). Types without behaviour do nothing. Keeps D3-D7/A2-A4. */
+void fo_S7_0F78(Regs *r);
 void fn_S7_2E9A(Regs *r) {
+    if (mz_original) { fo_S7_0F78(r); return; }             /* Original: its dispatcher (generated) */
     uint32_t d3 = r->d[3], d4 = r->d[4], d5 = r->d[5], d6 = r->d[6], d7 = r->d[7];
     uint32_t a2 = r->a[2], a3 = r->a[3], a4 = r->a[4];
     obj_tables();

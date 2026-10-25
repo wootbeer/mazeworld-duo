@@ -282,7 +282,7 @@
 7  269C  regs fn_S7_269C
 7  2AD2  regs fn_S7_2AD2
 7  26C4  regs fn_S7_26C4  ignore=all
-7  2E9A  regs fn_S7_2E9A  ignore=d0,d1,d2,a0,a1,ccr
+7  2E9A  regs fn_S7_2E9A  ignore=d0,d1,d2,a0,a1,ccr both
 7  2D1C  regs fn_S7_2D1C  ignore=d0,d1,d2,a0,a1,ccr
 2  0376  regs fn_S2_0376  ignore=d0,d1,d2,a0,a1,ccr
 2  5810  regs fn_S2_5810  ignore=d1,d2,a0,a1,ccr both
@@ -331,13 +331,13 @@
 8  0F90  void fn_S8_0F90(void)
 8  1004  void fn_S8_1004(void)
 8  1078  void fn_S8_1078(void)
-8  0A24  void fn_S8_0A24(void)  nocheck
+8  0A24  void fn_S8_0A24(void)  nocheck both
 8  172A  void fn_S8_172A(void)  nocheck both
 8  17D0  void fn_S8_17D0(void)  nocheck
 8  0206  u8 fn_S8_0206(void)  nocheck both
 8  0136  u8 fn_S8_0136(i16 level)  nocheck both
 8  03AE  u8 fn_S8_03AE(void)  nocheck
-8  0000  u8 fn_S8_0000(void)  nocheck
+8  0000  u8 fn_S8_0000(void)  nocheck both
 8  1814  regs fn_S8_1814  ignore=ccr nocheck both
 8  606C  ptr fn_S8_606C(ptr r)  nocheck
 8  610C  ptr fn_S8_610C(ptr r)  nocheck
@@ -352,11 +352,11 @@
 8  4790  void fn_S8_4790(void)  nocheck
 8  4526  void fn_S8_4526(void)  nocheck
 8  4620  void fn_S8_4620(void)  nocheck
-8  3F6A  void fn_S8_3F6A(void)
-8  2CAC  void fn_S8_2CAC(ptr w)
+8  3F6A  void fn_S8_3F6A(void)  nocheck both
+8  2CAC  void fn_S8_2CAC(ptr w)  nocheck
 8  3E88  void fn_S8_3E88(ptr name)  nocheck
 8  3D66  void fn_S8_3D66(void)  nocheck
-8  3C0C  void fn_S8_3C0C(void)  nocheck
+8  3C0C  void fn_S8_3C0C(void)  nocheck both
 8  577A  u8 fn_S8_577A(void)  d0=zext nocheck
 8  527A  u8 fn_S8_527A(i16 size)  nocheck both
 8  48A2  u8 fn_S8_48A2(i16 size, ptr rect)  nocheck
@@ -383,10 +383,10 @@
 8  2D26  void fn_S8_2D26(ptr w, ptr ev)  nocheck both
 8  2B86  void fn_S8_2B86(ptr ev)  nocheck
 8  2B5E  void fn_S8_2B5E(ptr ev)  nocheck
-8  2C36  void fn_S8_2C36(ptr ev)  nocheck
+8  2C36  void fn_S8_2C36(ptr ev)  nocheck both
 8  2D12  void fn_S8_2D12(ptr ev)  nocheck
-8  2AB8  void fn_S8_2AB8(ptr ev)  nocheck
-8  2A4A  void fn_S8_2A4A(void)  nocheck
+8  2AB8  void fn_S8_2AB8(ptr ev)  nocheck both
+8  2A4A  void fn_S8_2A4A(void)  nocheck both
 8  3822  ptr fn_S8_3822(i16 err)
 8  37E6  void fn_S8_37E6(ptr what, i16 err)  nocheck
 8  3658  i16 fn_S8_3658(i16 ref, ptr h)  nocheck
@@ -551,7 +551,6 @@
 1  01BE  internal (C division)  orig
 10 2C7C  regs fo_S10_2C7C  orig ignore=all
 10 0028  regs fo_S10_0028  orig ignore=all
-7  0F78  regs fo_S7_0F78  orig ignore=d0,d1,d2,a0,a1,ccr
 10 3C60  internal (orig_gen_*.c)  orig
 10 3E22  internal (orig_gen_*.c)  orig
 10 3BA8  internal (orig_gen_*.c)  orig
@@ -562,3 +561,6 @@
 10 3B9C  internal (orig_gen_*.c)  orig
 10 1168  internal (orig_gen_*.c)  orig
 10 115A  internal (orig_gen_*.c)  orig
+8  2346  internal shell_mouse_down  orig
+8  2524  internal fo_menu  orig
+8  29AE  internal fo_menu  orig

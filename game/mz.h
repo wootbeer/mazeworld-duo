@@ -39,6 +39,11 @@ extern int mz_original;
  * the chosen ability and 1-4 choose it, instead of the mouse moving and its gestures choosing */
 extern int mz_alt_controls;
 extern int16_t mz_alt_move[3];
+/* Original's own routines that shared code hands over to (game/orig_shell.c) */
+void    fo_S8_0E2A(void);
+uint8_t fo_S8_0000(void);
+void    fo_S8_3796(void);
+void    fo_S8_38EE(void);
 void     mz_select_original(void);
 uint32_t mz_jt(uint16_t off);          /* jump-table entry `off` above A5 */
 uint32_t mz_orig_func(int seg, uint16_t off);

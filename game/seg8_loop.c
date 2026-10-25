@@ -91,6 +91,7 @@ static uint32_t per_tick(uint32_t delta, uint16_t ticks) {
  *  - drawing: panels, shading, walls, floor runs, sprites, effects, scanner, the frame, sounds
  *    and the HUD; every 4th frame the bonus counter (fn_S2_4C86 with G_20DC / 4). */
 void fn_S8_0A24(void) {
+    if (mz_original) { fo_S8_0E2A(); return; }                 /* Original: its own (game/orig_shell.c) */
     MZ_FRAME;
     Regs r = {{0}, {0}, 0};
     uint32_t args = mz_local(0x40) + 0x30;                  /* stack arguments for fn_S2_3692 */
@@ -289,6 +290,7 @@ uint8_t fn_S8_03AE(void) {
  * everything, opens the sound channels and runs the game loop, then releases it all. Returns 1,
  * or 0 if something could not be set up. */
 uint8_t fn_S8_0000(void) {
+    if (mz_original) { return fo_S8_0000(); }                 /* Original: its own (game/orig_shell.c) */
     MZ_FRAME;
     Regs r = {{0}, {0}, 0};
     uint8_t ok = 1;

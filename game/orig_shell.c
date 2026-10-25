@@ -479,3 +479,196 @@ void fo_S8_57DE(uint32_t dlg, int16_t item) {
     mac_SetPenState(pen);
     mac_SetPort(r32(port));
 }
+
+/* ---------- play ---------- */
+
+/* a routine taking the level as its word argument on the stack (fo_S8_0510, 0756, 07D4) */
+static void with_level(Regs *r, void (*f)(Regs *), int16_t level) {
+    MZ_FRAME;
+    uint32_t s = mz_local(8);
+    w16(s + 4, (uint16_t)level);
+    r->a[7] = s;
+    f(r);
+}
+/* fo_S8_0E2A: the game loop, until G_57F2. Each pass handles the pending events (unless only the
+ * window is being redrawn, G_57D0), then, unless suspended (G_589E), plays one frame: the step
+ * taken from G_56D8 / G_56D4 (G_56CE / G_56CA), the mouse's movement (G_5756 / G_5754, into
+ * G_7200 / G_7202) steering the player (fo_S8_1152, not while a full-view picture shows), the
+ * objects (fn_S2_031C), then the drawing: panel, walls (fo_S2_41E8), floor, sprites, full-view
+ * pictures (fo_S8_0F5A), effects, the frame onto the window (which waits for the frame's time),
+ * gauges, message box and labels. A redraw (G_57D0) is one pass. */
+void fo_S8_0E2A(void) {
+    MZ_FRAME;
+    Regs r = {{0}, {0}, 0};
+    uint32_t args = mz_local(0x40) + 0x30;                  /* stack arguments for fn_S2_2C72 */
+    sog8(0x71F8, 0); sog16(0x71F0, 0); sog16(0x71F2, 0);
+    if (!og8(0x57D0)) sog32(0x7206, r32(r32(og32(0x5800) + 0x68) + 0x20));
+    sog8(0x57F2, 0);
+    while (!og8(0x57F2)) {
+        if (!og8(0x57D0)) {
+            int got;
+            do {
+                got = mac_WaitNextEvent((int16_t)0xFFFF, OADDR(0x57EE), 0, 0);
+                if (got) fn_S8_10EC(OADDR(0x57EE));
+            } while (got && !og8(0x57F2));
+        }
+        if (og8(0x57D0) || !og8(0x589E)) {
+            sog32(0x56CE, og32(0x56D8)); sog32(0x56CA, og32(0x56D4));
+            fn_S8_0E4C(&r);
+            if (!og8(0x57D0)) {
+                sog16(0x7200, og16(0x5756)); sog16(0x7202, og16(0x5754));
+                sog16(0x5756, 0); sog16(0x5754, 0);
+                if (!og16(0x56E0)) fo_S8_1152();
+            }
+            mz_seg_of(2, 0x0376), fn_S2_0376(&r);
+            mz_seg(2);
+            fo_S2_35FC();
+            fn_S2_3A36();
+            fo_S2_41E8(og32(0x53B4));
+            w32(args + 4, og32(0x53B4)); w32(args + 8, og32(0x53F4));
+            r.a[7] = args; fn_S2_3692(&r);
+            fn_S2_5810(&r);
+            if (og16(0x56E0)) fo_S8_0F5A();
+            if (og16(0x56EE) == 0x2B) fn_S8_0F90();
+            if (og16(0x56EE) == 0x2C) fn_S8_1004();
+            if (og16(0x56EE) == 0x2D) fn_S8_1078();
+            mz_seg(2);
+            fn_S2_040A();
+            fo_S2_36C2(); fo_S2_3A0E(); fo_S2_3D6E(); fo_S2_3E04();
+        }
+        if (og8(0x57D0)) sog8(0x57F2, 1);
+    }
+}
+/* fo_S8_0000: plays levels until G_57F1: the mouse's VBL task runs throughout (not for a redraw,
+ * G_57D0). Each pass sets up the level G_56DC (G_720C): its objects and the player (fo_S8_065A),
+ * graphics (fn_S8_0136), colours (fo_S8_05CC), offscreen world, map (fo_S8_0510), objects'
+ * places (fo_S8_0756), locks it all and runs the game loop; then (not for a redraw) stores the
+ * level (fo_S8_07D4) and, on a level change (G_57DE), puts the player at the new level's arrival
+ * point. Returns 1, or 0 if something could not be set up. */
+uint8_t fo_S8_0000(void) {
+    MZ_FRAME;
+    Regs r = {{0}, {0}, 0};
+    uint32_t rc = mz_local(8);
+    int fail = 0;
+    if (!og8(0x57D0)) fn_S8_172A();
+    sog8(0x57F1, 0);
+    while (!og8(0x57F1)) {
+        fn_S8_083A(&r);
+        fo_S8_065A(&r);
+        sog16(0x720C, og16(0x56DC));
+        fn_S8_0946(&r);
+        int16_t level = (int16_t)og16(0x720C);
+        if (!fn_S8_0136(level) || !fo_S8_05CC(level)) { fail = 1; break; }
+        fo_S8_44A8(OADDR(0x589C), og32(0x5898));
+        if (!og32(0x589C)) { fail = 1; break; }
+        fn_S8_083A(&r);
+        with_level(&r, fo_S8_0510, level);
+        if (!(uint8_t)r.d[0]) { fail = 2; break; }
+        if (og8(0x57D0)) {
+            uint32_t w = og32(0x5804);
+            mac_SetPort(w);
+            w32(rc, r32(w + 0x10)); w32(rc + 4, r32(w + 0x14));
+            mac_ClipRect(rc); mac_ValidRect(rc);
+        }
+        with_level(&r, fo_S8_0756, level);
+        fn_S8_0946(&r);
+        fn_S8_083A(&r);
+        fn_S8_02F0();
+        fn_S8_09FC(og32(0x53F0));
+        fn_S8_04C8(&r);
+        fo_S8_0E2A();
+        fn_S8_0946(&r);
+        fn_S8_0360();
+        if (og8(0x57D0)) { sog8(0x57F1, 1); continue; }
+        fn_S8_083A(&r);
+        with_level(&r, fo_S8_07D4, level);
+        if (og8(0x57DE)) {
+            sog32(0x56D8, og32(0x57D8)); sog32(0x56D4, og32(0x57D4));
+            sog16(0x56DC, og16(0x57DC)); sog16(0x56DA, og16(0x57DA));
+            sog8(0x57DE, 0); sog16(0x56E0, 0);
+        }
+        fo_S8_06DC(&r);
+        fn_S8_0946(&r);
+    }
+    if (!og8(0x57D0)) fn_S8_17D0();
+    if (fail == 2) fn_S8_0946(&r);
+    return !fail;
+}
+/* fo_S8_3796: starts playing from the main window: finds its screen (fn_S8_4CF0) and makes the
+ * offscreen world (alert G_68E0 if it cannot); unless the game is over (G_5787) checks the screen
+ * (fewer than 4 bits per pixel: alert G_68A8; another unusual depth: G_67A8; both go on; smaller than
+ * the window: alert G_66B4 and stop). Then the game window, black windows on the other screens,
+ * plays (fo_S8_0000) and puts it all back. */
+void fo_S8_3796(void) {
+    MZ_FRAME;
+    uint32_t rc = mz_local(8);
+    fn_S8_4CF0(OADDR(0x5898));
+    fo_S8_44A8(OADDR(0x589C), og32(0x5898));
+    if (!og32(0x589C)) { mz_seg_of(2, 0x03A0), fn_S2_03A0(OADDR(0x68E0), 0, 0); return; }
+    int16_t depth = (int16_t)r16(deref(r32(deref(og32(0x5898)) + 0x16)) + 0x20);
+    if (og8(0x5787)) return;
+    if (depth < 4) { fn_S8_4BE2(1); mz_seg_of(2, 0x03DC), fn_S2_03DC(OADDR(0x68A8), 0); }
+    else if (depth != 8 && depth != 4 && depth != 16 && depth != 32) { fn_S8_4BE2(1); mz_seg_of(2, 0x03DC), fn_S2_03DC(OADDR(0x67A8), 0); }
+    uint32_t g = deref(og32(0x5898)) + 0x22;
+    if ((int16_t)(r16(g + 6) - r16(g + 2)) < (int16_t)og16(0x5748) || (int16_t)(r16(g + 4) - r16(g)) < (int16_t)og16(0x5746)) {
+        fn_S8_4BE2(1); mz_seg_of(2, 0x03DC), fn_S2_03DC(OADDR(0x66B4), 0);
+        return;
+    }
+    sog8(0x5788, 0); sog8(0x5784, 1); sog8(0x57D0, 0);
+    fn_S8_4BE2(0);
+    mac_HideCursor();
+    fn_S8_4526(); fn_S8_4620(); fn_S8_471C();
+    uint32_t w = og32(0x5800);
+    mac_SelectWindow(w); mac_SetPort(w);
+    w32(rc, r32(w + 0x10)); w32(rc + 4, r32(w + 0x14));
+    mac_ClipRect(rc); mac_PmForeColor(0); mac_PaintRect(rc); mac_ValidRect(rc);
+    { Regs regs = {{0}, {0}, 0}; mz_seg_of(2, 0x39F8), fn_S2_39F8(&regs); }
+    fo_S8_0000();
+    fn_S8_4790(); fn_S8_46EE(); fn_S8_460C();
+    mac_SetPort(og32(0x5804));
+    mac_ShowCursor();
+    fn_S8_4BE2(1);
+}
+/* fo_S8_38EE: an update of the main window G_5804: what it shows (G_57D0 set: drawn, not played):
+ * no offscreen world: fo_S8_3BB8; the title (G_5788): fo_S8_39AA; the level's end (G_5787):
+ * fo_S8_3AB8; else the game's view (one pass of fo_S8_0000; the pause screen fo_S8_3B3E if it cannot) */
+void fo_S8_38EE(void) {
+    MZ_FRAME;
+    uint32_t rc = mz_local(8), w = og32(0x5804);
+    sog8(0x57D0, 1);
+    fn_S8_4CF0(OADDR(0x5898));
+    fo_S8_44A8(OADDR(0x589C), og32(0x5898));
+    mac_BeginUpdate(w);
+    if (!og32(0x589C)) fo_S8_3BB8();
+    else if (og8(0x5788)) fo_S8_39AA();
+    else if (og8(0x5787)) fo_S8_3AB8();
+    else {
+        mac_SetPort(w);
+        w32(rc, r32(w + 0x10)); w32(rc + 4, r32(w + 0x14));
+        mac_ClipRect(rc); mac_PmForeColor(0); mac_PaintRect(rc);
+        { Regs regs = {{0}, {0}, 0}; mz_seg_of(2, 0x39F8), fn_S2_39F8(&regs); }
+        if (!fo_S8_0000()) fo_S8_3B3E();
+        if (og8(0x5787)) {
+            mac_SetPort(w);
+            w32(rc, r32(w + 0x10)); w32(rc + 4, r32(w + 0x14));
+            mac_ClipRect(rc); mac_InvalRect(rc);
+        }
+    }
+    mac_EndUpdate(w);
+}
+
+/* Original's menus (fn_S8_2524): Apple 128 (fn_S8_29AE: About = the instructions from page 1, Read
+ * Instructions from page 3, Print Order Form, Register; desk accessories), File 129 (fo_S8_2A2A),
+ * Window Size 131 (fo_S8_2A78), Options 132 (fo_S8_2AA8). Print Order Form is left out: the port
+ * has no Mac printing (the original prints the form through the Printing Manager). */
+void fo_menu(int16_t menu, int16_t item) {
+    switch (menu) {
+    case 0x80:
+        if (item == 1 || item == 2) fn_S8_190C(item == 1 ? 1 : 3);
+        else if (item == 4) { fo_S8_68FA(); inval_window(); }
+        break;
+    case 0x81: fo_S8_2A2A(item); break;
+    case 0x83: fo_S8_2A78(item); break;
+    case 0x84: fo_S8_2AA8(item); break;
+    }
+}
