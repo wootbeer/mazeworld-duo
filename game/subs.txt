@@ -552,16 +552,16 @@
 1  01BE  internal (C division)  orig
 10 2C7C  regs fo_S10_2C7C  orig ignore=all
 10 0028  regs fo_S10_0028  orig ignore=all
-10 3C60  internal (orig_gen_*.c)  orig
-10 3E22  internal (orig_gen_*.c)  orig
-10 3BA8  internal (orig_gen_*.c)  orig
-10 3B08  internal (orig_gen_*.c)  orig
-10 3DC0  internal (orig_gen_*.c)  orig
-10 16FC  internal (orig_gen_*.c)  orig
-10 3B7C  internal (orig_gen_*.c)  orig
-10 3B9C  internal (orig_gen_*.c)  orig
-10 1168  internal (orig_gen_*.c)  orig
-10 115A  internal (orig_gen_*.c)  orig
+10 3C60  internal george_showing  orig
+10 3E22  internal g_ring_at  orig
+10 3BA8  internal george_appear  orig
+10 3B08  internal george_speech  orig
+10 3DC0  internal george_path  orig
+10 16FC  internal (orig_gen.c)  orig
+10 3B7C  internal george_hide  orig
+10 3B9C  internal george_hide_shown  orig
+10 1168  internal (orig_gen.c)  orig
+10 115A  internal (orig_gen.c)  orig
 8  2346  internal shell_mouse_down  orig
 8  2524  internal fo_menu  orig
 8  29AE  internal fo_menu  orig

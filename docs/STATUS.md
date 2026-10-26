@@ -23,12 +23,15 @@
   filter all reach): the shell loop and event dispatch (fn_S8_21E8, 2256, 2346, 23D4, 2524, 244A,
   62AC), starting play (3796), the main window's update (38EE) and the start-up (1C0C); not run
   by any test yet: Print Order Form (3284) and the Apple-event handlers (3482, 35FC, 36F8, 3454).
-- The creatures: the smaller behaviours by hand (`game/orig_creatures.c`); the two long ones
-  (fn_S10_0028, fn_S10_2C7C) and the dispatcher fn_S7_0F78 with every behaviour it reaches that no
-  C covered yet (segments 4, 9, 11) translated instruction by instruction by `tools/asm2c.py`
-  (`game/orig_gen_*.c`, operations in `game/asm68.h`; regenerate, do not edit). The tests reach a
-  part of that code and match the original on every call; the rest is translated the same way but
-  not yet run by a test (a longer recording would reach more of it).
+- The creatures (`game/orig_creatures.c`, by hand): the dispatcher fo_S7_0F78 and every behaviour
+  level 1 reaches but the snails: George the translator (states 0-15), the Eashire Cat, the exit,
+  the gates, the hunters and the rest. Still the instruction-by-instruction translation of
+  `tools/asm2c.py` (`game/orig_gen.c`, operations in `game/asm68.h`; regenerate with the arguments
+  at its top, do not edit): the snails (fo_S10_0028, 97 states, a conversation), George's states
+  16-51 (his remarks on later levels), type $1B, and every creature of levels 2-6 (segments 4, 9,
+  11). Those are written by hand as recordings reach them: the snails need a recording that talks
+  to them on level 1, the rest playthroughs of levels 2-6 (each level's creatures: per-level types
+  from the 'mazr' 199 data, see the dispatcher's table).
 - Now all C: the play loop, the shell loop, start-up, the menus and saved games; the port runs
   Original with no 68k code. In the rig only fn_S3_0000 / 026A and fn_S2_2F98 (a few start-up
   instructions) still run as 68k. Not reached by any test yet: Apple events, Load / Save Game on a
