@@ -39,7 +39,7 @@ def decode(seg, a):
     if not got or w & 0xF000 == 0xA000: raise ValueError(f'cannot decode S{seg}:{a:05X}')
     i = got[0]; t = f'{i.mnemonic} {i.op_str}'.strip(); cm = ''
     m = re.fullmatch(r'jsr \$([0-9a-f]+)\(a5\)', t)
-    if m and int(m.group(1), 16) in JT: s2, o2 = JT[int(m.group(1), 16)]; cm = f'; -> JT fn_S{s2}_{o2:04X}'
+    if m and int(m.group(1), 16) - 2 in JT: s2, o2 = JT[int(m.group(1), 16) - 2]; cm = f'; -> JT fn_S{s2}_{o2:04X}'   # (JSR to the entry's +2)
     FALLBACK[seg] += 1
     return (t, cm, i.size)
 # instructions the disassembler took as data (a table's guessed end overlaps them)
@@ -51,15 +51,22 @@ def seg_tables(seg):
         m = re.match(r'\s*[ ?l]?([0-9A-F]{5})\*?\s+([0-9a-f]+)\s+(.*?)\s*(;.*)?$', l)
         if not m: continue
         if m.group(3).startswith('dc.'):
-            mm = re.match(r'dc\.w S\d+_([0-9A-F]+)_case\d+ ; .*-> ([0-9A-F]+)', m.group(3) + ' ' + (m.group(4) or ''))
-            if mm: cases.setdefault(int(mm.group(1), 16), []).append(int(mm.group(2), 16))
+            mm = re.match(r'dc\.w S\d+_([0-9A-F]+)_case\d+', m.group(3))
+            if mm:   # the target from the code itself: the listing's comment cuts long addresses short
+                at = int(m.group(1), 16)
+                cases.setdefault(int(mm.group(1), 16), []).append(at + SW(seg, at))
             continue
         ins[int(m.group(1), 16)] = (m.group(3).strip(), m.group(4) or '', len(m.group(2)) // 2)
     for (sg, a), v in PATCH.items():
         if sg == seg: ins[a] = v
     INS[seg] = ins
     FALLBACK[seg] = 0
-    CASES[seg] = {t: [x for x in v if x in ins] for t, v in cases.items()}   # (a table's length is the disassembler's guess)
+    def code_at(x):   # a case's target: an instruction, also where the listing's sweep was out of step
+        if x in ins: return True
+        if x & 1 or not 0 <= x < len(CODES[seg]) - 1: return False
+        try: decode(seg, x); FALLBACK[seg] -= 1; return True
+        except Exception: return False
+    CASES[seg] = {t: [x for x in v if code_at(x)] for t, v in cases.items()}   # (a table's length is the disassembler's guess)
 
 # routines C already covers: Original's own (subs.txt orig) and shared ones that run for Original
 cfun = {}

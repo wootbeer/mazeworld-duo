@@ -35,6 +35,30 @@ static uint8_t *load_fork(const char *path, uint32_t *len) {
 #define BE16(p) (uint16_t)(((p)[0] << 8) | (p)[1])
 #define BE32(p) (uint32_t)(((uint32_t)(p)[0] << 24) | ((p)[1] << 16) | ((p)[2] << 8) | (p)[3])
 
+/* -level N (tests): Mazeworld Original's new game ('mazr' 199) starts at the arrival point of level
+ * N (2-6, as the gates and exits give them), with George already joined (G_56C2) and making his
+ * remarks (state 7), so random play reaches the later levels' creatures. */
+int g_start_level;
+static void start_level(uint8_t *g) {
+    static const uint32_t at[7][2] = {{0, 0}, {0, 0}, {0xF80000, 0x1E80000}, {0x380000, 0x140000},
+                                      {0x780000, 0x5E0000}, {0x480000, 0x480000}, {0x140000, 0x140000}};
+    #define PUT16(p, v) ((p)[0] = (uint8_t)((v) >> 8), (p)[1] = (uint8_t)(v))
+    #define PUT32(p, v) (PUT16(p, (v) >> 16), PUT16((p) + 2, v))
+    if (g_start_level > 6) return;
+    uint8_t *st = g + BE16(g);                              /* the state block */
+    PUT16(st + 2, g_start_level); PUT32(st + 4, at[g_start_level][0]); PUT32(st + 8, at[g_start_level][1]);
+    PUT16(st + 0x32, 0xFFFF);
+    for (uint8_t *o = st + 2 * BE16(st); o < g + BE16(g + 2) && BE16(o); o += 2 * BE16(o))
+        if (BE16(o + 2) == 0x14) PUT16(o + 0x16, 7);           /* George */
+}
+
+/* a test script may say where it starts: a "# level N" line among its first comment lines */
+void rs_script_level(const char *script) {
+    FILE *f = fopen(script, "r"); char ln[128];
+    while (f && fgets(ln, sizeof ln, f) && ln[0] == '#') sscanf(ln, "# level %d", &g_start_level);
+    if (f) fclose(f);
+}
+
 static void set_reserr(int e) { wr16(LM_ResErr, (uint16_t)e); }
 
 static int parse_fork(RFile *rf) {
@@ -57,6 +81,7 @@ static int parse_fork(RFile *rf) {
             r->len = BE32(f + doff + ro); r->off = doff + ro + 4;
             if (no != 0xFFFF) memcpy(r->name, m + nl + no, m[nl + no] + 1); else r->name[0] = 0;
             r->handle = 0;
+            if (type == 0x6D617A72 && r->id == 199 && g_start_level > 1) start_level(f + r->off);
         }
     }
     return 0;

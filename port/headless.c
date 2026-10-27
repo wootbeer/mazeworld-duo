@@ -42,6 +42,7 @@ int main(int argc, char **argv) {
         else break;
     }
     if (i >= argc) { fprintf(stderr, "usage: mzport-headless [-ticks N] [-script file] [-o outdir] <archive>\n"); return 2; }
+    if (script) { void rs_script_level(const char *script); rs_script_level(script); }
     char lp[512], err[256]; snprintf(lp, sizeof lp, "%s/log.txt", g_outdir);
     if (port_boot(argv[i], lp, err, sizeof err)) { fprintf(stderr, "%s\n", err); return 1; }
     if (script && input_load(script)) { fprintf(stderr, "cannot load script %s\n", script); return 1; }

@@ -129,6 +129,8 @@ static void oc_S4_0B72(Regs *r);
 static void oc_S4_0B98(Regs *r);
 static void oc_S4_0BB2(Regs *r);
 static void oc_S4_0BE2(Regs *r);
+static void oc_S4_0C04(Regs *r);
+static void oc_S4_0C0E(Regs *r);
 static void oc_S4_0CAC(Regs *r);
 static void oc_S4_0D0A(Regs *r);
 static void oc_S4_0D50(Regs *r);
@@ -155,6 +157,8 @@ static void oc_S4_1566(Regs *r);
 static void oc_S4_158C(Regs *r);
 static void oc_S4_15A4(Regs *r);
 static void oc_S4_15DC(Regs *r);
+static void oc_S4_15FA(Regs *r);
+static void oc_S4_1612(Regs *r);
 static void oc_S4_1904(Regs *r);
 static void oc_S4_1964(Regs *r);
 static void oc_S4_1968(Regs *r);
@@ -206,6 +210,7 @@ static void oc_S4_2106(Regs *r);
 static void oc_S4_2150(Regs *r);
 static void oc_S4_2178(Regs *r);
 static void oc_S4_2196(Regs *r);
+static void oc_S4_21A0(Regs *r);
 static void oc_S4_23C6(Regs *r);
 static void oc_S4_2420(Regs *r);
 static void oc_S4_2436(Regs *r);
@@ -250,6 +255,7 @@ static void oc_S4_29C8(Regs *r);
 static void oc_S4_29EE(Regs *r);
 static void oc_S4_2A08(Regs *r);
 static void oc_S4_2A2E(Regs *r);
+static void oc_S4_2A42(Regs *r);
 static void oc_S4_2B50(Regs *r);
 static void oc_S4_2B82(Regs *r);
 static void oc_S4_2BC6(Regs *r);
@@ -539,6 +545,7 @@ static void oc_S11_0C98(Regs *r);
 static void oc_S4_06F4(Regs *r);
 static void oc_S2_2B3E(Regs *r);
 static void oc_S7_1E54(Regs *r);
+static void oc_S7_1E66(Regs *r);
 static void oc_S4_1096(Regs *r);
 static void oc_S7_201C(Regs *r);
 static void oc_S7_2132(Regs *r);
@@ -588,6 +595,7 @@ static void oc_S11_0C9E(Regs *r);
 static void oc_S11_0CB4(Regs *r);
 static void oc_S11_0CD2(Regs *r);
 static void oc_S11_0CEE(Regs *r);
+static void oc_S7_1EA2(Regs *r);
 static void oc_S4_11E4(Regs *r);
 static void oc_S7_2210(Regs *r);
 static void oc_S4_2EA8(Regs *r);
@@ -4517,7 +4525,7 @@ static void oc_S4_0804(Regs *r) {
     m_set(2, &r->d[7], f_logic(r, 2, r->d[0]));
     m_set(2, &r->d[0], f_add(r, 2, r->d[0], r->d[0]));
     m_set(2, &r->d[0], f_add(r, 2, m_rd(2, (cs + 0x810u + sxw(r->d[0]))), r->d[0]));
-    switch ((uint16_t)(0x810u + (uint16_t)r->d[0])) { case 0x830: goto L00830; case 0x8AA: goto L008AA; case 0x8CC: goto L008CC; case 0x958: goto L00958; case 0xA20: goto L00A20; case 0xA76: goto L00A76; case 0xA84: goto L00A84; case 0xA94: goto L00A94; case 0xB02: goto L00B02; case 0xB32: goto L00B32; case 0xB74: goto L00B74; case 0xB9A: goto L00B9A; case 0xBF6: goto L00BF6; case 0xC0C: goto L00C0C; default: hx_fault("jump table at S4:%05X: index %04X", 0x80Cu, (unsigned)(uint16_t)r->d[0]); r->a[7] = sp0; return; }
+    switch ((uint16_t)(0x810u + (uint16_t)r->d[0])) { case 0x830: goto L00830; case 0x8AA: goto L008AA; case 0x8CC: goto L008CC; case 0x958: goto L00958; case 0xA20: goto L00A20; case 0xA76: goto L00A76; case 0xA84: goto L00A84; case 0xA94: goto L00A94; case 0xAC4: goto L00AC4; case 0xB02: goto L00B02; case 0xB32: goto L00B32; case 0xB74: goto L00B74; case 0xB9A: goto L00B9A; case 0xBCE: goto L00BCE; case 0xBF6: goto L00BF6; case 0xC0C: goto L00C0C; default: hx_fault("jump table at S4:%05X: index %04X", 0x80Cu, (unsigned)(uint16_t)r->d[0]); r->a[7] = sp0; return; }
 L00830:
     mz_seg_of(7, 0x319E), fn_S7_319E(r);
     m_set(2, &r->d[0], f_logic(r, 2, m_rd(2, OADDR(0x382E))));
@@ -4616,6 +4624,22 @@ L00A94:
     oc_call_a3(r); r->a[7] = sp0; return;
 L00AAA:
     r->a[7] = sp0; return;
+L00AC4:
+    m_set(2, &r->d[0], f_logic(r, 2, m_rd(2, (r->a[4] + 0xEu))));
+    r->a[0] = m_rd(4, OADDR(0x53D4));
+    m_wr(2, (r->a[0] + 0xEu + sxw(r->d[0])), f_logic(r, 2, 0));
+    m_set(2, &r->d[0], f_logic(r, 2, m_rd(2, OADDR(0x3834))));
+    m_set(2, &r->d[1], f_logic(r, 2, m_rd(2, (r->a[4] + 0x30u))));
+    mz_seg_of(2, 0x3410), fn_S2_3410(r);
+    m_wr(2, (r->a[4] + 0x10u), f_logic(r, 2, m_rd(2, (r->a[4] + 0x30u))));
+    r->d[0] = f_logic(r, 4, 0x0u);
+    m_wr(4, (r->a[4] + 0x4u), f_logic(r, 4, r->d[0]));
+    m_wr(4, (r->a[4] + 0x8u), f_logic(r, 4, r->d[0]));
+    m_wr(2, (r->a[4] + 0x30u), f_logic(r, 2, r->d[0]));
+    m_wr(2, (r->a[4] + 0xEu), f_logic(r, 2, r->d[0]));
+    m_wr(2, (r->a[4] + 0x1Cu), f_logic(r, 2, 0x2EEu));
+    m_set(2, &r->d[0], f_logic(r, 2, 0x9u));
+    oc_call_a3(r); r->a[7] = sp0; return;
 L00B02:
     m_set(2, &r->d[0], f_logic(r, 2, m_rd(2, OADDR(0x56E0))));
     f_cmp(r, 2, 0x80u, r->d[0]);
@@ -4672,6 +4696,14 @@ L00B9A:
     oc_call_a3(r); r->a[7] = sp0; return;
 L00BB0:
     r->a[7] = sp0; return;
+L00BCE:
+    { uint32_t ad = (r->a[4] + 0x1Cu); m_wr(2, ad, f_sub(r, 2, 0x1u, m_rd(2, ad))); }
+    if (CC_MI) goto L00BD6;
+    r->a[7] = sp0; return;
+L00BD6:
+    m_wr(2, (r->a[4] + 0x1Cu), f_logic(r, 2, 0x5u));
+    m_set(2, &r->d[0], f_logic(r, 2, 0xEu));
+    oc_call_a3(r); r->a[7] = sp0; return;
 L00BF6:
     { uint32_t ad = (r->a[4] + 0x1Cu); m_wr(2, ad, f_sub(r, 2, 0x1u, m_rd(2, ad))); }
     if (CC_MI) goto L00BFE;
@@ -4939,6 +4971,25 @@ static void oc_S4_0BE2(Regs *r) {
     mz_seg_of(7, 0x3722), fn_S7_3722(r);
     mz_seg_of(7, 0x3722), fn_S7_3722(r);
 L00BF4:
+    r->a[7] = sp0; return;
+}
+
+/* S4:00C04 */
+static void oc_S4_0C04(Regs *r) {
+    uint32_t cs = mz_seg_base(4); (void)cs;
+    MZ_FRAME;
+    uint32_t sp0 = r->a[7]; r->a[7] = mz_local(0x100) + 0x100;   /* its stack: frames and pushes */
+    m_wr(2, (r->a[4] + 0x3Au), f_logic(r, 2, 0x78u));
+    r->a[7] = sp0; return;
+}
+
+/* S4:00C0E */
+static void oc_S4_0C0E(Regs *r) {
+    uint32_t cs = mz_seg_base(4); (void)cs;
+    MZ_FRAME;
+    uint32_t sp0 = r->a[7]; r->a[7] = mz_local(0x100) + 0x100;   /* its stack: frames and pushes */
+    m_wr(2, (r->a[4] + 0x3Au), f_logic(r, 2, 0x78u));
+    oc_S7_1E66(r);
     r->a[7] = sp0; return;
 }
 
@@ -5340,7 +5391,7 @@ static void oc_S4_12E8(Regs *r) {
     m_set(2, &r->d[7], f_logic(r, 2, r->d[0]));
     m_set(2, &r->d[0], f_add(r, 2, r->d[0], r->d[0]));
     m_set(2, &r->d[0], f_add(r, 2, m_rd(2, (cs + 0x12F4u + sxw(r->d[0]))), r->d[0]));
-    switch ((uint16_t)(0x12F4u + (uint16_t)r->d[0])) { case 0x1312: goto L01312; case 0x1366: goto L01366; case 0x138A: goto L0138A; case 0x1408: goto L01408; case 0x1416: goto L01416; case 0x1478: goto L01478; case 0x1486: goto L01486; case 0x14FA: goto L014FA; case 0x1526: goto L01526; case 0x1568: goto L01568; case 0x158E: goto L0158E; case 0x15EC: goto L015EC; case 0x1610: goto L01610; default: hx_fault("jump table at S4:%05X: index %04X", 0x12F0u, (unsigned)(uint16_t)r->d[0]); r->a[7] = sp0; return; }
+    switch ((uint16_t)(0x12F4u + (uint16_t)r->d[0])) { case 0x1312: goto L01312; case 0x1366: goto L01366; case 0x138A: goto L0138A; case 0x1408: goto L01408; case 0x1416: goto L01416; case 0x1478: goto L01478; case 0x1486: goto L01486; case 0x14BC: goto L014BC; case 0x14FA: goto L014FA; case 0x1526: goto L01526; case 0x1568: goto L01568; case 0x158E: goto L0158E; case 0x15C8: goto L015C8; case 0x15EC: goto L015EC; case 0x1610: goto L01610; default: hx_fault("jump table at S4:%05X: index %04X", 0x12F0u, (unsigned)(uint16_t)r->d[0]); r->a[7] = sp0; return; }
 L01312:
     mz_seg_of(7, 0x319E), fn_S7_319E(r);
     m_set(2, &r->d[0], f_logic(r, 2, m_rd(2, OADDR(0x382E))));
@@ -5418,6 +5469,22 @@ L01486:
     oc_call_a3(r); r->a[7] = sp0; return;
 L0149C:
     r->a[7] = sp0; return;
+L014BC:
+    m_set(2, &r->d[0], f_logic(r, 2, m_rd(2, (r->a[4] + 0xEu))));
+    r->a[0] = m_rd(4, OADDR(0x53D4));
+    m_wr(2, (r->a[0] + 0xEu + sxw(r->d[0])), f_logic(r, 2, 0));
+    m_set(2, &r->d[0], f_logic(r, 2, m_rd(2, OADDR(0x3834))));
+    m_set(2, &r->d[1], f_logic(r, 2, m_rd(2, (r->a[4] + 0x30u))));
+    mz_seg_of(2, 0x3410), fn_S2_3410(r);
+    m_wr(2, (r->a[4] + 0x10u), f_logic(r, 2, m_rd(2, (r->a[4] + 0x30u))));
+    r->d[0] = f_logic(r, 4, 0x0u);
+    m_wr(4, (r->a[4] + 0x4u), f_logic(r, 4, r->d[0]));
+    m_wr(4, (r->a[4] + 0x8u), f_logic(r, 4, r->d[0]));
+    m_wr(2, (r->a[4] + 0x30u), f_logic(r, 2, r->d[0]));
+    m_wr(2, (r->a[4] + 0xEu), f_logic(r, 2, r->d[0]));
+    m_wr(2, (r->a[4] + 0x1Eu), f_logic(r, 2, 0x2EEu));
+    m_set(2, &r->d[0], f_logic(r, 2, 0x8u));
+    oc_call_a3(r); r->a[7] = sp0; return;
 L014FA:
     m_set(2, &r->d[0], f_logic(r, 2, m_rd(2, OADDR(0x56E0))));
     if (CC_EQ) goto L0150A;
@@ -5473,6 +5540,14 @@ L0158E:
     oc_call_a3(r); r->a[7] = sp0; return;
 L015A2:
     r->a[7] = sp0; return;
+L015C8:
+    { uint32_t ad = (r->a[4] + 0x1Eu); m_wr(2, ad, f_sub(r, 2, 0x1u, m_rd(2, ad))); }
+    if (CC_MI) goto L015D0;
+    r->a[7] = sp0; return;
+L015D0:
+    m_wr(2, (r->a[4] + 0x1Eu), f_logic(r, 2, 0x5u));
+    m_set(2, &r->d[0], f_logic(r, 2, 0xDu));
+    oc_call_a3(r); r->a[7] = sp0; return;
 L015EC:
     { uint32_t ad = (r->a[4] + 0x1Eu); m_wr(2, ad, f_sub(r, 2, 0x1u, m_rd(2, ad))); }
     if (CC_MI) goto L015F4;
@@ -5657,6 +5732,30 @@ static void oc_S4_15DC(Regs *r) {
     if (CC_MI) goto L015EA;
     mz_seg_of(7, 0x3722), fn_S7_3722(r);
 L015EA:
+    r->a[7] = sp0; return;
+}
+
+/* S4:015FA */
+static void oc_S4_15FA(Regs *r) {
+    uint32_t cs = mz_seg_base(4); (void)cs;
+    MZ_FRAME;
+    uint32_t sp0 = r->a[7]; r->a[7] = mz_local(0x100) + 0x100;   /* its stack: frames and pushes */
+    m_wr(2, (r->a[4] + 0x3Au), f_logic(r, 2, 0x37u));
+    mz_seg_of(7, 0x3128), fn_S7_3128(r);
+    m_set(2, &r->d[0], f_logic(r, 2, m_rd(2, OADDR(0x3830))));
+    if (CC_MI) goto L0160E;
+    mz_seg_of(7, 0x3722), fn_S7_3722(r);
+L0160E:
+    r->a[7] = sp0; return;
+}
+
+/* S4:01612 */
+static void oc_S4_1612(Regs *r) {
+    uint32_t cs = mz_seg_base(4); (void)cs;
+    MZ_FRAME;
+    uint32_t sp0 = r->a[7]; r->a[7] = mz_local(0x100) + 0x100;   /* its stack: frames and pushes */
+    m_wr(2, (r->a[4] + 0x3Au), f_logic(r, 2, 0x37u));
+    oc_S7_1E66(r);
     r->a[7] = sp0; return;
 }
 
@@ -6242,7 +6341,7 @@ static void oc_S4_1E90(Regs *r) {
     m_set(2, &r->d[7], f_logic(r, 2, r->d[0]));
     m_set(2, &r->d[0], f_add(r, 2, r->d[0], r->d[0]));
     m_set(2, &r->d[0], f_add(r, 2, m_rd(2, (cs + 0x1E9Cu + sxw(r->d[0]))), r->d[0]));
-    switch ((uint16_t)(0x1E9Cu + (uint16_t)r->d[0])) { case 0x1EBC: goto L01EBC; case 0x1EC4: goto L01EC4; case 0x1EE6: goto L01EE6; case 0x1F64: goto L01F64; case 0x1F72: goto L01F72; case 0x1FD8: goto L01FD8; case 0x1FE6: goto L01FE6; case 0x2018: goto L02018; case 0x2056: goto L02056; case 0x2086: goto L02086; case 0x20C8: goto L020C8; case 0x20EE: goto L020EE; case 0x2164: goto L02164; case 0x2188: goto L02188; case 0x219E: goto L0219E; default: hx_fault("jump table at S4:%05X: index %04X", 0x1E98u, (unsigned)(uint16_t)r->d[0]); r->a[7] = sp0; return; }
+    switch ((uint16_t)(0x1E9Cu + (uint16_t)r->d[0])) { case 0x1EBC: goto L01EBC; case 0x1EC4: goto L01EC4; case 0x1EE6: goto L01EE6; case 0x1F64: goto L01F64; case 0x1F72: goto L01F72; case 0x1FD8: goto L01FD8; case 0x1FE6: goto L01FE6; case 0x2018: goto L02018; case 0x2056: goto L02056; case 0x2086: goto L02086; case 0x20C8: goto L020C8; case 0x20EE: goto L020EE; case 0x2124: goto L02124; case 0x2164: goto L02164; case 0x2188: goto L02188; case 0x219E: goto L0219E; default: hx_fault("jump table at S4:%05X: index %04X", 0x1E98u, (unsigned)(uint16_t)r->d[0]); r->a[7] = sp0; return; }
 L01EBC:
     m_set(2, &r->d[0], f_logic(r, 2, 0xCu));
     oc_call_a3(r); r->a[7] = sp0; return;
@@ -6371,6 +6470,22 @@ L020EE:
     m_set(2, &r->d[0], f_logic(r, 2, 0xCu));
     oc_call_a3(r); r->a[7] = sp0; return;
 L02104:
+    r->a[7] = sp0; return;
+L02124:
+    mz_seg_of(7, 0x319E), fn_S7_319E(r);
+    m_set(2, &r->d[0], f_logic(r, 2, m_rd(2, OADDR(0x3830))));
+    if (CC_MI) goto L0213A;
+    m_wr(2, (r->a[4] + 0x1Au), f_logic(r, 2, 0x6u));
+    m_set(2, &r->d[0], f_logic(r, 2, 0x2u));
+    oc_call_a3(r); r->a[7] = sp0; return;
+L0213A:
+    mz_seg_of(7, 0x3FF0), fn_S7_3FF0(r);
+    f_logic(r, 2, r->d[0]);
+    if (CC_EQ) goto L0214E;
+    m_wr(2, (r->a[4] + 0x1Cu), f_logic(r, 2, m_rd(2, OADDR(0x56D0))));
+    m_set(2, &r->d[0], f_logic(r, 2, 0x3u));
+    oc_call_a3(r); r->a[7] = sp0; return;
+L0214E:
     r->a[7] = sp0; return;
 L02164:
     { uint32_t ad = (r->a[4] + 0x1Eu); m_wr(2, ad, f_sub(r, 2, 0x1u, m_rd(2, ad))); }
@@ -6582,6 +6697,16 @@ static void oc_S4_2196(Regs *r) {
     MZ_FRAME;
     uint32_t sp0 = r->a[7]; r->a[7] = mz_local(0x100) + 0x100;   /* its stack: frames and pushes */
     m_wr(2, (r->a[4] + 0x3Au), f_logic(r, 2, 0x73u));
+    r->a[7] = sp0; return;
+}
+
+/* S4:021A0 */
+static void oc_S4_21A0(Regs *r) {
+    uint32_t cs = mz_seg_base(4); (void)cs;
+    MZ_FRAME;
+    uint32_t sp0 = r->a[7]; r->a[7] = mz_local(0x100) + 0x100;   /* its stack: frames and pushes */
+    m_wr(2, (r->a[4] + 0x3Au), f_logic(r, 2, 0x73u));
+    oc_S7_1E66(r);
     r->a[7] = sp0; return;
 }
 
@@ -7136,7 +7261,7 @@ static void oc_S4_286E(Regs *r) {
     m_set(2, &r->d[7], f_logic(r, 2, r->d[0]));
     m_set(2, &r->d[0], f_add(r, 2, r->d[0], r->d[0]));
     m_set(2, &r->d[0], f_add(r, 2, m_rd(2, (cs + 0x287Au + sxw(r->d[0]))), r->d[0]));
-    switch ((uint16_t)(0x287Au + (uint16_t)r->d[0])) { case 0x2890: goto L02890; case 0x28A6: goto L028A6; case 0x28F0: goto L028F0; case 0x2902: goto L02902; case 0x2922: goto L02922; case 0x2960: goto L02960; case 0x2970: goto L02970; case 0x29CA: goto L029CA; case 0x29F0: goto L029F0; case 0x2A34: goto L02A34; default: hx_fault("jump table at S4:%05X: index %04X", 0x2876u, (unsigned)(uint16_t)r->d[0]); r->a[7] = sp0; return; }
+    switch ((uint16_t)(0x287Au + (uint16_t)r->d[0])) { case 0x2890: goto L02890; case 0x28A6: goto L028A6; case 0x28F0: goto L028F0; case 0x2902: goto L02902; case 0x2922: goto L02922; case 0x2960: goto L02960; case 0x2970: goto L02970; case 0x29CA: goto L029CA; case 0x29F0: goto L029F0; case 0x2A1E: goto L02A1E; case 0x2A34: goto L02A34; default: hx_fault("jump table at S4:%05X: index %04X", 0x2876u, (unsigned)(uint16_t)r->d[0]); r->a[7] = sp0; return; }
 L02890:
     mz_seg_of(7, 0x3128), fn_S7_3128(r);
     f_logic(r, 2, r->d[0]);
@@ -7239,6 +7364,14 @@ L029F0:
     oc_call_a3(r); r->a[7] = sp0; return;
 L02A06:
     r->a[7] = sp0; return;
+L02A1E:
+    mz_seg_of(7, 0x3128), fn_S7_3128(r);
+    f_logic(r, 2, r->d[0]);
+    if (CC_EQ) goto L02A28;
+    r->a[7] = sp0; return;
+L02A28:
+    m_set(2, &r->d[0], f_logic(r, 2, 0xAu));
+    oc_call_a3(r); r->a[7] = sp0; return;
 L02A34:
     mz_seg_of(7, 0x3128), fn_S7_3128(r);
     if (CC_NE) goto L02A3C;
@@ -7344,6 +7477,48 @@ static void oc_S4_2A2E(Regs *r) {
     MZ_FRAME;
     uint32_t sp0 = r->a[7]; r->a[7] = mz_local(0x100) + 0x100;   /* its stack: frames and pushes */
     m_wr(2, (r->a[2] + 0x98u), f_logic(r, 2, 0));
+    r->a[7] = sp0; return;
+}
+
+/* S4:02A42 */
+static void oc_S4_2A42(Regs *r) {
+    uint32_t cs = mz_seg_base(4); (void)cs;
+    MZ_FRAME;
+    uint32_t sp0 = r->a[7]; r->a[7] = mz_local(0x100) + 0x100;   /* its stack: frames and pushes */
+    m_wr(2, (r->a[2] + 0x98u), f_logic(r, 2, 0x1u));
+    m_set(2, &r->d[0], f_logic(r, 2, m_rd(2, OADDR(0x56D0))));
+    m_wr(2, (r->a[2] + 0xDAu), f_logic(r, 2, r->d[0]));
+    m_wr(2, (r->a[2] + 0xDEu), f_logic(r, 2, r->d[0]));
+    m_wr(2, (r->a[2] + 0xE0u), f_logic(r, 2, 0x2u));
+    m_set(2, &r->d[1], f_logic(r, 2, m_rd(2, OADDR(0x56D8))));
+    m_set(2, &r->d[2], f_logic(r, 2, m_rd(2, OADDR(0x56D4))));
+    fo_S7_2038(r);
+    m_wr(2, (r->a[2] + 0xD8u), f_logic(r, 2, r->d[0]));
+    m_wr(2, (r->a[2] + 0xDCu), f_logic(r, 2, r->d[0]));
+    m_set(2, &r->d[0], f_logic(r, 2, m_rd(2, OADDR(0x382E))));
+    f_cmp(r, 2, 0xAu, r->d[0]);
+    if (CC_CS) goto L02AAE;
+    oc_S7_226E(r);
+    f_logic(r, 2, r->d[0]);
+    if (CC_NE) goto L02A8C;
+    m_wr(2, OADDR(0x3814), f_logic(r, 2, m_rd(2, OADDR(0x56D0))));
+    oc_S7_2132(r);
+    goto L02AA4;
+L02A8C:
+    m_wr(2, OADDR(0x381C), f_logic(r, 2, m_rd(2, OADDR(0x56D8))));
+    m_wr(2, OADDR(0x3818), f_logic(r, 2, m_rd(2, OADDR(0x56D4))));
+    mz_seg_of(7, 0x3B36), fn_S7_3B36(r);
+    m_set(2, &r->d[3], f_logic(r, 2, r->d[0]));
+    mz_seg_of(7, 0x3D0E), fn_S7_3D0E(r);
+    m_set(2, &r->d[0], f_logic(r, 2, r->d[3]));
+L02AA4:
+    f_logic(r, 2, r->d[0]);
+    if (CC_MI) goto L02AAE;
+    oc_S7_1FF8(r);
+    r->a[7] = sp0; return;
+L02AAE:
+    m_set(2, &r->d[0], f_logic(r, 2, m_rd(2, OADDR(0x3830))));
+    mz_seg_of(7, 0x3722), fn_S7_3722(r);
     r->a[7] = sp0; return;
 }
 
@@ -13308,6 +13483,35 @@ L01E64:
     r->a[7] = sp0; return;
 }
 
+/* S7:01E66 */
+static void oc_S7_1E66(Regs *r) {
+    uint32_t cs = mz_seg_base(7); (void)cs;
+    MZ_FRAME;
+    uint32_t sp0 = r->a[7]; r->a[7] = mz_local(0x100) + 0x100;   /* its stack: frames and pushes */
+    oc_S7_1EA2(r);
+    m_set(2, &r->d[0], f_logic(r, 2, m_rd(2, OADDR(0x382E))));
+    f_cmp(r, 2, 0x6u, r->d[0]);
+    if (CC_CS) goto L01E7C;
+    oc_S7_1EA2(r);
+    oc_S7_1EA2(r);
+L01E7C:
+    m_set(2, &r->d[0], f_logic(r, 2, m_rd(2, OADDR(0x382E))));
+    f_cmp(r, 2, 0x6u, r->d[0]);
+    if (CC_CC) goto L01EA0;
+    r->d[0] = f_logic(r, 4, 0x0u);
+    m_wr(2, OADDR(0x382C), f_logic(r, 2, r->d[0]));
+    m_wr(2, OADDR(0x3828), f_logic(r, 2, r->d[0]));
+    m_wr(2, OADDR(0x3824), f_logic(r, 2, r->d[0]));
+    m_set(2, &r->d[0], f_logic(r, 2, 0x2Au));
+    m_set(2, &r->d[1], f_logic(r, 2, 0));
+    m_set(2, &r->d[2], f_logic(r, 2, 0));
+    oc_S7_1F60(r);
+L01EA0:
+    goto L01EBE;
+L01EBE:
+    r->a[7] = sp0; return;
+}
+
 /* S4:01096 */
 static void oc_S4_1096(Regs *r) {
     uint32_t cs = mz_seg_base(4); (void)cs;
@@ -14790,6 +14994,22 @@ static void oc_S11_0CEE(Regs *r) {
     r->a[7] = sp0; return;
 }
 
+/* S7:01EA2 */
+static void oc_S7_1EA2(Regs *r) {
+    uint32_t cs = mz_seg_base(7); (void)cs;
+    MZ_FRAME;
+    uint32_t sp0 = r->a[7]; r->a[7] = mz_local(0x100) + 0x100;   /* its stack: frames and pushes */
+    mz_seg_of(7, 0x3128), fn_S7_3128(r);
+    m_set(2, &r->d[0], f_logic(r, 2, m_rd(2, OADDR(0x3830))));
+    if (CC_MI) goto L01EBC;
+    mz_seg_of(7, 0x3722), fn_S7_3722(r);
+    r->a[0] = OADDR(0x4F30);
+    mz_seg_of(7, 0x374C), fn_S7_374C(r);
+    mz_seg_of(7, 0x3784), fn_S7_3784(r);
+L01EBC:
+    r->a[7] = sp0; return;
+}
+
 /* S4:011E4 */
 static void oc_S4_11E4(Regs *r) {
     uint32_t cs = mz_seg_base(4); (void)cs;
@@ -15073,6 +15293,8 @@ static void oc_call_rel(Regs *r, int seg, uint16_t at) {
     if (seg == 4 && at == 0xB98) { oc_S4_0B98(r); return; }
     if (seg == 4 && at == 0xBB2) { oc_S4_0BB2(r); return; }
     if (seg == 4 && at == 0xBE2) { oc_S4_0BE2(r); return; }
+    if (seg == 4 && at == 0xC04) { oc_S4_0C04(r); return; }
+    if (seg == 4 && at == 0xC0E) { oc_S4_0C0E(r); return; }
     if (seg == 4 && at == 0xD0A) { oc_S4_0D0A(r); return; }
     if (seg == 4 && at == 0xD50) { oc_S4_0D50(r); return; }
     if (seg == 4 && at == 0xEB2) { oc_S4_0EB2(r); return; }
@@ -15097,6 +15319,8 @@ static void oc_call_rel(Regs *r, int seg, uint16_t at) {
     if (seg == 4 && at == 0x158C) { oc_S4_158C(r); return; }
     if (seg == 4 && at == 0x15A4) { oc_S4_15A4(r); return; }
     if (seg == 4 && at == 0x15DC) { oc_S4_15DC(r); return; }
+    if (seg == 4 && at == 0x15FA) { oc_S4_15FA(r); return; }
+    if (seg == 4 && at == 0x1612) { oc_S4_1612(r); return; }
     if (seg == 4 && at == 0x1964) { oc_S4_1964(r); return; }
     if (seg == 4 && at == 0x1968) { oc_S4_1968(r); return; }
     if (seg == 4 && at == 0x19B2) { oc_S4_19B2(r); return; }
@@ -15146,6 +15370,7 @@ static void oc_call_rel(Regs *r, int seg, uint16_t at) {
     if (seg == 4 && at == 0x2150) { oc_S4_2150(r); return; }
     if (seg == 4 && at == 0x2178) { oc_S4_2178(r); return; }
     if (seg == 4 && at == 0x2196) { oc_S4_2196(r); return; }
+    if (seg == 4 && at == 0x21A0) { oc_S4_21A0(r); return; }
     if (seg == 4 && at == 0x2420) { oc_S4_2420(r); return; }
     if (seg == 4 && at == 0x2436) { oc_S4_2436(r); return; }
     if (seg == 4 && at == 0x2452) { oc_S4_2452(r); return; }
@@ -15188,6 +15413,7 @@ static void oc_call_rel(Regs *r, int seg, uint16_t at) {
     if (seg == 4 && at == 0x29EE) { oc_S4_29EE(r); return; }
     if (seg == 4 && at == 0x2A08) { oc_S4_2A08(r); return; }
     if (seg == 4 && at == 0x2A2E) { oc_S4_2A2E(r); return; }
+    if (seg == 4 && at == 0x2A42) { oc_S4_2A42(r); return; }
     if (seg == 4 && at == 0x2B82) { oc_S4_2B82(r); return; }
     if (seg == 4 && at == 0x2BC6) { oc_S4_2BC6(r); return; }
     if (seg == 4 && at == 0x2CB6) { oc_S4_2CB6(r); return; }

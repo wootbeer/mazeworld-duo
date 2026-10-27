@@ -32,6 +32,12 @@
   11). Those are written by hand as recordings reach them: the snails need a recording that talks
   to them on level 1, the rest playthroughs of levels 2-6 (each level's creatures: per-level types
   from the 'mazr' 199 data, see the dispatcher's table).
+- Tests that start on a later level: a script whose first lines include `# level N` (or the rig's
+  `-level N`) starts the new game at level N's arrival point with George joined
+  (`harness/rsrc.c`); `tests/mwo_level2_31.txt` .. `mwo_level6_31.txt` are random play there. They
+  reach mostly each creature's resting state, but they check every level's code end to end, and
+  found two translator bugs (jump-table targets cut short in the listing, a JT lookup in its own
+  decoding), fixed in `tools/asm2c.py`.
 - Now all C: the play loop, the shell loop, start-up, the menus and saved games; the port runs
   Original with no 68k code. In the rig only fn_S3_0000 / 026A and fn_S2_2F98 (a few start-up
   instructions) still run as 68k. Not reached by any test yet: Apple events, Load / Save Game on a
