@@ -1668,6 +1668,92 @@ void fo_S4_1256(Regs *r) {
     w16(o + 0x16, (uint16_t)r->d[7]);
 }
 
+/* ---------- type $2D (fn_S4_1DFA, level 4) ----------
+ * Like type $20, firing in a spread: stands (12) turning to fn_S7_1CCC's direction, a step when
+ * facing it, until it sees the player (G_3830 set): 2, firing every 4 frames (fn_S7_1EC0, $36)
+ * within 3 of his direction at random, moving to him (step table G_4B70) while he is $A or more
+ * away; out of sight 3-4 as type $20, then 12. Hit by types $17 / $19 / $1A in states 0, 2 and 4:
+ * 3; by $18: 5 (also in 11 and 12). States 1, 5-11 and 13-15 are not reached by the tests yet. */
+void gen_S4_1E90(Regs *r), gen_S4_1EE4(Regs *r), gen_S4_1FE4(Regs *r), gen_S4_1FFE(Regs *r), gen_S4_2054(Regs *r),
+    gen_S4_207E(Regs *r), gen_S4_20C6(Regs *r), gen_S4_20EC(Regs *r), gen_S4_2106(Regs *r), gen_S4_2178(Regs *r),
+    gen_S4_2196(Regs *r), gen_S4_21A0(Regs *r);
+static void t2d_think(Regs *r) {
+    uint32_t o = r->a[4];
+    for (;;) {
+        set_w(&r->d[7], (uint16_t)r->d[0]);
+        uint16_t next;
+        switch ((uint16_t)r->d[7]) {
+        case 0: next = 0xC; break;
+        case 2: mz_seg_of(7, 0x319E), fn_S7_319E(r); if (!(uint16_t)r->d[0]) return; next = 3; break;
+        case 3: w16(o + 0x1E, 0x1E); next = 4; break;
+        case 4:
+            mz_seg_of(7, 0x319E), fn_S7_319E(r);
+            if (!(uint16_t)r->d[0]) { next = 2; break; }
+            if (!r16(o + 0x1E)) w16(o + 0x1C, 0);
+            if (r16(o + 0x1C)) return;
+            next = 0xC; break;
+        case 12:
+            mz_seg_of(7, 0x319E), fn_S7_319E(r);
+            if (!(og16(0x3830) & 0x8000)) { w16(o + 0x1A, 6); next = 2; break; }
+            mz_seg_of(7, 0x3FF0), fn_S7_3FF0(r);
+            if (!(uint16_t)r->d[0]) return;
+            w16(o + 0x1C, og16(0x56D0)); next = 3; break;
+        default:
+            r->a[3] = mz_seg_base(4) + 0x1E90;                   /* the original's think, for its JMP (A3) */
+            gen_S4_1E90(r);
+            return;
+        }
+        set_w(&r->d[0], next);
+    }
+}
+void fo_S4_1DFA(Regs *r) {
+    static const uint16_t hits[] = {0x17, 3, 0x18, 5, 0x19, 3, 0x1A, 3, 0xFFFF}, hits18[] = {0x18, 5, 0xFFFF};
+    static void (*const gen_act[16])(Regs *) = {NULL, gen_S4_1EE4, NULL, NULL, NULL, gen_S4_1FE4, gen_S4_1FFE, gen_S4_2054,
+                                                gen_S4_207E, gen_S4_20C6, gen_S4_20EC, gen_S4_2106, NULL, gen_S4_2178, gen_S4_2196, gen_S4_21A0};
+    uint32_t o = r->a[4], map = og32(0x53D4);
+    set_w(&r->d[7], r16(o + 0x16));
+    set_w(&r->d[0], (uint16_t)r->d[7]);
+    t2d_think(r);
+    uint16_t s = (uint16_t)r->d[7];
+    o_hit(r, s == 0 || s == 2 || s == 4 ? hits : s == 11 || s == 12 ? hits18 : NULL, t2d_think);
+    s = (uint16_t)r->d[7];
+    switch (s) {
+    case 0: case 3: break;
+    case 2:
+        w16(o + 0x1C, og16(0x56D0));
+        if (!r16(o + 0x1A)) {
+            random_d0(r);
+            int16_t spread = (int16_t)(((uint16_t)r->d[0] & 7) - 3);
+            if (spread == 4) spread = 0;
+            set_w(&r->d[1], (uint16_t)((spread + og16(0x3830)) & 0x3F));
+            set_w(&r->d[0], 0x36); set_w(&r->d[2], og16(0x3834));
+            r->a[0] = OADDR(0x48F0); mz_seg_of(7, 0x40D6), fn_S7_40D6(r);
+            w16(o + 0x1A, 4);
+            break;
+        }
+        if (og16(0x382E) < 0xA) break;
+        g_target(og16(0x56D8), og16(0x56D4));
+        mz_seg_of(7, 0x3B36), fn_S7_3B36(r); fn_S7_3D0E(r);
+        set_w(&r->d[0], og16(0x3812));
+        if (!(og16(0x3812) & 0x8000)) { r->a[0] = OADDR(0x4B70); mz_seg(7), fo_S7_1E54(r); }
+        break;
+    case 4: {
+        uint16_t c = r16(o + 0x1C);
+        g_target(r16(map + sxw(c) + 0x1C), r16(map + sxw(c) + 0x1E));
+        mz_seg_of(7, 0x3B36), fn_S7_3B36(r); fn_S7_3D0E(r);
+        set_w(&r->d[0], og16(0x3812));
+        if (!(og16(0x3812) & 0x8000)) t1e_step(r);
+        if (r16(o + 0x30) == r16(o + 0x1C)) w16(o + 0x1C, 0);
+        else w16(o + 0x1E, (uint16_t)(r16(o + 0x1E) - 1));
+        break;
+    }
+    case 12: mz_seg_of(7, 0x3EE2), fn_S7_3EE2(r); if ((uint16_t)r->d[0] < 0x40) t1e_step(r); break;
+    default: if (s < 16 && gen_act[s]) gen_act[s](r); break;
+    }
+    { int16_t t = (int16_t)(r16(o + 0x1A) - 1); w16(o + 0x1A, (uint16_t)(t < 0 ? 0 : t)); }
+    w16(o + 0x16, (uint16_t)r->d[7]);
+}
+
 /* ---------- fn_S7_0F78: one object's tick (Original's dispatcher, for fn_S7_2E9A) ----------
  * The record at D0.w of G_53C8 (G_3834 = D0) runs the behaviour of its type (+2); types without
  * one do nothing. Keeps D3-D7 / A2-A4. The behaviours not yet written by hand are the translations
