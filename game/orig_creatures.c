@@ -1446,6 +1446,122 @@ void fo_S4_0C44(Regs *r) {
     w16(o + 0x16, (uint16_t)r->d[7]);
 }
 
+/* ---------- type $1E (fn_S4_0782, level 4) ----------
+ * A hunter: roams (0, fn_S7_1CCC's way, two steps a frame while facing it) until it sees the player
+ * close (fn_S7_1334: distance < 5, or in front within $14): 3, where it closes in along his scent
+ * (fn_S7_1B46) and, near him (fn_S7_1B1E) or without a way, turns to him and within 6 of facing
+ * him fires (fn_S7_1EC0, $3D) with a pause of $22-$31 frames (+$1A, 4: walking off meanwhile,
+ * the pause shortened by 4 when it has no way); out of sight: 5, then 2, following the scent in its
+ * cell (map +$10) for $14 steps (+$1C) or until it ends. The player moving to a new cell while it
+ * chases is noted for the scent (G_56A6 / G_56A8 = $23, fn_S2_2B3E). Hit by type $18 in states 0,
+ * 2, 3, 4 and 12: 6. States 1 and 6-15 are not reached by the tests yet (the translation). */
+void gen_S4_0804(Regs *r), gen_S4_08CA(Regs *r), gen_S4_0A92(Regs *r), gen_S4_0AAC(Regs *r), gen_S4_0B00(Regs *r),
+    gen_S4_0B2A(Regs *r), gen_S4_0B72(Regs *r), gen_S4_0B98(Regs *r), gen_S4_0BB2(Regs *r), gen_S4_0BE2(Regs *r),
+    gen_S4_0C04(Regs *r), gen_S4_0C0E(Regs *r), fo_S7_1E54(Regs *r);
+static void t1e_step(Regs *r) { r->a[0] = OADDR(0x4F30); mz_seg(7), fo_S7_1E54(r); }
+static void t1e_dir_roam(Regs *r) { mz_seg_of(7, 0x3EE2), fn_S7_3EE2(r); }
+static void t1e_dir_scent(Regs *r) {                        /* fn_S7_1B46, then fn_S7_1B02 (D0 kept) */
+    mz_seg_of(7, 0x3D5C), fn_S7_3D5C(r);
+    uint32_t d = r->d[0];
+    fn_S7_3D0E(r);
+    set_w(&r->d[0], (uint16_t)d);
+}
+/* a direction from dir(): if it is not its heading, it turns (fn_S7_1516) and steps; if it is,
+ * it steps and, still facing the next direction, steps again. 0, or -1 if there is none. */
+static int t1e_walk(Regs *r, void (*dir)(Regs *)) {
+    dir(r);
+    if ((uint16_t)r->d[0] & 0x8000) return -1;
+    if ((uint16_t)r->d[0] != r16(r->a[4] + 0xC)) { mz_seg_of(7, 0x3722), fn_S7_3722(r); t1e_step(r); return 0; }
+    t1e_step(r);
+    dir(r);
+    if ((uint16_t)r->d[0] == r16(r->a[4] + 0xC)) t1e_step(r);
+    return 0;
+}
+static void t1e_scent_reset(Regs *r) {
+    sog16(0x56A8, 0); sog16(0x56A6, 0);
+    mz_seg_of(2, 0x366A), fn_S2_366A(r); fn_S2_3568(r);    /* fn_S2_2B3E */
+}
+static void t1e_think(Regs *r) {
+    uint32_t o = r->a[4], map = og32(0x53D4);
+    for (;;) {
+        set_w(&r->d[7], (uint16_t)r->d[0]);
+        uint16_t next;
+        switch ((uint16_t)r->d[7]) {
+        case 0:
+            mz_seg_of(7, 0x319E), fn_S7_319E(r);
+            if (!(og16(0x382E) & 0x8000)) {
+                if (og16(0x382E) < 5) { next = 3; break; }
+                set_w(&r->d[0], (uint16_t)(og16(0x3830) - r16(o + 0xC)));
+                mz_seg_of(7, 0x367E), fn_S7_367E(r);
+                if ((uint16_t)r->d[0] < 0x14) { next = 3; break; }
+            }
+            if (!r16(map + sxw(r16(o + 0x30)) + 0x10)) return;
+            next = 5; break;
+        case 2: {
+            mz_seg_of(7, 0x319E), fn_S7_319E(r);
+            if (!(uint16_t)r->d[0]) { next = 3; break; }
+            uint16_t sc = r16(map + sxw(r16(o + 0x30)) + 0x10);
+            if (!sc) { next = 0; break; }
+            if (sc != 0xFFFF && !(r16(o + 0x1C) & 0x8000)) return;
+            t1e_scent_reset(r);
+            next = 0; break;
+        }
+        case 3:
+            mz_seg_of(7, 0x319E), fn_S7_319E(r);
+            if ((uint16_t)r->d[0]) { next = 5; break; }
+            if (!r16(o + 0x1A)) return;
+            next = 4; break;
+        case 4: if (r16(o + 0x1A)) return; next = 0; break;
+        case 5: w16(o + 0x1C, 0x14); next = 2; break;
+        default:
+            r->a[3] = mz_seg_base(4) + 0x804;                    /* the original's think, for its JMP (A3) */
+            gen_S4_0804(r);
+            return;
+        }
+        set_w(&r->d[0], next);
+    }
+}
+void fo_S4_0782(Regs *r) {
+    static const uint16_t hits[] = {0x18, 6, 0xFFFF};
+    static void (*const gen_act[10])(Regs *) = {gen_S4_0A92, gen_S4_0AAC, gen_S4_0B00, gen_S4_0B2A, gen_S4_0B72,
+                                                gen_S4_0B98, gen_S4_0BB2, gen_S4_0BE2, gen_S4_0C04, gen_S4_0C0E};
+    uint32_t o = r->a[4];
+    set_w(&r->d[7], r16(o + 0x16));
+    set_w(&r->d[0], (uint16_t)r->d[7]);
+    t1e_think(r);
+    uint16_t s = (uint16_t)r->d[7];
+    o_hit(r, s == 0 || (s >= 2 && s <= 4) || s == 12 ? hits : NULL, t1e_think);
+    s = (uint16_t)r->d[7];
+    switch (s) {
+    case 0: t1e_walk(r, t1e_dir_roam); break;
+    case 1: gen_S4_08CA(r); break;
+    case 2: if (t1e_walk(r, t1e_dir_scent) < 0) w16(o + 0x1C, (uint16_t)(r16(o + 0x1C) - 1)); break;
+    case 3:
+        if (og16(0x56D0) != og16(0x582C)) {
+            sog16(0x56A6, og16(0x56D0)); sog16(0x56A8, 0x23);
+            mz_seg_of(2, 0x366A), fn_S2_366A(r); fn_S2_3568(r);
+        }
+        mz_seg_of(7, 0x3D2A), fn_S7_3D2A(r);
+        if (!((uint16_t)r->d[0] & 0x8000) && t1e_walk(r, t1e_dir_scent) == 0) break;
+        set_w(&r->d[0], og16(0x3830)); mz_seg_of(7, 0x3722), fn_S7_3722(r); fn_S7_3722(r);
+        set_w(&r->d[0], (uint16_t)((uint16_t)r->d[0] - r16(o + 0xC)));
+        fn_S7_367E(r);
+        if ((uint16_t)r->d[0] >= 6) break;
+        set_w(&r->d[0], 0x3D); set_w(&r->d[1], og16(0x3830)); set_w(&r->d[2], og16(0x3834));
+        r->a[0] = OADDR(0x48F0); mz_seg_of(7, 0x40D6), fn_S7_40D6(r);
+        random_d0(r);
+        w16(o + 0x1A, (uint16_t)(((uint16_t)r->d[0] & 0xF) + 0x22));
+        break;
+    case 4:
+        if (t1e_walk(r, t1e_dir_roam) < 0) { int16_t t = (int16_t)(r16(o + 0x1A) - 4); w16(o + 0x1A, (uint16_t)(t < 0 ? 0 : t)); }
+        break;
+    case 5: break;
+    default: if (s >= 6 && s <= 15) gen_act[s - 6](r); break;
+    }
+    { int16_t t = (int16_t)(r16(o + 0x1A) - 1); w16(o + 0x1A, (uint16_t)(t < 0 ? 0 : t)); }
+    w16(o + 0x16, (uint16_t)r->d[7]);
+}
+
 /* ---------- fn_S7_0F78: one object's tick (Original's dispatcher, for fn_S7_2E9A) ----------
  * The record at D0.w of G_53C8 (G_3834 = D0) runs the behaviour of its type (+2); types without
  * one do nothing. Keeps D3-D7 / A2-A4. The behaviours not yet written by hand are the translations
