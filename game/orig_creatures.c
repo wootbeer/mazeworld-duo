@@ -1754,6 +1754,90 @@ void fo_S4_1DFA(Regs *r) {
     w16(o + 0x16, (uint16_t)r->d[7]);
 }
 
+/* ---------- Lips, the brain (type $2E, fn_S4_21D6, level 5) ----------
+ * Speaks the texts $2Exx ("Lips says, \"I can see you, but you'll never find me...\"", later "The
+ * brain says, \"Wait! Wait! Let me live...\""), watching record 2's +$18 (set by type $30 while
+ * the player is near it) and George's company (G_56C2); each frame it counts down record 3's
+ * +$20 and +$24 (fn_S4_2770). States: 0 waiting for record 2; 1 "I can see you..." (said: 31),
+ * left when record 2 clears or George is gone: 2, which sets record 3's +$22 and +$24 (the hunt
+ * of types $1F / $31 begins), 3 waiting for record 2 again; 31 waiting for it to clear. States
+ * 4-30 (the rest of the story, its creatures and its end) are not reached by the tests yet: their
+ * think and act are the translation (gen_S4_*); the lists below are the original's for all states. */
+void gen_S4_23C6(Regs *r), gen_S4_2484(Regs *r), gen_S4_249A(Regs *r), gen_S4_24B8(Regs *r), gen_S4_24D4(Regs
+    *r), gen_S4_24F0(Regs *r), gen_S4_250A(Regs *r), gen_S4_251A(Regs *r), gen_S4_2538(Regs *r),
+    gen_S4_254E(Regs *r), gen_S4_2552(Regs *r), gen_S4_2564(Regs *r), gen_S4_2584(Regs *r), gen_S4_259E(Regs
+    *r), gen_S4_25B8(Regs *r), gen_S4_2602(Regs *r), gen_S4_260C(Regs *r), gen_S4_2622(Regs *r),
+    gen_S4_263A(Regs *r), gen_S4_2652(Regs *r), gen_S4_2670(Regs *r), gen_S4_26A4(Regs *r), gen_S4_26B0(Regs
+    *r), gen_S4_26B4(Regs *r), gen_S4_26C6(Regs *r), gen_S4_26E0(Regs *r), gen_S4_2750(Regs *r),
+    gen_S4_2754(Regs *r);
+static void (*const t2e_gen_act[27])(Regs *) = {
+    gen_S4_2484, gen_S4_249A, gen_S4_24B8, gen_S4_24D4, gen_S4_24F0, gen_S4_250A, gen_S4_251A,
+    gen_S4_2538, gen_S4_254E, gen_S4_2552, gen_S4_2564, gen_S4_2584, gen_S4_259E, gen_S4_25B8,
+    gen_S4_2602, gen_S4_260C, gen_S4_2622, gen_S4_263A, gen_S4_2652, gen_S4_2670, gen_S4_26A4,
+    gen_S4_26B0, gen_S4_26B4, gen_S4_26C6, gen_S4_26E0, gen_S4_2750, gen_S4_2754};
+static void t2e_count(void) {                               /* fn_S4_2770 */
+    uint32_t tbl = og32(0x53C8);
+    if (r16(tbl + 0xE0)) w16(tbl + 0xE0, (uint16_t)(r16(tbl + 0xE0) - 1));
+    uint16_t t = r16(tbl + 0xE4);
+    if (t && !(t & 0x8000)) w16(tbl + 0xE4, (uint16_t)(t - 1));
+}
+static void t2e_think(Regs *r) {
+    uint32_t tbl = og32(0x53C8);
+    for (;;) {
+        set_w(&r->d[7], (uint16_t)r->d[0]);
+        uint16_t next;
+        switch ((uint16_t)r->d[7]) {
+        case 0: if (!r16(tbl + 0x98)) return; next = 1; break;
+        case 1: if (r16(tbl + 0x98) && og16(0x56C2)) return; next = 2; break;
+        case 2: w16(tbl + 0xE2, 1); w16(tbl + 0xE4, 1); next = 3; break;
+        case 3: if (!r16(tbl + 0x98)) return; next = 4; break;
+        case 31: if (r16(tbl + 0x98)) return; next = 2; break;
+        default:
+            r->a[3] = mz_seg_base(4) + 0x23C6;                   /* the original's think, for its JMP (A3) */
+            gen_S4_23C6(r);
+            return;
+        }
+        set_w(&r->d[0], next);
+    }
+}
+void fo_S4_21D6(Regs *r) {
+    static uint16_t said[32][2], *hit[32];
+    static uint16_t hl[14][7];
+    if (!said[1][0]) {
+        static const uint16_t sv[][3] = {{1, 0xAE01, 31}, {5, 0xAE02, 6}, {6, 0xAE03, 7}, {8, 0xAE04, 11}, {10, 0xAE04, 11},
+                                         {11, 0xAE05, 13}, {20, 0xAE06, 21}, {21, 0xAE07, 22}, {22, 0xAE08, 23}, {23, 0xAE09, 24}};
+        for (unsigned k = 0; k < sizeof sv / sizeof sv[0]; k++) { said[sv[k][0]][0] = sv[k][1]; said[sv[k][0]][1] = sv[k][2]; }
+        /* hits: { state, by $17 ->, by $18 ->, by $19 -> } (0: none) */
+        static const uint8_t hv[14][4] = {{5, 6, 16, 6}, {6, 7, 16, 7}, {8, 11, 16, 11}, {10, 11, 16, 11}, {11, 13, 16, 13},
+            {13, 0, 16, 0}, {15, 0, 16, 0}, {18, 0, 27, 0}, {19, 0, 27, 0}, {20, 21, 27, 21}, {21, 22, 27, 22},
+            {22, 23, 27, 23}, {23, 24, 27, 24}, {26, 0, 27, 0}};
+        for (int k = 0; k < 14; k++) {
+            int n = 0;
+            for (int j = 0; j < 3; j++) if (hv[k][j + 1]) { hl[k][n++] = (uint16_t)(0x17 + j); hl[k][n++] = hv[k][j + 1]; }
+            hl[k][n] = 0xFFFF;
+            hit[hv[k][0]] = hl[k];
+        }
+    }
+    uint32_t o = r->a[4];
+    r->a[2] = og32(0x53C8);
+    set_w(&r->d[7], r16(o + 0x16));
+    set_w(&r->d[0], (uint16_t)r->d[7]);
+    t2e_think(r);
+    uint16_t s = (uint16_t)r->d[7];
+    if (s < 32) o_said(r, said[s], t2e_think);
+    s = (uint16_t)r->d[7];
+    o_hit(r, s < 32 ? hit[s] : NULL, t2e_think);
+    s = (uint16_t)r->d[7];
+    switch (s) {
+    case 0: case 2: break;
+    case 1: t2e_count(); say(0x2E01); break;
+    case 3: case 31: t2e_count(); break;
+    default: if (s >= 4 && s <= 30) t2e_gen_act[s - 4](r); break;
+    }
+    sog32(0x5752, (uint16_t)r->d[7]);
+    w16(o + 0x16, (uint16_t)r->d[7]);
+}
+
 /* ---------- fn_S7_0F78: one object's tick (Original's dispatcher, for fn_S7_2E9A) ----------
  * The record at D0.w of G_53C8 (G_3834 = D0) runs the behaviour of its type (+2); types without
  * one do nothing. Keeps D3-D7 / A2-A4. The behaviours not yet written by hand are the translations
