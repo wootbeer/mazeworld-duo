@@ -501,6 +501,8 @@ void fo_S10_400A(Regs *r);
 void fo_S7_007C(Regs *r);
 void fo_S10_2C7C(Regs *r);
 void fo_S10_0028(Regs *r);
+void fo_S4_280A(Regs *r);
+void fo_S4_2AF0(Regs *r);
 
 static void w_fn_S4_36F2(void) {
     setreg(M68K_REG_D0, (uint32_t)(uint16_t)fn_S4_36F2());
@@ -1668,6 +1670,8 @@ static void w_fo_S10_400A(void) { Regs r; sub_regs_load(&r); fo_S10_400A(&r); su
 static void w_fo_S7_007C(void) { Regs r; sub_regs_load(&r); fo_S7_007C(&r); sub_regs_store(&r); }
 static void w_fo_S10_2C7C(void) { Regs r; sub_regs_load(&r); fo_S10_2C7C(&r); sub_regs_store(&r); }
 static void w_fo_S10_0028(void) { Regs r; sub_regs_load(&r); fo_S10_0028(&r); sub_regs_store(&r); }
+static void w_fo_S4_280A(void) { Regs r; sub_regs_load(&r); fo_S4_280A(&r); sub_regs_store(&r); }
+static void w_fo_S4_2AF0(void) { Regs r; sub_regs_load(&r); fo_S4_2AF0(&r); sub_regs_store(&r); }
 
 typedef struct { int seg; uint32_t off; const char *name; void (*fn)(void); int regs; uint32_t d0mask; int argbytes; int nocheck; int pops; uint32_t ignore; int orig; } SubEntry;
 const SubEntry g_subs[] = {
@@ -2165,5 +2169,7 @@ const SubEntry g_subs[] = {
     {7, 0x007C, "fo_S7_007C", w_fo_S7_007C, 1, 0xFFFFFFFFu, 0, 0, 0, 0x11FFFu, 1},
     {10, 0x2C7C, "fo_S10_2C7C", w_fo_S10_2C7C, 1, 0xFFFFFFFFu, 0, 0, 0, 0x11FFFu, 1},
     {10, 0x0028, "fo_S10_0028", w_fo_S10_0028, 1, 0xFFFFFFFFu, 0, 0, 0, 0x11FFFu, 1},
+    {4, 0x280A, "fo_S4_280A", w_fo_S4_280A, 1, 0xFFFFFFFFu, 0, 0, 0, 0x11FFFu, 1},
+    {4, 0x2AF0, "fo_S4_2AF0", w_fo_S4_2AF0, 1, 0xFFFFFFFFu, 0, 0, 0, 0x11FFFu, 1},
     {0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0}
 };

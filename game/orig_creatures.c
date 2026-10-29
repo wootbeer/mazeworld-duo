@@ -1058,6 +1058,230 @@ void fo_S7_007C(Regs *r) {
     }
 }
 
+/* ---------- type $30 (fn_S4_280A, level 5) ----------
+ * Waits (0) until the player is near, then (1) turns to him and marks him for records 2 and 3
+ * (record 2's +$18 = 1; record 3's +$18 / +$1C the area fn_S7_2038 gives for his position, +$1A /
+ * +$1E his cell) until he is $20 away; then (2-5) picture $7E for 3 frames and gone from the map for
+ * $10 frames; (6) back, once record 3's +$22 is set, in a free cell of the eight around it (G_4F40,
+ * at random) that the player is not close to; (7-8) two frames of picture $81, then (9) waiting
+ * for the player. Hit by type $18 in states 0, 1, 9 and 10: 2. State 10 (the player near again:
+ * it follows him) is not reached by the tests yet: its act is the translation gen_S4_2A42. */
+void gen_S4_2A42(Regs *r);
+static void t30_think(Regs *r) {
+    uint32_t o = r->a[4], map = og32(0x53D4), tbl = og32(0x53C8);
+    for (;;) {
+        set_w(&r->d[7], (uint16_t)r->d[0]);
+        uint16_t next;
+        switch ((uint16_t)r->d[7]) {
+        case 0: near_d0(r); if ((uint16_t)r->d[0]) return; next = 1; break;
+        case 1: near_d0(r); if (og16(0x382E) < 0x20) return; next = 2; break;
+        case 2: w16(o + 0x18, 0xFFFF); w16(tbl + 0x98, 0); next = 3; break;
+        case 3: case 8: {
+            uint16_t t = (uint16_t)(r16(o + 0x18) + 1);
+            w16(o + 0x18, t);
+            if (t < ((uint16_t)r->d[7] == 3 ? 3 : 2)) return;
+            next = (uint16_t)r->d[7] == 3 ? 4 : 9; break;
+        }
+        case 4:
+            w16(map + sxw(r16(o + 0xE)) + 0xE, 0);
+            unlink_obj(r);
+            w16(o + 0x10, r16(o + 0x30));
+            w16(o + 4, 0); w16(o + 8, 0); w16(o + 0x30, 0); w16(o + 0xE, 0);
+            w16(o + 0x18, 0x10);
+            next = 5; break;
+        case 5: {
+            int16_t t = (int16_t)(r16(o + 0x18) - 1);
+            w16(o + 0x18, (uint16_t)t);
+            if (t >= 0) return;
+            next = 6; break;
+        }
+        case 6: {
+            if (!r16(tbl + 0xE2)) return;
+            random_d0(r);
+            uint16_t cell = r16(OADDR(0x4F40) + 2 * ((uint16_t)r->d[0] & 7));
+            set_w(&r->d[2], cell);
+            sog16(0x3824, cell);
+            sog16(0x382C, r16(map + sxw(cell) + 0x1C)); sog16(0x3828, r16(map + sxw(cell) + 0x1E));
+            if (r16(map + sxw(cell) + 0xE)) return;
+            mz_seg_of(7, 0x3972), fn_S7_3972(r); if ((uint16_t)r->d[0]) return;
+            sog16(0x3822, 5);
+            fn_S7_3ACA(r); if ((uint16_t)r->d[0]) return;
+            fn_S7_3784(r); if ((uint16_t)r->d[0]) return;
+            next = 7; break;
+        }
+        case 7:
+            w16(o + 0xE, r16(o + 0x30));
+            w16(map + sxw(r16(o + 0xE)) + 0xE, 1);
+            w16(o + 0x10, 0); w16(o + 0x18, 0xFFFF);
+            next = 8; break;
+        case 9: near_d0(r); if ((uint16_t)r->d[0]) return; next = 10; break;
+        case 10: near_d0(r); if (!(uint16_t)r->d[0]) return; next = 9; break;
+        default: return;
+        }
+        set_w(&r->d[0], next);
+    }
+}
+void fo_S4_280A(Regs *r) {
+    static const uint16_t hits[] = {0x18, 2, 0xFFFF};
+    uint32_t o = r->a[4], tbl = og32(0x53C8);
+    r->a[2] = tbl;
+    set_w(&r->d[7], r16(o + 0x16));
+    set_w(&r->d[0], (uint16_t)r->d[7]);
+    t30_think(r);
+    uint16_t s = (uint16_t)r->d[7];
+    o_hit(r, s <= 1 || s == 9 || s == 10 ? hits : NULL, t30_think);
+    switch ((uint16_t)r->d[7]) {
+    case 0: case 9: w16(tbl + 0x98, 0); break;
+    case 1:
+        set_w(&r->d[0], og16(0x3830)); mz_seg_of(7, 0x3722), fn_S7_3722(r); fn_S7_3722(r);
+        w16(tbl + 0x98, 1);
+        w16(tbl + 0xDA, og16(0x56D0)); w16(tbl + 0xDE, og16(0x56D0));
+        set_w(&r->d[1], og16(0x56D8)); set_w(&r->d[2], og16(0x56D4)); mz_seg(7), fo_S7_2038(r);
+        w16(tbl + 0xD8, (uint16_t)r->d[0]); w16(tbl + 0xDC, (uint16_t)r->d[0]);
+        break;
+    case 3: w16(o + 0x3A, 0x7E); break;
+    case 8: w16(o + 0x3A, r16(o + 0x18) ? 0 : 0x81); break;
+    case 10: gen_S4_2A42(r); break;
+    }
+    w16(o + 0x16, (uint16_t)r->d[7]);
+}
+
+/* ---------- type $31 (fn_S4_2AF0, level 5) ----------
+ * Waits (0) until record 3 has its +$22 set and an area (+$1C), then (1) roams: in the area
+ * record 3 names it heads for record 3's cell (+$1E; reached: both cleared), elsewhere for the
+ * passage between its area and that one (the cell G_5248 lists by G_51E0) and through it; with
+ * record 3's +$20 set and fn_S7_226E seeing the player (2) it chases him, and at distance < 2
+ * takes 1 from his life (G_56EA) and gets a random +$26. Hit by types $18 / $2E in states 0-2:
+ * 3. States 3-8 (vanishing and coming back) are not reached by the tests yet: the translation
+ * gen_S4_2B50 / gen_S4_2D52 runs them. */
+void gen_S4_2B50(Regs *r), gen_S4_2D52(Regs *r), fo_S7_226E(Regs *r);
+/* the distance-map index of map cell c from the object (G_53BC / G_53C0 are 128 x 128 maps) */
+static uint16_t t31_index(uint32_t o, uint32_t map, uint16_t c) {
+    uint16_t y = (uint16_t)(((r16(map + sxw(c) + 0x1E) - r16(o + 8)) & 0x7F) << 7);
+    return (uint16_t)(y | ((r16(map + sxw(c) + 0x1C) - r16(o + 4)) & 0x7F));
+}
+static const int16_t t31_steps[4] = {-0x400, 0x3E0, 0x40, 0x3E0};   /* north, west, east, south in turn */
+/* fn_S4_2DE2: a step in direction D0 (none if negative) */
+static void t31_step(Regs *r) {
+    if ((uint16_t)r->d[0] & 0x8000) return;
+    r->a[0] = OADDR(0x4F30); mz_seg_of(7, 0x374C), fn_S7_374C(r); fn_S7_3784(r);
+}
+/* fn_S4_2DF6: D0 = the direction to the target cell +$12; within 2 of it the next one is the
+ * best of its free neighbours by a random weight, more for one other than the last (+$10) */
+static void t31_wander(Regs *r) {
+    uint32_t o = r->a[4], map = og32(0x53D4);
+    uint16_t at = r16(o + 0x12), i = t31_index(o, map, at);
+    if (r8(og32(0x53BC) + sxw(i)) >= 2) { r->d[0] = r8(og32(0x53C0) + sxw(i)); return; }
+    uint16_t best = 0, bcell = 0xFFFF, c = at;
+    for (int k = 0; k < 4; k++) {
+        c = (uint16_t)(c + t31_steps[k]);
+        if (r8(map + sxw(c)) & 1) continue;
+        random_d0(r);
+        uint16_t w = (uint16_t)(((uint16_t)r->d[0] & 0x3F) | (c == r16(o + 0x10) ? 0x40 : 0x80));
+        if (w >= best) { best = w; bcell = c; }
+    }
+    w16(o + 0x10, at); w16(o + 0x12, bcell);
+    r->d[0] = r8(og32(0x53C0) + sxw(t31_index(o, map, bcell)));
+}
+/* fn_S4_2EF0: D0 = the direction to the target cell +$12 on the way to cell G_3814 (-2 there):
+ * within 2 of it the next one is the free neighbour nearest G_3814 (half-scale distance map),
+ * the last one (+$10) only if nothing else */
+static void t31_toward(Regs *r) {
+    uint32_t o = r->a[4], map = og32(0x53D4), dist = og32(0x53BC);
+    uint16_t at = r16(o + 0x12), i = t31_index(o, map, at);
+    if (r8(dist + sxw(i)) >= 2) { r->d[0] = r8(og32(0x53C0) + sxw(i)); return; }
+    uint16_t to = og16(0x3814);
+    if (to == at) { r->d[0] = 0xFFFFFFFEu; return; }
+    sog16(0x381C, r16(map + sxw(to) + 0x1C)); sog16(0x3818, r16(map + sxw(to) + 0x1E));
+    uint16_t best = 0xFFFF, bcell = 0xFFFF, c = at;
+    for (int k = 0; k < 4; k++) {
+        c = (uint16_t)(c + t31_steps[k]);
+        if (r8(map + sxw(c)) & 1) continue;
+        uint16_t y = (uint16_t)((((uint16_t)(r16(map + sxw(c) + 0x1E) - og16(0x3818)) >> 1) & 0x7F) << 7);
+        uint16_t x = (uint16_t)(((uint16_t)(r16(map + sxw(c) + 0x1C) - og16(0x381C)) >> 1) & 0x7F);
+        uint16_t w = (uint16_t)(r8(dist + sxw((uint16_t)(y | x))) | (c == r16(o + 0x10) ? 0x100 : 0));
+        if (w < best) { best = w; bcell = c; }
+    }
+    w16(o + 0x10, at); w16(o + 0x12, bcell);
+    r->d[0] = r8(og32(0x53C0) + sxw(t31_index(o, map, bcell)));
+}
+static int t31_sees(Regs *r) { mz_seg(7), fo_S7_226E(r); return (uint16_t)r->d[0] != 0; }
+static void t31_think(Regs *r) {
+    uint32_t tbl = og32(0x53C8);
+    for (;;) {
+        set_w(&r->d[7], (uint16_t)r->d[0]);
+        uint16_t next;
+        switch ((uint16_t)r->d[7]) {
+        case 0: if (!r16(tbl + 0xE2) || !r16(tbl + 0xDC)) return; next = 1; break;
+        case 1:
+            if (!r16(tbl + 0xE2) || !r16(tbl + 0xDC)) { next = 0; break; }
+            if (!r16(tbl + 0xE0) || !t31_sees(r)) return;
+            next = 2; break;
+        case 2:
+            if (!r16(tbl + 0xE2)) { next = 0; break; }
+            if (r16(tbl + 0xE0) && t31_sees(r)) return;
+            next = 1; break;
+        default:
+            r->a[3] = mz_seg_base(4) + 0x2B50;                   /* the original's think, for its JMP (A3) */
+            gen_S4_2B50(r);
+            return;
+        }
+        set_w(&r->d[0], next);
+    }
+}
+void fo_S4_2AF0(Regs *r) {
+    static const uint16_t hits[] = {0x18, 3, 0x2E, 3, 0xFFFF};
+    uint32_t o = r->a[4], tbl = og32(0x53C8);
+    r->a[2] = tbl;
+    set_w(&r->d[7], r16(o + 0x16));
+    set_w(&r->d[0], (uint16_t)r->d[7]);
+    t31_think(r);
+    o_hit(r, (uint16_t)r->d[7] <= 2 ? hits : NULL, t31_think);
+    switch ((uint16_t)r->d[7]) {
+    case 0:
+        for (int k = 0; k < 3; k++) { t31_wander(r); t31_step(r); }
+        w16(o + 0x3A, 0x7C);
+        break;
+    case 1: {
+        w16(o + 0x3A, r16(tbl + 0xE0) ? 0x7D : 0x7C);
+        set_w(&r->d[1], r16(o + 4)); set_w(&r->d[2], r16(o + 8)); mz_seg(7), fo_S7_2038(r);
+        uint16_t area = (uint16_t)r->d[0], gate = 0;
+        if (area == r16(tbl + 0xDC)) sog16(0x3814, r16(tbl + 0xDE));
+        else {
+            gate = (uint16_t)(r8(OADDR(0x51E0) + sxw((uint16_t)((area << 5) | r16(tbl + 0xDC)))) << 1);
+            sog16(0x3814, r16(OADDR(0x5248) + sxw(gate)));
+        }
+        for (int k = 0; k < 3; k++) {
+            t31_toward(r);
+            if ((uint16_t)r->d[0] & 0x8000) {
+                if (area == r16(tbl + 0xDC)) { w16(tbl + 0xDC, 0); w16(tbl + 0xDE, 0); break; }
+                uint16_t c = r16(OADDR(0x5248) + sxw((uint16_t)(gate ^ 2)));   /* through: the passage's other side */
+                sog16(0x3824, c);
+                uint32_t map = og32(0x53D4);
+                sog16(0x382C, r16(map + sxw(c) + 0x1C)); sog16(0x3828, r16(map + sxw(c) + 0x1E));
+                mz_seg_of(7, 0x3784), fn_S7_3784(r);
+                if (!(uint16_t)r->d[0]) w16(o + 0x12, og16(0x3824));
+                break;
+            }
+            t31_step(r);
+        }
+        break;
+    }
+    case 2:
+        w16(o + 0x12, og16(0x56D0));
+        for (int k = 0; k < 3; k++) { near_d0(r); set_w(&r->d[0], og16(0x3830)); t31_step(r); }
+        if (og16(0x382E) < 2) {
+            int16_t l = (int16_t)(og16(0x56EA) - 1);
+            sog16(0x56EA, (uint16_t)(l < 0 ? 0 : l));
+            random_d0(r); w16(o + 0x26, (uint16_t)r->d[0] & 1);
+        }
+        w16(o + 0x3A, 0x7D);
+        break;
+    case 4: gen_S4_2D52(r); break;
+    }
+    w16(o + 0x16, (uint16_t)r->d[7]);
+}
+
 /* ---------- fn_S7_0F78: one object's tick (Original's dispatcher, for fn_S7_2E9A) ----------
  * The record at D0.w of G_53C8 (G_3834 = D0) runs the behaviour of its type (+2); types without
  * one do nothing. Keeps D3-D7 / A2-A4. The behaviours not yet written by hand are the translations
