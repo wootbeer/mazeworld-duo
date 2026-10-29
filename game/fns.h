@@ -498,4 +498,5 @@ void fo_S10_2C7C(Regs *r);
 void fo_S10_0028(Regs *r);
 void fo_S4_280A(Regs *r);
 void fo_S4_2AF0(Regs *r);
+void fo_S4_0C44(Regs *r);
 #endif

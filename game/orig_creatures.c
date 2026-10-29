@@ -1282,6 +1282,170 @@ void fo_S4_2AF0(Regs *r) {
     w16(o + 0x16, (uint16_t)r->d[7]);
 }
 
+/* ---------- type $1F (fn_S4_0C44, level 5) ----------
+ * Roams the map (fn_S4_1096: on to a free neighbouring cell at random, the last one less likely;
+ * standing on a gate's cell (type $B / $10, state $A or more), one time in two through it to the
+ * paired gate's cell, G_5248) until it sees the player close (fn_S7_1334: distance < 6, or
+ * facing him within $11): 2, chasing him (marking him for record 3: +$18 / +$1C his area, +$1A /
+ * +$1E his cell, +$20 = 2) until he is out of sight: 3, which notes where he was, and 1: following
+ * record 3's marks, through the gates between areas (G_51E0 / G_5248) to his last cell; there,
+ * with no trace (record 3's +$18 cleared, or +$22), back to 0. Hit by types $18 / $2E in states
+ * 0-2: 4. States 4-10 are not reached by the tests yet (the translation gen_S4_0CAC and its acts). */
+void gen_S4_0CAC(Regs *r), gen_S4_0F64(Regs *r), gen_S4_0F7E(Regs *r), gen_S4_0FD0(Regs *r), gen_S4_0FE0(Regs *r),
+    gen_S4_103A(Regs *r), gen_S4_1066(Regs *r), gen_S4_107E(Regs *r), fo_S7_201C(Regs *r), fo_S7_2132(Regs *r),
+    fo_S7_1FF8(Regs *r);
+/* the gate record in cell c's object list (its first object), if of type $B / $10 in state $A+ */
+static int t1f_gate(uint16_t c, uint16_t *state) {
+    uint8_t n = r8(og32(0x53D4) + sxw(c) + 1);
+    if (!n) return 0;
+    uint32_t g = og32(0x53C8) + ((uint32_t)n << 6);
+    if (r16(g + 2) != 0xB && r16(g + 2) != 0x10) return 0;
+    *state = r16(g + 0x16);
+    return *state >= 0xA;
+}
+void hx_log(const char *f, ...);
+static void t1f_at(uint16_t c) {                            /* G_3824 / G_382C / G_3828: cell c and its centre */
+    uint32_t map = og32(0x53D4);
+    sog16(0x3824, c); sog16(0x382C, r16(map + sxw(c) + 0x1C)); sog16(0x3828, r16(map + sxw(c) + 0x1E));
+}
+/* moved into cell c if it is free (fn_S7_1766 / 1578), taking it over in the map; then fn_S7_1CCC */
+static void t1f_through(Regs *r, uint16_t c) {
+    uint32_t o = r->a[4], map = og32(0x53D4);
+    t1f_at(c);
+    if (r16(map + sxw(c) + 0xE)) return;
+    mz_seg_of(7, 0x3972), fn_S7_3972(r); if ((uint16_t)r->d[0]) return;
+    fn_S7_3784(r); if ((uint16_t)r->d[0]) return;
+    w16(map + sxw(r16(o + 0xE)) + 0xE, 0);
+    w16(o + 0xE, og16(0x3824));
+    w16(map + sxw(og16(0x3824)) + 0xE, 1);
+    mz_seg_of(7, 0x3EE2), fn_S7_3EE2(r);
+}
+/* fn_S4_1096: D0.w = the direction to the target cell +$E; there, the next one (see above) */
+static void t1f_route(Regs *r) {
+    static const int16_t step[4] = {-0x400, 0x3E0, 0x40, 0x3E0};
+    static const uint16_t dir[4] = {0x10, 0, 0x20, 0x30};
+    uint32_t o = r->a[4], map = og32(0x53D4);
+    uint16_t at = r16(o + 0xE), st;
+    int16_t dx = (int16_t)(r16(map + sxw(at) + 0x1C) - r16(o + 4)), dy = (int16_t)(r16(map + sxw(at) + 0x1E) - r16(o + 8));
+    if (dx) { set_w(&r->d[0], dx < 0 ? 0 : 0x20); return; }
+    if (dy) { set_w(&r->d[0], dy < 0 ? 0x10 : 0x30); return; }
+    w16(map + sxw(at) + 0xE, 0);
+    if (t1f_gate(at, &st) && st != 0x3C) {
+        random_d0(r);
+        if (!((uint16_t)r->d[0] & 1)) {
+            uint16_t c = r16(OADDR(0x5248) + sxw((uint16_t)(((st - 0xA) ^ 1) << 1)));
+            t1f_at(c);
+            if (!r16(map + sxw(c) + 0xE)) {
+                mz_seg_of(7, 0x3972), fn_S7_3972(r);
+                if (!(uint16_t)r->d[0]) { fn_S7_3784(r); w16(o + 0xE, og16(0x3824)); }
+            }
+        }
+        at = r16(o + 0xE);
+    }
+    uint16_t best = 0, bcell = 0xFFFF, bdir = 0xFFFF, c = at;
+    for (int k = 0; k < 4; k++) {
+        c = (uint16_t)(c + step[k]);
+        if (r16(map + sxw(c) + 0xE)) continue;
+        random_d0(r);
+        uint16_t w = (uint16_t)(((uint16_t)r->d[0] & 3) | (c == r16(o + 0x10) ? 4 : 8));
+        if (w >= best) { best = w; bcell = c; bdir = dir[k]; }
+    }
+    if (!(bcell & 0x8000)) { w16(o + 0x10, r16(o + 0xE)); w16(o + 0xE, bcell); w16(map + sxw(bcell) + 0xE, 1); }
+    else w16(map + sxw(r16(o + 0xE)) + 0xE, 1);
+    set_w(&r->d[0], bdir);
+}
+/* fn_S7_1334 (fn_S7_319E): the player close (< 6) or in front (within $11 of its heading)? */
+static int t1f_sees(Regs *r) {
+    mz_seg_of(7, 0x319E), fn_S7_319E(r);
+    if (og16(0x382E) & 0x8000) return 0;
+    if (og16(0x382E) < 6) return 1;
+    set_w(&r->d[0], (uint16_t)(og16(0x3830) - r16(r->a[4] + 0xC)));
+    mz_seg_of(7, 0x367E), fn_S7_367E(r);
+    return (uint16_t)r->d[0] < 0x11;
+}
+static void mark_player(Regs *r) {                          /* record 3: the player's cell and area */
+    uint32_t tbl = og32(0x53C8);
+    w16(tbl + 0xDA, og16(0x56D0)); w16(tbl + 0xDE, og16(0x56D0));
+    set_w(&r->d[1], og16(0x56D8)); set_w(&r->d[2], og16(0x56D4)); mz_seg(7), fo_S7_2038(r);
+    w16(tbl + 0xD8, (uint16_t)r->d[0]); w16(tbl + 0xDC, (uint16_t)r->d[0]);
+}
+static void t1f_think(Regs *r) {
+    uint32_t tbl = og32(0x53C8);
+    for (;;) {
+        set_w(&r->d[7], (uint16_t)r->d[0]);
+        uint16_t next;
+        switch ((uint16_t)r->d[7]) {
+        case 0:
+            if (r16(tbl + 0xE2) && r16(tbl + 0xD8)) { next = 1; break; }
+            if (!t1f_sees(r)) return;
+            next = 2; break;
+        case 1:
+            if (!r16(tbl + 0xD8) || !r16(tbl + 0xE2)) { next = 0; break; }
+            if (!t1f_sees(r)) return;
+            next = 2; break;
+        case 2:
+            mz_seg_of(7, 0x319E), fn_S7_319E(r);
+            if (!(og16(0x382E) & 0x8000)) return;
+            next = 3; break;
+        case 3: mark_player(r); w16(r->a[4] + 0x10, 0); next = 1; break;
+        default:
+            r->a[3] = mz_seg_base(4) + 0xCAC;                    /* the original's think, for its JMP (A3) */
+            gen_S4_0CAC(r);
+            return;
+        }
+        set_w(&r->d[0], next);
+    }
+}
+void fo_S4_0C44(Regs *r) {
+    static const uint16_t hits[] = {0x18, 4, 0x2E, 4, 0xFFFF};
+    static void (*const gen_act[7])(Regs *) = {gen_S4_0F64, gen_S4_0F7E, gen_S4_0FD0, gen_S4_0FE0, gen_S4_103A, gen_S4_1066, gen_S4_107E};
+    uint32_t o = r->a[4], tbl = og32(0x53C8);
+    r->a[2] = tbl;
+    set_w(&r->d[7], r16(o + 0x16));
+    set_w(&r->d[0], (uint16_t)r->d[7]);
+    t1f_think(r);
+    o_hit(r, (uint16_t)r->d[7] <= 2 ? hits : NULL, t1f_think);
+    uint16_t s = (uint16_t)r->d[7];
+    switch (s) {
+    case 0: t1f_route(r); mz_seg(7), fo_S7_201C(r); break;
+    case 1: {
+        set_w(&r->d[1], r16(o + 4)); set_w(&r->d[2], r16(o + 8)); mz_seg(7), fo_S7_2038(r);
+        uint16_t area = (uint16_t)r->d[0], gate = 0;
+        int same = area == r16(tbl + 0xD8);
+        if (same) sog16(0x3814, r16(tbl + 0xDA));
+        else {
+            gate = (uint16_t)(r8(OADDR(0x51E0) + sxw((uint16_t)((area << 5) | r16(tbl + 0xD8)))) << 1);
+            sog16(0x3814, r16(OADDR(0x5248) + sxw(gate)));
+        }
+        mz_seg(7), fo_S7_2132(r);
+        int16_t d = (int16_t)r->d[0];
+        if (d >= 0) { if (same) fo_S7_1FF8(r); else fo_S7_201C(r); break; }
+        if (d != -2) break;
+        if (!same) { t1f_through(r, r16(OADDR(0x5248) + sxw((uint16_t)(gate ^ 2)))); break; }
+        w16(tbl + 0xD8, 0); w16(tbl + 0xDA, 0);             /* at his last cell: a gate there? through it */
+        uint16_t st;
+        if (t1f_gate(r16(o + 0xE), &st)) t1f_through(r, r16(OADDR(0x5248) + sxw((uint16_t)(((st - 0xA) ^ 1) << 1))));
+        break;
+    }
+    case 2:
+        w16(tbl + 0xDA, og16(0x56D0)); w16(tbl + 0xDE, og16(0x56D0));
+        w16(tbl + 0xE0, 2);
+        g_target(og16(0x56D8), og16(0x56D4));
+        set_w(&r->d[1], og16(0x56D8)); set_w(&r->d[2], og16(0x56D4)); mz_seg(7), fo_S7_2038(r);
+        w16(tbl + 0xD8, (uint16_t)r->d[0]); w16(tbl + 0xDC, (uint16_t)r->d[0]);
+        if (og16(0x382E) >= 0xA) {
+            mz_seg_of(7, 0x3B36), fn_S7_3B36(r); fn_S7_3D0E(r);
+            set_w(&r->d[0], og16(0x3812));
+            if (!(og16(0x3812) & 0x8000)) { mz_seg(7), fo_S7_1FF8(r); break; }
+        }
+        set_w(&r->d[0], og16(0x3830)); mz_seg_of(7, 0x3722), fn_S7_3722(r);
+        break;
+    case 3: break;
+    default: if (s >= 4 && s <= 10) gen_act[s - 4](r); break;
+    }
+    w16(o + 0x16, (uint16_t)r->d[7]);
+}
+
 /* ---------- fn_S7_0F78: one object's tick (Original's dispatcher, for fn_S7_2E9A) ----------
  * The record at D0.w of G_53C8 (G_3834 = D0) runs the behaviour of its type (+2); types without
  * one do nothing. Keeps D3-D7 / A2-A4. The behaviours not yet written by hand are the translations

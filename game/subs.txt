@@ -569,3 +569,4 @@
 1  0228  internal (empty)  orig
 4  280A  regs fo_S4_280A  orig ignore=all
 4  2AF0  regs fo_S4_2AF0  orig ignore=all
+4  0C44  regs fo_S4_0C44  orig ignore=all
