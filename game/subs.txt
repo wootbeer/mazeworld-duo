@@ -574,3 +574,4 @@
 4  1256  regs fo_S4_1256  orig ignore=all
 4  1DFA  regs fo_S4_1DFA  orig ignore=all
 4  21D6  regs fo_S4_21D6  orig ignore=all
+9  1AE0  regs fo_S9_1AE0  orig ignore=all

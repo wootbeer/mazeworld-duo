@@ -1838,6 +1838,63 @@ void fo_S4_21D6(Regs *r) {
     w16(o + 0x16, (uint16_t)r->d[7]);
 }
 
+/* ---------- type $29 (fn_S9_1AE0, level 3) ----------
+ * Grows (+$C, kept in record 0's +$1C between frames: fn_S9_1908, unless bit 4 of flag word 0 is
+ * set, steps 0-4 after 3, 7, 7, 100 frames); with the player standing at x $33-$3C, y below $12
+ * (no full-view picture showing): 4, then 5: 7 frames of full view $83 and the way back to level 2
+ * (at $1EB, $78, turned $10 to the left). Hit by type $19: 2, by $1A: 1; +$C negative: 3. States
+ * 1-3 are not reached by the tests yet (the translation gen_S9_1B44; their acts do nothing). */
+void gen_S9_1B44(Regs *r);
+static void t29_grow(Regs *r) {                             /* fn_S9_1908 */
+    static const uint16_t step[5][2] = {{3, 1}, {7, 2}, {7, 3}, {100, 3}, {100, 4}};
+    uint32_t o = r->a[4];
+    if (flag(r, 0, 4)) return;
+    uint16_t c = r16(o + 0xC), n = (uint16_t)(r16(o + 0x10) + 1);
+    w16(o + 0x10, n);
+    if (n < step[c][0]) return;
+    w16(o + 0xC, step[c][1]); w16(o + 0x10, 0);
+}
+static void t29_think(Regs *r) {
+    uint32_t o = r->a[4];
+    for (;;) {
+        set_w(&r->d[7], (uint16_t)r->d[0]);
+        uint16_t next;
+        switch ((uint16_t)r->d[7]) {
+        case 0:
+            if (r16(o + 0xC) & 0x8000) { next = 3; break; }
+            if (og16(0x56E0) >= 0x80 || og16(0x56D4) >= 0x12 || og16(0x56D8) < 0x33 || og16(0x56D8) >= 0x3D) return;
+            next = 4; break;
+        case 4: w16(o + 0x12, 7); next = 5; break;
+        case 5: {
+            sog16(0x56E0, 0x83);
+            uint16_t t = (uint16_t)(r16(o + 0x12) - 1);
+            w16(o + 0x12, t);
+            if (t) return;
+            sog16(0x57DC, 2); sog32(0x57D8, 0x1EB0000); sog32(0x57D4, 0x780000);
+            sog16(0x57DA, (uint16_t)((og16(0x56DA) - 0x10) & 0x3F)); sog8(0x57DE, 1); sog8(0x57F2, 1);
+            next = 0; break;
+        }
+        default:
+            r->a[3] = mz_seg_base(9) + 0x1B44;                   /* the original's think, for its JMP (A3) */
+            gen_S9_1B44(r);
+            return;
+        }
+        set_w(&r->d[0], next);
+    }
+}
+void fo_S9_1AE0(Regs *r) {
+    static const uint16_t hits[] = {0x19, 2, 0x1A, 1, 0xFFFF};
+    uint32_t o = r->a[4];
+    set_w(&r->d[7], r16(o + 0x16));
+    w16(o + 0xC, r16(og32(0x53C8) + 0x1C));
+    set_w(&r->d[0], (uint16_t)r->d[7]);
+    t29_think(r);
+    o_hit(r, (uint16_t)r->d[7] == 0 ? hits : NULL, t29_think);
+    if ((uint16_t)r->d[7] == 0 || (uint16_t)r->d[7] == 5) t29_grow(r);
+    w16(og32(0x53C8) + 0x1C, r16(o + 0xC));
+    w16(o + 0x16, (uint16_t)r->d[7]);
+}
+
 /* ---------- fn_S7_0F78: one object's tick (Original's dispatcher, for fn_S7_2E9A) ----------
  * The record at D0.w of G_53C8 (G_3834 = D0) runs the behaviour of its type (+2); types without
  * one do nothing. Keeps D3-D7 / A2-A4. The behaviours not yet written by hand are the translations

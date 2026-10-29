@@ -503,4 +503,5 @@ void fo_S4_0782(Regs *r);
 void fo_S4_1256(Regs *r);
 void fo_S4_1DFA(Regs *r);
 void fo_S4_21D6(Regs *r);
+void fo_S9_1AE0(Regs *r);
 #endif
