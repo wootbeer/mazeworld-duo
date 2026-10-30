@@ -32,6 +32,9 @@
   11). Those are written by hand as recordings reach them: the snails need a recording that talks
   to them on level 1, the rest playthroughs of levels 2-6 (each level's creatures: per-level types
   from the 'mazr' 199 data, see the dispatcher's table).
+- Later levels by hand, as far as random play reaches them (the rest of each behaviour still runs the
+  translation, gen_S*): level 3's type $29, level 4's types $1E, $20 and $2D, level 5's types $1F,
+  $30, $31 and Lips ($2E). Their per-level tests check them call by call.
 - Tests that start on a later level: a script whose first lines include `# level N` (or the rig's
   `-level N`) starts the new game at level N's arrival point with George joined
   (`harness/rsrc.c`); `tests/mwo_level2_31.txt` .. `mwo_level6_31.txt` are random play there. They
