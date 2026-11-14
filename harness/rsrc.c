@@ -36,12 +36,13 @@ static uint8_t *load_fork(const char *path, uint32_t *len) {
 #define BE32(p) (uint32_t)(((uint32_t)(p)[0] << 24) | ((p)[1] << 16) | ((p)[2] << 8) | (p)[3])
 
 /* -level N (tests): Mazeworld Original's new game ('mazr' 199) starts at the arrival point of level
- * N (2-6, as the gates and exits give them), with George already joined (G_56C2) and making his
- * remarks (state 7), so random play reaches the later levels' creatures. */
+ * N (2-6, as the gates and exits give them; on levels 2 and 5 a cell along, the point itself being
+ * in a gate back), with George already joined (G_56C2) and making his remarks (state 7), so random
+ * play reaches the later levels' creatures. */
 int g_start_level;
 static void start_level(uint8_t *g) {
-    static const uint32_t at[7][2] = {{0, 0}, {0, 0}, {0xF80000, 0x1E80000}, {0x380000, 0x140000},
-                                      {0x780000, 0x5E0000}, {0x480000, 0x480000}, {0x140000, 0x140000}};
+    static const uint32_t at[7][2] = {{0, 0}, {0, 0}, {0x1080000, 0x1E80000}, {0x380000, 0x140000},
+                                      {0x780000, 0x5E0000}, {0x580000, 0x480000}, {0x140000, 0x140000}};
     #define PUT16(p, v) ((p)[0] = (uint8_t)((v) >> 8), (p)[1] = (uint8_t)(v))
     #define PUT32(p, v) (PUT16(p, (v) >> 16), PUT16((p) + 2, v))
     if (g_start_level > 6) return;

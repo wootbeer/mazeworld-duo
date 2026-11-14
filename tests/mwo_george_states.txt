@@ -1,0 +1,58 @@
+# recorded session
+1 move 693 491
+48 move 344 245
+49 move 343 245
+50 move 341 246
+51 move 340 247
+52 move 338 247
+53 move 335 248
+54 move 332 249
+55 move 330 249
+59 move 328 250
+60 move 325 252
+61 move 320 254
+62 move 317 255
+63 move 316 255
+394 mousedown
+399 mouseup
+696 mousedown
+703 mouseup
+900 setg 56C2 65535
+900 setr 1 16 7
+1000 setr 1 16 16
+1240 setr 1 16 17
+1480 setr 1 16 18
+1720 setr 1 16 19
+1960 setr 1 16 20
+2200 setr 1 16 21
+2440 setr 1 16 22
+2680 setr 1 16 23
+2920 setr 1 16 24
+3160 setr 1 16 25
+3400 setr 1 16 26
+3640 setr 1 16 27
+3880 setr 1 16 28
+4120 setr 1 16 29
+4360 setr 1 16 30
+4600 setr 1 16 31
+4840 setr 1 16 32
+5080 setr 1 16 33
+5320 setr 1 16 34
+5560 setr 1 16 35
+5800 setr 1 16 36
+6040 setr 1 16 37
+6280 setr 1 16 38
+6520 setr 1 16 39
+6760 setr 1 16 40
+7000 setr 1 16 41
+7240 setr 1 16 42
+7480 setr 1 16 43
+7720 setr 1 16 44
+7960 setr 1 16 45
+8200 setr 1 16 46
+8440 setr 1 16 47
+8680 setr 1 16 48
+8920 setr 1 16 49
+9160 setr 1 16 50
+9400 setr 1 16 51
+9640 mmove 0 0

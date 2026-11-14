@@ -24,24 +24,28 @@
   62AC), starting play (3796), the main window's update (38EE) and the start-up (1C0C); not run
   by any test yet: Print Order Form (3284) and the Apple-event handlers (3482, 35FC, 36F8, 3454).
 - The creatures (`game/orig_creatures.c`, by hand): the dispatcher fo_S7_0F78 and every behaviour
-  level 1 reaches: George the translator (states 0-15), the snails (all three kinds, fo_S10_0028:
-  the talker's 97 states, its story and the journey the three make), the Eashire Cat, the exit, the
-  gates, the hunters and the rest. Still the instruction-by-instruction translation of
-  `tools/asm2c.py` (`game/orig_gen.c`, operations in `game/asm68.h`; regenerate with the arguments
-  at its top, do not edit): George's states 16-51 (his remarks on later levels), type $1B, and the
-  parts of levels 2-6's creatures (segments 4, 9, 11) no test reaches yet.
+  level 1 has (George, the snails, the Eashire Cat, the gates, the hunters, ...) and, on levels 3-5,
+  types $29, $1E, $20, $2D, $1F, $30, $31, Lips ($2E), $D, $E and $F, all their states; also
+  Original's own segment-7 helpers they use (`game/orig_seg7.c`: fo_S7_1E54, 1FF8, 201C, 2038,
+  2132, 226E). Still the instruction-by-instruction translation of `tools/asm2c.py`
+  (`game/orig_gen.c`, operations in `game/asm68.h`; regenerate with the arguments at its top, do
+  not edit): the rest of levels 2-6's types (fo_S9_*, fo_S11_*, fo_S7_087A / 099C / 0A5A / 0AB0 /
+  0C9C / 0B7C, fo_S4_1670 (type $23), fo_S10_1F28 (type $1B)).
 - The autopilot (`harness/auto.c`, the rig's `-auto <goals>`) makes recordings itself: goal lines
-  (`goto X Y` by the map's cells, `face R`, `fire N` the abilities, `wait N`, `setg` / `setr` to set
-  a test up, `dump`) become input, written as `auto.txt`; a test is the start of a recording plus
-  that. `tools/explore.py` tries abilities and waits after each sequence found so far and keeps
-  those that reach a behaviour's states not yet reached (by the original's trace of its act table).
-  `tests/mwo_snail_*.txt` were made this way (George set as joined, the hunters set aside for the
-  journey; `setg` / `setr` lines in a script are applied by the rig and the headless port alike).
-- Later levels by hand, as far as random play reaches them (the rest of each behaviour still runs the
-  translation, gen_S*): level 3's type $29, level 4's types $1E, $20 and $2D, level 5's types $1F,
-  $30, $31 and Lips ($2E). Their per-level tests check them call by call.
+  (`goto X Y` by the map's cells, `face R`, `head H`, `fire N` the abilities, `wait N`, `setg` /
+  `setr` to set a test up, `dump`) become input, written as `auto.txt`; a test is the start of a
+  recording plus that. `tools/explore.py` tries abilities and waits after each sequence found so far
+  and keeps those that reach a behaviour's states not yet reached (by the original's trace of its
+  act table). `tests/mwo_snail_*.txt` were made this way (George set as joined, the hunters set
+  aside for the journey).
+- State sweeps: `tests/mwo_george_states.txt`, `mwo_snail_states.txt` and `mwo_level3_states.txt` ..
+  `mwo_level5_end.txt` set creatures' states directly (`setr <record> 16 <state>`) one after
+  another, so states play does not easily reach run and are checked against the original (most
+  states of each behaviour this way; which ones, by the original's trace). `setg` / `setr` lines are
+  applied by the rig and the headless port alike.
 - Tests that start on a later level: a script whose first lines include `# level N` (or the rig's
-  `-level N`) starts the new game at level N's arrival point with George joined
+  `-level N`) starts the new game at level N's arrival point (levels 2 and 5: a cell along, the
+  point itself being in a gate back) with George joined
   (`harness/rsrc.c`); `tests/mwo_level2_31.txt` .. `mwo_level6_31.txt` are random play there. They
   reach mostly each creature's resting state, but they check every level's code end to end, and
   found two translator bugs (jump-table targets cut short in the listing, a JT lookup in its own

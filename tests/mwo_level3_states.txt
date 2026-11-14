@@ -1,0 +1,11 @@
+# level 3
+60 click 320 240
+700 setr 2 16 2
+800 setr 2 16 2
+900 setr 2 16 1
+1000 setr 2 16 1
+1100 setr 0 16 4
+1100 setr 0 1C 0
+1101 setr 2 16 1
+1300 setr 2 16 3
+1600 mmove 0 0

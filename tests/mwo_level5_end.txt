@@ -1,0 +1,8 @@
+# level 5
+60 click 320 240
+700 setr 4 16 5
+700 setr 4 18 30000
+700 setr 2 18 1
+800 setr 3 16 27
+1200 setr 3 16 24
+1700 mmove 0 0

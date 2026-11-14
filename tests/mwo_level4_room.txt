@@ -1,0 +1,6 @@
+# level 4
+60 click 320 240
+700 setg 56D8 160
+700 setg 56D4 336
+700 setg 56D0 21824
+2500 mmove 0 0

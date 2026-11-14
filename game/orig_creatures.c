@@ -470,6 +470,43 @@ static void remove_obj(Regs *r) {
     unlink_obj(r);
     w16(r->a[4] + 2, r16(r->a[4] + 2) | 0x8000);
 }
+/* fn_S7_1F60: an object of type `type` made in the first free record (type $FFFF, from the last
+ * down) at G_382C / G_3828 in cell G_3824 (fn_S2_2976 refusing it: none), heading c, +$10 f10; its
+ * record offset, or -1 */
+static int make_object(Regs *r, uint16_t type, uint16_t c, uint16_t f10) {
+    uint32_t t = og32(0x53C8);
+    uint16_t rec = 0x1DC0;
+    while (r16(t + rec + 2) != 0xFFFF) { rec -= 0x40; if (!rec) return -1; }
+    set_w(&r->d[0], rec); set_w(&r->d[1], og16(0x3824));
+    mz_seg_of(2, 0x33A4), fn_S2_33A4(r);
+    if ((uint16_t)r->d[0]) return -1;
+    uint32_t o = t + rec;
+    w16(o + 2, type); w16(o + 4, og16(0x382C)); w16(o + 8, og16(0x3828));
+    w16(o + 6, 0x8000); w16(o + 0xA, 0x8000); w16(o + 0xE, 0);
+    w16(o + 0xC, c); w16(o + 0x10, f10); w16(o + 0x14, 0); w16(o + 0x12, 0xFFFF);
+    set_w(&r->d[0], rec);
+    mz_seg_of(2, 0x3480), fn_S2_3480(r);
+    return rec;
+}
+/* fn_S7_1E66: at the player: a step towards him (fn_S7_1EA2, when it can see him), two more beyond
+ * 6; within 6 an object of type $2A (made at 0, 0) */
+static void rush_step(Regs *r) {
+    mz_seg_of(7, 0x3128), fn_S7_3128(r);                    /* fn_S7_12BE */
+    if (og16(0x3830) & 0x8000) return;
+    set_w(&r->d[0], og16(0x3830));
+    mz_seg_of(7, 0x3722), fn_S7_3722(r);
+    r->a[0] = OADDR(0x4F30);
+    mz_seg_of(7, 0x374C), fn_S7_374C(r);
+    mz_seg_of(7, 0x3784), fn_S7_3784(r);
+}
+static void rush(Regs *r) {
+    rush_step(r);
+    if (og16(0x382E) >= 6) { rush_step(r); rush_step(r); }
+    if (og16(0x382E) < 6) {
+        sog16(0x382C, 0); sog16(0x3828, 0); sog16(0x3824, 0);
+        make_object(r, 0x2A, 0, 0);
+    }
+}
 static void scent_move(Regs *r) {                           /* fn_S7_1B46, fn_S7_1B02, then the move */
     mz_seg_of(7, 0x3D5C), fn_S7_3D5C(r);
     uint16_t d = (uint16_t)r->d[0];
@@ -722,28 +759,20 @@ void fo_S10_400A(Regs *r) {
  * 8 waits out a full-view picture (G_56E0 >= $80, which in most states sends him to 0 or 8); 9-14
  * (event $1D02 at the start): $1C frames, "Welcome to the Mazeworld...", a walk along two points
  * (george_path), then 1.
- * States 16-51 (his remarks on later levels and the snails' greeting, event $304) are not reached
- * by the tests yet: their think and act run the translation in orig_gen.c (gen_S10_*). */
-void gen_S10_2E6C(Regs *r), gen_S10_35E6(Regs *r), gen_S10_35FA(Regs *r), gen_S10_3614(Regs *r),
-    gen_S10_3628(Regs *r), gen_S10_3670(Regs *r), gen_S10_3684(Regs *r), gen_S10_36A8(Regs *r),
-    gen_S10_36BA(Regs *r), gen_S10_36D8(Regs *r), gen_S10_3704(Regs *r), gen_S10_3718(Regs *r),
-    gen_S10_3722(Regs *r), gen_S10_3748(Regs *r), gen_S10_379E(Regs *r), gen_S10_37B0(Regs *r),
-    gen_S10_37F6(Regs *r), gen_S10_3808(Regs *r), gen_S10_381A(Regs *r), gen_S10_3860(Regs *r),
-    gen_S10_3884(Regs *r), gen_S10_38B6(Regs *r), gen_S10_38E0(Regs *r), gen_S10_391A(Regs *r),
-    gen_S10_394A(Regs *r), gen_S10_39A2(Regs *r), gen_S10_39CC(Regs *r), gen_S10_3A00(Regs *r),
-    gen_S10_3A0E(Regs *r), gen_S10_3A1C(Regs *r), gen_S10_3A60(Regs *r), gen_S10_3A62(Regs *r),
-    gen_S10_3A84(Regs *r), gen_S10_3AA6(Regs *r), gen_S10_3AC8(Regs *r), gen_S10_3AEA(Regs *r),
-    gen_S10_3AF2(Regs *r);
-static void (*const george_gen_act[36])(Regs *) = {
-    gen_S10_35E6, gen_S10_35FA, gen_S10_3614, gen_S10_3628, gen_S10_3670, gen_S10_3684, gen_S10_36A8, gen_S10_36BA,
-    gen_S10_36D8, gen_S10_3704, gen_S10_3718, gen_S10_3722, gen_S10_3748, gen_S10_379E, gen_S10_37B0, gen_S10_37F6,
-    gen_S10_3808, gen_S10_381A, gen_S10_3860, gen_S10_3884, gen_S10_38B6, gen_S10_38E0, gen_S10_391A, gen_S10_394A,
-    gen_S10_39A2, gen_S10_39CC, gen_S10_3A00, gen_S10_3A0E, gen_S10_3A1C, gen_S10_3A60, gen_S10_3A62, gen_S10_3A84,
-    gen_S10_3AA6, gen_S10_3AC8, gen_S10_3AEA, gen_S10_3AF2};
+ * States 16-51 are his remarks (george_remark, event $304 from the snails: 16), each a text or
+ * two ($1405-$141A), most setting a bit of flag words 0 / 1; 34-41 walk him to a point on level 4
+ * (fo_S7_155C) and leave him there until the player goes (36-37: gone). Not all of them are
+ * reached by the tests yet. */
+void fo_S7_155C(Regs *r);
 static void say(uint16_t text) { sog16(0x56C0, (uint16_t)(0x8000 | text)); }
 static int flag(Regs *r, uint16_t word, uint16_t bits) { call_d0d1(r, fo_S7_1282, word, bits); return (uint16_t)r->d[0] != 0; }
 static void flag_set(Regs *r, uint16_t word, uint16_t bits) { call_d0d1(r, fo_S7_1292, word, bits); }
 static int cell_in(uint16_t cell, const uint16_t *list) { for (; *list; list++) if (cell == *list) return 1; return 0; }
+static int george_cell_ends(void) {                          /* fn_S10_3D6C: the player in one of these cells ends a remark */
+    static const uint16_t cells[] = {0x2580, 0x2940, 0x4BC0, 0x5340, 0x7B20, 0x4660, 0x4E80, 0x7160, 0x6E20, 0x6520,
+                                     0x6540, 0x6560, 0};
+    return cell_in(og16(0x56D0), cells);
+}
 /* fn_S10_3B7C: off the map (out of his cell; x, y, cell and the showing phase +$1A cleared) */
 static void george_hide(Regs *r) {
     if (!r16(r->a[4] + 0x30)) return;
@@ -944,10 +973,83 @@ static void george_think(Regs *r) {
             next = 0xE; break;
         case 14: w16(o + 0x1E, 0x28); next = 1; break;
         case 15: call_d0d1(r, fo_S7_1278, 1, 0x140); next = 0; break;   /* event 1 to the cat */
-        default:
-            r->a[3] = mz_seg_base(10) + 0x2E6C;                  /* the original's think, for its JMP (A3) */
-            gen_S10_2E6C(r);
+        /* his remarks (george_remark chooses them): mostly a text said in the act, here waiting for
+         * it to end (o_said) or for a full view (8), some of them leaving when the player leaves
+         * their cells (7) */
+        case 16:                                            /* level 1: once, after the snails' bit 0 */
+            if (!og16(0x56C2) || og16(0x56C0) || !flag(r, 0, 1) || flag(r, 0, 0x40)) { next = 7; break; }
+            flag_set(r, 0, 0x40);
+            next = flag(r, 0, 0x80) ? 0x12 : 0x11;
+            break;
+        case 17: case 18: case 21: case 23: case 26: if (!full) return; next = 8; break;
+        case 19: case 44: w16(o + 0x18, 6); next = (uint16_t)(s + 1); break;
+        case 20: case 45: {                                 /* standing there turned to heading $30 / $10 */
+            if (s == 20 ? og16(0x56D0) != 0x4240 && og16(0x56D0) != 0x4280 : og16(0x56D0) != 0x6940) { next = 7; break; }
+            int16_t t = (int16_t)r16(o + 0x18);
+            if (t >= 0) { w16(o + 0x18, (uint16_t)(t - 1)); return; }
+            set_w(&r->d[0], (uint16_t)(og16(0x56DA) - (s == 20 ? 0x30 : 0x10)));
+            mz_seg_of(7, 0x367E), fn_S7_367E(r);
+            if ((uint16_t)r->d[0] >= 0xC) return;
+            if (s == 20) flag_set(r, 0, 0x100); else flag_set(r, 1, 8);
+            next = s == 20 ? 0x15 : 0x2E;
+            break;
+        }
+        case 22: next = og16(0x56D0) == 0x4240 || og16(0x56D0) == 0x4280 ? 0x17 : 7; break;
+        case 24: flag_set(r, 0, 0x200); w16(o + 0x18, 0x2D); next = 0x19; break;
+        case 25: {
+            int16_t t = (int16_t)(r16(o + 0x18) - 1);
+            w16(o + 0x18, (uint16_t)t);
+            if (t >= 0) return;
+            uint16_t c = og16(0x56D0);
+            next = c == 0x1FE0 || c == 0x1FC0 || c == 0x1BE0 ? 0x1A : 0x1B;
+            break;
+        }
+        case 27: return;
+        case 28: case 29: case 30: case 31: case 32: case 33: case 46: case 51:
+            if (full) { next = 8; break; }
+            if (george_cell_ends()) { next = 7; break; }
+            if (s == 29) {
+                if (og16(0x56D0) == 0x50E0) { next = 0x1E; break; }
+                if (og16(0x56D0) == 0x60E0) { flag_set(r, 0, 0x1000); next = 7; break; }
+            }
+            if (s == 31 && (og16(0x56D0) == 0x2B40 || og16(0x56D0) == 0x2BC0)) { next = 0x20; break; }
             return;
+        case 34: case 38: case 40: {                        /* walking to a point: his part in the story */
+            static const uint16_t to[41][3] = {[34] = {0x1B8, 0x178, 2}, [38] = {0x1A8, 0x188, 2}, [40] = {0x188, 0x188, 4}};
+            sog16(0x382C, to[s][0]); sog16(0x3828, to[s][1]);
+            mz_seg(7), fo_S7_155C(r);
+            mz_seg_of(7, 0x3784), fn_S7_3784(r);
+            if ((uint16_t)r->d[0]) return;
+            flag_set(r, 1, to[s][2]);
+            w16(o + 0x18, 0xFFFF);
+            next = (uint16_t)(s + 1);
+            break;
+        }
+        case 35: case 39: case 41: {                        /* there, until the player leaves */
+            uint16_t c = og16(0x56D0);
+            int here = s == 35 ? c == 0x5F60 : s == 39 ? c == 0x6360 || c == 0x6340 || c == 0x6320 : c == 0x6300 || c == 0x5F00;
+            if (!full && !george_cell_ends() && !here) return;
+            next = 0x24;
+            break;
+        }
+        case 36: w16(o + 0x18, 2); next = 0x25; break;
+        case 37:
+            w16(o + 0x18, (uint16_t)(r16(o + 0x18) - 1));
+            if (r16(o + 0x18)) return;
+            unlink_obj(r);
+            w16(o + 4, 0); w16(o + 6, 0); w16(o + 8, 0); w16(o + 0xA, 0); w16(o + 0x30, 0);
+            next = 7;
+            break;
+        case 42: if (!george_cell_ends()) return; next = 0x2B; break;
+        case 43: next = 7; break;
+        case 47: case 48: case 49: case 50: {               /* level 5: while the player stays in the area */
+            static const uint8_t area[4] = {0xA, 0x11, 0xF, 0xE};
+            set_w(&r->d[1], og16(0x56D8)); set_w(&r->d[2], og16(0x56D4)); mz_seg(7), fo_S7_2038(r);
+            if ((uint16_t)r->d[0] == area[s - 47]) return;
+            next = 7;
+            break;
+        }
+        default: return;
         }
         set_w(&r->d[0], next);
     }
@@ -976,7 +1078,31 @@ static void george_act(Regs *r) {
         if (s == 10) say(0x1403);
         break;
     case 12: say(0x1403); break;
-    default: if (s >= 16 && s < 52) george_gen_act[s - 16](r); break;
+    case 22: if (og16(0x56E0) >= 0x80) { set_w(&r->d[0], 8); george_think(r); } break;   /* the original's act is think 23's code */
+    case 28: flag_set(r, 0, 0x400); say(0x140B); break;
+    case 29: flag_set(r, 0, 0x800); say(0x140C); break;
+    case 30: flag_set(r, 0, 0x1000); say(0x140D); break;
+    case 31: flag_set(r, 0, 0x2000); say(0x140E); break;
+    case 32: flag_set(r, 0, 0x4000); say(0x140F); break;
+    case 33: flag_set(r, 1, 1); say(0x1410); break;
+    case 35: case 39: case 41: {                            /* turned to the player, shown on the second frame */
+        uint32_t o = r->a[4];
+        w16(o + 0x20, 0x8000);
+        w16(o + 0x18, (uint16_t)(r16(o + 0x18) + 1));
+        if (r16(o + 0x18)) w16(o + 0x20, 0);
+        say(s == 35 ? 0x1411 : s == 39 ? 0x1412 : 0x1413);
+        near_d0(r);
+        if (!(og16(0x3830) & 0x8000)) w16(o + 0xC, og16(0x3830));
+        break;
+    }
+    case 37: w16(r->a[4] + 0x20, 0x8000); break;
+    case 51: flag_set(r, 1, 0x200); say(0x141A); break;
+    default: {
+        static const uint16_t text[51] = {[17] = 0x1405, [18] = 0x1406, [21] = 0x1407, [23] = 0x1408, [26] = 0x1409,
+            [27] = 0x140A, [42] = 0x1414, [46] = 0x1415, [47] = 0x1416, [48] = 0x1417, [49] = 0x1418, [50] = 0x1419};
+        if (s < 51 && text[s]) say(text[s]);
+        break;
+    }
     }
 }
 void fo_S10_2C7C(Regs *r) {
@@ -1064,9 +1190,11 @@ void fo_S7_007C(Regs *r) {
  * +$1E his cell) until he is $20 away; then (2-5) picture $7E for 3 frames and gone from the map for
  * $10 frames; (6) back, once record 3's +$22 is set, in a free cell of the eight around it (G_4F40,
  * at random) that the player is not close to; (7-8) two frames of picture $81, then (9) waiting
- * for the player. Hit by type $18 in states 0, 1, 9 and 10: 2. State 10 (the player near again:
- * it follows him) is not reached by the tests yet: its act is the translation gen_S4_2A42. */
-void gen_S4_2A42(Regs *r);
+ * for the player. Hit by type $18 in states 0, 1, 9 and 10: 2. In 10 (the player near again) it
+ * follows him, marking him as in 1 (and record 3's +$20 = 2): beyond $A, by the cells when it
+ * cannot see him (fo_S7_2132), straight at him when it can (fn_S7_1FF8 the step); otherwise it
+ * turns to him. */
+void fo_S7_2132(Regs *r), fo_S7_1FF8(Regs *r), fo_S7_226E(Regs *r);
 static void t30_think(Regs *r) {
     uint32_t o = r->a[4], map = og32(0x53D4), tbl = og32(0x53C8);
     for (;;) {
@@ -1141,7 +1269,28 @@ void fo_S4_280A(Regs *r) {
         break;
     case 3: w16(o + 0x3A, 0x7E); break;
     case 8: w16(o + 0x3A, r16(o + 0x18) ? 0 : 0x81); break;
-    case 10: gen_S4_2A42(r); break;
+    case 10:                                                /* following the player */
+        w16(tbl + 0x98, 1);
+        w16(tbl + 0xDA, og16(0x56D0)); w16(tbl + 0xDE, og16(0x56D0));
+        w16(tbl + 0xE0, 2);
+        set_w(&r->d[1], og16(0x56D8)); set_w(&r->d[2], og16(0x56D4)); mz_seg(7), fo_S7_2038(r);
+        w16(tbl + 0xD8, (uint16_t)r->d[0]); w16(tbl + 0xDC, (uint16_t)r->d[0]);
+        if (og16(0x382E) >= 0xA) {
+            mz_seg(7), fo_S7_226E(r);
+            if (!(uint16_t)r->d[0]) {                       /* out of sight: the way by the cells */
+                sog16(0x3814, og16(0x56D0));
+                mz_seg(7), fo_S7_2132(r);
+            } else {                                        /* in sight: straight at him */
+                sog16(0x381C, og16(0x56D8)); sog16(0x3818, og16(0x56D4));
+                mz_seg_of(7, 0x3B36), fn_S7_3B36(r);
+                uint16_t d = (uint16_t)r->d[0];
+                mz_seg_of(7, 0x3D0E), fn_S7_3D0E(r);
+                set_w(&r->d[0], d);
+            }
+            if (!((uint16_t)r->d[0] & 0x8000)) { mz_seg(7), fo_S7_1FF8(r); break; }
+        }
+        set_w(&r->d[0], og16(0x3830)); mz_seg_of(7, 0x3722), fn_S7_3722(r);
+        break;
     }
     w16(o + 0x16, (uint16_t)r->d[7]);
 }
@@ -1152,9 +1301,10 @@ void fo_S4_280A(Regs *r) {
  * passage between its area and that one (the cell G_5248 lists by G_51E0) and through it; with
  * record 3's +$20 set and fn_S7_226E seeing the player (2) it chases him, and at distance < 2
  * takes 1 from his life (G_56EA) and gets a random +$26. Hit by types $18 / $2E in states 0-2:
- * 3. States 3-8 (vanishing and coming back) are not reached by the tests yet: the translation
- * gen_S4_2B50 / gen_S4_2D52 runs them. */
-void gen_S4_2B50(Regs *r), gen_S4_2D52(Regs *r), fo_S7_226E(Regs *r);
+ * 3: it marks the player's place for record 3 as type $30 does, shows picture $80 for a frame
+ * (4), is gone from the map for $4B frames (5-6), waits for record 3's +$24 to clear (7) and comes
+ * back in a free cell of the eight G_4F40 lists (8; +$24 = $14 again), then 0. */
+void fo_S7_226E(Regs *r);
 /* the distance-map index of map cell c from the object (G_53BC / G_53C0 are 128 x 128 maps) */
 static uint16_t t31_index(uint32_t o, uint32_t map, uint16_t c) {
     uint16_t y = (uint16_t)(((r16(map + sxw(c) + 0x1E) - r16(o + 8)) & 0x7F) << 7);
@@ -1221,10 +1371,47 @@ static void t31_think(Regs *r) {
             if (!r16(tbl + 0xE2)) { next = 0; break; }
             if (r16(tbl + 0xE0) && t31_sees(r)) return;
             next = 1; break;
-        default:
-            r->a[3] = mz_seg_base(4) + 0x2B50;                   /* the original's think, for its JMP (A3) */
-            gen_S4_2B50(r);
-            return;
+        case 3: {                                           /* hit: marks the player for record 3 */
+            uint16_t c = og16(0x56D0);
+            w16(r->a[4] + 0x18, 0xFFFF);
+            w16(tbl + 0xDA, c); w16(tbl + 0xDE, c);
+            set_w(&r->d[1], og16(0x56D8)); set_w(&r->d[2], og16(0x56D4)); mz_seg(7), fo_S7_2038(r);
+            w16(tbl + 0xD8, (uint16_t)r->d[0]); w16(tbl + 0xDC, (uint16_t)r->d[0]);
+            next = 4; break;
+        }
+        case 4: {                                           /* a frame of picture $80 */
+            uint16_t t = (uint16_t)(r16(r->a[4] + 0x18) + 1);
+            w16(r->a[4] + 0x18, t);
+            if (t < 1) return;
+            next = 5; break;
+        }
+        case 5: {                                           /* gone from the map for $4B frames */
+            uint32_t o = r->a[4];
+            unlink_obj(r);
+            w16(o + 4, 0); w16(o + 8, 0); w16(o + 0x30, 0);
+            w16(o + 0x18, 0x4B);
+            next = 6; break;
+        }
+        case 6: {
+            int16_t t = (int16_t)(r16(r->a[4] + 0x18) - 1);
+            w16(r->a[4] + 0x18, (uint16_t)t);
+            if (t >= 0) return;
+            next = 7; break;
+        }
+        case 7: if (r16(tbl + 0xE4)) return; next = 8; break;   /* until record 3's +$24 runs out */
+        case 8: {                                           /* back in one of the eight cells (G_4F40), at random */
+            uint32_t map = og32(0x53D4);
+            random_d0(r);
+            uint16_t c = r16(OADDR(0x4F40) + 2 * ((uint16_t)r->d[0] & 7));
+            w16(r->a[4] + 0x12, c);
+            sog16(0x3824, c);
+            sog16(0x382C, r16(map + sxw(c) + 0x1C)); sog16(0x3828, r16(map + sxw(c) + 0x1E));
+            mz_seg_of(7, 0x3784), fn_S7_3784(r);
+            if ((uint16_t)r->d[0]) return;
+            w16(tbl + 0xE4, 0x14);
+            next = 0; break;
+        }
+        default: return;
         }
         set_w(&r->d[0], next);
     }
@@ -1277,7 +1464,7 @@ void fo_S4_2AF0(Regs *r) {
         }
         w16(o + 0x3A, 0x7D);
         break;
-    case 4: gen_S4_2D52(r); break;
+    case 4: w16(o + 0x3A, 0x80); break;
     }
     w16(o + 0x16, (uint16_t)r->d[7]);
 }
@@ -1290,10 +1477,10 @@ void fo_S4_2AF0(Regs *r) {
  * +$1E his cell, +$20 = 2) until he is out of sight: 3, which notes where he was, and 1: following
  * record 3's marks, through the gates between areas (G_51E0 / G_5248) to his last cell; there,
  * with no trace (record 3's +$18 cleared, or +$22), back to 0. Hit by types $18 / $2E in states
- * 0-2: 4. States 4-10 are not reached by the tests yet (the translation gen_S4_0CAC and its acts). */
-void gen_S4_0CAC(Regs *r), gen_S4_0F64(Regs *r), gen_S4_0F7E(Regs *r), gen_S4_0FD0(Regs *r), gen_S4_0FE0(Regs *r),
-    gen_S4_103A(Regs *r), gen_S4_1066(Regs *r), gen_S4_107E(Regs *r), fo_S7_201C(Regs *r), fo_S7_2132(Regs *r),
-    fo_S7_1FF8(Regs *r);
+ * 0-2: 4, marking the player as in 2; 5 two frames of pictures $7E, $7F; 6-7 gone from the map for
+ * $96 frames; 8 back, once record 3's +$24 is clear, in a free cell of the eight G_4F40 lists
+ * (+$24 = 5); 9-10 picture $81, then 0. */
+void fo_S7_201C(Regs *r), fo_S7_2132(Regs *r), fo_S7_1FF8(Regs *r);
 /* the gate record in cell c's object list (its first object), if of type $B / $10 in state $A+ */
 static int t1f_gate(uint16_t c, uint16_t *state) {
     uint8_t n = r8(og32(0x53D4) + sxw(c) + 1);
@@ -1370,7 +1557,7 @@ static void mark_player(Regs *r) {                          /* record 3: the pla
     w16(tbl + 0xD8, (uint16_t)r->d[0]); w16(tbl + 0xDC, (uint16_t)r->d[0]);
 }
 static void t1f_think(Regs *r) {
-    uint32_t tbl = og32(0x53C8);
+    uint32_t o = r->a[4], tbl = og32(0x53C8), map = og32(0x53D4);
     for (;;) {
         set_w(&r->d[7], (uint16_t)r->d[0]);
         uint16_t next;
@@ -1388,17 +1575,66 @@ static void t1f_think(Regs *r) {
             if (!(og16(0x382E) & 0x8000)) return;
             next = 3; break;
         case 3: mark_player(r); w16(r->a[4] + 0x10, 0); next = 1; break;
-        default:
-            r->a[3] = mz_seg_base(4) + 0xCAC;                    /* the original's think, for its JMP (A3) */
-            gen_S4_0CAC(r);
-            return;
+        case 4: {                                           /* hit: marks the player, as type $31 does */
+            uint16_t c = og16(0x56D0);
+            w16(o + 0x18, 0xFFFF);
+            w16(tbl + 0xDA, c); w16(tbl + 0xDE, c);
+            set_w(&r->d[1], og16(0x56D8)); set_w(&r->d[2], og16(0x56D4)); mz_seg(7), fo_S7_2038(r);
+            w16(tbl + 0xD8, (uint16_t)r->d[0]); w16(tbl + 0xDC, (uint16_t)r->d[0]);
+            next = 5; break;
+        }
+        case 5: {                                           /* two frames of pictures $7E, $7F */
+            uint16_t t = (uint16_t)(r16(o + 0x18) + 1);
+            w16(o + 0x18, t);
+            if (t < 2) return;
+            next = 6; break;
+        }
+        case 6:                                             /* gone from the map for $96 frames */
+            w16(map + sxw(r16(o + 0xE)) + 0xE, 0);
+            unlink_obj(r);
+            w16(o + 0x10, r16(o + 0x30));
+            w16(o + 4, 0); w16(o + 8, 0); w16(o + 0x30, 0); w16(o + 0xE, 0);
+            w16(o + 0x18, 0x96);
+            next = 7; break;
+        case 7: {
+            int16_t t = (int16_t)(r16(o + 0x18) - 1);
+            w16(o + 0x18, (uint16_t)t);
+            if (t >= 0) return;
+            next = 8; break;
+        }
+        case 8: {                                           /* back in a free cell of the eight (G_4F40) */
+            if (r16(tbl + 0xE4)) return;
+            random_d0(r);
+            uint16_t c = r16(OADDR(0x4F40) + 2 * ((uint16_t)r->d[0] & 7));
+            set_w(&r->d[2], c);
+            sog16(0x3824, c);
+            sog16(0x382C, r16(map + sxw(c) + 0x1C)); sog16(0x3828, r16(map + sxw(c) + 0x1E));
+            if (r16(map + sxw(c) + 0xE)) return;
+            mz_seg_of(7, 0x3972), fn_S7_3972(r); if ((uint16_t)r->d[0]) return;
+            sog16(0x3822, 5);
+            fn_S7_3ACA(r); if ((uint16_t)r->d[0]) return;
+            fn_S7_3784(r); if ((uint16_t)r->d[0]) return;
+            next = 9; break;
+        }
+        case 9:
+            w16(o + 0xE, r16(o + 0x30));
+            w16(map + sxw(r16(o + 0xE)) + 0xE, 1);
+            w16(o + 0x10, 0); w16(o + 0x18, 0xFFFF);
+            w16(tbl + 0xE4, 5);
+            next = 10; break;
+        case 10: {
+            uint16_t t = (uint16_t)(r16(o + 0x18) - 1);
+            w16(o + 0x18, t);
+            if (t < 2) return;
+            next = 0; break;
+        }
+        default: return;
         }
         set_w(&r->d[0], next);
     }
 }
 void fo_S4_0C44(Regs *r) {
     static const uint16_t hits[] = {0x18, 4, 0x2E, 4, 0xFFFF};
-    static void (*const gen_act[7])(Regs *) = {gen_S4_0F64, gen_S4_0F7E, gen_S4_0FD0, gen_S4_0FE0, gen_S4_103A, gen_S4_1066, gen_S4_107E};
     uint32_t o = r->a[4], tbl = og32(0x53C8);
     r->a[2] = tbl;
     set_w(&r->d[7], r16(o + 0x16));
@@ -1440,10 +1676,56 @@ void fo_S4_0C44(Regs *r) {
         }
         set_w(&r->d[0], og16(0x3830)); mz_seg_of(7, 0x3722), fn_S7_3722(r);
         break;
-    case 3: break;
-    default: if (s >= 4 && s <= 10) gen_act[s - 4](r); break;
+    case 5: { static const uint16_t pic[2] = {0x7E, 0x7F}; w16(o + 0x3A, pic[r16(o + 0x18)]); break; }
+    case 10: { static const uint16_t pic[2] = {0x81, 0}; w16(o + 0x3A, pic[r16(o + 0x18)]); break; }
     }
     w16(o + 0x16, (uint16_t)r->d[7]);
+}
+
+/* types $1E and $20 when hit: off the map for a while (its cell kept in +$10, count in field f),
+ * then back in that cell once it is free (G_3822 = 6), then on the map again */
+static void off_map(Regs *r, uint32_t f, uint16_t frames) {
+    uint32_t o = r->a[4], map = og32(0x53D4);
+    w16(map + sxw(r16(o + 0xE)) + 0xE, 0);
+    unlink_obj(r);
+    w16(o + 0x10, r16(o + 0x30));
+    w16(o + 4, 0); w16(o + 6, 0); w16(o + 8, 0); w16(o + 0xA, 0); w16(o + 0x30, 0); w16(o + 0xE, 0);
+    w16(o + f, frames);
+}
+static int back_in_cell(Regs *r) {                          /* 1 once it is there */
+    uint32_t map = og32(0x53D4);
+    uint16_t c = r16(r->a[4] + 0x10);
+    sog16(0x382C, r16(map + sxw(c) + 0x1C)); sog16(0x3828, r16(map + sxw(c) + 0x1E));
+    sog16(0x3824, c);
+    if (r16(map + sxw(c) + 0xE)) return 0;
+    mz_seg_of(7, 0x3972), fn_S7_3972(r); if ((uint16_t)r->d[0]) return 0;
+    sog16(0x3822, 6);
+    fn_S7_3ACA(r); if ((uint16_t)r->d[0]) return 0;
+    fn_S7_3784(r);
+    return 1;
+}
+static void on_map(Regs *r, uint32_t f) {
+    uint32_t o = r->a[4];
+    w16(o + 0xE, r16(o + 0x30));
+    w16(og32(0x53D4) + sxw(r16(o + 0xE)) + 0xE, 1);
+    w16(o + 0x10, 0); w16(o + f, 0xFFFF);
+}
+static int count_down(Regs *r, uint32_t f, uint16_t by) {  /* the field less `by`: 1 once negative */
+    int16_t t = (int16_t)(r16(r->a[4] + f) - by);
+    w16(r->a[4] + f, (uint16_t)t);
+    return t < 0;
+}
+static int count_up(Regs *r, uint32_t f, uint16_t to) {    /* the field plus 1: 1 once `to` (unsigned) */
+    uint16_t t = (uint16_t)(r16(r->a[4] + f) + 1);
+    w16(r->a[4] + f, t);
+    return t >= to;
+}
+static void turn_to_player(Regs *r, int times) {
+    near_d0(r);
+    if (og16(0x3830) & 0x8000) return;
+    set_w(&r->d[0], og16(0x3830));
+    mz_seg_of(7, 0x3722);
+    while (times--) fn_S7_3722(r);
 }
 
 /* ---------- type $1E (fn_S4_0782, level 4) ----------
@@ -1454,10 +1736,11 @@ void fo_S4_0C44(Regs *r) {
  * the pause shortened by 4 when it has no way); out of sight: 5, then 2, following the scent in its
  * cell (map +$10) for $14 steps (+$1C) or until it ends. The player moving to a new cell while it
  * chases is noted for the scent (G_56A6 / G_56A8 = $23, fn_S2_2B3E). Hit by type $18 in states 0,
- * 2, 3, 4 and 12: 6. States 1 and 6-15 are not reached by the tests yet (the translation). */
-void gen_S4_0804(Regs *r), gen_S4_08CA(Regs *r), gen_S4_0A92(Regs *r), gen_S4_0AAC(Regs *r), gen_S4_0B00(Regs *r),
-    gen_S4_0B2A(Regs *r), gen_S4_0B72(Regs *r), gen_S4_0B98(Regs *r), gen_S4_0BB2(Regs *r), gen_S4_0BE2(Regs *r),
-    gen_S4_0C04(Regs *r), gen_S4_0C0E(Regs *r), fo_S7_1E54(Regs *r);
+ * 2, 3, 4 and 12: 6: pictures $77, $78 (7), gone from the map for 750 frames (8-9, faster under a
+ * full view), back in its old cell once free (10-11) and 24 frames of pictures $79, $7A, 0 (12),
+ * then 4. State 1 (no test reaches it from play) leads by 13 (turning to the player) or 14 to 15,
+ * picture $78 rushing at him (fn_S7_1E66). */
+void fo_S7_1E54(Regs *r);
 static void t1e_step(Regs *r) { r->a[0] = OADDR(0x4F30); mz_seg(7), fo_S7_1E54(r); }
 static void t1e_dir_roam(Regs *r) { mz_seg_of(7, 0x3EE2), fn_S7_3EE2(r); }
 static void t1e_dir_scent(Regs *r) {                        /* fn_S7_1B46, then fn_S7_1B02 (D0 kept) */
@@ -1513,18 +1796,25 @@ static void t1e_think(Regs *r) {
             next = 4; break;
         case 4: if (r16(o + 0x1A)) return; next = 0; break;
         case 5: w16(o + 0x1C, 0x14); next = 2; break;
-        default:
-            r->a[3] = mz_seg_base(4) + 0x804;                    /* the original's think, for its JMP (A3) */
-            gen_S4_0804(r);
-            return;
+        case 1:                                             /* (no picture: 13, else 14) */
+            if (!r16(o + 0x3A)) { w16(o + 0x1C, 7); next = 0xD; } else { w16(o + 0x1C, 5); next = 0xE; }
+            break;
+        case 6: w16(o + 0x1C, 0xFFFF); next = 7; break;
+        case 7: if (!count_up(r, 0x1C, 2)) return; next = 8; break;   /* hit: two frames of pictures $77, $78 */
+        case 8: off_map(r, 0x1C, 0x2EE); next = 9; break;  /* gone for 750 frames */
+        case 9: if (!count_down(r, 0x1C, og16(0x56E0) >= 0x80 ? 100 : 1)) return; next = 0xA; break;   /* faster under a full view */
+        case 10: if (!back_in_cell(r)) return; next = 0xB; break;
+        case 11: on_map(r, 0x1C); next = 0xC; break;
+        case 12: if (!count_up(r, 0x1C, 0x18)) return; next = 4; break;   /* 24 frames of pictures $79, $7A, 0 */
+        case 13: if (!count_down(r, 0x1C, 1)) return; w16(o + 0x1C, 5); next = 0xE; break;
+        case 14: if (!count_down(r, 0x1C, 1)) return; next = 0xF; break;
+        default: return;                                    /* 15 */
         }
         set_w(&r->d[0], next);
     }
 }
 void fo_S4_0782(Regs *r) {
     static const uint16_t hits[] = {0x18, 6, 0xFFFF};
-    static void (*const gen_act[10])(Regs *) = {gen_S4_0A92, gen_S4_0AAC, gen_S4_0B00, gen_S4_0B2A, gen_S4_0B72,
-                                                gen_S4_0B98, gen_S4_0BB2, gen_S4_0BE2, gen_S4_0C04, gen_S4_0C0E};
     uint32_t o = r->a[4];
     set_w(&r->d[7], r16(o + 0x16));
     set_w(&r->d[0], (uint16_t)r->d[7]);
@@ -1534,7 +1824,6 @@ void fo_S4_0782(Regs *r) {
     s = (uint16_t)r->d[7];
     switch (s) {
     case 0: t1e_walk(r, t1e_dir_roam); break;
-    case 1: gen_S4_08CA(r); break;
     case 2: if (t1e_walk(r, t1e_dir_scent) < 0) w16(o + 0x1C, (uint16_t)(r16(o + 0x1C) - 1)); break;
     case 3:
         if (og16(0x56D0) != og16(0x582C)) {
@@ -1555,8 +1844,11 @@ void fo_S4_0782(Regs *r) {
     case 4:
         if (t1e_walk(r, t1e_dir_roam) < 0) { int16_t t = (int16_t)(r16(o + 0x1A) - 4); w16(o + 0x1A, (uint16_t)(t < 0 ? 0 : t)); }
         break;
-    case 5: break;
-    default: if (s >= 6 && s <= 15) gen_act[s - 6](r); break;
+    case 7: { static const uint16_t pic[2] = {0x77, 0x78}; w16(o + 0x3A, pic[r16(o + 0x1C)]); break; }
+    case 9: case 14: w16(o + 0x3A, 0x78); break;
+    case 12: { static const uint16_t pic[3] = {0x79, 0x7A, 0}; w16(o + 0x3A, pic[r16(o + 0x1C) >> 3]); break; }
+    case 13: turn_to_player(r, 2); break;
+    case 15: w16(o + 0x3A, 0x78); rush(r); break;           /* at the player */
     }
     { int16_t t = (int16_t)(r16(o + 0x1A) - 1); w16(o + 0x1A, (uint16_t)(t < 0 ? 0 : t)); }
     w16(o + 0x16, (uint16_t)r->d[7]);
@@ -1567,11 +1859,10 @@ void fo_S4_0782(Regs *r) {
  * player close (distance < 5, or in front within $F): 2, firing (fn_S7_1EC0, $22) when facing him
  * at most every $1E frames (+$1A), closing in while he is $A or more away; out of sight: 3-4, $1E
  * frames (+$1E) going for his last cell (+$1C), then 0. Noticing him another way (fn_S7_1DDA) also
- * starts 3. Hit by types $17 / $19 / $1A in states 0, 2 and 4: 3; by $18: 5 (also in 11).
- * States 1 and 5-14 are not reached by the tests yet (the translation). */
-void gen_S4_12E8(Regs *r), gen_S4_1388(Regs *r), gen_S4_1484(Regs *r), gen_S4_149E(Regs *r), gen_S4_14F8(Regs *r),
-    gen_S4_151E(Regs *r), gen_S4_1566(Regs *r), gen_S4_158C(Regs *r), gen_S4_15A4(Regs *r), gen_S4_15DC(Regs *r),
-    gen_S4_15FA(Regs *r), gen_S4_1612(Regs *r);
+ * starts 3. Hit by types $17 / $19 / $1A in states 0, 2 and 4: 3; by $18: 5 (also in 11): as type
+ * $1E, pictures $33-$37, gone for 750 frames (faster while G_56E0 is set), back in its old cell,
+ * pictures $38-$3D, $32, then 0. State 1 leads by 12 / 13 (turning to the player) to 14, picture $37
+ * rushing at him (fn_S7_1E66). */
 /* fn_S4_1620: turns towards D0 (fn_S7_1516); facing it, a step (fn_S7_1540) unless blocked
  * (fn_S7_1766, D0 = -1) */
 static void t20_step(Regs *r) {
@@ -1618,18 +1909,25 @@ static void t20_think(Regs *r) {
             if (!r16(o + 0x1E)) w16(o + 0x1C, 0);
             if (r16(o + 0x1C)) return;
             next = 0; break;
-        default:
-            r->a[3] = mz_seg_base(4) + 0x12E8;                   /* the original's think, for its JMP (A3) */
-            gen_S4_12E8(r);
-            return;
+        case 1:                                             /* (picture $32: 12, else 13) */
+            if (r16(o + 0x3A) == 0x32) { w16(o + 0x1E, 7); next = 0xC; } else { w16(o + 0x1E, 5); next = 0xD; }
+            break;
+        case 5: w16(o + 0x1E, 0xFFFF); next = 6; break;
+        case 6: if (!count_up(r, 0x1E, 5)) return; next = 7; break;   /* hit by $18: pictures $33-$37 */
+        case 7: off_map(r, 0x1E, 0x2EE); next = 8; break;
+        case 8: if (!count_down(r, 0x1E, og16(0x56E0) ? 100 : 1)) return; next = 9; break;
+        case 9: if (!back_in_cell(r)) return; next = 0xA; break;
+        case 10: on_map(r, 0x1E); next = 0xB; break;
+        case 11: if (!count_up(r, 0x1E, 0x1C)) return; next = 0; break;   /* 28 frames of pictures $38-$3D, $32 */
+        case 12: if (!count_down(r, 0x1E, 1)) return; w16(o + 0x1E, 5); next = 0xD; break;
+        case 13: if (!count_down(r, 0x1E, 1)) return; next = 0xE; break;
+        default: return;                                    /* 14 */
         }
         set_w(&r->d[0], next);
     }
 }
 void fo_S4_1256(Regs *r) {
     static const uint16_t hits[] = {0x17, 3, 0x18, 5, 0x19, 3, 0x1A, 3, 0xFFFF}, hits11[] = {0x18, 5, 0xFFFF};
-    static void (*const gen_act[10])(Regs *) = {gen_S4_1484, gen_S4_149E, gen_S4_14F8, gen_S4_151E, gen_S4_1566,
-                                                gen_S4_158C, gen_S4_15A4, gen_S4_15DC, gen_S4_15FA, gen_S4_1612};
     uint32_t o = r->a[4], map = og32(0x53D4);
     set_w(&r->d[7], r16(o + 0x16));
     set_w(&r->d[0], (uint16_t)r->d[7]);
@@ -1639,7 +1937,6 @@ void fo_S4_1256(Regs *r) {
     s = (uint16_t)r->d[7];
     switch (s) {
     case 0: mz_seg_of(7, 0x3EE2), fn_S7_3EE2(r); if ((uint16_t)r->d[0] < 0x40) t20_step(r); break;
-    case 1: gen_S4_1388(r); break;
     case 2:
         w16(o + 0x1C, og16(0x56D0));
         if (!r16(o + 0x1A)) {
@@ -1662,7 +1959,12 @@ void fo_S4_1256(Regs *r) {
         else w16(o + 0x1E, (uint16_t)(r16(o + 0x1E) - 1));
         break;
     }
-    default: if (s >= 5 && s <= 14) gen_act[s - 5](r); break;
+    case 6: { static const uint16_t pic[5] = {0x33, 0x34, 0x35, 0x36, 0x37}; w16(o + 0x3A, pic[r16(o + 0x1E)]); break; }
+    case 8: w16(o + 0x3A, 0x37); break;
+    case 11: { static const uint16_t pic[7] = {0x38, 0x39, 0x3A, 0x3B, 0x3C, 0x3D, 0x32}; w16(o + 0x3A, pic[r16(o + 0x1E) >> 2]); break; }
+    case 12: turn_to_player(r, 1); break;
+    case 13: w16(o + 0x3A, 0x37); turn_to_player(r, 1); break;
+    case 14: w16(o + 0x3A, 0x37); rush(r); break;           /* at the player */
     }
     { int16_t t = (int16_t)(r16(o + 0x1A) - 1); w16(o + 0x1A, (uint16_t)(t < 0 ? 0 : t)); }
     w16(o + 0x16, (uint16_t)r->d[7]);
@@ -1673,10 +1975,9 @@ void fo_S4_1256(Regs *r) {
  * facing it, until it sees the player (G_3830 set): 2, firing every 4 frames (fn_S7_1EC0, $36)
  * within 3 of his direction at random, moving to him (step table G_4B70) while he is $A or more
  * away; out of sight 3-4 as type $20, then 12. Hit by types $17 / $19 / $1A in states 0, 2 and 4:
- * 3; by $18: 5 (also in 11 and 12). States 1, 5-11 and 13-15 are not reached by the tests yet. */
-void gen_S4_1E90(Regs *r), gen_S4_1EE4(Regs *r), gen_S4_1FE4(Regs *r), gen_S4_1FFE(Regs *r), gen_S4_2054(Regs *r),
-    gen_S4_207E(Regs *r), gen_S4_20C6(Regs *r), gen_S4_20EC(Regs *r), gen_S4_2106(Regs *r), gen_S4_2178(Regs *r),
-    gen_S4_2196(Regs *r), gen_S4_21A0(Regs *r);
+ * 3; by $18: 5 (also in 11 and 12): as type $1E, pictures $71-$73, gone for 750 frames, back in
+ * its old cell, pictures $74-$76, 0, then 12. State 1 leads by 13 / 14 to 15, rushing at the
+ * player (fn_S7_1E66). */
 static void t2d_think(Regs *r) {
     uint32_t o = r->a[4];
     for (;;) {
@@ -1698,18 +1999,25 @@ static void t2d_think(Regs *r) {
             mz_seg_of(7, 0x3FF0), fn_S7_3FF0(r);
             if (!(uint16_t)r->d[0]) return;
             w16(o + 0x1C, og16(0x56D0)); next = 3; break;
-        default:
-            r->a[3] = mz_seg_base(4) + 0x1E90;                   /* the original's think, for its JMP (A3) */
-            gen_S4_1E90(r);
-            return;
+        case 1:                                             /* (no picture: 13, else 14) */
+            if (!r16(o + 0x3A)) { w16(o + 0x1E, 7); next = 0xD; } else { w16(o + 0x1E, 5); next = 0xE; }
+            break;
+        case 5: w16(o + 0x1E, 0xFFFF); next = 6; break;
+        case 6: if (!count_up(r, 0x1E, 3)) return; next = 7; break;   /* hit by $18: pictures $71-$73 */
+        case 7: off_map(r, 0x1E, 0x2EE); next = 8; break;
+        case 8: if (!count_down(r, 0x1E, og16(0x56E0) >= 0x80 ? 100 : 1)) return; next = 9; break;
+        case 9: if (!back_in_cell(r)) return; next = 0xA; break;
+        case 10: on_map(r, 0x1E); next = 0xB; break;
+        case 11: if (!count_up(r, 0x1E, 0x10)) return; next = 0xC; break;   /* 16 frames of pictures $74-$76, 0 */
+        case 13: if (!count_down(r, 0x1E, 1)) return; w16(o + 0x1E, 5); next = 0xE; break;
+        case 14: if (!count_down(r, 0x1E, 1)) return; next = 0xF; break;
+        default: return;                                    /* 15 */
         }
         set_w(&r->d[0], next);
     }
 }
 void fo_S4_1DFA(Regs *r) {
     static const uint16_t hits[] = {0x17, 3, 0x18, 5, 0x19, 3, 0x1A, 3, 0xFFFF}, hits18[] = {0x18, 5, 0xFFFF};
-    static void (*const gen_act[16])(Regs *) = {NULL, gen_S4_1EE4, NULL, NULL, NULL, gen_S4_1FE4, gen_S4_1FFE, gen_S4_2054,
-                                                gen_S4_207E, gen_S4_20C6, gen_S4_20EC, gen_S4_2106, NULL, gen_S4_2178, gen_S4_2196, gen_S4_21A0};
     uint32_t o = r->a[4], map = og32(0x53D4);
     set_w(&r->d[7], r16(o + 0x16));
     set_w(&r->d[0], (uint16_t)r->d[7]);
@@ -1748,7 +2056,11 @@ void fo_S4_1DFA(Regs *r) {
         break;
     }
     case 12: mz_seg_of(7, 0x3EE2), fn_S7_3EE2(r); if ((uint16_t)r->d[0] < 0x40) t1e_step(r); break;
-    default: if (s < 16 && gen_act[s]) gen_act[s](r); break;
+    case 6: { static const uint16_t pic[3] = {0x71, 0x72, 0x73}; w16(o + 0x3A, pic[r16(o + 0x1E)]); break; }
+    case 8: case 14: w16(o + 0x3A, 0x73); break;
+    case 11: { static const uint16_t pic[4] = {0x74, 0x75, 0x76, 0}; w16(o + 0x3A, pic[r16(o + 0x1E) >> 2]); break; }
+    case 13: turn_to_player(r, 1); break;
+    case 15: w16(o + 0x3A, 0x73); rush(r); break;           /* at the player */
     }
     { int16_t t = (int16_t)(r16(o + 0x1A) - 1); w16(o + 0x1A, (uint16_t)(t < 0 ? 0 : t)); }
     w16(o + 0x16, (uint16_t)r->d[7]);
@@ -1760,43 +2072,100 @@ void fo_S4_1DFA(Regs *r) {
  * the player is near it) and George's company (G_56C2); each frame it counts down record 3's
  * +$20 and +$24 (fn_S4_2770). States: 0 waiting for record 2; 1 "I can see you..." (said: 31),
  * left when record 2 clears or George is gone: 2, which sets record 3's +$22 and +$24 (the hunt
- * of types $1F / $31 begins), 3 waiting for record 2 again; 31 waiting for it to clear. States
- * 4-30 (the rest of the story, its creatures and its end) are not reached by the tests yet: their
- * think and act are the translation (gen_S4_*); the lists below are the original's for all states. */
-void gen_S4_23C6(Regs *r), gen_S4_2484(Regs *r), gen_S4_249A(Regs *r), gen_S4_24B8(Regs *r), gen_S4_24D4(Regs
-    *r), gen_S4_24F0(Regs *r), gen_S4_250A(Regs *r), gen_S4_251A(Regs *r), gen_S4_2538(Regs *r),
-    gen_S4_254E(Regs *r), gen_S4_2552(Regs *r), gen_S4_2564(Regs *r), gen_S4_2584(Regs *r), gen_S4_259E(Regs
-    *r), gen_S4_25B8(Regs *r), gen_S4_2602(Regs *r), gen_S4_260C(Regs *r), gen_S4_2622(Regs *r),
-    gen_S4_263A(Regs *r), gen_S4_2652(Regs *r), gen_S4_2670(Regs *r), gen_S4_26A4(Regs *r), gen_S4_26B0(Regs
-    *r), gen_S4_26B4(Regs *r), gen_S4_26C6(Regs *r), gen_S4_26E0(Regs *r), gen_S4_2750(Regs *r),
-    gen_S4_2754(Regs *r);
-static void (*const t2e_gen_act[27])(Regs *) = {
-    gen_S4_2484, gen_S4_249A, gen_S4_24B8, gen_S4_24D4, gen_S4_24F0, gen_S4_250A, gen_S4_251A,
-    gen_S4_2538, gen_S4_254E, gen_S4_2552, gen_S4_2564, gen_S4_2584, gen_S4_259E, gen_S4_25B8,
-    gen_S4_2602, gen_S4_260C, gen_S4_2622, gen_S4_263A, gen_S4_2652, gen_S4_2670, gen_S4_26A4,
-    gen_S4_26B0, gen_S4_26B4, gen_S4_26C6, gen_S4_26E0, gen_S4_2750, gen_S4_2754};
+ * of types $1F / $31 begins), 3 waiting for record 2 again; 31 waiting for it to clear. 4 (hit)
+ * calls types $1F / $31 to it (fn_S4_2790: those below y $1C0 get a hit by record 3; flag word 1
+ * bit $20) and 14-15 waits 30 frames for the player; 5-13 and 20-23 are its texts ($2E02-$2E09,
+ * most with fn_S4_27C4 calling the hunters to area $E, cell $3380) while record 2 stays set; 16-18
+ * three pictures ($82, $83, 0), then the call again and, the player below y $180, 25-26 the end;
+ * 24 makes an object of type $37 where the player is; 27-29 three pictures ($82, $84, $84) and it
+ * is gone with record 2. (State 9 clears the word at address $E4, not record 3's +$E4: the
+ * original's slip, kept.) The lists below are the original's for all states. */
 static void t2e_count(void) {                               /* fn_S4_2770 */
     uint32_t tbl = og32(0x53C8);
     if (r16(tbl + 0xE0)) w16(tbl + 0xE0, (uint16_t)(r16(tbl + 0xE0) - 1));
     uint16_t t = r16(tbl + 0xE4);
     if (t && !(t & 0x8000)) w16(tbl + 0xE4, (uint16_t)(t - 1));
 }
+static void t2e_call(void) {                                /* fn_S4_2790: types $1F / $31 low on the map hit by record 3 */
+    uint32_t t = og32(0x53C8);
+    for (uint16_t rec = 0x1DC0; rec; rec -= 0x40) {
+        uint16_t ty = r16(t + rec + 2);
+        if ((ty == 0x1F || ty == 0x31) && r16(t + rec + 8) >= 0x1C0) w16(t + rec + 0x14, 0xC0);
+    }
+}
+static void t2e_mark(void) {                                /* fn_S4_27C4: record 3's marks: area $E, cell $3380 */
+    uint32_t t = og32(0x53C8);
+    w16(t + 0xD8, 0xE); w16(t + 0xDC, 0xE); w16(t + 0xDA, 0x3380); w16(t + 0xDE, 0x3380);
+}
 static void t2e_think(Regs *r) {
     uint32_t tbl = og32(0x53C8);
     for (;;) {
         set_w(&r->d[7], (uint16_t)r->d[0]);
-        uint16_t next;
-        switch ((uint16_t)r->d[7]) {
+        uint16_t s = (uint16_t)r->d[7], next;
+        switch (s) {
         case 0: if (!r16(tbl + 0x98)) return; next = 1; break;
         case 1: if (r16(tbl + 0x98) && og16(0x56C2)) return; next = 2; break;
         case 2: w16(tbl + 0xE2, 1); w16(tbl + 0xE4, 1); next = 3; break;
         case 3: if (!r16(tbl + 0x98)) return; next = 4; break;
         case 31: if (r16(tbl + 0x98)) return; next = 2; break;
-        default:
-            r->a[3] = mz_seg_base(4) + 0x23C6;                   /* the original's think, for its JMP (A3) */
-            gen_S4_23C6(r);
-            return;
+        case 4: w16(tbl + 0xE4, 0xFFFF); t2e_call(); flag_set(r, 1, 0x20); next = 14; break;
+        case 5: case 20: if (r16(tbl + 0x98) && og16(0x56C2)) return; next = s == 5 ? 12 : 25; break;
+        case 6: if (r16(tbl + 0x98)) return; next = 12; break;
+        case 7: w16(tbl + 0x96, 50); next = 8; break;
+        case 8: {
+            if (!r16(tbl + 0x98)) { next = 12; break; }
+            int16_t t = (int16_t)(r16(tbl + 0x96) - 1);
+            w16(tbl + 0x96, (uint16_t)t);
+            if (t >= 0) return;
+            next = 9; break;
         }
+        case 9: w16(0xE4, 0); next = 10; break;
+        case 10: if (r16(tbl + 0x98)) return; next = 13; break;
+        case 11: w16(tbl + 0xE4, 0); if (r16(tbl + 0x98)) return; next = 13; break;
+        case 12: w16(tbl + 0xE4, 0); next = 13; break;
+        case 14: w16(tbl + 0x96, 30); next = 15; break;
+        case 15: {
+            if (!r16(tbl + 0x98)) { w16(tbl + 0xE4, 0); next = 3; break; }
+            int16_t t = (int16_t)(r16(tbl + 0x96) - 1);
+            w16(tbl + 0x96, (uint16_t)t);
+            if (t >= 0) return;
+            next = 5; break;
+        }
+        case 16: case 27: w16(tbl + 0x96, 0xFFFF); next = (uint16_t)(s + 1); break;
+        case 17: case 28: {
+            uint16_t t = (uint16_t)(r16(tbl + 0x96) + 1);
+            w16(tbl + 0x96, t);
+            if (t < 3) return;
+            next = (uint16_t)(s + 1); break;
+        }
+        case 18:
+            w16(tbl + 0xE4, 5);
+            t2e_call();
+            if (og16(0x56D4) < 0x180) { next = 25; break; }
+            if (!r16(tbl + 0x98)) return;
+            w16(tbl + 0xE4, 0xFFFF);
+            next = 20; break;
+        case 21: case 22: if (!r16(tbl + 0x98)) { next = 25; break; } return;
+        case 23: if (r16(tbl + 0x98)) return; next = 24; break;
+        case 24:
+            sog16(0x382C, og16(0x56D8)); sog16(0x3828, og16(0x56D4)); sog16(0x3824, og16(0x56D0));
+            make_object(r, 0x37, 0, 0);
+            next = 30; break;
+        case 25: w16(tbl + 0xE4, 0); next = 26; break;
+        case 29: {                                          /* gone, and record 2 with it */
+            uint32_t o = r->a[4];
+            w16(og32(0x53D4) + sxw(r16(o + 0xE)) + 0xE, 0);
+            unlink_obj(r);
+            w16(o + 4, 0); w16(o + 8, 0); w16(o + 0x30, 0); w16(o + 0xE, 0);
+            set_w(&r->d[0], 0x80); set_w(&r->d[1], r16(tbl + 0xB0));
+            mz_seg_of(2, 0x3410), fn_S2_3410(r);
+            w16(tbl + 0x84, 0); w16(tbl + 0x88, 0); w16(tbl + 0xB0, 0);
+            w16(tbl + 0xE4, 0xFFFF); w16(tbl + 0xE2, 0);
+            next = 30; break;
+        }
+        default: return;                                    /* 13, 19, 26, 30 */
+        }
+
         set_w(&r->d[0], next);
     }
 }
@@ -1832,7 +2201,19 @@ void fo_S4_21D6(Regs *r) {
     case 0: case 2: break;
     case 1: t2e_count(); say(0x2E01); break;
     case 3: case 31: t2e_count(); break;
-    default: if (s >= 4 && s <= 30) t2e_gen_act[s - 4](r); break;
+    case 5: case 6: case 8: case 20: case 21: case 22: case 23: {
+        static const uint16_t text[24] = {[5] = 0x2E02, [6] = 0x2E03, [8] = 0x2E04, [20] = 0x2E06, [21] = 0x2E07,
+                                          [22] = 0x2E08, [23] = 0x2E09};
+        t2e_count(); t2e_mark(); say(text[s]);
+        break;
+    }
+    case 10: t2e_count(); say(0x2E04); break;
+    case 11: t2e_count(); say(0x2E05); break;
+    case 13: case 26: case 30: t2e_count(); break;
+    case 15: t2e_count(); t2e_call(); t2e_mark(); break;
+    case 17: { static const uint16_t pic[3] = {0x82, 0x83, 0}; w16(r->a[4] + 0x3A, pic[r16(og32(0x53C8) + 0x96)]); t2e_count(); break; }
+    case 18: t2e_count(); t2e_mark(); break;
+    case 28: { static const uint16_t pic[3] = {0x82, 0x84, 0x84}; w16(r->a[4] + 0x3A, pic[r16(og32(0x53C8) + 0x96)]); t2e_count(); break; }
     }
     sog32(0x5752, (uint16_t)r->d[7]);
     w16(o + 0x16, (uint16_t)r->d[7]);
@@ -1842,9 +2223,9 @@ void fo_S4_21D6(Regs *r) {
  * Grows (+$C, kept in record 0's +$1C between frames: fn_S9_1908, unless bit 4 of flag word 0 is
  * set, steps 0-4 after 3, 7, 7, 100 frames); with the player standing at x $33-$3C, y below $12
  * (no full-view picture showing): 4, then 5: 7 frames of full view $83 and the way back to level 2
- * (at $1EB, $78, turned $10 to the left). Hit by type $19: 2, by $1A: 1; +$C negative: 3. States
- * 1-3 are not reached by the tests yet (the translation gen_S9_1B44; their acts do nothing). */
-void gen_S9_1B44(Regs *r);
+ * (at $1EB, $78, turned $10 to the left). Hit by type $19: 2 (+$C one more, up to 4), by $1A: 1
+ * (one less; at 0 with flag word 0 bit 2 set, -1); +$C negative: 3, where each frame takes 2 from
+ * the player's life (G_56EE = $27). Their acts do nothing. */
 static void t29_grow(Regs *r) {                             /* fn_S9_1908 */
     static const uint16_t step[5][2] = {{3, 1}, {7, 2}, {7, 3}, {100, 3}, {100, 4}};
     uint32_t o = r->a[4];
@@ -1874,10 +2255,25 @@ static void t29_think(Regs *r) {
             sog16(0x57DA, (uint16_t)((og16(0x56DA) - 0x10) & 0x3F)); sog8(0x57DE, 1); sog8(0x57F2, 1);
             next = 0; break;
         }
-        default:
-            r->a[3] = mz_seg_base(9) + 0x1B44;                   /* the original's think, for its JMP (A3) */
-            gen_S9_1B44(r);
+        case 1: {                                           /* hit by $1A: smaller (at 0, with flag 0 bit 2: 3) */
+            int16_t t = (int16_t)(r16(o + 0xC) - 1);
+            if (t >= 0) w16(o + 0xC, (uint16_t)t);
+            else if (flag(r, 0, 4)) { w16(o + 0xC, 0xFFFF); next = 3; break; }
+            w16(o + 0x10, 0);
+            next = 0; break;
+        }
+        case 2: {                                           /* hit by $19: bigger, up to 4 */
+            uint16_t t = (uint16_t)(r16(o + 0xC) + 1);
+            w16(o + 0xC, t >= 5 ? 4 : t);
+            next = 0; break;
+        }
+        case 3:                                             /* gone: each frame 2 from the player's life */
+            sog32(0x382C, 0); sog32(0x3828, 0); sog16(0x3824, 0);
+            mz_seg_of(7, 0x3784), fn_S7_3784(r);
+            { int16_t l = (int16_t)(og16(0x56EA) - 2); sog16(0x56EA, (uint16_t)(l < 0 ? 0 : l)); }
+            sog16(0x56EE, 0x27);
             return;
+        default: return;
         }
         set_w(&r->d[0], next);
     }
@@ -2277,11 +2673,203 @@ void fo_S10_0028(Regs *r) {
     r->a[7] += 6; r->a[6] = a6;
 }
 
+/* ---------- type $D (fn_S4_0028, level 4) ----------
+ * While the player is in its room (x $90-$E7, y $100-$1CF) it goes round the room's cells (the
+ * list below, +$10 its place in it) two steps a frame, holding the 3 x 3 cells around its target
+ * in the map (+$E) and four doorways always; within 4 of the player it takes his place: he is moved
+ * to it, turned 6 to the left and his life is gone (+$26 = 2, fn_S2_2AD2). */
+static void hold_around(uint16_t v, uint16_t c) {          /* fn_S4_0164 */
+    uint32_t map = og32(0x53D4);
+    static const int16_t at[9] = {-0x420, -0x400, -0x3E0, -0x20, 0, 0x20, 0x3E0, 0x400, 0x420};
+    for (int k = 0; k < 9; k++) {
+        uint16_t n = (uint16_t)(c + at[k]);
+        if (!(r8(map + sxw(n)) & 1)) w16(map + sxw(n) + 0xE, v);
+    }
+    w16(map + 0x694E, 1); w16(map + 0x6D4E, 1); w16(map + 0x496E, 1); w16(map + 0x456E, 1);
+}
+static void td_step(Regs *r) {                             /* fn_S4_0090 */
+    static const uint16_t way[45] = {0x6540, 0x6560, 0x6580, 0x61A0, 0x5D80, 0x5D60, 0x5D40, 0x5920, 0x5540,
+        0x5560, 0x5580, 0x51A0, 0x4D80, 0x4D60, 0x4D40, 0x5120, 0x5520, 0x5940, 0x5960, 0x5980, 0x5DA0, 0x61A0,
+        0x6580, 0x6560, 0x0460, 0x6120, 0x5D40, 0x5D60, 0x5D80, 0x59A0, 0x5580, 0x5560, 0x5540, 0x5120, 0x4D40,
+        0x4D60, 0x4D80, 0x51A0, 0x55A0, 0x5980, 0x5960, 0x5940, 0x5D20, 0x6120, 0};   /* (sic: $0460) */
+    uint32_t o = r->a[4], map = og32(0x53D4);
+    for (;;) {
+        uint16_t c = way[r16(o + 0x10) / 2];
+        hold_around(1, c);
+        g_target(r16(map + sxw(c) + 0x1C), r16(map + sxw(c) + 0x1E));
+        fo_S7_1488(r);
+        if (!((uint16_t)r->d[0] & 0x8000)) {
+            mz_seg_of(7, 0x3722), fn_S7_3722(r);
+            set_w(&r->d[0], r16(o + 0xC));
+            r->a[0] = OADDR(0x4F30);
+            mz_seg_of(7, 0x374C), fn_S7_374C(r);
+            mz_seg_of(7, 0x3784), fn_S7_3784(r);
+            return;
+        }
+        hold_around(0, c);                                  /* there: the next cell */
+        uint16_t i = (uint16_t)(r16(o + 0x10) + 2);
+        w16(o + 0x10, way[i / 2] ? i : 0);
+    }
+}
+void fo_S4_0028(Regs *r) {
+    uint16_t x = og16(0x56D8), y = og16(0x56D4);
+    if (x < 0x90 || x >= 0xE8 || y >= 0x1D0 || y < 0x100) return;
+    td_step(r); td_step(r);
+    near_d0(r);
+    if (og16(0x382E) >= 4) return;
+    uint32_t o = r->a[4];
+    sog16(0x56D8, r16(o + 4)); sog16(0x56D4, r16(o + 8)); sog16(0x56D0, r16(o + 0x30));
+    sog16(0x56DA, (uint16_t)((og16(0x56DA) - 6) & 0x3F));
+    w16(o + 0x26, 2);
+    sog16(0x56EA, 0);
+    mz_seg_of(2, 0x3500), fn_S2_3500(r);
+}
+
+/* ---------- type $E (fn_S4_020C, level 4) ----------
+ * While the player is in its room (x $90-$127, y $100-$1CF) it goes for him four steps a frame
+ * (straight at him in his cell, else to the free cell around it nearest him, fn_S4_030E) or, while
+ * he is in parts of the room, for fixed points; within 4 it takes his place as type $D does
+ * (turned 6 to the right). */
+static uint16_t te_next_cell(Regs *r, uint16_t tx, uint16_t ty) {   /* fn_S4_030E */
+    uint32_t map = og32(0x53D4), dist = og32(0x53BC);
+    uint16_t best = 0xFFFF, cell = 0x5960, c = r16(r->a[4] + 0x30);
+    #define TRY(n) do { uint16_t n_ = (n); if (!r16(map + sxw(n_) + 0xE)) { \
+        uint16_t y_ = (uint16_t)((((uint16_t)(ty - r16(map + sxw(n_) + 0x1E)) >> 1) & 0x7F) << 7); \
+        uint16_t x_ = (uint16_t)(((uint16_t)(tx - r16(map + sxw(n_) + 0x1C)) >> 1) & 0x7F); \
+        uint16_t w_ = r8(dist + sxw((uint16_t)(y_ | x_))); if (w_ < best) { best = w_; cell = n_; } } } while (0)
+    static const int16_t line[4] = {0x20, -0x20, 0x400, -0x400};
+    TRY(c);
+    for (int k = 0; k < 4; k++) {                           /* each way two cells, unless the first is a wall */
+        uint16_t n = (uint16_t)(c + line[k]);
+        if (r8(map + sxw(n)) & 1) continue;
+        TRY(n);
+        TRY((uint16_t)(n + line[k]));
+    }
+    static const int16_t diag[4] = {-0x420, -0x3E0, 0x3E0, 0x420};
+    for (int k = 0; k < 4; k++) TRY((uint16_t)(c + diag[k]));
+    #undef TRY
+    return cell;
+}
+void fo_S4_020C(Regs *r) {
+    uint32_t map = og32(0x53D4);
+    uint16_t x = og16(0x56D8), y = og16(0x56D4), tx, ty;
+    if (x < 0x90 || x >= 0x128 || y >= 0x1D0 || y < 0x100) return;
+    if (x >= 0xE0) tx = 0xB8, ty = 0x168;
+    else if (y < 0x130) tx = 0xC8, ty = 0x148;
+    else if (y >= 0x1A0) tx = 0xA8, ty = 0x188;
+    else tx = x, ty = y;
+    for (int k = 0; k < 4; k++) {                           /* fn_S4_02D4 */
+        uint16_t c = te_next_cell(r, tx, ty);
+        if (c == og16(0x56D0)) g_target(og16(0x56D8), og16(0x56D4));
+        else g_target(r16(map + sxw(c) + 0x1C), r16(map + sxw(c) + 0x1E));
+        fo_S7_1488(r);
+        if ((uint16_t)r->d[0] & 0x8000) continue;
+        r->a[0] = OADDR(0x4F30);
+        mz_seg_of(7, 0x374C), fn_S7_374C(r);
+        mz_seg_of(7, 0x3784), fn_S7_3784(r);
+    }
+    near_d0(r);
+    if (og16(0x382E) >= 4) return;
+    uint32_t o = r->a[4];
+    sog16(0x56D8, r16(o + 4)); sog16(0x56D4, r16(o + 8)); sog16(0x56D0, r16(o + 0x30));
+    sog16(0x56DA, (uint16_t)((og16(0x56DA) + 6) & 0x3F));
+    w16(o + 0x26, 2);
+    sog16(0x56EA, 0);
+    mz_seg_of(2, 0x3500), fn_S2_3500(r);
+}
+
+/* ---------- type $F (fn_S4_04AE, record 2 on level 4) ----------
+ * It turns the object +$18 bytes on from it (in 0 and 1: 2 a frame, either way by that one's +$18
+ * sign) while the player is within $20 (1; beyond: 3, 0). Hit by $19 (states 0-1): 2, the next
+ * object ($40 on, wrapping below $500); by $18 / $1A: 4, the object pulled to its place and set
+ * going (state 1, +$18 | $4000): a type $23 one starts 6-9: 15 frames, picture $45, 20 frames of
+ * $46 / $47 at random, event $F01 to record 3, two frames of $48, the event again; then 8 removes
+ * the types $1E, $20 and $2D and itself. */
+static void tf_think(Regs *r) {
+    uint32_t o = r->a[4];
+    for (;;) {
+        uint16_t s = (uint16_t)r->d[0], next;
+        set_w(&r->d[7], s);
+        switch (s) {
+        case 1: near_d0(r); if (og16(0x382E) < 0x20) return; next = 3; break;
+        case 2: {
+            uint16_t n = (uint16_t)(r16(o + 0x18) + 0x40);
+            w16(o + 0x18, n >= 0x500 ? 0x40 : n);
+            w16(o + 0x1A, 1);
+            next = 1; break;
+        }
+        case 3: w16(o + 0x1A, 0xFFFF); next = 0; break;
+        case 4: {
+            sog16(0x382C, r16(o + 4)); sog16(0x3828, r16(o + 8)); sog16(0x3824, r16(o + 0x30));
+            uint16_t self = og16(0x3834), off = r16(o + 0x18);
+            sog16(0x3834, (uint16_t)(self + off));
+            uint32_t p = o + off;
+            r->a[4] = p;
+            w16(p + 0x18, r16(p + 0x18) | 0x4000);
+            w16(og32(0x53D4) + sxw(r16(p + 0xE)) + 0xE, 0);
+            mz_seg_of(7, 0x3784), fn_S7_3784(r);
+            w16(p + 0x16, 1);
+            int t23 = r16(p + 2) == 0x23;
+            r->a[4] = o; sog16(0x3834, self);
+            w16(o + 0x1A, 0xFFFF);
+            if (t23) { w16(o + 0x1C, 15); next = 6; } else next = 5;
+            break;
+        }
+        case 6: if (!count_down(r, 0x1C, 1)) return; w16(o + 0x1C, 20); next = 7; break;
+        case 7: if (!count_down(r, 0x1C, 1)) return; w16(o + 0x1C, 2); tell(r, 0xF01, 0xC0); next = 9; break;
+        case 8: {                                           /* fn_S4_06F4: the types $1E, $20, $2D gone; then itself */
+            uint32_t t = og32(0x53C8);
+            for (uint16_t rec = 0x1DC0; rec; rec -= 0x40) {
+                uint16_t ty = r16(t + rec + 2);
+                if (ty != 0x1E && ty != 0x20 && ty != 0x2D) continue;
+                unlink_rec(r, rec);
+                w16(t + rec + 4, 0); w16(t + rec + 6, 0); w16(t + rec + 8, 0); w16(t + rec + 0xA, 0);
+                w16(t + rec + 0x30, 0); w16(t + rec + 0xE, 0);
+                w16(t + rec + 2, ty | 0x8000);
+                w16(t + rec + 0x18, r16(t + rec + 0x18) | 0x4000);
+            }
+            unlink_obj(r);
+            w16(o + 4, 0); w16(o + 8, 0); w16(o + 0x30, 0);
+            w16(o + 2, r16(o + 2) | 0x8000);
+            next = 5; break;
+        }
+        case 9: if (!count_down(r, 0x1C, 1)) return; tell(r, 0xF01, 0xC0); next = 8; break;
+        default: return;                                    /* 0, 5 */
+        }
+        set_w(&r->d[0], next);
+    }
+}
+void fo_S4_04AE(Regs *r) {
+    static const uint16_t hits[] = {0x18, 4, 0x19, 2, 0x1A, 4, 0xFFFF};
+    uint32_t o = r->a[4], a6 = r->a[6];
+    r->a[6] = r->a[7] - 4;                                  /* LINK A6, #-6 */
+    r->a[7] -= 10;
+    set_w(&r->d[7], r16(o + 0x16));
+    set_w(&r->d[0], (uint16_t)r->d[7]);
+    tf_think(r);
+    o_hit(r, (uint16_t)r->d[7] <= 1 ? hits : NULL, tf_think);
+    switch ((uint16_t)r->d[7]) {
+    case 1: {                                               /* turning the object it points at */
+        uint32_t p = o + r16(o + 0x18);
+        uint16_t v = r16(p + 0x18);
+        uint16_t h = (uint16_t)(((v & 0x8000) ? v - 2 : v + 2) & 0x3F);
+        w16(o + 0xC, h);
+        w16(p + 0x18, (uint16_t)((v & 0xFF00) | h));
+        break;
+    }
+    case 6: set_pic(r, 0x45); break;
+    case 7: { random_d0(r); static const uint16_t pic[2] = {0x46, 0x47}; set_pic(r, pic[(uint16_t)r->d[0] & 1]); break; }
+    case 9: set_pic(r, 0x48); break;
+    }
+    w16(o + 0x16, (uint16_t)r->d[7]);
+    r->a[7] += 10; r->a[6] = a6;
+}
+
 /* ---------- fn_S7_0F78: one object's tick (Original's dispatcher, for fn_S7_2E9A) ----------
  * The record at D0.w of G_53C8 (G_3834 = D0) runs the behaviour of its type (+2); types without
  * one do nothing. Keeps D3-D7 / A2-A4. The behaviours not yet written by hand are the translations
  * in orig_gen.c (levels 2-6 and type $1B). */
-void fo_S10_0028(Regs *r), fo_S4_0028(Regs *r), fo_S4_020C(Regs *r), fo_S4_04AE(Regs *r), fo_S9_0046(Regs *r),
+void fo_S10_0028(Regs *r), fo_S9_0046(Regs *r),
     fo_S9_0372(Regs *r), fo_S7_087A(Regs *r), fo_S11_00C0(Regs *r), fo_S10_1F28(Regs *r), fo_S4_0782(Regs *r),
     fo_S4_0C44(Regs *r), fo_S4_1256(Regs *r), fo_S7_099C(Regs *r), fo_S4_1670(Regs *r), fo_S9_0D76(Regs *r),
     fo_S9_1738(Regs *r), fo_S9_1AE0(Regs *r), fo_S7_0A5A(Regs *r), fo_S9_1D0C(Regs *r), fo_S9_1CAC(Regs *r),

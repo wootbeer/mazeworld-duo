@@ -9,6 +9,7 @@
  *   goto X Y        walk to map point X, Y (pixels; a cell is $10), by the map's free cells
  *   near R D        walk to record R (of G_53C8) until within D
  *   face R          turn to record R
+ *   head H          turn to heading H (0-63)
  *   fire N          use ability N (1-4: the mouse-button gesture to that corner)
  *   until R S T     wait (at most T ticks) for record R to be in state S
  *   shoot R N T     face record R and use ability N again and again until it is gone (type
@@ -157,6 +158,7 @@ static void auto_tick(uint32_t tick) {
         else if (!strcmp(g->op, "goto")) done = walk_to(g->a, g->b, 4);
         else if (!strcmp(g->op, "near")) { uint32_t o = rec_at(g->a); done = walk_to((int16_t)rd16(o + 4), (int16_t)rd16(o + 8), g->b); }
         else if (!strcmp(g->op, "face")) { uint32_t o = rec_at(g->a); done = turn_to(heading_to((int16_t)rd16(o + 4), (int16_t)rd16(o + 8))); }
+        else if (!strcmp(g->op, "head")) done = turn_to(g->a);
         else if (!strcmp(g->op, "until")) done = rd16(rec_at(g->a) + 0x16) == g->b || tick - started >= (uint32_t)g->c;
         else if (!strcmp(g->op, "fire")) done = fire(g->a, tick - started);
         else if (!strcmp(g->op, "shoot")) {
