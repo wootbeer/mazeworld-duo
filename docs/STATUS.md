@@ -24,13 +24,15 @@
   62AC), starting play (3796), the main window's update (38EE) and the start-up (1C0C); not run
   by any test yet: Print Order Form (3284) and the Apple-event handlers (3482, 35FC, 36F8, 3454).
 - The creatures (`game/orig_creatures.c`, by hand): the dispatcher fo_S7_0F78 and every behaviour
-  level 1 has (George, the snails, the Eashire Cat, the gates, the hunters, ...) and, on levels 3-5,
-  types $29, $1E, $20, $2D, $1F, $30, $31, Lips ($2E), $D, $E and $F, all their states; also
+  level 1 has (George, the snails, the Eashire Cat, the gates, the hunters, ...) and, on levels 2-5,
+  types $11, $28, $29, $2B, $2C, $32, $34, $35, $1E, $20, $2D, $1F, $30, $31, Lips ($2E), $D, $E
+  and $F, all their states; also
   Original's own segment-7 helpers they use (`game/orig_seg7.c`: fo_S7_1E54, 1FF8, 201C, 2038,
   2132, 226E). Still the instruction-by-instruction translation of `tools/asm2c.py`
   (`game/orig_gen.c`, operations in `game/asm68.h`; regenerate with the arguments at its top, do
-  not edit): the rest of levels 2-6's types (fo_S9_*, fo_S11_*, fo_S7_087A / 099C / 0A5A / 0AB0 /
-  0C9C / 0B7C, fo_S4_1670 (type $23), fo_S10_1F28 (type $1B)).
+  not edit): the rest of levels 2-6's types (fo_S9_0372 and 0D76 (types $12 and $24, level 2),
+  fo_S11_*, fo_S7_087A / 099C / 0A5A / 0AB0 / 0C9C / 0B7C, fo_S4_1670 (type $23), fo_S10_1F28
+  (type $1B)).
 - The autopilot (`harness/auto.c`, the rig's `-auto <goals>`) makes recordings itself: goal lines
   (`goto X Y` by the map's cells, `face R`, `head H`, `fire N` the abilities, `wait N`, `setg` /
   `setr` to set a test up, `dump`) become input, written as `auto.txt`; a test is the start of a
@@ -38,10 +40,11 @@
   and keeps those that reach a behaviour's states not yet reached (by the original's trace of its
   act table). `tests/mwo_snail_*.txt` were made this way (George set as joined, the hunters set
   aside for the journey).
-- State sweeps: `tests/mwo_george_states.txt`, `mwo_snail_states.txt` and `mwo_level3_states.txt` ..
+- State sweeps: `tests/mwo_george_states.txt`, `mwo_snail_states.txt` and `mwo_level2_*.txt` ..
   `mwo_level5_end.txt` set creatures' states directly (`setr <record> 16 <state>`) one after
   another, so states play does not easily reach run and are checked against the original (most
-  states of each behaviour this way; which ones, by the original's trace). `setg` / `setr` lines are
+  states of each behaviour this way; which ones, by the original's trace). Not reached yet: level
+  3's passages (types $2B / $2C moving the player; a poke of his position does not cross them). `setg` / `setr` lines are
   applied by the rig and the headless port alike.
 - Tests that start on a later level: a script whose first lines include `# level N` (or the rig's
   `-level N`) starts the new game at level N's arrival point (levels 2 and 5: a cell along, the

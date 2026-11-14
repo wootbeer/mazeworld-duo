@@ -2235,6 +2235,18 @@ static void t29_grow(Regs *r) {                             /* fn_S9_1908 */
     if (n < step[c][0]) return;
     w16(o + 0xC, step[c][1]); w16(o + 0x10, 0);
 }
+static uint16_t t29_smaller(Regs *r) {                     /* hit by $1A: smaller (at 0, with flag 0 bit 2: state 3) */
+    uint32_t o = r->a[4];
+    int16_t t = (int16_t)(r16(o + 0xC) - 1);
+    if (t >= 0) w16(o + 0xC, (uint16_t)t);
+    else if (flag(r, 0, 4)) { w16(o + 0xC, 0xFFFF); return 3; }
+    w16(o + 0x10, 0);
+    return 0;
+}
+static void t29_bigger(Regs *r) {                           /* hit by $19: bigger, up to 4 */
+    uint16_t t = (uint16_t)(r16(r->a[4] + 0xC) + 1);
+    w16(r->a[4] + 0xC, t >= 5 ? 4 : t);
+}
 static void t29_think(Regs *r) {
     uint32_t o = r->a[4];
     for (;;) {
@@ -2255,18 +2267,8 @@ static void t29_think(Regs *r) {
             sog16(0x57DA, (uint16_t)((og16(0x56DA) - 0x10) & 0x3F)); sog8(0x57DE, 1); sog8(0x57F2, 1);
             next = 0; break;
         }
-        case 1: {                                           /* hit by $1A: smaller (at 0, with flag 0 bit 2: 3) */
-            int16_t t = (int16_t)(r16(o + 0xC) - 1);
-            if (t >= 0) w16(o + 0xC, (uint16_t)t);
-            else if (flag(r, 0, 4)) { w16(o + 0xC, 0xFFFF); next = 3; break; }
-            w16(o + 0x10, 0);
-            next = 0; break;
-        }
-        case 2: {                                           /* hit by $19: bigger, up to 4 */
-            uint16_t t = (uint16_t)(r16(o + 0xC) + 1);
-            w16(o + 0xC, t >= 5 ? 4 : t);
-            next = 0; break;
-        }
+        case 1: next = t29_smaller(r); break;
+        case 2: t29_bigger(r); next = 0; break;
         case 3:                                             /* gone: each frame 2 from the player's life */
             sog32(0x382C, 0); sog32(0x3828, 0); sog16(0x3824, 0);
             mz_seg_of(7, 0x3784), fn_S7_3784(r);
@@ -2865,11 +2867,384 @@ void fo_S4_04AE(Regs *r) {
     r->a[7] += 10; r->a[6] = a6;
 }
 
+/* ---------- type $11 (fn_S9_0046, level 2) ----------
+ * While record 8's +$1E is set it turns (+$C through 0-19) and bends the shots near it (types
+ * $13 and $17-$1A in the 3 x 3 cells around: one coming within $14 of straight at it, from 3 to
+ * $F away, is turned two steps towards it, the abilities' shots six); either way it pulls in the
+ * player within 3 (moving onto him, +$26 = 2) unless he is against a wall. Record 8 clear: state -1,
+ * and once set again it only pulls until its state (counting up) is no longer negative. */
+static int t11_player_at_wall(void) {                       /* fn_S9_00C2: within 4 / 5 of a wall cell around */
+    uint32_t c = og32(0x53D4) + og16(0x56D0);
+    uint16_t px = og16(0x56D8), py = og16(0x56D4), cx = r16(c + 0x1C), cy = r16(c + 0x1E);
+    #define WALL(o) (r8(c + (uint32_t)(int32_t)(o)) & 1)
+    if (WALL(0x20) && (uint16_t)(cx + 4) < px) return 1;
+    if (WALL(0x400) && (uint16_t)(cy + 4) < py) return 1;
+    if (WALL(-0x20) && (uint16_t)(cx - 5) >= px) return 1;
+    if (WALL(-0x400) && (uint16_t)(cy - 5) >= py) return 1;
+    if (WALL(0x420) && (uint16_t)(cx + 4) < px && (uint16_t)(cy + 4) < py) return 1;
+    if (WALL(0x3E0) && (uint16_t)(cx - 5) >= px && (uint16_t)(cy + 4) < py) return 1;
+    if (WALL(-0x420) && (uint16_t)(cx - 5) >= px && (uint16_t)(cy - 5) >= py) return 1;
+    if (WALL(-0x3E0) && (uint16_t)(cx + 4) < px && (uint16_t)(cy - 5) >= py) return 1;
+    #undef WALL
+    return 0;
+}
+static void t11_pull(Regs *r) {                             /* fn_S9_0086 */
+    near_d0(r);
+    if (og16(0x382E) >= 3 || t11_player_at_wall()) return;
+    sog16(0x382C, og16(0x56D8)); sog16(0x3828, og16(0x56D4)); sog16(0x3824, og16(0x56D0));
+    mz_seg_of(7, 0x3972), fn_S7_3972(r);
+    if ((uint16_t)r->d[0]) return;
+    mz_seg_of(7, 0x3784), fn_S7_3784(r);
+    w16(r->a[4] + 0x26, 2);
+}
+static void t11_bend(Regs *r, uint32_t shot) {             /* fn_S9_028A */
+    uint32_t o = r->a[4];
+    uint16_t ty = r16(shot + 2);
+    if (!((ty >= 0x17 && ty < 0x1B) || ty == 0x13)) return;
+    uint16_t i = (uint16_t)((((r16(o + 8) - r16(shot + 8)) & 0x7F) << 7) | ((r16(o + 4) - r16(shot + 4)) & 0x7F));
+    uint16_t dir = r8(og32(0x53C0) + sxw(i));
+    if (r16(shot + 0xC) & 0x8000) { w16(shot + 0xC, dir); return; }
+    set_w(&r->d[0], (uint16_t)(dir - r16(shot + 0xC)));
+    mz_seg_of(7, 0x367E), fn_S7_367E(r);
+    if ((uint16_t)r->d[0] >= 0x14) return;
+    uint16_t d = r8(og32(0x53BC) + sxw(i));
+    if (d < 3 || d >= 0x10) return;
+    r->a[4] = shot;                                         /* the shot turned towards it */
+    r->a[0] = og32(0x53C0);
+    set_w(&r->d[0], dir);
+    for (int k = ty >= 0x17 ? 6 : 2; k; k--) mz_seg_of(7, 0x36F4), fn_S7_36F4(r);
+    r->a[4] = o;
+}
+void fo_S9_0046(Regs *r) {
+    uint32_t o = r->a[4];
+    if (!r16(og32(0x53C8) + 0x21E)) { w16(o + 0x16, 0xFFFF); t11_pull(r); return; }
+    int16_t st = (int16_t)r16(o + 0x16);
+    if (st < 0) { w16(o + 0x16, (uint16_t)(st + 1)); if (st + 1 < 0) { t11_pull(r); return; } }
+    uint16_t t = (uint16_t)(r16(o + 0xC) + 1);
+    w16(o + 0xC, t >= 0x14 ? 0 : t);
+    t11_pull(r);
+    uint32_t map = og32(0x53D4), tbl = og32(0x53C8);       /* fn_S9_01C4: the 3 x 3 cells around */
+    static const int16_t at[9] = {-0x420, -0x400, -0x3E0, -0x20, 0, 0x20, 0x3E0, 0x400, 0x420};
+    for (int k = 0; k < 9; k++) {
+        uint16_t c = (uint16_t)(r16(o + 0x30) + at[k]);
+        for (uint32_t j = 1; j <= 10; j++) {
+            uint8_t n = r8(map + sxw(c) + j);
+            if (!n) break;
+            t11_bend(r, tbl + ((uint32_t)n << 6));
+        }
+    }
+}
+
+/* ---------- types $2C and $2B (fn_S9_1CAC, fn_S9_1D0C, level 3) ----------
+ * Passages within level 3: the player crossing y $98 (from his last y, G_56CA) with x $56-$5A
+ * (type $2C) is moved $B0 right and $C0 down; crossing y $158 with x $106-$10A (type $2B), as far
+ * back (G_57DC = 3, the level, and the move made at the frame's end, G_57DE / G_57F2). Type $2C
+ * also sets G_56EE by the player's y (fn_S9_1D68: $18 above $90, $1E above $A0, else $2A). */
+static void passage(uint16_t x0, uint16_t y, int16_t dx, int16_t dy) {
+    uint16_t px = og16(0x56D8), py = og16(0x56D4), last = og16(0x56CA);
+    if (px < x0 || px >= x0 + 5) return;
+    if (!(y >= py ? y < last : y >= last)) return;           /* not crossed */
+    sog16(0x57DC, 3);
+    sog16(0x57D8, (uint16_t)(px + dx)); sog16(0x57D4, (uint16_t)(py + dy));
+    sog16(0x57DA, og16(0x56DA));
+    sog8(0x57DE, 1); sog8(0x57F2, 1);
+}
+void fo_S9_1CAC(Regs *r) {
+    (void)r;
+    uint16_t py = og16(0x56D4);
+    sog16(0x56EE, py >= 0xA0 ? 0x2A : py >= 0x90 ? 0x1E : 0x18);
+    passage(0x56, 0x98, 0xB0, 0xC0);
+}
+void fo_S9_1D0C(Regs *r) { (void)r; passage(0x106, 0x158, -0xB0, -0xC0); }
+
+/* ---------- type $32 (fn_S9_1E46, level 3) ----------
+ * A talker (texts $32xx): its mouth moves (fn_S7_22EE); with George there (G_56C2) and the player
+ * within 7, looking at it within $A, it turns to him and says $3201 (flag word 0 bit 2), then
+ * $3202 (heading $10) while he stays within $14 and looks within $1A; going away: 5, event $3202
+ * to record 4, then 4 (waiting, heading $10). Event $3201 to record 4 (3), a wait of 5 frames (6-7)
+ * and $3203, $3204 (8-9) while the player stays in the box fn_S7_22BC names; then 5. */
+static void talk_mouth(Regs *r) {                           /* fn_S7_22EE: a new mouth every 16 frames */
+    uint32_t o = r->a[4];
+    uint16_t t = (uint16_t)(r16(o + 0x18) + 1);
+    if (t >= 0x10) { random_d0(r); w16(o + 0x1A, (uint16_t)(((uint16_t)r->d[0] & 3) << 4)); t = 0; }
+    w16(o + 0x18, t);
+}
+static uint16_t t32_where(void) {                           /* fn_S7_22BC: 0 above y $A0, 1 in x $D0-$13F / y $120-$19F, else 2 */
+    uint16_t x = og16(0x56D8), y = og16(0x56D4);
+    if (y < 0xA0) return 0;
+    return y >= 0x120 && y < 0x1A0 && x >= 0xD0 && x < 0x140 ? 1 : 2;
+}
+static int t32_watched(Regs *r, uint16_t within, uint16_t look) {
+    near_d0(r);
+    if (og16(0x382E) >= within) return 0;
+    set_w(&r->d[0], (uint16_t)(og16(0x3830) - r16(r->a[4] + 0xC)));
+    mz_seg_of(7, 0x367E), fn_S7_367E(r);
+    return (uint16_t)r->d[0] < look;
+}
+static void t32_think(Regs *r) {
+    uint32_t o = r->a[4];
+    for (;;) {
+        uint16_t s = (uint16_t)r->d[0], next;
+        set_w(&r->d[7], s);
+        switch (s) {
+        case 0: if (!t32_watched(r, 7, 0xA) || !og16(0x56C2)) return; next = 1; break;
+        case 1: case 2: if (t32_watched(r, 0x14, 0x1A)) return; next = 5; break;
+        case 3: tell(r, 0x3201, 0x100); next = 6; break;
+        case 5: tell(r, 0x3202, 0x100); next = 4; break;
+        case 6: w16(o + 0x1C, 4); next = 7; break;
+        case 7: if (!count_down(r, 0x1C, 1)) return; next = 8; break;
+        case 8: case 9: if (t32_where()) return; next = 5; break;
+        default: return;                                    /* 4 */
+        }
+        set_w(&r->d[0], next);
+    }
+}
+static void t32_turn(Regs *r, uint16_t to) { set_w(&r->d[0], to); mz_seg_of(7, 0x36F4), fn_S7_36F4(r); }
+void fo_S9_1E46(Regs *r) {
+    static const uint16_t said[10][2] = {[1] = {0xB201, 2}, [2] = {0xB202, 3}, [8] = {0xB203, 9}, [9] = {0xB204, 5}};
+    uint32_t o = r->a[4];
+    set_w(&r->d[7], r16(o + 0x16));
+    set_w(&r->d[0], (uint16_t)r->d[7]);
+    t32_think(r);
+    uint16_t s = (uint16_t)r->d[7];
+    if (s < 10) o_said(r, said[s], t32_think);
+    switch ((uint16_t)r->d[7]) {
+    case 0: talk_mouth(r); break;
+    case 1: talk_mouth(r); sog16(0x56C0, 0xB201); flag_set(r, 0, 4); t32_turn(r, og16(0x3830)); break;
+    case 2: talk_mouth(r); sog16(0x56C0, 0xB202); t32_turn(r, 0x10); break;
+    case 4: case 7: talk_mouth(r); t32_turn(r, 0x10); break;
+    case 8: talk_mouth(r); sog16(0x56C0, 0xB203); t32_turn(r, 0x10); break;
+    case 9: talk_mouth(r); sog16(0x56C0, 0xB204); t32_turn(r, 0x10); break;
+    }
+    w16(o + 0x16, (uint16_t)r->d[7]);
+}
+
+/* ---------- type $34 (fn_S9_2072, level 3) ----------
+ * With +$C clear it walks a fixed way round (four pixels a frame, one axis at a time; at the end
+ * back to $58, $98 and round again); with +$C set it goes to $108, $15B a pixel a frame and then
+ * stands at $108, $164. Once flag word 0 bit 2 is set it is gone. */
+static void t34_move(Regs *r) { mz_seg(7), fo_S7_155C(r); mz_seg_of(7, 0x3784), fn_S7_3784(r); }
+static void t34_toward(Regs *r, uint16_t tx, uint16_t ty) { /* a pixel along x, else along y; 0 if there */
+    uint32_t o = r->a[4];
+    sog16(0x382C, r16(o + 4)); sog16(0x3828, r16(o + 8));
+    int16_t d = (int16_t)(tx - r16(o + 4));
+    if (d) sog16(0x382C, (uint16_t)(og16(0x382C) + (d < 0 ? -1 : 1)));
+    else if ((d = (int16_t)(ty - r16(o + 8))) != 0) sog16(0x3828, (uint16_t)(og16(0x3828) + (d < 0 ? -1 : 1)));
+}
+void fo_S9_2072(Regs *r) {
+    static const uint16_t way[16] = {0x58, 0x78, 0x38, 0x78, 0x38, 0x58, 0x58, 0x58, 0x58, 0x28, 0x38, 0x28, 0x38, 0x10, 0, 0};
+    uint32_t o = r->a[4];
+    if (flag(r, 0, 4)) { unlink_obj(r); w16(o + 2, r16(o + 2) | 0x8000); return; }
+    if (r16(o + 0xC)) {                                     /* fn_S9_2140 */
+        if (r16(o + 4) == 0x108 && r16(o + 8) == 0x15B) { sog16(0x382C, 0x108); sog16(0x3828, 0x164); }
+        else t34_toward(r, 0x108, 0x15B);
+        t34_move(r);
+        return;
+    }
+    for (int k = 0; k < 4; k++) {                           /* fn_S9_20B0 */
+        for (;;) {
+            uint16_t i = r16(o + 0x10) / 2;
+            if (!way[i]) { sog16(0x382C, 0x58); sog16(0x3828, 0x98); t34_move(r); w16(o + 0x10, 0); break; }
+            if (r16(o + 4) != way[i] || r16(o + 8) != way[i + 1]) { t34_toward(r, way[i], way[i + 1]); t34_move(r); break; }
+            w16(o + 0x10, (uint16_t)(r16(o + 0x10) + 4));
+        }
+    }
+}
+
+/* ---------- type $35 (fn_S9_219A, level 3) ----------
+ * A ghost in the box fn_S7_22BC names: away from the player (0) until he is out of it (2), then a
+ * wait of 16-79 frames, and it appears near him (3: within $20 either way, +$1A counting its
+ * appearances), facing him for a frame and 50 more (4-5), then gone (6-8, off to 0, 0) and back to
+ * 1. From its thirteenth appearance on (9): 10, taking $28 from the player's life and pushing him on
+ * along his heading until he is clear (11: fn_S7_15B8), facing him (12), then 20. Event $3201 from
+ * type $32 sends it to 11, $3202 to 19-15 (200 frames off the map) and 16: back at $58, $98 while
+ * the player is above y $A0 (no full view), following his scent (17; under a full view 18) until
+ * near him: 9. */
+static void face_player(Regs *r) { near_d0(r); if (!(og16(0x3830) & 0x8000)) w16(r->a[4] + 0xC, og16(0x3830)); }
+static void move_to(Regs *r, uint16_t x, uint16_t y, uint16_t c) {   /* G_382C / G_3828 / G_3824 and fn_S7_1578 */
+    sog16(0x382C, x); sog16(0x3828, y); sog16(0x3824, c);
+    mz_seg_of(7, 0x3784), fn_S7_3784(r);
+}
+static void t35_think(Regs *r) {
+    uint32_t o = r->a[4];
+    for (;;) {
+        uint16_t s = (uint16_t)r->d[0], next;
+        set_w(&r->d[7], s);
+        switch (s) {
+        case 0: if (t32_where() != 2) return; next = 1; break;
+        case 1: random_d0(r); w16(o + 0x1C, (uint16_t)(((uint16_t)r->d[0] & 0x3F) + 0x10)); next = 2; break;
+        case 2: if (t32_where() != 2) { next = 0; break; } if (!count_down(r, 0x1C, 1)) return; next = 3; break;
+        case 3:
+            if (r16(o + 0x1A) >= 0xD) { next = 9; break; }
+            random_d0(r); sog16(0x382C, (uint16_t)(((uint16_t)r->d[0] & 0x3F) - 0x20 + og16(0x56D8)));
+            random_d0(r); sog16(0x3828, (uint16_t)(((uint16_t)r->d[0] & 0x3F) - 0x20 + og16(0x56D4)));
+            mz_seg(7), fo_S7_155C(r);
+            mz_seg_of(7, 0x3784), fn_S7_3784(r);
+            w16(o + 0x1C, 1);
+            next = 4; break;
+        case 4: case 5:
+            if (t32_where() != 2) { next = 6; break; }
+            if (count_down(r, 0x1C, 1)) {
+                if (s == 5) { next = 6; break; }
+                w16(o + 0x1C, 0x32); w16(o + 0x18, 5); next = 5; break;
+            }
+            if (s == 4) w16(o + 0x18, 0xF);
+            near_d0(r);
+            if (og16(0x3830) & 0x8000) { next = 6; break; }
+            w16(o + 0xC, og16(0x3830));
+            return;
+        case 6: w16(o + 0x1C, 1); next = 7; break;
+        case 7:
+            if (!count_down(r, 0x1C, 1)) { w16(o + 0x18, 0xF); return; }
+            w16(o + 0x1A, (uint16_t)(r16(o + 0x1A) + 1));
+            next = 8; break;
+        case 8: move_to(r, 0, 0, 0); next = 1; break;
+        case 9: w16(o + 0x1A, 6); next = 0xA; break;
+        case 11:                                            /* onto the player, pushing him on until clear */
+            move_to(r, og16(0x56D8), og16(0x56D4), og16(0x56D0));
+            r->a[0] = OADDR(0x4DF0); set_w(&r->d[0], og16(0x56DA));
+            mz_seg_of(7, 0x374C), fn_S7_374C(r); mz_seg_of(7, 0x3784), fn_S7_3784(r);
+            do {
+                r->a[0] = OADDR(0x4F30); set_w(&r->d[0], og16(0x56DA));
+                mz_seg_of(7, 0x374C), fn_S7_374C(r); mz_seg_of(7, 0x3784), fn_S7_3784(r);
+                sog16(0x3820, og16(0x3834)); sog16(0x3822, 4);
+                mz_seg_of(7, 0x37C4), fn_S7_37C4(r);
+            } while ((uint16_t)r->d[0]);
+            w16(o + 0x1C, 1);
+            next = 0xC; break;
+        case 12:
+            if (count_down(r, 0x1C, 1)) { w16(o + 0x18, 5); next = 0x14; break; }
+            w16(o + 0x18, 0xF);
+            face_player(r);
+            return;
+        case 13: case 15: if (!count_down(r, 0x1C, 1)) return; next = (uint16_t)(s + 1); break;
+        case 14: move_to(r, 0, 0, 0); w16(o + 0x1C, 0xA); next = 0xF; break;
+        case 16:
+            if (og16(0x56E0) >= 0x80) return;
+            if (t32_where()) { next = 9; break; }
+            sog16(0x382C, 0x58); sog16(0x3828, 0x98);
+            mz_seg(7), fo_S7_155C(r);
+            mz_seg_of(7, 0x3784), fn_S7_3784(r);
+            w16(o + 0xE, r16(o + 0x30));
+            next = 0x11; break;
+        case 17:
+            w16(o + 0x18, 5);
+            if (og16(0x56E0) >= 0x80) { next = 0x12; break; }
+            mz_seg_of(7, 0x3D2A), fn_S7_3D2A(r);
+            if (!((uint16_t)r->d[0] & 0x8000)) return;
+            next = 9; break;
+        case 18: if (og16(0x56E0) >= 0x80) return; next = 0x11; break;
+        case 19: w16(o + 0x1C, 0xC8); next = 0xD; break;
+        default: return;                                    /* 10, 20 */
+        }
+        set_w(&r->d[0], next);
+    }
+}
+void fo_S9_219A(Regs *r) {
+    static const uint16_t e0[] = {0x3201, 11, 0x3202, 19, 0xFFFF}, e2[] = {0x3202, 19, 0xFFFF};
+    uint32_t o = r->a[4];
+    set_w(&r->d[7], r16(o + 0x16));
+    set_w(&r->d[0], (uint16_t)r->d[7]);
+    t35_think(r);
+    uint16_t s = (uint16_t)r->d[7];
+    o_event(r, s == 0 ? e0 : s == 12 || s == 20 ? e2 : NULL, t35_think);
+    switch ((uint16_t)r->d[7]) {
+    case 7: near_d0(r); if (!(og16(0x382E) & 0x8000)) w16(o + 0xC, og16(0x382E)); break;   /* (sic: the distance) */
+    case 10: {                                              /* on the player: $28 from his life */
+        w16(o + 0x26, 1);
+        int16_t t = (int16_t)(r16(o + 0x1A) - 1);
+        w16(o + 0x1A, (uint16_t)(t < 0 ? 0 : t));
+        w16(o + 0x18, 0x10);
+        sog32(0x382C, og32(0x56D8)); sog32(0x3828, og32(0x56D4)); sog16(0x3824, og16(0x56D0));
+        mz_seg_of(7, 0x3784), fn_S7_3784(r);
+        int16_t l = (int16_t)(og16(0x56EA) - 0x28);
+        sog16(0x56EA, (uint16_t)(l < 0 ? 0 : l));
+        break;
+    }
+    case 13: case 20: face_player(r); break;
+    case 17:                                                /* along his scent */
+        if (og16(0x56D0) != og16(0x582C)) { sog16(0x56A6, og16(0x56D0)); sog16(0x56A8, 0x1A); refresh(r); }
+        mz_seg_of(7, 0x3D5C), fn_S7_3D5C(r);
+        { uint16_t d = (uint16_t)r->d[0];
+          fn_S7_3D0E(r);
+          set_w(&r->d[0], d);
+          if (d & 0x8000) break; }
+        mz_seg_of(7, 0x3722), fn_S7_3722(r);
+        if ((uint16_t)r->d[0] != r16(o + 0xC)) break;
+        r->a[0] = OADDR(0x4F30);
+        mz_seg_of(7, 0x374C), fn_S7_374C(r); mz_seg_of(7, 0x3784), fn_S7_3784(r);
+        break;
+    }
+    w16(o + 0x16, (uint16_t)r->d[7]);
+}
+
+/* ---------- type $28 (fn_S9_1738, level 2) ----------
+ * Level 2's type $29: grows (+$C in record 0's +$1C, fn_S9_1908) and is hit smaller / bigger the
+ * same way; with the player at x $1EE on, y $74-$7A (no full view): 4-5, 7 frames of full view
+ * $82 and the way on to level 3 (at $38, $14, turned $10 to the right). +$C negative: 3, gone from
+ * the map: records 15-18 get +$18 = $7FFF, flag word 0 bit 3, and two frames later (6) its type
+ * is negative. Under the level's start (cells below $2800, no full view) it sets G_56EE = 8. */
+static void t28_think(Regs *r) {
+    uint32_t o = r->a[4];
+    for (;;) {
+        uint16_t s = (uint16_t)r->d[0], next;
+        set_w(&r->d[7], s);
+        switch (s) {
+        case 0:
+            if (r16(o + 0xC) & 0x8000) { next = 3; break; }
+            if (og16(0x56E0) >= 0x80 || og16(0x56D8) < 0x1EE || og16(0x56D4) < 0x74 || og16(0x56D4) >= 0x7B) return;
+            next = 4; break;
+        case 1: next = t29_smaller(r); break;
+        case 2: t29_bigger(r); next = 0; break;
+        case 3: {
+            sog16(0x56EE, 0x2B);
+            unlink_obj(r);
+            w16(o + 4, 0); w16(o + 8, 0); w16(o + 0x30, 0);
+            uint32_t t = og32(0x53C8);
+            for (uint16_t rec = 0x3C0; rec <= 0x480; rec += 0x40) w16(t + rec + 0x18, 0x7FFF);
+            flag_set(r, 0, 8);
+            w16(o + 0x12, 2);
+            next = 6; break;
+        }
+        case 4: w16(o + 0x12, 7); next = 5; break;
+        case 5:
+            sog16(0x56E0, 0x82);
+            w16(o + 0x12, (uint16_t)(r16(o + 0x12) - 1));
+            if (r16(o + 0x12)) return;
+            sog16(0x57DC, 3); sog32(0x57D8, 0x380000); sog32(0x57D4, 0x140000);
+            sog16(0x57DA, (uint16_t)((og16(0x56DA) + 0x10) & 0x3F)); sog8(0x57DE, 1); sog8(0x57F2, 1);
+            next = 0; break;
+        case 6: if (count_down(r, 0x12, 1)) w16(o + 2, r16(o + 2) | 0x8000); return;
+        default: return;
+        }
+        set_w(&r->d[0], next);
+    }
+}
+void fo_S9_1738(Regs *r) {
+    static const uint16_t hits[] = {0x19, 2, 0x1A, 1, 0xFFFF};
+    uint32_t o = r->a[4];
+    set_w(&r->d[7], r16(o + 0x16));
+    w16(o + 0xC, r16(og32(0x53C8) + 0x1C));
+    set_w(&r->d[0], (uint16_t)r->d[7]);
+    t28_think(r);
+    o_hit(r, (uint16_t)r->d[7] == 0 ? hits : NULL, t28_think);
+    switch ((uint16_t)r->d[7]) {
+    case 0:
+        t29_grow(r);
+        if (og16(0x56E0) < 0x80 && og16(0x56D0) < 0x2800) sog16(0x56EE, 8);   /* fn_S9_1954 */
+        break;
+    case 5: t29_grow(r); break;
+    case 6: sog16(0x56EE, 0x2B); break;
+    }
+    w16(og32(0x53C8) + 0x1C, r16(o + 0xC));
+    w16(o + 0x16, (uint16_t)r->d[7]);
+}
+
 /* ---------- fn_S7_0F78: one object's tick (Original's dispatcher, for fn_S7_2E9A) ----------
  * The record at D0.w of G_53C8 (G_3834 = D0) runs the behaviour of its type (+2); types without
  * one do nothing. Keeps D3-D7 / A2-A4. The behaviours not yet written by hand are the translations
  * in orig_gen.c (levels 2-6 and type $1B). */
-void fo_S10_0028(Regs *r), fo_S9_0046(Regs *r),
+void fo_S10_0028(Regs *r),
     fo_S9_0372(Regs *r), fo_S7_087A(Regs *r), fo_S11_00C0(Regs *r), fo_S10_1F28(Regs *r), fo_S4_0782(Regs *r),
     fo_S4_0C44(Regs *r), fo_S4_1256(Regs *r), fo_S7_099C(Regs *r), fo_S4_1670(Regs *r), fo_S9_0D76(Regs *r),
     fo_S9_1738(Regs *r), fo_S9_1AE0(Regs *r), fo_S7_0A5A(Regs *r), fo_S9_1D0C(Regs *r), fo_S9_1CAC(Regs *r),

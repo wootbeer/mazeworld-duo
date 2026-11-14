@@ -1,0 +1,11 @@
+# level 3
+60 click 320 240
+700 setr 8 12 1
+800 setg 56D8 88
+800 setg 56D4 153
+801 setg 56CA 20
+802 setg 56CA 20
+803 setg 56CA 20
+804 setg 56CA 20
+1200 setr 0 16 4
+1400 mmove 0 0

@@ -1,0 +1,30 @@
+# level 3
+60 click 320 240
+700 setr 3 16 1
+800 setr 3 16 2
+900 setr 3 16 3
+1000 setr 3 16 4
+1100 setr 3 16 5
+1200 setr 3 16 6
+1300 setr 3 16 7
+1400 setr 3 16 8
+1500 setr 3 16 9
+1600 setr 4 16 11
+1750 setr 4 16 20
+1900 setr 4 16 1
+2050 setr 4 16 3
+2200 setr 4 16 4
+2350 setr 4 16 6
+2500 setr 4 16 7
+2650 setr 4 16 9
+2800 setr 4 16 13
+2950 setr 4 16 19
+3100 setr 4 16 16
+3250 setr 4 16 17
+3400 setr 4 16 18
+3550 setr 8 12 1
+3750 setr 0 16 4
+3950 setg 56D8 88
+3950 setg 56D4 153
+3950 setg 56CA 20
+4250 mmove 0 0

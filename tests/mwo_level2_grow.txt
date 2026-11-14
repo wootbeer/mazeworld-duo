@@ -1,0 +1,8 @@
+# level 2
+60 click 320 240
+700 setr 68 16 2
+800 setr 68 16 1
+900 setr 68 16 2
+1000 setr 0 1C 65535
+1400 setr 68 16 4
+1600 mmove 0 0
