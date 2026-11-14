@@ -3240,6 +3240,108 @@ void fo_S9_1738(Regs *r) {
     w16(o + 0x16, (uint16_t)r->d[7]);
 }
 
+/* ---------- type $16 (fn_S11_00C0, level 6) ----------
+ * Hit by type $17 in state 0: 1, which sets its +$12 to 1 and becomes 2. Nothing else. */
+static void t16_think(Regs *r) {
+    if ((uint16_t)r->d[0] == 1) { w16(r->a[4] + 0x12, 1); set_w(&r->d[0], 2); }
+    set_w(&r->d[7], (uint16_t)r->d[0]);
+}
+void fo_S11_00C0(Regs *r) {
+    static const uint16_t hits[] = {0x17, 1, 0xFFFF};
+    uint32_t o = r->a[4];
+    set_w(&r->d[7], r16(o + 0x16));
+    set_w(&r->d[0], (uint16_t)r->d[7]);
+    t16_think(r);
+    o_hit(r, (uint16_t)r->d[7] == 0 ? hits : NULL, t16_think);
+    w16(o + 0x16, (uint16_t)r->d[7]);
+}
+
+/* ---------- types $38 and $39 (fn_S11_019A, fn_S11_0382, level 6) ----------
+ * Two actors in level 6's ending, moved by record 9's events. $38: event $3A01 puts it at $A8, $82
+ * and it walks to $A8, $9B (step table G_4B70), then sends record 9 event $3801 and turns to the
+ * player; event $3A03: 5, facing record 8; $3A04 / $3A06: gone. $39: event $3A02 puts it at $A8,
+ * $A6 (heading $10), talking (fn_S7_22EE) until event $3A04 (3: it turns to the player and is gone,
+ * event $3A05 to record 9) or a hit by type $17 (4, the same without the turn). */
+static void gone_from_map(Regs *r) {                        /* out of its cell, type negative */
+    uint32_t o = r->a[4];
+    unlink_obj(r);
+    w16(o + 4, 0); w16(o + 6, 0); w16(o + 8, 0); w16(o + 0xA, 0); w16(o + 0x30, 0);
+    w16(o + 2, r16(o + 2) | 0x8000);
+}
+static void t38_think(Regs *r) {
+    for (;;) {
+        uint16_t s = (uint16_t)r->d[0], next;
+        set_w(&r->d[7], s);
+        switch (s) {
+        case 1: sog16(0x382C, 0xA8); sog16(0x3828, 0x82); t34_move(r); next = 2; break;
+        case 2:
+            g_target(0xA8, 0x9B);
+            fo_S7_1488(r);
+            if (!((uint16_t)r->d[0] & 0x8000)) {
+                mz_seg_of(7, 0x3722), fn_S7_3722(r);
+                r->a[0] = OADDR(0x4B70);
+                mz_seg_of(7, 0x374C), fn_S7_374C(r);
+                mz_seg_of(7, 0x3784), fn_S7_3784(r);
+                return;
+            }
+            next = 3; break;
+        case 3: tell(r, 0x3801, 0x240); next = 4; break;
+        case 6: gone_from_map(r); return;
+        default: return;                                    /* 0, 4, 5 */
+        }
+        set_w(&r->d[0], next);
+    }
+}
+void fo_S11_019A(Regs *r) {
+    static const uint16_t e0[] = {0x3A01, 1, 0xFFFF}, e4[] = {0x3A03, 5, 0xFFFF}, e5[] = {0x3A04, 6, 0x3A06, 6, 0xFFFF};
+    uint32_t o = r->a[4];
+    set_w(&r->d[7], r16(o + 0x16));
+    set_w(&r->d[0], (uint16_t)r->d[7]);
+    t38_think(r);
+    uint16_t s = (uint16_t)r->d[7];
+    o_event(r, s == 0 ? e0 : s == 4 ? e4 : s == 5 ? e5 : NULL, t38_think);
+    switch ((uint16_t)r->d[7]) {
+    case 4: near_d0(r); set_w(&r->d[0], og16(0x3830)); mz_seg_of(7, 0x3722), fn_S7_3722(r); break;
+    case 5: {                                               /* facing record 8 */
+        uint32_t t = og32(0x53C8);
+        if (!r16(t + 0x204)) break;
+        g_target(r16(t + 0x204), r16(t + 0x208));
+        fo_S7_1488(r);
+        mz_seg_of(7, 0x3722), fn_S7_3722(r);
+        break;
+    }
+    }
+    w16(o + 0x16, (uint16_t)r->d[7]);
+}
+static void t39_gone(Regs *r) { gone_from_map(r); tell(r, 0x3A05, 0x240); }
+static void t39_think(Regs *r) {
+    for (;;) {
+        uint16_t s = (uint16_t)r->d[0];
+        set_w(&r->d[7], s);
+        if (s == 1) { sog16(0x382C, 0xA8); sog16(0x3828, 0xA6); t34_move(r); w16(r->a[4] + 0xC, 0x10); set_w(&r->d[0], 2); continue; }
+        if (s == 4) t39_gone(r);
+        return;
+    }
+}
+void fo_S11_0382(Regs *r) {
+    static const uint16_t e0[] = {0x3A02, 1, 0xFFFF}, e2[] = {0x3A04, 3, 0xFFFF}, h2[] = {0x17, 4, 0xFFFF};
+    uint32_t o = r->a[4];
+    set_w(&r->d[7], r16(o + 0x16));
+    set_w(&r->d[0], (uint16_t)r->d[7]);
+    t39_think(r);
+    uint16_t s = (uint16_t)r->d[7];
+    o_event(r, s == 0 ? e0 : s == 2 ? e2 : NULL, t39_think);
+    o_hit(r, (uint16_t)r->d[7] == 2 ? h2 : NULL, t39_think);
+    switch ((uint16_t)r->d[7]) {
+    case 2: talk_mouth(r); break;
+    case 3:                                                 /* turned to the player, then gone (the act runs on into 4's think) */
+        near_d0(r); set_w(&r->d[0], og16(0x3830)); mz_seg_of(7, 0x36F4), fn_S7_36F4(r);
+        t39_gone(r);
+        break;
+    }
+    w16(o + 0x16, (uint16_t)r->d[7]);
+}
+
 /* ---------- fn_S7_0F78: one object's tick (Original's dispatcher, for fn_S7_2E9A) ----------
  * The record at D0.w of G_53C8 (G_3834 = D0) runs the behaviour of its type (+2); types without
  * one do nothing. Keeps D3-D7 / A2-A4. The behaviours not yet written by hand are the translations
