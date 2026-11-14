@@ -25,12 +25,12 @@
   by any test yet: Print Order Form (3284) and the Apple-event handlers (3482, 35FC, 36F8, 3454).
 - The creatures (`game/orig_creatures.c`, by hand): the dispatcher fo_S7_0F78 and every behaviour
   level 1 has (George, the snails, the Eashire Cat, the gates, the hunters, ...) and, on levels 2-5,
-  types $11, $28, $29, $2B, $2C, $32, $34, $35, $1E, $20, $2D, $1F, $30, $31, Lips ($2E), $D, $E,
+  types $11, $12, $28, $29, $2B, $2C, $32, $34, $35, $1E, $20, $2D, $1F, $30, $31, Lips ($2E), $D, $E,
   $F and $23 (level 4's talker), level 6's $16, $38 and $39, and the shots and spells (types $13,
   $22, $2A, $36, $37, $3D), all their states; also Original's own segment-7 helpers they use (`game/orig_seg7.c`: fo_S7_1E54, 1FF8, 201C, 2038,
   2132, 226E). Still the instruction-by-instruction translation of `tools/asm2c.py`
   (`game/orig_gen.c`, operations in `game/asm68.h`; regenerate with the arguments at its top, do
-  not edit): the rest of levels 2-6's types (fo_S9_0372 and 0D76 (types $12 and $24, level 2),
+  not edit): the rest of levels 2-6's types (fo_S9_0D76 (type $24, level 2),
   fo_S11_046E (type $3A, level 6's ending)). Type $1B (fo_S10_1F28, a blast) is by hand too.
 - The autopilot (`harness/auto.c`, the rig's `-auto <goals>`) makes recordings itself: goal lines
   (`goto X Y` by the map's cells, `face R`, `head H`, `fire N` the abilities, `wait N`, `setg` /

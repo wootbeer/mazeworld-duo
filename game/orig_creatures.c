@@ -3500,6 +3500,235 @@ void fo_S4_1670(Regs *r) {
     w16(o + 0x16, s);
 }
 
+/* ---------- type $12 (fn_S9_0372, record 8 on level 2) ----------
+ * Level 2's keeper. It hurts the player near it (life and the screen's G_56EE glow: fn_S9_09B4 /
+ * 0A2C / 0ABC by the distance), keeps the objects around it going (fn_S9_0B64: types $26 / $27 and
+ * $11 counted down, type 8 in its cell stopped, a type $13 shot marked as hitting it), and:
+ * 0 waits; at the level's start (fn_S7_22A0) 7-8: the view to cell $55E0 and along the player's
+ * scent until there and cell $1360 is free, where it goes (9), heads for its post (+$18: the table
+ * below) and stands (10). 1 roams (fn_S7_1CCC) until the player is within $28 (2: after him, by
+ * the cells beyond $14, straight within, near enough to stop beyond $32); at the start: 6 (scent,
+ * the view, back to 0 at cell $55E0). Hit by a type $13 shot: 3, events $1201 (+$18 below 2) or
+ * $1203 to records 11-14 and 4: along the scent and, record 9's +$18 negative, $1202 to them and 5
+ * (+$18 below 2: 6, else 1). Event $1201 / $1203 sends it to 4, $1202 to 5. A full view $82
+ * (fn_S9_098A) takes it to its post (11: records 2-7, 9 and 10 get +$18 = -1, the type $13 shots
+ * gone) and 10; flag word 0 bit 2 then to the other post (13-14); bit 3 (fn_S9_099C): gone (12). */
+static const uint16_t t12_post[2][4][3] = {               /* { x, y, heading } by +$18 */
+    {{0x1B8, 0x58, 0x30}, {0x1C8, 0x48, 0x20}, {0x1B8, 0x38, 0x10}, {0x1A8, 0x48, 0}},
+    {{0x1E8, 0x48, 0x30}, {0x1E8, 0x52, 0x30}, {0x1B8, 0x78, 0x20}, {0x1C2, 0x78, 0x20}}};
+static void life_less(uint16_t n) { int16_t l = (int16_t)(og16(0x56EA) - n); sog16(0x56EA, (uint16_t)(l < 0 ? 0 : l)); }
+static void glow(uint16_t v) { sog16(0x56EE, v >= 0x28 ? 0x27 : v); }
+static void t12_hurt_still(Regs *r) {                       /* fn_S9_09B4 */
+    near_d0(r);
+    uint16_t d = og16(0x382E);
+    if (d >= 0x14) return;
+    glow((uint16_t)((0x17 - d) * 2 + og16(0x56EE)));
+    if (d < 6) sog16(0x56EA, 0);
+    else life_less(d < 0xA ? 0x14 : d < 0xC ? 2 : 1);
+}
+static void t12_hurt(Regs *r) {                             /* fn_S9_0A2C */
+    near_d0(r);
+    uint16_t d = og16(0x382E);
+    if (d >= 0x20) return;
+    if (d >= 0x14) { glow((uint16_t)((og16(0x56EE) + 3) * 2)); return; }
+    glow((uint16_t)((0x17 - d) * 2 + og16(0x56EE)));
+    if (d < 6) life_less(0x14); else if (d < 0xA) life_less(0xA); else if (d < 0xE) life_less(2);
+}
+static void t12_hurt_post(Regs *r) {                        /* fn_S9_0ABC */
+    near_d0(r);
+    uint16_t d = og16(0x382E);
+    if (d < 0x27) { uint16_t v = (uint16_t)(0x28 - d); if (v >= 0x28) v = 0x27; if (v >= og16(0x56EE)) sog16(0x56EE, v); }
+    mz_seg_of(7, 0x3D2A), fn_S7_3D2A(r);
+    d = og16(0x382E);
+    if ((uint16_t)r->d[0] & 0x8000) life_less(d < 6 ? 0x23 : 0x1C);
+    else if (d < 0x16) life_less(d < 0xE ? 2 : 1);
+}
+static void t12_guard(void) {                               /* fn_S9_0CB4: records 15-18 stopped; at its posts the player loses $28 */
+    uint32_t t = og32(0x53C8);
+    for (uint16_t rec = 0x3C0; rec <= 0x480; rec += 0x40) w16(t + rec + 0x18, 0xFFFF);
+    if (og16(0x56D0) == 0x1360 || og16(0x56D0) == 0x55E0) life_less(0x28);
+}
+static void t12_step(Regs *r, uint16_t dir) {              /* fn_S9_0B4C: turned, and facing it a step (G_4A30) */
+    set_w(&r->d[0], dir);
+    mz_seg_of(7, 0x3722), fn_S7_3722(r);
+    if ((uint16_t)r->d[0] != r16(r->a[4] + 0xC)) return;
+    r->a[0] = OADDR(0x4A30);
+    mz_seg_of(7, 0x374C), fn_S7_374C(r); mz_seg_of(7, 0x3784), fn_S7_3784(r);
+}
+static int t12_scent_step(Regs *r) {                        /* along the player's scent; 0 if there is none */
+    mz_seg_of(7, 0x3D5C), fn_S7_3D5C(r);
+    uint16_t d = (uint16_t)r->d[0];
+    fn_S7_3D0E(r);
+    if (d & 0x8000) return 0;
+    t12_step(r, d);
+    return 1;
+}
+static int t12_toward(Regs *r, uint16_t x, uint16_t y) {   /* straight at x, y; 0 when there */
+    sog16(0x381C, x); sog16(0x3818, y);
+    mz_seg_of(7, 0x3B36), fn_S7_3B36(r);
+    uint16_t d = (uint16_t)r->d[0];
+    mz_seg_of(7, 0x3D0E), fn_S7_3D0E(r);
+    if (d & 0x8000) return 0;
+    t12_step(r, d);
+    return 1;
+}
+static void t12_view(Regs *r, uint16_t cell) { sog16(0x56A8, 0xAA); sog16(0x56A6, cell); refresh(r); }
+static void t12_tell(Regs *r, uint16_t ev) { for (uint16_t rec = 0x2C0; rec <= 0x380; rec += 0x40) tell(r, ev, rec); }
+static int t12_to_post(Regs *r, int which) {               /* placed at the post; 0 if it could not be */
+    uint32_t o = r->a[4], map = og32(0x53D4);
+    const uint16_t *p = t12_post[which][r16(o + 0x18)];
+    sog16(0x382C, p[0]); sog16(0x3828, p[1]); w16(o + 0xC, p[2]);
+    mz_seg(7), fo_S7_155C(r);
+    mz_seg_of(7, 0x3784), fn_S7_3784(r);
+    if ((uint16_t)r->d[0]) return 0;
+    w16(map + sxw(r16(o + 0xE)) + 0xE, 0);
+    w16(map + sxw(r16(o + 0x30)) + 0xE, 1);
+    w16(o + 0xE, r16(o + 0x30));
+    return 1;
+}
+static void t12_think(Regs *r) {
+    uint32_t o = r->a[4], tbl = og32(0x53C8), map = og32(0x53D4);
+    for (;;) {
+        uint16_t s = (uint16_t)r->d[0], next;
+        set_w(&r->d[7], s);
+        int start = og16(0x56E0) < 0x80 && og16(0x56D0) < 0x2800;   /* fn_S7_22A0 */
+        if ((s <= 1 || s == 4 || s == 6 || s == 8 || s == 9) && og16(0x56E0) == 0x82) { next = 0xB; goto on; }
+        if ((s <= 2 || s == 4 || s == 6 || (s >= 8 && s <= 10) || s == 14) && flag(r, 0, 8)) { next = 0xC; goto on; }
+        switch (s) {
+        case 0: if (!start) return; next = 7; break;
+        case 1:
+            if (start) { t12_view(r, 0x55E0); next = 6; break; }
+            near_d0(r);
+            if (og16(0x382E) >= 0x28) return;
+            w16(o + 0x10, 0); next = 2; break;
+        case 2: near_d0(r); if (og16(0x382E) < 0x32) return; next = 1; break;
+        case 3:
+            t12_view(r, 0x31E0);
+            t12_tell(r, r16(o + 0x18) < 2 ? 0x1201 : 0x1203);
+            next = 4; break;
+        case 4:
+            if (t12_scent_step(r)) return;
+            if (!(r16(tbl + 0x258) & 0x8000)) return;
+            t12_tell(r, 0x1202);
+            t12_view(r, 0x55E0);
+            next = 5; break;
+        case 5: next = r16(o + 0x18) < 2 ? 6 : 1; break;
+        case 6:
+            if (t12_scent_step(r)) return;
+            if (r16(o + 0x30) == 0x55E0) { t12_view(r, 0x51E0); next = 0; break; }
+            near_d0(r);
+            if (og16(0x382E) < 0x28) { set_w(&r->d[0], og16(0x3830)); mz_seg_of(7, 0x3722), fn_S7_3722(r); }
+            return;
+        case 7: t12_view(r, 0x55E0); next = 8; break;
+        case 8:
+            if (t12_scent_step(r)) return;
+            if (r16(o + 0x30) != 0x55E0 || r16(map + 0x136E)) return;
+            w16(map + sxw(r16(o + 0xE)) + 0xE, 0);
+            sog16(0x382C, 0x1B8); sog16(0x3828, 0x48); sog16(0x3824, 0x1360);
+            w16(o + 0xE, 0x1360); w16(map + 0x136E, 1);
+            mz_seg_of(7, 0x3784), fn_S7_3784(r);
+            next = 9; break;
+        case 9: {
+            const uint16_t *p = t12_post[0][r16(o + 0x18)];
+            if (t12_toward(r, p[0], p[1])) return;
+            next = 0xA; break;
+        }
+        case 10: if (!flag(r, 0, 4)) return; next = 0xD; break;
+        case 11: {
+            if (!t12_to_post(r, 0)) return;
+            static const uint16_t stop[8] = {0x98, 0xD8, 0x118, 0x158, 0x198, 0x1D8, 0x258, 0x298};
+            for (int k = 0; k < 8; k++) w16(tbl + stop[k], 0xFFFF);
+            for (uint16_t rec = 0x1DC0; rec; rec -= 0x40)     /* fn_S9_0CEE: the type $13 shots gone */
+                if (r16(tbl + rec + 2) == 0x13) { unlink_rec(r, rec); w16(tbl + rec + 2, 0xFFFF); }
+            next = 0xA; break;
+        }
+        case 12:
+            w16(map + sxw(r16(o + 0xE)) + 0xE, 0);
+            unlink_obj(r);
+            w16(o + 2, r16(o + 2) | 0x8000);
+            return;
+        case 13: if (!t12_to_post(r, 1)) return; next = 0xE; break;
+        default: return;                                    /* 14 */
+        }
+    on:
+        set_w(&r->d[0], next);
+    }
+}
+static void t12_around(Regs *r) {                           /* fn_S9_0B64 */
+    uint32_t o = r->a[4], map = og32(0x53D4), tbl = og32(0x53C8);
+    static const int16_t at[9] = {-0x420, -0x400, -0x3E0, -0x20, 0, 0x20, 0x3E0, 0x400, 0x420};
+    for (int k = 0; k < 9; k++) {
+        uint16_t c = (uint16_t)(r16(o + 0x30) + at[k]);
+        for (uint32_t j = 1; j <= 10; j++) {
+            uint8_t n = r8(map + sxw(c) + j);
+            if (!n) break;
+            uint16_t rec = (uint16_t)(n << 6), ty = r16(tbl + rec + 2);
+            uint32_t q = tbl + rec;
+            if (ty == 0x26 || ty == 0x27 || (ty == 0x11 && r16(q + 0x30) == r16(o + 0x30))) {
+                uint32_t f = q + (ty == 0x11 ? 0x16 : 0x18);
+                uint16_t v = r16(f);
+                if (!(v & 0x8000) || v >= 0xFFF6) w16(f, (uint16_t)(v - (ty == 0x11 ? 2 : 1)));
+            } else if (ty == 8) {
+                if (r16(q + 0x30) == r16(o + 0x30) && !(r16(q + 0x18) & 0x8000)) w16(q + 0x18, 0xFFFF);
+            } else if (ty == 0x13) w16(o + 0x14, rec);
+        }
+    }
+}
+void fo_S9_0372(Regs *r) {
+    static const uint16_t h13[] = {0x13, 3, 0xFFFF}, e1201[] = {0x1201, 4, 0xFFFF}, e1202[] = {0x1202, 5, 0xFFFF},
+        e6[] = {0x1201, 4, 0x1203, 4, 0xFFFF};
+    uint32_t o = r->a[4];
+    set_w(&r->d[7], r16(o + 0x16));
+    set_w(&r->d[0], (uint16_t)r->d[7]);
+    t12_think(r);
+    uint16_t s = (uint16_t)r->d[7];
+    o_hit(r, s <= 2 || s == 6 ? h13 : NULL, t12_think);
+    s = (uint16_t)r->d[7];
+    o_event(r, s <= 2 ? e1201 : s == 4 ? e1202 : s == 6 ? e6 : NULL, t12_think);
+    switch ((uint16_t)r->d[7]) {
+    case 0: case 9: case 10: t12_hurt_still(r); t12_guard(); break;
+    case 1:
+        t12_hurt(r);
+        mz_seg_of(7, 0x3EE2), fn_S7_3EE2(r);
+        if (!((uint16_t)r->d[0] & 0x8000)) t12_step(r, (uint16_t)r->d[0]);
+        break;
+    case 2: {
+        t12_hurt(r);
+        uint16_t d = og16(0x382E);
+        if (d < 0xA) break;
+        if (d < 0x14) { t12_toward(r, og16(0x56D8), og16(0x56D4)); break; }
+        sog16(0x3814, og16(0x56D0));
+        fo_S7_2132(r);
+        if (!((uint16_t)r->d[0] & 0x8000)) t12_step(r, (uint16_t)r->d[0]);
+        break;
+    }
+    case 4: case 6: t12_hurt(r); break;
+    case 8: t12_hurt(r); if (r16(o + 0x30) == 0x55E0) t12_guard(); break;
+    case 13: if (flag(r, 0, 8)) { set_w(&r->d[0], 0xC); t12_think(r); } break;   /* the original's act is think 14's code */
+    case 14:                                                /* at the other post: after the player within $12, else turned to him */
+        w16(o + 0x32, 4);
+        near_d0(r);
+        if ((uint16_t)r->d[0] & 0x8000) break;
+        t12_hurt_post(r);
+        if (og16(0x382E) < 0x12) { set_w(&r->d[0], og16(0x3830)); mz_seg_of(7, 0x36F4), fn_S7_36F4(r); break; }
+        sog16(0x381C, og16(0x56D8)); sog16(0x3818, og16(0x56D4));
+        mz_seg_of(7, 0x3B36), fn_S7_3B36(r);
+        { uint16_t d = (uint16_t)r->d[0];
+          mz_seg_of(7, 0x3D0E), fn_S7_3D0E(r);
+          if (d & 0x8000) break;
+          set_w(&r->d[0], d); }
+        mz_seg_of(7, 0x3722), fn_S7_3722(r);
+        if ((uint16_t)r->d[0] != r16(o + 0xC)) break;
+        r->a[0] = OADDR(0x4B70);
+        mz_seg_of(7, 0x374C), fn_S7_374C(r);
+        mz_seg_of(7, 0x3972), fn_S7_3972(r);
+        if (!(uint16_t)r->d[0]) mz_seg_of(7, 0x3784), fn_S7_3784(r);
+        break;
+    }
+    t12_around(r);
+    w16(o + 0x16, (uint16_t)r->d[7]);
+}
+
 /* ---------- type $1B (fn_S10_1F28) ----------
  * A blast: after 5 frames (+$16 counting) it hits everything in its cell (+$14 = it; the player
  * there: life 0, fn_S10_2126) and is gone. */
