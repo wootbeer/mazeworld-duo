@@ -26,12 +26,12 @@
 - The creatures (`game/orig_creatures.c`, by hand): the dispatcher fo_S7_0F78 and every behaviour
   level 1 has (George, the snails, the Eashire Cat, the gates, the hunters, ...) and, on levels 2-5,
   types $11, $12, $24, $28, $29, $2B, $2C, $32, $34, $35, $1E, $20, $2D, $1F, $30, $31, Lips ($2E), $D, $E,
-  $F and $23 (level 4's talker), level 6's $16, $38 and $39, and the shots and spells (types $13,
-  $22, $2A, $36, $37, $3D), all their states; also Original's own segment-7 helpers they use (`game/orig_seg7.c`: fo_S7_1E54, 1FF8, 201C, 2038,
-  2132, 226E). Still the instruction-by-instruction translation of `tools/asm2c.py`
-  (`game/orig_gen.c`, operations in `game/asm68.h`; regenerate with the arguments at its top, do
-  not edit): level 6's ending, type $3A
-  (fo_S11_046E). Type $1B (fo_S10_1F28, a blast) is by hand too.
+  $F and $23 (level 4's talker), level 6's $16, $38, $39 and its ending ($3A), the blast ($1B) and
+  the shots and spells (types $13, $22, $2A, $36, $37, $3D), all their states; also Original's own
+  segment-7 helpers they use (`game/orig_seg7.c`: fo_S7_1E54, 1FF8, 201C, 2038, 2132, 226E). Every
+  creature is by hand now (the instruction-by-instruction translator, `tools/asm2c.py`, and its
+  output are gone). Not reached by a test yet: level 6's ending reaching record 2 (the game
+  won) and its two-flags branch.
 - The autopilot (`harness/auto.c`, the rig's `-auto <goals>`) makes recordings itself: goal lines
   (`goto X Y` by the map's cells, `face R`, `head H`, `fire N` the abilities, `wait N`, `setg` /
   `setr` to set a test up, `dump`) become input, written as `auto.txt`; a test is the start of a
@@ -51,7 +51,7 @@
   (`harness/rsrc.c`); `tests/mwo_level2_31.txt` .. `mwo_level6_31.txt` are random play there. They
   reach mostly each creature's resting state, but they check every level's code end to end, and
   found two translator bugs (jump-table targets cut short in the listing, a JT lookup in its own
-  decoding), fixed in `tools/asm2c.py`.
+  decoding), fixed in the translator then.
 - Now all C: the play loop, the shell loop, start-up, the menus and saved games; the port runs
   Original with no 68k code. In the rig only fn_S3_0000 / 026A and fn_S2_2F98 (a few start-up
   instructions) still run as 68k. Not reached by any test yet: Apple events, Load / Save Game on a

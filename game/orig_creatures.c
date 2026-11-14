@@ -3878,6 +3878,217 @@ void fo_S9_0D76(Regs *r) {
     w16(o + 0x16, (uint16_t)r->d[7]);
 }
 
+/* ---------- type $3A (fn_S11_046E, record 9 on level 6: the ending) ----------
+ * It waits (0) until the player leaves the start corner (x $30 / y $27), then (44) until records
+ * 3-6's +$12 are all set. Then the ending runs with the view its own (fn_S11_0CB4: the player put
+ * where it is, facing as it faces): it takes his place (1-3), walks to $A5, $A0 (4), brings in type
+ * $38 at record 7 (5, event $3A01) and faces it until it is done (6, event $3801), calls record 2
+ * (+$12 = 1) and talks ($3A01-$3A04, 8-11; or, with flag word 0 bits 4 and 3, $3A05-$3A09, 15-19),
+ * or walks to record 2 (12-13) and the player's life is gone (14). 20 brings in type $39 at record 8
+ * (events $3A02 / $3A03) and it talks to it ($3A0A, $3A0B); 23-25 a count of $88 frames, the glow
+ * G_56EE rising and record 7's +$18 counting at the end, and the player within reach of records 7
+ * (29), 8 or 2 (28: life gone); the count out: 26-27 (events $3A04; the player losing $14 a frame).
+ * 29 takes record 7's place (it is removed; life and G_56E6 $8D), 30 draining it by 4 until event
+ * $3A05 (31) or it is gone (43); 31-34 flashes, 35-39 record 10 brought in as type $3B on the player,
+ * opening (+$26 0-7, then pictures $20-$25) and removed; record 2's +$12 = -1, 40-41 ($3A0D), and 42
+ * walking to record 2: the game won (G_5787 / G_5786, G_57F2 / G_57F1). Beyond state 0 it also opens
+ * the map behind the player as he goes (fn_S11_0D00 / 0E30: +$1A the furthest of 15 places). */
+static void t3a_view(Regs *r) {                             /* fn_S11_0CB4 */
+    uint32_t o = r->a[4];
+    sog16(0x56D8, r16(o + 4)); sog16(0x56D4, r16(o + 8)); sog16(0x56D0, r16(o + 0x30)); sog16(0x56DA, r16(o + 0xC));
+    mz_seg_of(2, 0x3500), fn_S2_3500(r);
+}
+static int t3a_walk(Regs *r, uint16_t x, uint16_t y, int slow) {   /* towards x, y (fn_S11_0C9E / 0CD2); 0 when there */
+    g_target(x, y);
+    fo_S7_1488(r);
+    if ((uint16_t)r->d[0] & 0x8000) return 0;
+    if (slow) {
+        mz_seg_of(7, 0x36F4), fn_S7_36F4(r);
+        if ((uint16_t)r->d[0] != r16(r->a[4] + 0xC)) return 1;
+        r->a[0] = OADDR(0x4B70);
+    } else {
+        mz_seg_of(7, 0x3722), fn_S7_3722(r);
+        r->a[0] = OADDR(0x4F30);
+    }
+    mz_seg_of(7, 0x374C), fn_S7_374C(r); mz_seg_of(7, 0x3784), fn_S7_3784(r);
+    return 1;
+}
+static void t3a_bring(Regs *r, uint16_t rec, uint16_t type) {   /* record rec made type `type`, on the map */
+    uint32_t t = og32(0x53C8);
+    w16(t + rec + 2, type); w16(t + rec + 0xE, 0);
+    set_w(&r->d[0], rec); mz_seg_of(2, 0x3480), fn_S2_3480(r);
+}
+static void t3a_remove(Regs *r, uint16_t rec) {
+    uint32_t t = og32(0x53C8);
+    unlink_rec(r, rec);
+    for (int k = 4; k < 0xC; k += 2) w16(t + rec + k, 0);
+    w16(t + rec + 0x30, 0); w16(t + rec + 2, r16(t + rec + 2) | 0x8000);
+}
+static void t3a_face(Regs *r, uint16_t rec, int twice) {  /* turned towards record rec, if it is on the map */
+    uint32_t t = og32(0x53C8);
+    if (!r16(t + rec + 4)) return;
+    g_target(r16(t + rec + 4), r16(t + rec + 8));
+    fo_S7_1488(r);
+    if (twice) mz_seg_of(7, 0x3722), fn_S7_3722(r); else mz_seg_of(7, 0x36F4), fn_S7_36F4(r);
+}
+static uint16_t t3a_dist(Regs *r, uint16_t rec) {          /* the player's distance from record rec */
+    uint32_t o = r->a[4]; uint16_t self = og16(0x3834);
+    w32(r->a[6] - 4, o); w16(r->a[6] - 6, self);           /* kept in the handler's locals */
+    r->a[4] = og32(0x53C8) + rec; sog16(0x3834, rec);
+    near_d0(r);
+    r->a[4] = o; sog16(0x3834, self);
+    return og16(0x382E);
+}
+static void t3a_flash(void) { sog16(0x56EE, 0x2B); sog16(0x56E2, 1); }   /* fn_S11_0CEE */
+static void t3a_think(Regs *r) {
+    uint32_t o = r->a[4], t = og32(0x53C8);
+    for (;;) {
+        uint16_t s = (uint16_t)r->d[0], next;
+        set_w(&r->d[7], s);
+        switch (s) {
+        case 0: if (og16(0x56D8) < 0x30 && og16(0x56D4) < 0x27) return; next = 0x2C; break;
+        case 1: w16(o + 0x18, 0xA); next = 2; break;
+        case 2: if (!count_down(r, 0x18, 1)) return; next = 3; break;
+        case 3:
+            sog16(0x382C, og16(0x56D8)); sog16(0x3828, og16(0x56D4)); sog16(0x3824, og16(0x56D0));
+            mz_seg_of(7, 0x3784), fn_S7_3784(r);
+            w16(o + 0xC, og16(0x56DA));
+            next = 4; break;
+        case 4:
+            if (t3a_walk(r, 0xA5, 0xA0, 0)) { t3a_view(r); if (t3a_walk(r, 0xA5, 0xA0, 0)) { t3a_view(r); return; } }
+            next = 5; break;
+        case 5: t3a_bring(r, 0x1C0, 0x38); tell(r, 0x3A01, 0x1C0); next = 6; break;
+        case 7:
+            w16(t + 0x92, 1);
+            next = flag(r, 0, 0x10) && flag(r, 0, 8) ? 0xF : 8; break;
+        case 12: if (t3a_walk(r, r16(t + 0x84), 0xA0, 1)) { t3a_view(r); return; } next = 0xD; break;
+        case 13: if (t3a_walk(r, r16(t + 0x84), r16(t + 0x88), 1)) { t3a_view(r); return; } next = 0xE; break;
+        case 20:
+            tell(r, 0x3A02, 0x200); tell(r, 0x3A03, 0x1C0);
+            t3a_bring(r, 0x200, 0x39);
+            next = 0x15; break;
+        case 23: w16(o + 0x18, 0); next = 0x18; break;
+        case 24: case 25: {
+            uint16_t c = (uint16_t)(r16(o + 0x18) + 1);
+            w16(o + 0x18, c);
+            if (c >= 0x80) { if (c - 0x80 >= 8) { next = 0x1A; break; } w16(t + 0x1D8, (uint16_t)(c - 0x80 + 4)); }
+            sog16(0x56EE, (uint16_t)(r16(o + 0x18) >> 2));
+            if (t3a_dist(r, 0x1C0) < 3) { next = 0x1D; break; }
+            if (t3a_dist(r, 0x200) < 3 || t3a_dist(r, 0x80) < 4) { next = 0x1C; break; }
+            return;
+        }
+        case 26: tell(r, 0x3A04, 0x1C0); tell(r, 0x3A04, 0x200); next = 0x1B; break;
+        case 28: sog16(0x56EA, 0); return;
+        case 29:                                            /* in record 7's place */
+            sog16(0x382C, r16(t + 0x1C4)); sog16(0x3828, (uint16_t)(r16(t + 0x1C8) + 2));
+            mz_seg(7), fo_S7_155C(r);
+            mz_seg_of(7, 0x3784), fn_S7_3784(r);
+            t3a_remove(r, 0x1C0);
+            w16(o + 0xC, 0x30);
+            sog16(0x56EA, 0x8D); sog16(0x56E6, 0x8D);
+            next = 0x1E; break;
+        case 30: life_less(4); if (og16(0x56EA)) return; next = 0x2B; break;
+        case 31: w16(o + 0x18, 2); w16(t + 0x92, 0); next = 0x20; break;
+        case 32: case 34: case 37: case 40: {
+            static const uint8_t to[41] = {[32] = 0x21, [34] = 0x23, [37] = 0x26, [40] = 0x29};
+            if (!count_down(r, 0x18, 1)) return;
+            if (s == 37) w16(o + 0x18, 0xFFFF);
+            next = to[s]; break;
+        }
+        case 33: w16(o + 0x18, 0xC); next = 0x22; break;
+        case 35: {                                          /* record 10 brought in on the player */
+            uint32_t a4 = r->a[4]; uint16_t self = og16(0x3834);
+            w32(r->a[6] - 4, a4); w16(r->a[6] - 6, self);
+            r->a[4] = t + 0x280; sog16(0x3834, 0x280);
+            w16(t + 0x282, 0x3B);
+            set_w(&r->d[0], 0x280); mz_seg_of(2, 0x3480), fn_S2_3480(r);
+            sog16(0x382C, og16(0x56D8)); sog16(0x3828, og16(0x56D4)); sog16(0x3824, og16(0x56D0));
+            mz_seg_of(7, 0x3784), fn_S7_3784(r);
+            w16(t + 0x28E, 0);
+            r->a[4] = a4; sog16(0x3834, self);
+            w16(o + 0x18, 0); next = 0x24; break;
+        }
+        case 36: case 38: {
+            uint16_t c = (uint16_t)(r16(o + 0x18) + 1);
+            w16(o + 0x18, c);
+            c >>= 1;
+            if (s == 36 && c < 8) { w16(t + 0x2A6, c); return; }
+            if (s == 38 && c < 6) { w16(t + 0x28C, (uint16_t)(c + 0x20)); w16(t + 0x2A6, 7); return; }
+            w16(o + 0x18, s == 36 ? 5 : 1);
+            next = (uint16_t)(s + 1); break;
+        }
+        case 39:
+            if (!count_down(r, 0x18, 1)) return;
+            t3a_remove(r, 0x280);
+            w16(o + 0x18, 0xA); w16(t + 0x92, 0xFFFF);
+            next = 0x28; break;
+        case 42:
+            if (t3a_walk(r, r16(t + 0x84), r16(t + 0x88), 1)) { t3a_view(r); return; }
+            sog8(0x5787, 1); sog16(0x5786, 1); sog8(0x57F2, 1); sog8(0x57F1, 1);   /* won */
+            return;
+        case 44:
+            if (!r16(t + 0xD2) || !r16(t + 0x112) || !r16(t + 0x152) || !r16(t + 0x192)) return;
+            next = 1; break;
+        default: return;
+        }
+        set_w(&r->d[0], next);
+    }
+}
+static void t3a_open(Regs *r) {                             /* fn_S11_0D00 / 0E30 */
+    static const uint16_t cells[][2] = {{0x420, 1}, {0x440, 1}, {0x820, 1}, {0x840, 1}, {0x460, 2}, {0x860, 2},
+        {0x480, 2}, {0x880, 2}, {0x4A0, 3}, {0x8A0, 3}, {0x4C0, 4}, {0x8C0, 4}, {0x4E0, 5}, {0x8E0, 5}, {0x500, 6},
+        {0x900, 6}, {0x520, 7}, {0x920, 7}, {0x540, 8}, {0x940, 8}, {0xD40, 9}, {0x1140, 0xA}, {0x1540, 0xB},
+        {0x1940, 0xC}, {0x1D40, 0xD}, {0x2140, 0xE}, {0x2540, 0xF}, {0x2520, 0xF}, {0x2560, 0xF}};
+    static const uint16_t walls[16][7][2] = {   /* { map offset, byte } ... */
+        {{0}}, {{0x820, 0xA0}, {0x840, 0xA0}, {0xC20, 0x81}, {0xC40, 0x81}}, {{0x440, 0x41}, {0x840, 0x41}},
+        {{0x460, 0x41}, {0x860, 0x41}}, {{0x480, 0x41}, {0x880, 0x41}}, {{0x4A0, 0x41}, {0x8A0, 0x41}},
+        {{0x4C0, 0x41}, {0x8C0, 0x41}}, {{0x4E0, 0x41}, {0x8E0, 0x41}},
+        {{0x520, 0x41}, {0x920, 0x41}, {0x540, 0x50}, {0x940, 0x50}, {0x560, 0x41}, {0x960, 0x41}},
+        {{0x920, 0x41}, {0x540, 0x81}, {0x940, 0x50}, {0x960, 0x41}}, {{0x940, 0x81}}, {{0xD40, 0x81}},
+        {{0x1140, 0x81}}, {{0x1540, 0x81}}, {{0x1940, 0x81}},
+        {{0x2140, 0x81}, {0x2D40, 0xA0}, {0x3140, 0x81}, {0x2900, 0x41}, {0x2960, 0x50}, {0x2980, 0x41}}};
+    uint32_t o = r->a[4], map = og32(0x53D4);
+    uint16_t at = 0;
+    for (unsigned k = 0; k < sizeof cells / sizeof cells[0]; k++) if (og16(0x56D0) == cells[k][0]) { at = cells[k][1]; break; }
+    if (at >= r16(o + 0x1A)) w16(o + 0x1A, at);
+    uint16_t n = r16(o + 0x1A);
+    for (int k = 0; k < 7 && walls[n][k][0]; k++) w8(map + walls[n][k][0], (uint8_t)walls[n][k][1]);
+}
+void fo_S11_046E(Regs *r) {
+    static const uint16_t said[45][2] = {[8] = {0xBA01, 9}, [9] = {0xBA02, 10}, [10] = {0xBA03, 11}, [11] = {0xBA04, 12},
+        [15] = {0xBA05, 16}, [16] = {0xBA06, 17}, [17] = {0xBA07, 18}, [18] = {0xBA08, 19}, [19] = {0xBA09, 20},
+        [21] = {0xBA0A, 22}, [22] = {0xBA0B, 23}, [24] = {0xBA0C, 25}, [41] = {0xBA0D, 42}};
+    static const uint16_t e6[] = {0x3801, 7, 0xFFFF}, e30[] = {0x3A05, 31, 0xFFFF};
+    uint32_t o = r->a[4], a6 = r->a[6];
+    r->a[6] = r->a[7] - 4;                                  /* LINK A6, #-6 */
+    r->a[7] -= 10;
+    set_w(&r->d[7], r16(o + 0x16));
+    set_w(&r->d[0], (uint16_t)r->d[7]);
+    t3a_think(r);
+    uint16_t s = (uint16_t)r->d[7];
+    if (s < 45) o_said(r, said[s], t3a_think);
+    s = (uint16_t)r->d[7];
+    o_event(r, s == 6 ? e6 : s == 30 ? e30 : NULL, t3a_think);
+    switch (s = (uint16_t)r->d[7]) {
+    case 6: t3a_face(r, 0x1C0, 1); t3a_view(r); break;
+    case 8: case 9: case 10: case 11: t3a_view(r); sog16(0x56C0, (uint16_t)(0xBA01 + s - 8)); break;
+    case 14: sog16(0x56EA, 0); t3a_view(r); break;
+    case 15: case 16: case 17: case 18: case 19: t3a_view(r); sog16(0x56C0, (uint16_t)(0xBA05 + s - 15)); break;
+    case 21: case 22: t3a_face(r, 0x200, 0); t3a_view(r); sog16(0x56C0, s == 21 ? 0xBA0A : 0xBA0B); break;
+    case 24: sog16(0x56C0, 0xBA0C); break;
+    case 27: sog16(0x56EE, 0x2A); life_less(0x14); break;
+    case 30: t3a_view(r); t3a_flash(); break;
+    case 32: t3a_view(r); t3a_flash(); sog16(0x56EE, 0x2C); break;
+    case 34: t3a_view(r); t3a_flash(); sog16(0x56EE, r16(o + 0x18) >= 4 ? 0x2D : 0x2B); break;
+    case 37: w16(og32(0x53C8) + 0x2A6, 7); t3a_view(r); break;
+    case 36: case 38: case 39: case 40: case 43: t3a_view(r); break;
+    case 41: sog16(0x56C0, 0xBA0D); t3a_view(r); break;
+    }
+    if ((uint16_t)r->d[7]) t3a_open(r);
+    w16(o + 0x16, (uint16_t)r->d[7]);
+    r->a[7] += 10; r->a[6] = a6;
+}
+
 /* ---------- type $1B (fn_S10_1F28) ----------
  * A blast: after 5 frames (+$16 counting) it hits everything in its cell (+$14 = it; the player
  * there: life 0, fn_S10_2126) and is gone. */
@@ -3971,8 +4182,7 @@ void fo_S7_0C9C(Regs *r) {                                  /* type $37 (Lips' e
 
 /* ---------- fn_S7_0F78: one object's tick (Original's dispatcher, for fn_S7_2E9A) ----------
  * The record at D0.w of G_53C8 (G_3834 = D0) runs the behaviour of its type (+2); types without
- * one do nothing. Keeps D3-D7 / A2-A4. The behaviours not yet written by hand are the translations
- * in orig_gen.c (levels 2-6 and type $1B). */
+ * one do nothing. Keeps D3-D7 / A2-A4. */
 void fo_S10_0028(Regs *r),
     fo_S9_0372(Regs *r), fo_S7_087A(Regs *r), fo_S11_00C0(Regs *r), fo_S10_1F28(Regs *r), fo_S4_0782(Regs *r),
     fo_S4_0C44(Regs *r), fo_S4_1256(Regs *r), fo_S7_099C(Regs *r), fo_S4_1670(Regs *r), fo_S9_0D76(Regs *r),
