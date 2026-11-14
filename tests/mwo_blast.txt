@@ -1,0 +1,22 @@
+# recorded session
+1 move 693 491
+48 move 344 245
+49 move 343 245
+50 move 341 246
+51 move 340 247
+52 move 338 247
+53 move 335 248
+54 move 332 249
+55 move 330 249
+59 move 328 250
+60 move 325 252
+61 move 320 254
+62 move 317 255
+63 move 316 255
+394 mousedown
+399 mouseup
+696 mousedown
+703 mouseup
+950 setr 62 16 2
+1000 setr 66 16 2
+1300 mmove 0 0

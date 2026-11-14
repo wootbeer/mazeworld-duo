@@ -3342,6 +3342,97 @@ void fo_S11_0382(Regs *r) {
     w16(o + 0x16, (uint16_t)r->d[7]);
 }
 
+/* ---------- type $1B (fn_S10_1F28) ----------
+ * A blast: after 5 frames (+$16 counting) it hits everything in its cell (+$14 = it; the player
+ * there: life 0, fn_S10_2126) and is gone. */
+void fo_S10_1F28(Regs *r) {
+    uint32_t o = r->a[4];
+    uint16_t t = (uint16_t)(r16(o + 0x16) + 1);
+    w16(o + 0x16, t);
+    if (t < 5) return;
+    uint32_t c = og32(0x53D4) + sxw(r16(o + 0x30)), tbl = og32(0x53C8);
+    if (r16(c + 0xC)) sog16(0x56EA, 0);
+    for (uint32_t k = 1; k <= 10; k++) {
+        uint8_t n = r8(c + k);
+        if (!n) break;
+        w16(tbl + ((uint32_t)n << 6) + 0x14, og16(0x3834));
+    }
+    unlink_obj(r);
+    w16(o + 2, r16(o + 2) | 0x8000);
+}
+
+/* ---------- shots and spells (fn_S7_087A, 099C, 0A5A, 0AB0, 0B7C, 0C9C) ----------
+ * Objects made by firing (types $13, $22, $36, $3D) or by other creatures ($2A, $37). +$12 is
+ * their state: negative while flying (+$C the heading, a step of table G_4F30 a frame, or more);
+ * a wall ends it (0); so does running into an object: one of a kind fn_S7_18BE finds by G_3822
+ * (the spells: +$12 = their time on the player, they stay there taking life each frame), or any
+ * object fn_S7_15B8 finds within a cell (the hit one's +$14 = this record, for a type $13). At 0
+ * they are gone (record free, type $FFFF). */
+static void shot_free(Regs *r) { unlink_obj(r); w16(r->a[4] + 2, 0xFFFF); }
+static int shot_step(Regs *r, uint16_t kind, uint16_t hold) {   /* fn_S7_09FC, 0B1E, 0BE2: -1 when it ends */
+    uint32_t o = r->a[4];
+    r->a[0] = OADDR(0x4F30); set_w(&r->d[0], r16(o + 0xC));
+    mz_seg_of(7, 0x374C), fn_S7_374C(r); mz_seg_of(7, 0x3784), fn_S7_3784(r);
+    if (r8(og32(0x53D4) + sxw(r16(o + 0x30))) & 1) { w16(o + 0x12, 0); return -1; }
+    sog16(0x3822, kind);
+    mz_seg_of(7, 0x3ACA), fn_S7_3ACA(r);
+    if ((uint16_t)r->d[0]) { w16(o + 0x12, hold); return -1; }
+    sog16(0x3822, 1); sog16(0x3820, r16(o + 0x10));
+    mz_seg_of(7, 0x37C4), fn_S7_37C4(r);
+    if ((uint16_t)r->d[0]) { w16(o + 0x12, 0); return -1; }
+    return 0;
+}
+static void spell_hold(Regs *r, uint16_t drain) {          /* on the player: moved with him, life - drain */
+    uint32_t o = r->a[4];
+    w16(o + 0x12, (uint16_t)(r16(o + 0x12) - 1));
+    sog32(0x382C, og32(0x56D8)); sog32(0x3828, og32(0x56D4)); sog16(0x3824, og16(0x56D0));
+    mz_seg_of(7, 0x3784), fn_S7_3784(r);
+    w16(o + 0x26, 0);
+    int16_t l = (int16_t)(og16(0x56EA) - drain);
+    sog16(0x56EA, (uint16_t)(l < 0 ? 0 : l));
+}
+static void spell(Regs *r, int steps, uint16_t kind, uint16_t hold, uint16_t f14, uint16_t drain) {
+    uint32_t o = r->a[4];
+    int16_t st = (int16_t)r16(o + 0x12);
+    if (st < 0) {
+        w16(o + 0x14, f14);
+        while (steps-- && !shot_step(r, kind, hold)) {}
+    } else if (!st) shot_free(r);
+    else spell_hold(r, drain);
+}
+void fo_S7_099C(Regs *r) { spell(r, 2, 4, 9, 4, 4); }       /* type $22 */
+void fo_S7_0AB0(Regs *r) { spell(r, 4, 3, 3, 0, 3); }       /* type $36 */
+void fo_S7_0B7C(Regs *r) { spell(r, 3, 4, 4, 0, 3); }       /* type $3D */
+void fo_S7_0A5A(Regs *r) {                                  /* type $2A (made by a rush): 2 frames on the player, 5 a frame */
+    uint32_t o = r->a[4];
+    if (r16(o + 0x12) & 0x8000) w16(o + 0x12, 2);
+    if (!r16(o + 0x12)) shot_free(r); else spell_hold(r, 5);
+}
+void fo_S7_087A(Regs *r) {                                  /* type $13: the hit object's +$14 = it */
+    uint32_t o = r->a[4];
+    if (!(r16(o + 0x12) & 0x8000)) { shot_free(r); return; }
+    if (r16(o + 0xC) & 0x8000) return;
+    r->a[0] = OADDR(0x4F30);
+    mz_seg_of(7, 0x374C), fn_S7_374C(r); mz_seg_of(7, 0x3784), fn_S7_3784(r);
+    if (r8(og32(0x53D4) + sxw(r16(o + 0x30))) & 1) { w16(o + 0x12, 0); return; }
+    sog16(0x3822, 1); sog16(0x3820, r16(o + 0x10));
+    mz_seg_of(7, 0x37C4), fn_S7_37C4(r);
+    if (!(uint16_t)r->d[0]) return;
+    w16(og32(0x53C8) + sxw((uint16_t)r->d[0]) + 0x14, og16(0x3834));
+    w16(o + 0x12, 0);
+}
+void fo_S7_0C9C(Regs *r) {                                  /* type $37 (Lips' end): 5 frames on the player, then level 6 */
+    uint32_t o = r->a[4];
+    if (r16(o + 0x12) & 0x8000) w16(o + 0x12, 5);
+    uint16_t t = (uint16_t)(r16(o + 0x12) - 1);
+    w16(o + 0x12, t); w16(o + 0x26, t);
+    sog16(0x382C, og16(0x56D8)); sog16(0x3828, og16(0x56D4)); sog16(0x3824, og16(0x56D0));
+    mz_seg_of(7, 0x3784), fn_S7_3784(r);
+    if (t) return;
+    sog16(0x57DC, 6); sog32(0x57D8, 0x140000); sog32(0x57D4, 0x140000);
+    sog16(0x57DA, og16(0x56DA)); sog8(0x57DE, 1); sog8(0x57F2, 1);
+}
+
 /* ---------- fn_S7_0F78: one object's tick (Original's dispatcher, for fn_S7_2E9A) ----------
  * The record at D0.w of G_53C8 (G_3834 = D0) runs the behaviour of its type (+2); types without
  * one do nothing. Keeps D3-D7 / A2-A4. The behaviours not yet written by hand are the translations
