@@ -279,10 +279,23 @@ static uint32_t shown[SCREEN_W * SCREEN_H];
 static int redraw = 1;           /* the window needs drawing even if the screen has not changed */
 static uint32_t view[SCREEN_W * SCREEN_H];
 static int view_x, view_y, view_w = SCREEN_W, view_h = SCREEN_H;   /* the part of the screen shown */
+static int game_w, game_h, hold;  /* the game's own area (Original's window size), once known */
 static void present(void) {
     int vx, vy, vw, vh;
     qd_screen_argb(pixels);
-    shell_view(&vx, &vy, &vw, &vh);
+    if (shell_view(&vx, &vy, &vw, &vh)) {
+        /* Window Size changed: the window changes with it, keeping its zoom */
+        if (game_w && (vw != game_w || vh != game_h) && !(SDL_GetWindowFlags(win) & (SDL_WINDOW_FULLSCREEN_DESKTOP | SDL_WINDOW_MAXIMIZED))) {
+            int cw, ch; SDL_GetWindowSize(win, &cw, &ch);
+            double z = (double)cw / game_w;
+            SDL_SetWindowSize(win, (int)(vw * z + 0.5), (int)(vh * z + 0.5));
+        }
+        game_w = vw; game_h = vh;
+    }
+    /* the view moving (play starting or pausing): the old picture stays a moment, while the
+     * game draws into its new place, instead of a frame of a bare window */
+    if ((vx != view_x || vy != view_y || vw != view_w || vh != view_h) && !hold) hold = 5;
+    if (hold && --hold) return;
     for (int y = 0; y < vh; y++)                            /* the view; black where it leaves the screen */
         for (int x = 0; x < vw; x++) {
             int sx = vx + x, sy = vy + y;

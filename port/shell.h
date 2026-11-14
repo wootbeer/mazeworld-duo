@@ -9,7 +9,7 @@ enum { MENU_PORT_VOLUME = 200, MENU_PORT_GAME, MENU_PORT_CONTROLS };
 /* the Options menu's items: the original dialog's check boxes (the port's own options will follow) */
 enum { OPT_DIRECT = 1, OPT_NOSYNC, OPT_DISTRIBUTE };
 int  shell_playing(void);
-void shell_view(int *x, int *y, int *w, int *h);   /* the part of the Mac screen the window shows */       /* is the game window in front (play in progress)? */
+int  shell_view(int *x, int *y, int *w, int *h);   /* the part of the Mac screen the window shows */       /* is the game window in front (play in progress)? */
 
 int  shell_item_state(int menu, int item, int *checked);   /* returns 1 if enabled */
 void shell_choose(int menu, int item);                      /* a command chosen in the native menu */
