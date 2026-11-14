@@ -237,6 +237,7 @@ static void usage(void) {
 int input_load(const char *path);
 uint32_t hx_ticks(void);
 int main(int argc, char **argv) {
+    const char *autogoals = NULL;
     const char *script = NULL, *play = NULL, *sublist = NULL, *fuzzspec = NULL; uint32_t max_ticks = 0;
     (void)play;
     extern uint32_t g_max_ticks;
@@ -250,6 +251,7 @@ int main(int argc, char **argv) {
 #ifdef HX_PLAY
         else if (!strcmp(argv[i], "-play") && i + 1 < argc) play = argv[++i];
 #endif
+        else if (!strcmp(argv[i], "-auto") && i + 1 < argc) autogoals = argv[++i];   /* auto.c: the autopilot */
         else if (!strcmp(argv[i], "-shots") && i + 1 < argc) g_shot_every = atoi(argv[++i]);
         else if (!strcmp(argv[i], "-sub") && i + 1 < argc) sublist = argv[++i];
         else if (!strcmp(argv[i], "-subcheck") && i + 1 < argc) { extern int g_sub_checkmode; g_sub_checkmode = 1; sublist = argv[++i]; }
@@ -311,6 +313,7 @@ int main(int argc, char **argv) {
     if (fuzzspec) { int sub_fuzz(const char *spec); if (sub_fuzz(fuzzspec)) { fprintf(stderr, "bad -fuzz spec %s (name:count:d4,d5,...)\n", fuzzspec); return 2; } }
     if (getenv("MZ_WLOG")) { char wp[512]; snprintf(wp, sizeof wp, "%s/writes.txt", g_outdir); wlogf = fopen(wp, "w"); wlog_from = (uint32_t)atoi(getenv("MZ_WLOG")); }
     if (script && input_load(script)) { fprintf(stderr, "cannot load input script %s\n", script); return 2; }
+    if (autogoals) { int auto_start(const char *goals, const char *outdir); if (auto_start(autogoals, g_outdir)) return 2; }
 #ifdef HX_PLAY
     { int play_start(const char *recording);   /* play.c: the window; the session is recorded */
       if (play) { if (play_start(play)) return 2; max_insns = ~0ull; } }

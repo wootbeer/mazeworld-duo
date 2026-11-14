@@ -1895,10 +1895,392 @@ void fo_S9_1AE0(Regs *r) {
     w16(o + 0x16, (uint16_t)r->d[7]);
 }
 
+/* ---------- the snails (types 3, 4 and 5: fn_S10_0028, level 1) ----------
+ * Three snails. The talker (type 3, record 2) speaks to the player once George is with him
+ * (G_56C2), its texts $83xx: it wakes (state 1) when the player comes within 15 (G_382E) and
+ * rests beyond 20. Awake it wanders after the player, and with George there waits +$1C frames
+ * (2-3) for the player to face it with nothing being said, then speaks: each text ended (or a
+ * hit by types $17 / $19) moves it on through 4-12, 16-20, 22-23, 25-48 (the long story,
+ * $8309-$8320), 54-57, 59-60 and 62; out of range it waits in a resting state (13-15, 21, 24,
+ * 53, 61) until the player is back. A hit by $1A jumps ahead; by $18 (most states) it dies (78,
+ * 96, 79: event $301 to the others, and shrinking away). In 64 flag word 0 bit 0 is set (it is
+ * cleared when one dies); 63-67 start the journey: event $301 calls the other two (types 4 and 5,
+ * records 3 and 4, otherwise wandering near their places: 0-1), and all three walk the ways below
+ * (68-77; 2-11 for the others), the talker waiting 50 frames on the way, telling records 6-11 (event
+ * $302), setting bit 15 of flag word 0, pushing the objects of type 9 in their cells (event $303)
+ * and, the last of them still walking, taking the view along (G_56A6). At the end they wait (80-88:
+ * the talker speaks again when the player, within 32, looks at it) until event 1 ends it all (89; 16
+ * for the others): the type 9 objects removed if one is above y $88, and the three snails with them.
+ * Event $101 sends the talker to 90 (resting) or 93 (awake): 90-95 talk once more ($832D, $832E);
+ * $304 sends it to 63. */
+static const uint16_t snail_ways[136] = {                 /* points { x, y } ..., $FFFF: the original's at S10:$1044 */
+    0x18, 0x98, 0x18, 0x78, 0x28, 0x78, 0x28, 0x4B, 0x48, 0x4B, 0x68, 0x4B, 0x98, 0x37, 0x98, 0x28, 0xB8, 0x28, 0xFFFF, 0xFFFF,
+    0xE8, 0x28, 0x108, 0x28, 0x108, 0x38, 0x118, 0x38, 0x118, 0x58, 0x118, 0x78, 0x148, 0x78, 0x148, 0x68, 0x168, 0x68,
+    0x188, 0x68, 0x188, 0x78, 0x1A8, 0x78, 0x1C8, 0x78, 0x1C8, 0x58, 0x1A8, 0x58, 0x1A8, 0x28, 0x1C8, 0x28, 0xFFFF, 0xFFFF,
+    0x1D6, 0x28, 0xFFFF, 0xFFFF,
+    0x1D6, 0x18, 0x1C8, 0x18, 0x1C8, 0x28, 0x1A8, 0x28, 0x1A8, 0x58, 0x1C8, 0x58, 0x1C8, 0x78, 0x1A8, 0x78, 0x188, 0x78,
+    0x188, 0x68, 0x168, 0x68, 0x168, 0x98, 0x168, 0xB8, 0x148, 0xB8, 0x128, 0xB8, 0x128, 0xD8, 0x128, 0xF8, 0xFFFF, 0xFFFF,
+    0x128, 0x128, 0x128, 0x148, 0x158, 0x148, 0x158, 0x128, 0x168, 0x128, 0xFFFF, 0xFFFF,
+    0x148, 0xF8, 0x148, 0x118, 0x168, 0x118, 0xFFFF, 0xFFFF,
+    0x148, 0xF8, 0x148, 0x118, 0x158, 0x118, 0xFFFF, 0xFFFF,
+    0x128, 0x128, 0x128, 0x148, 0x158, 0x148, 0x158, 0x118, 0x148, 0x118, 0xFFFF, 0xFFFF};
+enum { WAY_1044 = 0, WAY_106C = 0x28, WAY_10B4 = 0x70, WAY_10BC = 0x78,       /* byte offsets */
+       WAY_1104 = 0xC0, WAY_111C = 0xD8, WAY_112C = 0xE8, WAY_113C = 0xF8 };
+static int snail_within(Regs *r, uint16_t d) { near_d0(r); return og16(0x382E) < d; }   /* fn_S10_115A (15), 1168 (20) */
+static int snail_looked_at(Regs *r, uint16_t dir, uint16_t within) {   /* the player looks this way */
+    set_w(&r->d[0], (uint16_t)(dir - og16(0x56DA)));
+    mz_seg_of(7, 0x367E), fn_S7_367E(r);
+    return (uint16_t)r->d[0] < within;
+}
+static int snail_faced(Regs *r) { return snail_looked_at(r, (og16(0x3830) + 0x20) & 0x3F, 8); }   /* fn_S10_1176 */
+static int snail_watched(Regs *r) {                        /* within 32 and looked at (within 12) */
+    near_d0(r);
+    return og16(0x382E) < 0x20 && snail_looked_at(r, og16(0x3830) ^ 0x20, 12);
+}
+static void snail_wander(Regs *r, uint16_t dir) {          /* fn_S10_16FC: about heading dir */
+    uint32_t o = r->a[4];
+    int16_t t = (int16_t)(r16(o + 0x1A) - 1);
+    w16(o + 0x1A, (uint16_t)t);
+    if (t < 0) {                                            /* a new heading every 45-76 frames */
+        random_d0(r); w16(o + 0x1A, (uint16_t)(((uint16_t)r->d[0] & 0x1F) + 0x2D));
+        random_d0(r); w16(o + 0x18, (uint16_t)((((uint16_t)r->d[0] & 0xF) - 8 + dir) & 0x3F));
+    }
+    set_w(&r->d[0], r16(o + 0x18));
+    mz_seg_of(7, 0x372C), fn_S7_372C(r);
+}
+static void tell(Regs *r, uint16_t ev, uint16_t rec) { call_d0d1(r, fo_S7_1278, ev, rec); }   /* event ev to a record */
+static void flag0_clear(uint16_t bits) { uint32_t f = og32(0x53C8) + 0x16; w16(f, r16(f) & ~bits); }   /* fn_S7_12A6 */
+static int gone(uint16_t rec) { return (r16(og32(0x53C8) + rec + 2) & 0x8000) != 0; }
+/* fn_S10_167A: the way from byte +$1C on: the heading to its point (fn_S7_1488), the next point
+ * once there; -1 at its end. Kept at -2(A6) for the act. */
+static int snail_way(Regs *r, uint16_t way) {
+    uint32_t o = r->a[4];
+    for (;;) {
+        uint16_t i = (uint16_t)((way + r16(o + 0x1C)) / 2);
+        sog16(0x381C, snail_ways[i]);
+        if (snail_ways[i] & 0x8000) { r->d[0] = 0xFFFFFFFFu; break; }
+        sog16(0x3818, snail_ways[i + 1]);
+        fo_S7_1488(r);
+        if (!((uint16_t)r->d[0] & 0x8000)) break;
+        w16(o + 0x1C, (uint16_t)(r16(o + 0x1C) + 4));
+    }
+    w16(r->a[6] - 2, (uint16_t)r->d[0]);
+    return ((uint16_t)r->d[0] & 0x8000) != 0;
+}
+static void refresh(Regs *r) {                              /* fn_S2_2B3E */
+    mz_seg_of(2, 0x366A), fn_S2_366A(r);
+    mz_seg_of(2, 0x3568), fn_S2_3568(r);
+}
+static void unlink_rec(Regs *r, uint16_t rec) {             /* fn_S2_29E2 for another record */
+    set_w(&r->d[0], rec); set_w(&r->d[1], r16(og32(0x53C8) + rec + 0x30));
+    mz_seg_of(2, 0x3410), fn_S2_3410(r);
+}
+/* the walk along a way (the act): fn_S10_1742 (table G_4A30) / 1746, pushing (fn_S10_176A) and
+ * the view (fn_S10_17FA) as asked */
+enum { WALK_FAST = 1, WALK_PUSH = 2, WALK_VIEW = 4, WALK_PIC = 8 };
+static void snail_walk(Regs *r, int how) {
+    uint32_t o = r->a[4];
+    if (how & WALK_PIC) set_pic(r, 0x21);
+    set_w(&r->d[0], r16(r->a[6] - 2));
+    r->a[0] = OADDR(how & WALK_FAST ? 0x4B70 : 0x4A30);
+    mz_seg_of(7, 0x36F4), fn_S7_36F4(r);                     /* fn_S7_14E8: turned that way? */
+    if ((uint16_t)r->d[0] == r16(o + 0xC)) {
+        mz_seg_of(7, 0x374C), fn_S7_374C(r);
+        mz_seg_of(7, 0x3972), fn_S7_3972(r);
+        if (!(uint16_t)r->d[0]) mz_seg_of(7, 0x3784), fn_S7_3784(r);
+    }
+    if (how & WALK_PUSH) {                                  /* the type 9 objects in its cell get event $303 */
+        uint32_t map = og32(0x53D4), t = og32(0x53C8);
+        for (uint32_t k = 1; k <= 10; k++) {
+            uint8_t n = r8(map + sxw(r16(o + 0x30)) + k);
+            if (!n) break;
+            if (r16(t + ((uint32_t)n << 6) + 2) == 9) w16(t + ((uint32_t)n << 6) + 0x12, 0x303);
+        }
+    }
+    if ((how & WALK_VIEW) && r16(o + 0x30) != og16(0x582C)) {   /* the view goes with it */
+        sog16(0x56A6, r16(o + 0x30)); sog16(0x56A8, 100);
+        refresh(r);
+    }
+}
+static void snail_call_others(Regs *r) {                    /* fn_S10_16AE: event $302 to records 6-11 */
+    w16(r->a[4] + 0x1C, 0);
+    for (uint16_t rec = 0x180; rec <= 0x2C0; rec += 0x40) tell(r, 0x302, rec);
+}
+static void snail_remove(Regs *r) {
+    unlink_obj(r);
+    w16(r->a[4] + 2, r16(r->a[4] + 2) | 0x8000);
+    sog16(0x56A8, 0); sog16(0x56A6, 0);
+    refresh(r);
+}
+static void snail_shrink(Regs *r, uint16_t pic, int tell_george) {   /* dying: 7 pictures from pic + 1, then gone */
+    uint16_t n = (uint16_t)(r16(r->a[4] + 0x1C) + 1);
+    if (n < 7) { w16(r->a[4] + 0x1C, n); set_pic(r, (uint16_t)(pic + n)); return; }
+    if (tell_george) { near_d0(r); if (!(og16(0x382E) & 0x8000)) tell(r, 0x304, 0x40); }
+    snail_remove(r);
+}
+static void snail_sink(Regs *r) {                           /* at the end of the way: pictures $20, $22, $22, then gone */
+    static const uint16_t pic[3] = {0x20, 0x22, 0x22};
+    uint16_t n = (uint16_t)(r16(r->a[4] + 0x1C) + 2);
+    w16(r->a[4] + 0x1C, n);
+    if (n < 6) set_pic(r, pic[n / 2]); else snail_remove(r);
+}
+static void snail_finale(Regs *r) {                         /* fn_S10_1816 */
+    uint32_t t = og32(0x53C8);
+    int above = 0;
+    for (uint16_t rec = 0x1DC0; rec && !above; rec -= 0x40)
+        above = r16(t + rec + 2) == 9 && r16(t + rec + 8) < 0x88;
+    if (above)                                              /* all the type 9 objects removed */
+        for (uint16_t rec = 0x1DC0; rec; rec -= 0x40) {
+            if (r16(t + rec + 2) != 9) continue;
+            w16(og32(0x53D4) + sxw(r16(t + rec + 0xE)) + 0xE, 0);
+            unlink_rec(r, rec);
+            w16(t + rec + 2, r16(t + rec + 2) | 0x8000);
+        }
+    for (uint16_t rec = 0x80; rec <= 0x100; rec += 0x40) {  /* and the snails */
+        w16(t + rec + 2, r16(t + rec + 2) | 0x8000);
+        unlink_rec(r, rec);
+    }
+    sog16(0x56A8, 0); sog16(0x56A6, 0);
+}
+/* the talker (type 3) */
+static void talker_think(Regs *r) {
+    uint32_t o = r->a[4];
+    for (;;) {
+        uint16_t s = (uint16_t)r->d[0], next;
+        set_w(&r->d[7], s);
+        switch (s) {
+        /* resting: the player back within 15 */
+        case 0: case 13: case 14: case 15: case 21: case 24: case 53: case 61: case 66: case 90: case 93: {
+            static const uint8_t back[94] = {[0] = 1, [13] = 7, [14] = 10, [15] = 16, [21] = 22, [24] = 22,
+                                             [53] = 59, [61] = 59, [66] = 65, [90] = 91, [93] = 94};
+            if (!snail_within(r, 15)) return;
+            next = back[s];
+            break;
+        }
+        case 2: w16(o + 0x1C, 20); w16(o + 0x18, og16(0x382E)); w16(o + 0x1A, 25); next = 3; break;
+        case 5: case 8: case 11: w16(o + 0x1C, 200); next = (uint16_t)(s + 1); break;
+        case 63: next = 67; break;
+        case 64: call_d0d1(r, fo_S7_1292, 0, 1); next = 67; break;
+        case 67: w16(o + 0x1C, 4); tell(r, 0x301, 0xC0); tell(r, 0x301, 0x100); next = 68; break;
+        case 68: if (!snail_way(r, WAY_1044)) return; next = 69; break;
+        case 69: snail_call_others(r); next = 70; break;
+        case 70: if (!snail_way(r, WAY_106C)) return; next = 71; break;
+        case 71: w16(o + 0x1C, 50); next = 72; break;
+        case 72: {
+            int16_t t = (int16_t)(r16(o + 0x1C) - 1);
+            w16(o + 0x1C, (uint16_t)t);
+            if (t >= 0) return;
+            w16(o + 0x1C, 0); next = 73;
+            break;
+        }
+        case 73: if (!snail_way(r, WAY_10B4)) return; next = 74; break;
+        case 74: call_d0d1(r, fo_S7_1292, 0, 0x8000); w16(o + 0x1C, 0); next = 75; break;
+        case 75: if (!snail_way(r, WAY_10BC)) return; next = 76; break;
+        case 76: w16(o + 0x1C, gone(0xC0) && gone(0x100) ? WAY_113C : WAY_1104); next = 77; break;
+        case 77: if (!snail_way(r, WAY_1044)) return; next = 82; break;
+        case 78: tell(r, 0x301, 0xC0); tell(r, 0x301, 0x100); flag0_clear(1); next = 96; break;   /* dying */
+        case 79: case 81: case 89: return;
+        case 80: w16(o + 0x1C, 0xFFFE); next = 81; break;
+        case 82: next = flag(r, 0, 1) ? 83 : 80; break;
+        case 83: if (!snail_watched(r)) return; next = 86; break;
+        case 84: w16(o + 0x1C, 1000); next = 85; break;
+        case 85: {
+            if (snail_watched(r)) { next = 86; break; }
+            int16_t t = (int16_t)(r16(o + 0x1C) - 1);
+            w16(o + 0x1C, (uint16_t)t);
+            if (t >= 0) return;
+            next = 80;
+            break;
+        }
+        case 86: case 87: case 88: near_d0(r); if (!(og16(0x3830) & 0x8000)) return; next = 80; break;
+        case 96: w16(o + 0x1C, 0xFFFF); next = 79; break;
+        default:
+            /* awake: beyond 20 it rests */
+            if (!snail_within(r, 20)) {
+                next = s <= 3 ? 0 : s <= 6 ? 13 : s <= 9 ? 14 : s <= 16 ? 15 : s <= 20 ? 21 : s <= 23 ? 24
+                     : s <= 58 ? 53 : s <= 60 ? 61 : s == 62 ? 63 : s == 65 ? 66 : s == 91 ? 90 : 93;
+                break;
+            }
+            if ((s == 1 || s == 91) && og16(0x56C2) && (s == 1 || !og16(0x56C0))) { next = s == 1 ? 2 : 92; break; }
+            if (s == 3) {
+                int16_t t = (int16_t)r16(o + 0x1C);
+                if (t >= 0) { w16(o + 0x1C, (uint16_t)(t - 1)); return; }
+                if (!snail_faced(r) || og16(0x56C0)) return;
+                next = 4;
+                break;
+            }
+            if (s == 6 || s == 9) {
+                int16_t t = (int16_t)(r16(o + 0x1C) - 1);
+                w16(o + 0x1C, (uint16_t)t);
+                if (t >= 0) return;
+                next = (uint16_t)(s + 1);
+                break;
+            }
+            return;
+        }
+        set_w(&r->d[0], next);
+    }
+}
+static const uint16_t *talker_hits(uint16_t s) {           /* { type, new state } ..., $FFFF */
+    static const uint8_t row[][4] = {                      /* { state, by $17, by $19, by $1A } */
+        {3, 0, 2, 0}, {4, 19, 5, 5}, {6, 19, 0, 0}, {7, 19, 8, 8}, {9, 19, 0, 0}, {10, 20, 11, 11}, {12, 20, 0, 0},
+        {16, 17, 0, 0}, {17, 18, 18, 0}, {18, 22, 22, 0}, {19, 22, 22, 0}, {20, 22, 22, 0}, {22, 25, 25, 59},
+        {23, 25, 25, 59}, {48, 55, 55, 62}, {54, 55, 55, 62}, {55, 0, 56, 58}, {56, 0, 64, 58}, {57, 0, 64, 58},
+        {59, 0, 64, 60}, {60, 0, 64, 0}, {62, 63, 63, 63}, {92, 95, 94, 94}, {95, 94, 94, 94}};
+    static uint16_t l[11];
+    uint8_t to17 = 0, to19 = 0, to1a = 0;
+    if (s >= 25 && s <= 47) to17 = to19 = (uint8_t)(s + 1), to1a = 58;   /* the story: on, or ahead */
+    for (unsigned k = 0; k < sizeof row / sizeof row[0]; k++)
+        if (row[k][0] == s) to17 = row[k][1], to19 = row[k][2], to1a = row[k][3];
+    int n = 0, dies = (s <= 48 && s != 2 && s != 5 && s != 8 && s != 11) || (s >= 53 && s <= 62) || s == 65
+                      || s == 66 || s == 68 || s == 70 || s == 72 || (s >= 90 && s <= 95);
+    if (to17) l[n++] = 0x17, l[n++] = to17;
+    if (dies) l[n++] = 0x18, l[n++] = 78;
+    if (to19) l[n++] = 0x19, l[n++] = to19;
+    if (to1a) l[n++] = 0x1A, l[n++] = to1a;
+    if (s == 70) l[n++] = 0x1B, l[n++] = 78;
+    l[n] = 0xFFFF;
+    return l;
+}
+static const uint16_t *talker_events(uint16_t s) {         /* { event, new state } ..., $FFFF */
+    static uint16_t l[9];
+    int n = 0, any = (s <= 62 && s != 2 && s != 5 && s != 8 && s != 11) || (s >= 90 && s <= 95);
+    if (s == 68 || s == 70 || s == 72 || s == 73 || s == 75 || s == 77 || s == 83 || (s >= 85 && s <= 88))
+        l[n++] = 1, l[n++] = 89;
+    if (any && s <= 61) {
+        int resting = s == 0 || s == 1 || s == 3 || s == 13 || s == 14 || s == 15 || s == 21 || s == 24 || s == 53 || s == 61;
+        l[n++] = 0x101, l[n++] = resting ? 90 : 93;
+    }
+    if (any) l[n++] = 0x304, l[n++] = 63;
+    if (s == 70) l[n++] = 0x901, l[n++] = 96;
+    l[n] = 0xFFFF;
+    return l;
+}
+static void talker_act(Regs *r) {
+    uint16_t s = (uint16_t)r->d[7];
+    static const uint16_t says[96] = {[4] = 0x8301, [7] = 0x8302, [10] = 0x8303, [17] = 0x8304, [18] = 0x8305,
+        [19] = 0x8306, [20] = 0x8307, [22] = 0x8308, [55] = 0x8325, [56] = 0x8326, [59] = 0x8327, [62] = 0x8328,
+        [86] = 0x832A, [87] = 0x832B, [88] = 0x832C, [92] = 0x832D, [95] = 0x832E};
+    switch (s) {
+    case 0: case 13: case 14: case 15: case 21: case 24: case 53: case 61: case 66: case 90: case 93:
+        snail_wander(r, 0x2A); break;
+    case 68: case 73: snail_walk(r, 0); break;
+    case 70: snail_walk(r, WALK_VIEW); break;
+    case 75: snail_walk(r, WALK_PIC | WALK_PUSH | WALK_VIEW); break;
+    case 77: snail_walk(r, WALK_PIC | WALK_FAST | WALK_PUSH | WALK_VIEW); break;
+    case 79: snail_shrink(r, 0x8E, 0); break;
+    case 81: snail_sink(r); break;
+    case 83: sog16(0x56C0, 0x8329); set_pic(r, 0x21); break;
+    case 85: snail_wander(r, 0x19); set_pic(r, 0x21); break;
+    case 89: snail_finale(r); break;
+    case 1: case 3: case 4: case 6: case 7: case 9: case 10: case 12: case 16: case 17: case 18: case 19: case 20:
+    case 22: case 23: case 54: case 55: case 56: case 57: case 58: case 59: case 60: case 62: case 65:
+    case 86: case 87: case 88: case 91: case 92: case 94: case 95:
+        if (says[s]) sog16(0x56C0, says[s]);
+        if (s >= 86 && s <= 88) set_pic(r, 0x21);
+        snail_wander(r, og16(0x3830));                      /* after the player */
+        break;
+    default:
+        if (s >= 25 && s <= 48) { sog16(0x56C0, (uint16_t)(0x8309 + s - 25)); snail_wander(r, og16(0x3830)); }
+        break;                                              /* the rest do nothing */
+    }
+}
+/* the other two (types 4 and 5): states 0-1 wandering near their places (headings $18 / 8), 2-11
+ * the journey (following the talker), 14-15 at its end (sinking once the ones before them are gone:
+ * record 2, for type 5 also record 3), 16 the end; hit by $18 (or $1B in 5): 12, 17, 13 dying (pictures
+ * from $96 / $9D; type 4 tells George, event $304, when the player can see it) */
+static int follower_last(Regs *r) {                         /* the ones before it gone */
+    return gone(0x80) && (r16(r->a[4] + 2) == 4 || gone(0xC0));
+}
+static void follower_think(Regs *r) {
+    uint32_t o = r->a[4];
+    for (;;) {
+        uint16_t s = (uint16_t)r->d[0], next;
+        set_w(&r->d[7], s);
+        switch (s) {
+        case 0: if (!snail_within(r, 15)) return; next = 1; break;
+        case 1: if (snail_within(r, 20)) return; next = 0; break;
+        case 2: case 6: w16(o + 0x1C, 0); next = (uint16_t)(s + 1); break;
+        case 3: if (!snail_way(r, WAY_1044)) return; next = 4; break;
+        case 4: snail_call_others(r); next = 5; break;
+        case 5: if (!snail_way(r, WAY_106C)) return; next = 6; break;
+        case 7: if (!snail_way(r, WAY_10B4)) return; next = 8; break;
+        case 8: call_d0d1(r, fo_S7_1292, 0, 0x8000); w16(o + 0x1C, 0); next = 9; break;
+        case 9: if (!snail_way(r, WAY_10BC)) return; next = 10; break;
+        case 10:
+            if (r16(o + 2) == 4) w16(o + 0x1C, !gone(0x80) ? WAY_111C : !gone(0x100) ? WAY_1104 : WAY_113C);
+            else w16(o + 0x1C, gone(0x80) && gone(0xC0) ? WAY_113C : WAY_112C);
+            next = 11;
+            break;
+        case 11: if (!snail_way(r, WAY_1044)) return; next = 14; break;
+        case 12: for (uint16_t rec = 0x80; rec <= 0x100; rec += 0x40) tell(r, 0x304, rec);   /* dying */
+                 flag0_clear(1); next = 17; break;
+        case 14: if (!follower_last(r)) return; w16(o + 0x1C, 0xFFFE); next = 15; break;
+        case 17: w16(o + 0x1C, 0xFFFF); next = 13; break;
+        default: return;                                    /* 13, 15, 16 */
+        }
+        set_w(&r->d[0], next);
+    }
+}
+static void follower_act(Regs *r) {
+    int t4 = r16(r->a[4] + 2) == 4, view = follower_last(r) ? WALK_VIEW : 0;
+    switch ((uint16_t)r->d[7]) {
+    case 0: snail_wander(r, t4 ? 0x18 : 8); break;
+    case 1: snail_wander(r, og16(0x3830)); break;
+    case 3: case 7: snail_walk(r, 0); break;
+    case 5: snail_walk(r, view); break;
+    case 9: snail_walk(r, WALK_PIC | WALK_PUSH | view); break;
+    case 11: snail_walk(r, WALK_PIC | WALK_FAST | WALK_PUSH | view); break;
+    case 13: snail_shrink(r, t4 ? 0x95 : 0x9C, t4); break;
+    case 14: set_pic(r, 0x21); snail_wander(r, 0); break;
+    case 15: snail_sink(r); break;
+    case 16: snail_finale(r); break;
+    }
+}
+void fo_S10_0028(Regs *r) {
+    static uint16_t said[97][2];                            /* the talker's { text that ended, next state } */
+    if (!said[4][0]) {
+        static const uint16_t sv[][3] = {{4, 0x8301, 5}, {7, 0x8302, 8}, {10, 0x8303, 11}, {17, 0x8304, 18},
+            {18, 0x8305, 22}, {19, 0x8306, 22}, {20, 0x8307, 22}, {22, 0x8308, 23}, {48, 0x8320, 54}, {55, 0x8325, 56},
+            {56, 0x8326, 57}, {59, 0x8327, 60}, {62, 0x0328, 63}, {83, 0x8329, 84}, {86, 0x832A, 87}, {87, 0x832B, 88},
+            {88, 0x832C, 80}, {92, 0x832D, 94}, {95, 0x832E, 94}};
+        for (unsigned k = 0; k < sizeof sv / sizeof sv[0]; k++) { said[sv[k][0]][0] = sv[k][1]; said[sv[k][0]][1] = sv[k][2]; }
+        for (int k = 25; k <= 47; k++) { said[k][0] = (uint16_t)(0x8309 + k - 25); said[k][1] = (uint16_t)(k + 1); }
+    }
+    static const uint16_t h[] = {0x18, 12, 0xFFFF}, h5[] = {0x18, 12, 0x1B, 12, 0xFFFF};
+    static const uint16_t e01[] = {0x301, 2, 0xFFFF}, e1[] = {1, 16, 0xFFFF}, e5[] = {1, 16, 0x901, 17, 0xFFFF};
+    static const uint16_t *const f_hits[18] = {h, h, NULL, h, NULL, h5, NULL, h};
+    static const uint16_t *const f_events[18] = {e01, e01, NULL, e1, NULL, e5, NULL, e1, NULL, e1, NULL, e1};
+    uint32_t o = r->a[4], a6 = r->a[6];
+    uint16_t type = r16(o + 2);
+    if (type < 3 || type > 5) return;
+    r->a[6] = r->a[7] - 4;                                  /* LINK A6, #-2: the way's heading, for the act */
+    r->a[7] -= 6;
+    set_w(&r->d[7], r16(o + 0x16));
+    set_w(&r->d[0], (uint16_t)r->d[7]);
+    if (type == 3) {
+        talker_think(r);
+        uint16_t s = (uint16_t)r->d[7];
+        if (s < 97) o_said(r, said[s], talker_think);
+        o_hit(r, talker_hits((uint16_t)r->d[7]), talker_think);
+        o_event(r, talker_events((uint16_t)r->d[7]), talker_think);
+        talker_act(r);
+    } else {
+        follower_think(r);
+        uint16_t s = (uint16_t)r->d[7];
+        o_hit(r, s < 18 ? f_hits[s] : NULL, follower_think);
+        s = (uint16_t)r->d[7];
+        o_event(r, s < 18 ? f_events[s] : NULL, follower_think);
+        follower_act(r);
+    }
+    w16(o + 0x16, (uint16_t)r->d[7]);
+    r->a[7] += 6; r->a[6] = a6;
+}
+
 /* ---------- fn_S7_0F78: one object's tick (Original's dispatcher, for fn_S7_2E9A) ----------
  * The record at D0.w of G_53C8 (G_3834 = D0) runs the behaviour of its type (+2); types without
  * one do nothing. Keeps D3-D7 / A2-A4. The behaviours not yet written by hand are the translations
- * in orig_gen.c (levels 2-6, the snails fo_S10_0028 and type $1B). */
+ * in orig_gen.c (levels 2-6 and type $1B). */
 void fo_S10_0028(Regs *r), fo_S4_0028(Regs *r), fo_S4_020C(Regs *r), fo_S4_04AE(Regs *r), fo_S9_0046(Regs *r),
     fo_S9_0372(Regs *r), fo_S7_087A(Regs *r), fo_S11_00C0(Regs *r), fo_S10_1F28(Regs *r), fo_S4_0782(Regs *r),
     fo_S4_0C44(Regs *r), fo_S4_1256(Regs *r), fo_S7_099C(Regs *r), fo_S4_1670(Regs *r), fo_S9_0D76(Regs *r),

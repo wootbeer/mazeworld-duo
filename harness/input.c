@@ -1,7 +1,7 @@
 /* Scripted input for deterministic runs.
  * Script lines:  <tick> down <key>   |   <tick> up <key>   |   <tick> tap <key>   (# comments)
  *                <tick> type <text>   (taps each character, one every 4 ticks; letters, digits, space)
- *                <tick> setg <global> <value>   |   at S<seg>:<off> setg <global> <value>   (test setup)
+ *                <tick> setg <global> <value>   |   <tick> setr <record> <offset> <value>   |   at S<seg>:<off> setg <global> <value>   (test setup)
  *                <tick> move x y   |   <tick> click x y   |   <tick> mousedown   |   <tick> mouseup
  *                <tick> menu <menu> <item>   (a menu choice: a click on the menu bar, MenuSelect answers it)
  *                <tick> key <code> <char> down|up|auto   (a key by Mac key code and character, hex: recordings)
@@ -56,8 +56,10 @@ int input_has_pc_hooks(void) { return npokes > 0; }
 
 /* "<tick> setg <global> <value>": the same when tick <tick> begins (independent of which code,
  * original or C, is running then) */
-typedef struct { uint32_t tick, g; uint16_t v; int done; } TickPoke;
-static TickPoke tpokes[16]; static int ntpokes;
+/* "<tick> setr <record> <offset> <value>" (Mazeworld Original): the word at <offset> (hex) of object
+ * record <record> (G_53C8's $40-byte records) the same way */
+typedef struct { uint32_t tick, g; uint16_t v; int done, rec; } TickPoke;
+static TickPoke tpokes[64]; static int ntpokes;
 /* called as each tick begins: the script's pokes and steps due by then are applied (so input
  * reaches the game at the same point whether replayed or played live), then the live front end's
  * turn (input_play_hook: pacing, the window, the real keyboard and mouse) */
@@ -68,8 +70,9 @@ void input_tick_hook(uint32_t tick) {
     for (int i = 0; i < ntpokes; i++)
         if (!tpokes[i].done && tick >= tpokes[i].tick) {
             tpokes[i].done = 1;
-            wr16(A5_ADDR - tpokes[i].g, tpokes[i].v);
-            hx_log("input script: G_%04X = %u at tick %u", tpokes[i].g, tpokes[i].v, tick);
+            if (tpokes[i].rec >= 0) wr16(rd32(A5_ADDR - 0x53C8) + (uint32_t)tpokes[i].rec * 0x40 + tpokes[i].g, tpokes[i].v);
+            else wr16(A5_ADDR - tpokes[i].g, tpokes[i].v);
+            hx_log("input script: %s%d %04X = %u at tick %u", tpokes[i].rec >= 0 ? "record " : "G", tpokes[i].rec, tpokes[i].g, tpokes[i].v, tick);
         }
     input_poll(tick);
     if (input_play_hook) input_play_hook(tick);
@@ -78,6 +81,7 @@ void input_tick_hook(uint32_t tick) {
 
 /* recording live input as a script (the playable test build): each live input is written with
  * the tick it arrived on, so the script replays the session exactly */
+FILE *input_rec_file(void) { return rec; }
 int input_record(const char *path) { rec = fopen(path, "w"); if (rec) fprintf(rec, "# recorded session\n"); return rec ? 0 : -1; }
 static uint32_t now_tick(void) { return rd32(LM_Ticks); }
 void input_record_end(uint32_t ticks) { if (rec) { fprintf(rec, "# ends: replay with -ticks %u\n", ticks); fflush(rec); } }
@@ -96,7 +100,12 @@ int input_load(const char *path) {
           }
           unsigned tk;
           if (sscanf(line, " %u setg %x %u", &tk, &g, &v) == 3) {
-              if (ntpokes < 16) tpokes[ntpokes++] = (TickPoke){tk, g, (uint16_t)v, 0};
+              if (ntpokes < 64) tpokes[ntpokes++] = (TickPoke){tk, g, (uint16_t)v, 0, -1};
+              continue;
+          }
+          unsigned rn;
+          if (sscanf(line, " %u setr %u %x %u", &tk, &rn, &g, &v) == 4) {
+              if (ntpokes < 64) tpokes[ntpokes++] = (TickPoke){tk, g, (uint16_t)v, 0, (int)rn};
               continue;
           } }
         { unsigned kc, kch; char how[8];
