@@ -602,9 +602,16 @@ int main(int argc, char **argv) {
     settings.full = (SDL_GetWindowFlags(win) & SDL_WINDOW_FULLSCREEN_DESKTOP) != 0;
     if (!settings.full) { SDL_GetWindowPosition(win, &settings.x, &settings.y); SDL_GetWindowSize(win, &settings.w, &settings.h); }
     settings_save();
-    if (audio) SDL_CloseAudioDevice(audio);
+    if (how == 1 && switch_to >= 0) { settings.game = switch_to; settings_save(); }
     SDL_DestroyRenderer(ren); SDL_DestroyWindow(win);
+    if (how == 1 && switch_to >= 0) relaunch(found[switch_to]);
+#ifdef _WIN32
+    /* leave now: shutting the sound device and SDL down can hang on some systems, which keeps an
+     * invisible Mazeworld.exe running (holding the program file and its settings) */
+    fflush(NULL);
+    TerminateProcess(GetCurrentProcess(), how == 1 ? 0 : 1);
+#endif
+    if (audio) SDL_CloseAudioDevice(audio);
     SDL_Quit();
-    if (how == 1 && switch_to >= 0) { settings.game = switch_to; settings_save(); relaunch(found[switch_to]); }
     return how == 1 ? 0 : 1;
 }
