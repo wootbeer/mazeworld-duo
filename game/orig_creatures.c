@@ -3729,6 +3729,155 @@ void fo_S9_0372(Regs *r) {
     w16(o + 0x16, (uint16_t)r->d[7]);
 }
 
+/* ---------- type $24 (fn_S9_0D76, record 8 on level 2) ----------
+ * A face at the level's start, alive while records 9 and 10 (+$18) are not negative. With the
+ * player within 8 it talks (+$18 / +$1A its mouth and eyes, from the tables below while it talks,
+ * else blinking at random: fn_S9_14CE): 2-4 ($2401), 5-7 ($2402), 8-10 ($2403) as long as he stays
+ * within $19 (hits by $17 / $19 move it on), the first time only after flag word 0 bit 0 (else 21-23:
+ * $2405 while George is there). He leaves (11): it fires a type $13 shot (+$1E = -1) and waits 100
+ * frames, then as long as a shot is in its cell (12-13). Records 9 / 10 negative: 14 (closed), back
+ * to 13 when they are not; flag word 0 bit 3: 15-19, records 9 and 10 set to $7FFF and, the player
+ * within 8, its last text ($2404); 20 the end. Every frame it moves records 2-7's negative +$18 on
+ * by 2 (fn_S9_14F0). */
+static void t24_blink(Regs *r) {                            /* fn_S9_14CE */
+    random_d0(r);
+    w16(r->a[4] + 0x18, 0); w16(r->a[4] + 0x1A, ((uint16_t)r->d[0] & 7) ? 1 : 0);
+}
+static void t24_others(void) {                              /* fn_S9_14F0 */
+    uint32_t t = og32(0x53C8);
+    for (uint16_t rec = 0x80; rec < 0x200; rec += 0x40) {
+        uint16_t v = r16(t + rec + 0x18);
+        if (v & 0x8000) w16(t + rec + 0x18, (uint16_t)(v + 2));
+    }
+}
+static int t24_shot_here(Regs *r) {                         /* fn_S9_1514: a type $13 in its cell */
+    uint32_t c = og32(0x53D4) + r16(r->a[4] + 0x30), t = og32(0x53C8);
+    for (uint32_t k = 1; k <= 10; k++) {
+        uint8_t n = r8(c + k);
+        if (!n) return 0;
+        if (r16(t + ((uint32_t)n << 6) + 2) == 0x13) return 1;
+    }
+    return 0;
+}
+static void t24_think(Regs *r) {
+    uint32_t o = r->a[4];
+    for (;;) {
+        uint16_t s = (uint16_t)r->d[0], next;
+        set_w(&r->d[7], s);
+        int open = !(r16(o + 0x58) & 0x8000) && !(r16(o + 0x98) & 0x8000);   /* records 9 and 10 */
+        switch (s) {
+        case 0: if (!open) return; next = 1; break;
+        case 1:
+            if (!open) { next = 0; break; }
+            near_d0(r);
+            if (og16(0x382E) >= 8) return;
+            next = flag(r, 0, 1) ? 2 : 0x15; break;
+        case 2: case 5: case 8: case 17: w16(o + 0x1C, 0xFFFE); next = (uint16_t)(s + 1); break;
+        case 3:
+            if (!open) { next = 0; break; }
+            near_d0(r);
+            if (og16(0x382E) >= 0x14) { next = 1; break; }
+            {
+                uint16_t t = (uint16_t)(r16(o + 0x1C) + 2);
+                w16(o + 0x1C, t);
+                if (t < 0x3A) return;
+            }
+            next = 4; break;
+        case 4: case 6: case 7: case 9: case 10: {          /* talking while he stays within $19 */
+            static const uint8_t end[11] = {[6] = 0x1C, [9] = 0x36};
+            if (!open) { next = 0xE; break; }
+            near_d0(r);
+            if (og16(0x382E) >= 0x19) { next = 0xB; break; }
+            if (!end[s]) return;
+            uint16_t t = (uint16_t)(r16(o + 0x1C) + 2);
+            w16(o + 0x1C, t);
+            if (t < end[s]) return;
+            next = (uint16_t)(s + 1); break;
+        }
+        case 11:                                            /* he left: a shot */
+            w16(o + 0x1E, 0xFFFF);
+            sog16(0x382C, r16(o + 4)); sog16(0x3828, r16(o + 8)); sog16(0x3824, r16(o + 0x30));
+            make_object(r, 0x13, 0xFFFF, og16(0x3834));
+            w16(o + 0x1C, 100);
+            next = 0xC; break;
+        case 12: if (!open) { next = 0xE; break; } if (!count_down(r, 0x1C, 1)) return; next = 0xD; break;
+        case 13: if (!open) { next = 0xE; break; } if (t24_shot_here(r)) return; next = 0xB; break;
+        case 14:
+            if (flag(r, 0, 8)) { next = 0xF; break; }
+            if (!open) return;
+            w16(o + 0x1E, 0xFFFF); next = 0xD; break;
+        case 15: w16(o + 0x58, 0x7FFF); w16(o + 0x98, 0x7FFF); w16(o + 0x1E, 0xFFFF); next = 0x10; break;
+        case 16: near_d0(r); if (og16(0x382E) >= 8) return; next = 0x11; break;
+        case 18: {
+            near_d0(r);
+            if (og16(0x382E) >= 0x19) { next = 0x14; break; }
+            uint16_t t = (uint16_t)(r16(o + 0x1C) + 2);
+            w16(o + 0x1C, t);
+            if (t < 0x3A) return;
+            next = 0x13; break;
+        }
+        case 19: near_d0(r); if (og16(0x382E) < 0x19) return; next = 0x14; break;
+        case 21:
+            if (!og16(0x56C2)) { next = 0x16; break; }
+            if (!open) { next = 0x17; break; }
+            near_d0(r);
+            if (og16(0x382E) >= 0x19) { next = 0x16; break; }
+            return;
+        case 22: if (open) return; next = 0x17; break;
+        case 23: if (!open) return; next = 0x16; break;
+        default: return;                                    /* 20 */
+        }
+        set_w(&r->d[0], next);
+    }
+}
+static void t24_face(Regs *r, const uint8_t *mouth, const uint8_t *eyes) {   /* the talking tables, by +$1C */
+    uint16_t i = r16(r->a[4] + 0x1C) / 2;
+    w16(r->a[4] + 0x18, mouth[i]); w16(r->a[4] + 0x1A, eyes[i]);
+    t24_others();
+}
+void fo_S9_0D76(Regs *r) {
+    static const uint16_t said[24][2] = {[4] = {0xA401, 5}, [7] = {0xA402, 8}, [10] = {0xA403, 11}, [19] = {0xA404, 20},
+        [21] = {0xA405, 22}};
+    static uint16_t h[5] = {0x17, 0, 0x19, 0, 0xFFFF};
+    static const uint8_t m3[30] = {0, 2, 4, 6, 4, 4, 2, 4, 6, 4, 6, 4, 2, 2, 2, 4, 6, 4, 2, 4, 6, 4, 2, 4, 2, 4, 6, 4, 2, 0},
+        e3[30] = {2, 3, 4, 3, 2, 3, 2, 3, 4, 3, 4, 3, 2, 1, 2, 3, 4, 1, 2, 3, 4, 1, 2, 3, 2, 3, 4, 2, 2, 2},
+        m6[14] = {0, 2, 4, 6, 4, 2, 4, 6, 4, 6, 4, 2, 4, 0}, e6[14] = {2, 3, 4, 4, 3, 2, 3, 4, 3, 4, 3, 2, 3, 2},
+        m9[27] = {0, 2, 4, 6, 4, 2, 2, 4, 2, 4, 6, 4, 2, 4, 6, 6, 4, 6, 4, 2, 4, 6, 4, 2, 4, 2, 0},
+        e9[27] = {2, 3, 4, 4, 3, 2, 1, 2, 3, 4, 4, 3, 2, 3, 4, 4, 3, 4, 3, 2, 3, 4, 3, 2, 3, 2, 1},
+        m18[30] = {0, 2, 4, 6, 6, 4, 6, 4, 2, 4, 6, 4, 2, 2, 4, 2, 4, 6, 4, 6, 4, 2, 4, 2, 4, 6, 6, 4, 2, 0},
+        e18[30] = {2, 3, 4, 4, 4, 3, 4, 3, 2, 3, 4, 3, 2, 1, 2, 1, 2, 3, 2, 3, 2, 1, 2, 1, 2, 3, 4, 3, 2, 2};
+    uint32_t o = r->a[4];
+    set_w(&r->d[7], r16(o + 0x16));
+    set_w(&r->d[0], (uint16_t)r->d[7]);
+    t24_think(r);
+    uint16_t s = (uint16_t)r->d[7];
+    if (s < 24) o_said(r, said[s], t24_think);
+    s = (uint16_t)r->d[7];
+    int hit = s == 4 || s == 7 || s == 10 || s == 19;
+    if (hit) h[1] = h[3] = (uint16_t)(s + 1);
+    o_hit(r, hit ? h : NULL, t24_think);
+    switch (s = (uint16_t)r->d[7]) {
+    case 1: case 16: case 20: case 22: t24_blink(r); t24_others(); break;
+    case 3: t24_face(r, m3, e3); break;
+    case 4: case 7: case 10: case 19: case 21: {
+        static const uint16_t text[22] = {[4] = 0xA401, [7] = 0xA402, [10] = 0xA403, [19] = 0xA404, [21] = 0xA405};
+        t24_blink(r); t24_others(); sog16(0x56C0, text[s]);
+        break;
+    }
+    case 5: set_w(&r->d[0], 6); t24_think(r); break;      /* the original's act is think 6's code */
+    case 6: t24_face(r, m6, e6); break;
+    case 9: t24_face(r, m9, e9); break;
+    case 12:
+        if (t24_shot_here(r)) { w16(o + 0x18, 6); w16(o + 0x1A, 0); } else t24_blink(r);
+        t24_others();
+        break;
+    case 13: t24_others(); w16(o + 0x18, 6); w16(o + 0x1A, 0); break;
+    case 14: case 23: w16(o + 0x18, 0); w16(o + 0x1A, 0xFFFF); w16(o + 0x1E, 0); break;
+    case 18: t24_face(r, m18, e18); break;
+    }
+    w16(o + 0x16, (uint16_t)r->d[7]);
+}
+
 /* ---------- type $1B (fn_S10_1F28) ----------
  * A blast: after 5 frames (+$16 counting) it hits everything in its cell (+$14 = it; the player
  * there: life 0, fn_S10_2126) and is gone. */
