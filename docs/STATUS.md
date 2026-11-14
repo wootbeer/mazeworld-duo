@@ -32,8 +32,8 @@
   the shots and spells (types $13, $22, $2A, $36, $37, $3D), all their states; also Original's own
   segment-7 helpers they use (`game/orig_seg7.c`: fo_S7_1E54, 1FF8, 201C, 2038, 2132, 226E). Every
   creature is by hand now (the instruction-by-instruction translator, `tools/asm2c.py`, and its
-  output are gone). Not reached by a test yet: level 6's ending reaching record 2 (the game
-  won) and its two-flags branch.
+  output are gone). Not reached by a test yet: the shots of types $13 (moving) and $3D (a level 4
+  hunter's, fired only when it faces the player within 6; walking up to one gets him killed first).
 - The autopilot (`harness/auto.c`, the rig's `-auto <goals>`) makes recordings itself: goal lines
   (`goto X Y` by the map's cells, `face R`, `head H`, `fire N` the abilities, `wait N`, `setg` /
   `setr` to set a test up, `dump`) become input, written as `auto.txt`; a test is the start of a
@@ -44,8 +44,9 @@
 - State sweeps: `tests/mwo_george_states.txt`, `mwo_snail_states.txt` and `mwo_level2_*.txt` ..
   `mwo_level5_end.txt` set creatures' states directly (`setr <record> 16 <state>`) one after
   another, so states play does not easily reach run and are checked against the original (most
-  states of each behaviour this way; which ones, by the original's trace). Not reached yet: level
-  3's passages (types $2B / $2C moving the player; a poke of his position does not cross them). `setg` / `setr` lines are
+  states of each behaviour this way; which ones, by the original's trace). Level 3's passages
+  (`mwo_level3_passage.txt`) are crossed on foot after moving the player as a passage does (the
+  next-level globals G_57DC.., `setg`). `setg` / `setr` lines are
   applied by the rig and the headless port alike.
 - Tests that start on a later level: a script whose first lines include `# level N` (or the rig's
   `-level N`) starts the new game at level N's arrival point (levels 2 and 5: a cell along, the

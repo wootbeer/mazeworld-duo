@@ -1,0 +1,9 @@
+# level 6
+60 click 320 240
+700 setr 0 16 24
+701 setr 9 16 7
+900 setr 9 4 166
+900 setr 9 8 166
+900 setr 9 30 10560
+901 setr 9 16 42
+1400 mmove 0 0
