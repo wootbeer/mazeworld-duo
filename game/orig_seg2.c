@@ -210,10 +210,14 @@ static void label(int16_t which) {
         {0x570E, {0x56FE, 0x56FC, 0x56FA}, "aff"}, {0x570C, {0x56F8, 0x56F6, 0x56F4}, "neg"}};
     if (which < 1 || which > 4) return;
     int16_t h, v; panel_origin(&h, &v);
+    /* the rows are closer than the letters are tall, and each letter (srcCopy) rubs out the bottom
+     * of the one above; the port's option draws them srcOr, whole */
+    if (mz_full_labels) mac_TextMode(1);
     for (int k = 0; k < 3; k++) {
         mac_MoveTo((int16_t)(og16(l[which - 1].col) + h), (int16_t)(og16(l[which - 1].row[k]) + v));
         mac_DrawChar((int16_t)l[which - 1].s[k]);
     }
+    if (mz_full_labels) mac_TextMode(0);
 }
 /* fo_S2_3E04 (JT 40): the attitude G_56E2 (last drawn G_524A; all when G_56E3): its label is
  * rubbed out (colour 0) and the new one drawn in its colour; 0 and 5 have none */

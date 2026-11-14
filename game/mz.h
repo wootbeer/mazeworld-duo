@@ -38,6 +38,7 @@ extern int mz_original;
  * turn (mz_alt_move: turn, forward, sideways units, 2 a step), the mouse only turns, a click fires
  * the chosen ability and 1-4 choose it, instead of the mouse moving and its gestures choosing */
 extern int mz_alt_controls;
+extern int mz_full_labels;   /* port option: Original's three-letter labels drawn without rubbing each other out */
 extern int16_t mz_alt_move[3];
 /* Original's own routines that shared code hands over to (game/orig_shell.c) */
 void    fo_S8_0E2A(void);

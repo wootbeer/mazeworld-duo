@@ -8,6 +8,7 @@
 
 int mz_original;
 int mz_alt_controls;
+int mz_full_labels;
 int16_t mz_alt_move[3];
 const uint16_t *mz_gmap;
 static uint16_t gmap[0x10000];

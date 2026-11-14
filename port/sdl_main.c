@@ -63,9 +63,10 @@ static struct {
     int x, y, w, h, full;       /* the window: position and client size when not fullscreen (w 0: none saved) */
     char archive[1024];         /* the game archive the player chose, if it is not next to the program */
     int orig_classic;           /* Mazeworld Original: its own mouse movement and gestures, not the keys */
+    int orig_classic_labels;    /* Mazeworld Original: the labels as it draws them, cut off */
     int game;                   /* the game played last */
     char archive2[1024];        /* Mazeworld Original's archive, if chosen */
-} settings = {100, 0, 0, 0, 0, 0, "", 0, 0, ""};
+} settings = {100, 0, 0, 0, 0, 0, "", 0, 0, 0, ""};
 static char settings_path[1024];
 
 /* The games the port knows, by their application's creator code. An archive given on the command
@@ -213,6 +214,7 @@ static void build_menus(HWND hwnd) {
     AppendMenuA(options, MF_POPUP, (UINT_PTR)popup(MENU_PORT_VOLUME, volume), "&Volume");
     if (running == 1) {
         AppendMenuA(options, MF_STRING, (UINT_PTR)CMD(MENU_PORT_CONTROLS, 1), "&Classic Mouse Controls");
+        AppendMenuA(options, MF_STRING, (UINT_PTR)CMD(MENU_PORT_LABELS, 1), "Classic &Labels");
         build_menus_original(options);
         SetMenu(hwnd, bar);
         return;
@@ -231,12 +233,14 @@ static const int volume_levels[] = {100, 75, 50, 25, 0};
 static int port_item_state(int menu, int item, int *checked) {
     if (menu == MENU_PORT_GAME) { *checked = item - 1 == running; return item - 1 != running && found[item - 1][0]; }
     if (menu == MENU_PORT_CONTROLS) { *checked = settings.orig_classic; return 1; }
+    if (menu == MENU_PORT_LABELS) { *checked = settings.orig_classic_labels; return 1; }
     *checked = menu == MENU_PORT_VOLUME && item >= 1 && item <= 5 && settings.volume == volume_levels[item - 1];
     return 1;
 }
 static void port_choose(int menu, int item) {
     if (menu == MENU_PORT_VOLUME && item >= 1 && item <= 5) { settings.volume = volume_levels[item - 1]; settings_save(); }
     if (menu == MENU_PORT_CONTROLS) { settings.orig_classic = !settings.orig_classic; settings_save(); }
+    if (menu == MENU_PORT_LABELS) { settings.orig_classic_labels = !settings.orig_classic_labels; settings_save(); }
     if (menu == MENU_PORT_GAME && item >= 1 && item <= NGAMES && found[item - 1][0]) { switch_to = item - 1; shell_request_quit(); }
 }
 /* checks and greys each item as the original's menu bar would be just then */
@@ -372,6 +376,7 @@ static void events(void) {
 void port_tick(uint32_t tick) {
     events();
     mz_alt_controls = mz_original && !settings.orig_classic;
+    mz_full_labels = mz_original && !settings.orig_classic_labels;
     mouse_look();
     /* the Mac's ticks are 1/60 s: wait for this one's time; after a stall (a menu held open,
      * the window dragged) start counting again rather than racing to catch up */
@@ -400,6 +405,7 @@ static void settings_load(void) {
         else if (sscanf(line, "window=%d,%d,%d,%d", &settings.x, &settings.y, &settings.w, &settings.h) == 4) {}
         else if (sscanf(line, "fullscreen=%d", &v) == 1) settings.full = v != 0;
         else if (sscanf(line, "original_classic_mouse=%d", &v) == 1) settings.orig_classic = v != 0;
+        else if (sscanf(line, "original_classic_labels=%d", &v) == 1) settings.orig_classic_labels = v != 0;
         else if (sscanf(line, "game=%d", &v) == 1) settings.game = v == 1;
         else if (!strncmp(line, "archive=", 8) || !strncmp(line, "archive2=", 9)) {
             char *a = line[7] == '=' ? settings.archive : settings.archive2;
@@ -417,6 +423,7 @@ static void settings_save(void) {
     if (settings.archive2[0]) fprintf(f, "archive2=%s\n", settings.archive2);
     fprintf(f, "game=%d\n", settings.game);
     fprintf(f, "original_classic_mouse=%d\n", settings.orig_classic);
+    fprintf(f, "original_classic_labels=%d\n", settings.orig_classic_labels);
     fclose(f);
 }
 static void prefs_load(void) {
