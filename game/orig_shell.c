@@ -5,6 +5,7 @@
  * The game in progress is the 'mazr' resource (G_54E4), saved and loaded whole as an 'Mzws' file;
  * G_57CE holds the file's FSSpec (G_57CF: there is one), the window G_5804 shows its name. */
 #include "mzasm.h"
+#include "orig_names.h"
 #include "fns.h"
 
 static void alert(uint16_t msg, int16_t err, int8_t fatal) { mz_seg_of(2, 0x03A0), fn_S2_03A0(OADDR(msg), err, fatal); }
@@ -513,12 +514,12 @@ void fo_S8_0E2A(void) {
             } while (got && !og8(0x57F2));
         }
         if (og8(0x57D0) || !og8(0x589E)) {
-            sog32(0x56CE, og32(0x56D8)); sog32(0x56CA, og32(0x56D4));
+            sog32(0x56CE, og32(OG_PLAYER_X)); sog32(0x56CA, og32(OG_PLAYER_Y));
             fn_S8_0E4C(&r);
             if (!og8(0x57D0)) {
                 sog16(0x7200, og16(0x5756)); sog16(0x7202, og16(0x5754));
                 sog16(0x5756, 0); sog16(0x5754, 0);
-                if (!og16(0x56E0)) fo_S8_1152();
+                if (!og16(OG_FULL_VIEW)) fo_S8_1152();
             }
             mz_seg_of(2, 0x0376), fn_S2_0376(&r);
             mz_seg(2);
@@ -528,7 +529,7 @@ void fo_S8_0E2A(void) {
             w32(args + 4, og32(0x53B4)); w32(args + 8, og32(0x53F4));
             r.a[7] = args; fn_S2_3692(&r);
             fn_S2_5810(&r);
-            if (og16(0x56E0)) fo_S8_0F5A();
+            if (og16(OG_FULL_VIEW)) fo_S8_0F5A();
             if (og16(0x56EE) == 0x2B) fn_S8_0F90();
             if (og16(0x56EE) == 0x2C) fn_S8_1004();
             if (og16(0x56EE) == 0x2D) fn_S8_1078();
@@ -555,7 +556,7 @@ uint8_t fo_S8_0000(void) {
     while (!og8(0x57F1)) {
         fn_S8_083A(&r);
         fo_S8_065A(&r);
-        sog16(0x720C, og16(0x56DC));
+        sog16(0x720C, og16(OG_LEVEL));
         fn_S8_0946(&r);
         int16_t level = (int16_t)og16(0x720C);
         if (!fn_S8_0136(level) || !fo_S8_05CC(level)) { fail = 1; break; }
@@ -583,9 +584,9 @@ uint8_t fo_S8_0000(void) {
         fn_S8_083A(&r);
         with_level(&r, fo_S8_07D4, level);
         if (og8(0x57DE)) {
-            sog32(0x56D8, og32(0x57D8)); sog32(0x56D4, og32(0x57D4));
-            sog16(0x56DC, og16(0x57DC)); sog16(0x56DA, og16(0x57DA));
-            sog8(0x57DE, 0); sog16(0x56E0, 0);
+            sog32(OG_PLAYER_X, og32(OG_GO_X)); sog32(OG_PLAYER_Y, og32(OG_GO_Y));
+            sog16(OG_LEVEL, og16(OG_GO_LEVEL)); sog16(OG_PLAYER_HEADING, og16(OG_GO_HEADING));
+            sog8(0x57DE, 0); sog16(OG_FULL_VIEW, 0);
         }
         fo_S8_06DC(&r);
         fn_S8_0946(&r);
@@ -697,7 +698,7 @@ void fo_S8_1C0C(void) {
     fn_S8_0136(1);
     fn_S8_2A32(&r);
     mz_seg_of(2, 0x39F8), fn_S2_39F8(&r);                   /* fn_S2_2F98: the panel's starting values */
-    sog16(0x56EE, 0); sog16(0x56EA, 0x8E); sog16(0x56E6, 0x8E); sog16(0x56E2, 3);
+    sog16(0x56EE, 0); sog16(OG_LIFE, 0x8E); sog16(0x56E6, 0x8E); sog16(0x56E2, 3);
     uint32_t p = deref(og32(0x5814));
     if (!fn_S8_48A2((int16_t)r16(p), p + 2)) mac_ExitToShell();
     sog32(0x37C4, r32(0x020C));                             /* seed from the clock (Time) */

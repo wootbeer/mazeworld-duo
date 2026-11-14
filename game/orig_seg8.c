@@ -1,6 +1,7 @@
 /* CODE segment 8 of Mazeworld Original: its own routines (no Catacombs counterpart), named by
  * Original's offsets (see build/disasm-original/seg8.s). */
 #include "mzasm.h"
+#include "orig_names.h"
 
 /* The player's state in the current level's record (G_53CC; the record is at the offset in its
  * first word): word +2 level number, longs +4 / +8 x / y, words +C heading, +E, +10, +12, +16,
@@ -22,7 +23,7 @@ void fo_S8_065A(Regs *r) {
     for (unsigned i = 0; i < sizeof player_state / sizeof *player_state; i++)
         if (player_state[i].len == 4) sog32(player_state[i].g, r32(p + player_state[i].at));
         else sog16(player_state[i].g, r16(p + player_state[i].at));
-    set_w(&r->d[2], og16(0x56DC)); sub_w(r, &r->d[2], 1); lsl_w(r, &r->d[2], 1);
+    set_w(&r->d[2], og16(OG_LEVEL)); sub_w(r, &r->d[2], 1); lsl_w(r, &r->d[2], 1);
     sog16(0x56A8, r16(p + sxw(r->d[2]) + 0x18));
     sog16(0x56A6, r16(p + sxw(r->d[2]) + 0x24));
     sog16(0x582E, 0); sog16(0x582C, 0);
@@ -33,7 +34,7 @@ void fo_S8_06DC(Regs *r) {
     for (unsigned i = 0; i < sizeof player_state / sizeof *player_state; i++)
         if (player_state[i].len == 4) w32(p + player_state[i].at, og32(player_state[i].g));
         else w16(p + player_state[i].at, og16(player_state[i].g));
-    set_w(&r->d[2], og16(0x56DC)); sub_w(r, &r->d[2], 1); lsl_w(r, &r->d[2], 1);
+    set_w(&r->d[2], og16(OG_LEVEL)); sub_w(r, &r->d[2], 1); lsl_w(r, &r->d[2], 1);
     w16(p + sxw(r->d[2]) + 0x18, og16(0x56A8));
     w16(p + sxw(r->d[2]) + 0x24, og16(0x56A6));
     cc_nz_w(r, og16(0x56A6));
@@ -48,7 +49,7 @@ void fo_S8_0510(Regs *r) {
     uint32_t h = mac_GetResource(0x6D617A72, (int16_t)(level + 0xC7));   /* 'mazr' */
     if (mac_ResError() || !h) { r->d[0] = 0; return; }
     r->a[0] = h; mac_trap_regs(r, 0xA029);                    /* HLock */
-    uint32_t p = r32(h), cell = og32(0x53D4);
+    uint32_t p = r32(h), cell = og32(OG_MAP);
     for (uint16_t y = 8; y < 0x200; y += 0x10)
         for (uint16_t x = 8; x < 0x200; x += 0x10) {
             uint8_t b = r8(p++);
@@ -78,7 +79,7 @@ void fo_S8_07D4(Regs *r) {
     a2 += (uint32_t)r16(a2) << 1;
     uint32_t a3 = 0;
     while (a2 != r->d[3]) {
-        a3 = og32(0x53C8) + (r->d[4] << 6);
+        a3 = og32(OG_OBJECTS) + (r->d[4] << 6);
         uint32_t a0 = a3 + 2;
         uint16_t n = r16(a2); a2 += 2;
         if (!--n) goto own;
@@ -89,7 +90,7 @@ own:
     a2 = og32(0x53CC);
     a2 += r16(a2 + sxw((uint16_t)(level << 1)));
     do {
-        a3 = og32(0x53C8) + (r->d[4] << 6);
+        a3 = og32(OG_OBJECTS) + (r->d[4] << 6);
         uint32_t a0 = a3 + 2;
         uint16_t n = r16(a2); a2 += 2;
         if (!--n) break;
@@ -105,7 +106,7 @@ own:
  * fn_S8_0852). Register routine called as C. */
 void fn_S8_0468(Regs *r);
 static void copy_in(Regs *r, uint32_t *a2) {
-    r->a[3] = og32(0x53C8) + (r->d[4] << 6);
+    r->a[3] = og32(OG_OBJECTS) + (r->d[4] << 6);
     uint32_t a0 = r->a[3];
     uint16_t n = r16(*a2);
     do { w16(a0, r16(*a2)); a0 += 2; *a2 += 2; } while (--n);
@@ -207,10 +208,10 @@ static void alt_moves(void) {
  * mouse steers the mood (fo_S8_1282) once set, or the player (fo_S8_132A). */
 void fo_S8_1152(void) {
     sog16(0x56C4, (uint16_t)(og16(0x56C4) + 1));
-    if (!og16(0x56EA)) { sog16(0x56E6, 0); sog16(0x56E0, 7); }
+    if (!og16(OG_LIFE)) { sog16(0x56E6, 0); sog16(OG_FULL_VIEW, 7); }
     else {
         if (!(og16(0x56C4) & 3)) { sog16(0x56E6, (uint16_t)(og16(0x56E6) + 1)); if (og16(0x56E6) > 0x8E) sog16(0x56E6, 0x8E); }
-        if ((og16(0x56C4) & 0xF) == 7) { sog16(0x56EA, (uint16_t)(og16(0x56EA) + 1)); if (og16(0x56EA) > 0x8E) sog16(0x56EA, 0x8E); }
+        if ((og16(0x56C4) & 0xF) == 7) { sog16(OG_LIFE, (uint16_t)(og16(OG_LIFE) + 1)); if (og16(OG_LIFE) > 0x8E) sog16(OG_LIFE, 0x8E); }
     }
     if (og8(0x71FE) && !og8(0x71F8)) {
         sog16(0x71FA, (uint16_t)(og16(0x71FA) + 1)); clamp_max(0x71FA, 0x7D00);
@@ -237,17 +238,17 @@ static void whole_view(uint32_t stream, uint16_t dist) {
 }
 static uint32_t model(uint32_t table, uint32_t off) { return table + r32(table + off); }
 void fo_S8_0F5A(void) {
-    int16_t t = (int16_t)og16(0x56E0);
+    int16_t t = (int16_t)og16(OG_FULL_VIEW);
     if (!t) return;
     if (t < 7) {
         sog16(0x56AA, 0);
         whole_view(model(og32(0x5380), sxw((uint16_t)((t - 1) << 2))), 7);
-        sog16(0x56E0, (uint16_t)(og16(0x56E0) - 1));
+        sog16(OG_FULL_VIEW, (uint16_t)(og16(OG_FULL_VIEW) - 1));
     } else if (t < 0x13) {
         sog16(0x56AA, 0x2B);
         whole_view(model(og32(0x5380), (uint32_t)(uint16_t)(((uint16_t)(t - 7) >> 1) << 2)), 7);
-        uint16_t n = (uint16_t)(og16(0x56E0) + 1);
-        if ((int16_t)n < 0x13) sog16(0x56E0, n);
+        uint16_t n = (uint16_t)(og16(OG_FULL_VIEW) + 1);
+        if ((int16_t)n < 0x13) sog16(OG_FULL_VIEW, n);
         else { sog8(0x5787, 1); sog16(0x5786, 0); sog8(0x57F2, 1); sog8(0x57F1, 1); }
     } else if (t == 0x80) { sog16(0x56AA, og16(0x56DE)); whole_view(model(og32(0x537C), 0), 2); }
     else if (t == 0x81) { sog16(0x56AA, og16(0x56DE)); whole_view(model(og32(0x53A4), 0x40), 2); }

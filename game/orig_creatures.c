@@ -6,6 +6,7 @@
  * lists for the reactions below. Here the tables are switches. Their register results are not
  * compared (the dispatcher restores what its caller keeps). */
 #include "mzasm.h"
+#include "orig_names.h"
 #include "fns.h"
 #include <stddef.h>
 
@@ -19,7 +20,7 @@ static void o_hit(Regs *r, const uint16_t *list, think_fn think) {
     uint16_t by = r16(r->a[4] + 0x14);
     if (!by) return;
     sog16(0x3832, by);
-    uint16_t type = r16(og32(0x53C8) + by + 2) & 0x7FFF;
+    uint16_t type = r16(og32(OG_OBJECTS) + by + 2) & 0x7FFF;
     for (; list && list[0] != 0xFFFF; list += 2)
         if (list[0] == type) { set_w(&r->d[0], list[1]); think(r); break; }
     w16(r->a[4] + 0x14, 0);
@@ -39,7 +40,7 @@ static void o_event(Regs *r, const uint16_t *list, think_fn think) {
  * fn_S10_3B08) against the state's { speech, new state }: a match switches state */
 static void o_said(Regs *r, const uint16_t *e, think_fn think) {
     if (!og16(0x56B8) || !(e[0] & 0x7FFF)) return;
-    if ((e[0] & 0x7FFF) != (og16(0x56C0) & 0x7FFF)) return;
+    if ((e[0] & 0x7FFF) != (og16(OG_MESSAGE) & 0x7FFF)) return;
     set_w(&r->d[0], e[1]); think(r);
 }
 static void set_pic(Regs *r, uint16_t p) { w16(r->a[4] + 0x3A, p); }
@@ -69,12 +70,12 @@ void fo_S7_0528(Regs *r) {
     static const uint16_t l0[] = {0x18, 2, 0x19, 1, 0xFFFF}, l1[] = {0x17, 0, 0x18, 2, 0x1A, 0, 0xFFFF},
                           l2[] = {0xFFFF}, l3[] = {0x17, 0, 0x18, 2, 0x19, 1, 0x1A, 0, 0xFFFF};
     static const uint16_t *const lists[4] = {l0, l1, l2, l3};
-    set_w(&r->d[7], r16(r->a[4] + 0x16));
+    set_w(&r->d[7], r16(r->a[4] + OB_STATE));
     set_w(&r->d[0], (uint16_t)r->d[7]);
     t0_think(r);
     o_hit(r, (uint16_t)r->d[7] < 4 ? lists[(uint16_t)r->d[7]] : NULL, t0_think);
     if ((uint16_t)r->d[7] == 3) set_pic(r, 0x1B);
-    w16(r->a[4] + 0x16, (uint16_t)r->d[7]);
+    w16(r->a[4] + OB_STATE, (uint16_t)r->d[7]);
 }
 
 /* ---------- type 1 (fn_S7_0606) ----------
@@ -84,11 +85,11 @@ void fo_S7_0528(Regs *r) {
 void fo_S7_0606(Regs *r) {
     set_w(&r->d[2], r16(r->a[4] + 0x14));
     if ((uint16_t)r->d[2]) {
-        r->a[0] = og32(0x53C8);
+        r->a[0] = og32(OG_OBJECTS);
         set_w(&r->d[0], r16(r->a[0] + sxw(r->d[2]) + 2));
-        uint16_t s = r16(r->a[4] + 0x16);
+        uint16_t s = r16(r->a[4] + OB_STATE);
         if ((uint16_t)r->d[0] == 0x18 && !(s & 0x8000)) {
-            if ((int16_t)s >= 0xD) w16(r->a[4] + 0x16, (uint16_t)(s - 0xD));
+            if ((int16_t)s >= 0xD) w16(r->a[4] + OB_STATE, (uint16_t)(s - 0xD));
             else {
                 call_d0d1(r, fo_S7_1282, 0, 0x20);
                 if ((uint16_t)r->d[0]) {
@@ -98,12 +99,12 @@ void fo_S7_0606(Regs *r) {
                 }
                 call_d0d1(r, fo_S7_1292, 0, 0x20);
                 r->d[0] = 0xFFFFFFFFu;
-                w16(r->a[4] + 0x16, 0xFFFF);
+                w16(r->a[4] + OB_STATE, 0xFFFF);
             }
         }
         w16(r->a[4] + 0x14, 0);
     }
-    set_pic(r, (r16(r->a[4] + 0x16) & 0x8000) ? 0x1C : 0);
+    set_pic(r, (r16(r->a[4] + OB_STATE) & 0x8000) ? 0x1C : 0);
 }
 
 /* ---------- type 2, the level's exit (fn_S7_06A8) ----------
@@ -114,9 +115,9 @@ void fo_S7_0606(Regs *r) {
  * the level changes (G_57DC = 4, G_57D8 / G_57D4 the start, G_57DA the heading, G_57DE, G_57F2). */
 static uint16_t t2_next(Regs *r) {
     static const uint16_t pic[7] = {0, 8, 9, 0xA, 0xB, 0xC, 0xD};
-    uint16_t s = (uint16_t)(r16(r->a[4] + 0x16) + 2);
+    uint16_t s = (uint16_t)(r16(r->a[4] + OB_STATE) + 2);
     if (s >= 0xD) s = 2;
-    w16(r->a[4] + 0x16, s);
+    w16(r->a[4] + OB_STATE, s);
     return pic[s / 2];
 }
 static uint16_t heal(uint16_t v, uint16_t by) { v = (uint16_t)(v + by); return v < 0x8E ? v : 0x8E; }
@@ -125,28 +126,28 @@ void fo_S7_06A8(Regs *r) {
         for (uint32_t k = 1; k <= 4; k++)
             if (r16(r->a[4] + 0x40 * k + 0x16) != 1) { set_pic(r, 0xE); return; }
         set_pic(r, t2_next(r));
-        if (r16(r->a[4] + 0x30) != og16(0x56D0)) return;
-        uint16_t x = og16(0x56D8), y = og16(0x56D4);
+        if (r16(r->a[4] + OB_CELL) != og16(OG_PLAYER_CELL)) return;
+        uint16_t x = og16(OG_PLAYER_X), y = og16(OG_PLAYER_Y);
         if (x < 0x56 || x >= 0x5B || y < 0x54 || y >= 0x58) return;
         for (uint16_t at = 0x80; at <= 0x140; at += 0x40) call_d0d1(r, fo_S7_1278, 1, at);
         w16(r->a[4] + 0x18, 0x10);
     }
     sog16(0x56DE, t2_next(r));
-    sog16(0x56E0, 0x81);
+    sog16(OG_FULL_VIEW, 0x81);
     uint16_t t = (uint16_t)(r16(r->a[4] + 0x18) - 1);
     w16(r->a[4] + 0x18, t);
     if (!t) {
-        sog16(0x57DC, 4); sog32(0x57D8, 0x780000); sog32(0x57D4, 0x5E0000);
-        sog16(0x57DA, og16(0x56DA)); sog8(0x57DE, 1); sog8(0x57F2, 1);
+        sog16(OG_GO_LEVEL, 4); sog32(OG_GO_X, 0x780000); sog32(OG_GO_Y, 0x5E0000);
+        sog16(OG_GO_HEADING, og16(OG_PLAYER_HEADING)); sog8(0x57DE, 1); sog8(0x57F2, 1);
     }
-    sog16(0x56EA, heal(og16(0x56EA), 3));
+    sog16(OG_LIFE, heal(og16(OG_LIFE), 3));
     sog16(0x56E6, heal(og16(0x56E6), 6));
 }
 
 /* fo_S10_2624: the spin-and-move (fn_S7_0A9C), only every other frame (G_56C4 odd) while the
  * object is above y $8F; else D0.l = -1 */
 void fo_S10_2624(Regs *r) {
-    set_w(&r->d[1], r16(r->a[4] + 8));
+    set_w(&r->d[1], r16(r->a[4] + OB_Y));
     if ((uint16_t)r->d[1] < 0x8F) {
         set_w(&r->d[1], og16(0x56C4) & 1);
         if (!(uint16_t)r->d[1]) { r->d[0] = 0xFFFFFFFFu; cc_nz_l(r, r->d[0]); return; }
@@ -156,7 +157,7 @@ void fo_S10_2624(Regs *r) {
 
 static void random_d0(Regs *r) { mz_seg_of(2, 0x3532), fn_S2_3532(r); }
 static void unlink_obj(Regs *r) {                           /* fn_S2_29E2: out of its cell's list */
-    set_w(&r->d[0], og16(0x3834)); set_w(&r->d[1], r16(r->a[4] + 0x30));
+    set_w(&r->d[0], og16(OG_SELF)); set_w(&r->d[1], r16(r->a[4] + OB_CELL));
     mz_seg_of(2, 0x3410), fn_S2_3410(r);
 }
 
@@ -185,9 +186,9 @@ static void k3_think(Regs *r) {
             w16(o + 0x18, 0x7FFF); set_w(&r->d[0], 1); continue;
         case 1: {
             if (t < 0) { set_w(&r->d[0], 0); continue; }
-            uint16_t c = (uint16_t)(r16(o + 0xC) + 1);
-            if (c >= 0x2E) { w16(o + 0xC, 0); set_w(&r->d[0], 2); continue; }
-            w16(o + 0xC, c); return;
+            uint16_t c = (uint16_t)(r16(o + OB_HEADING) + 1);
+            if (c >= 0x2E) { w16(o + OB_HEADING, 0); set_w(&r->d[0], 2); continue; }
+            w16(o + OB_HEADING, c); return;
         }
         case 2:
             if (t < 0) { set_w(&r->d[0], 0); continue; }
@@ -196,7 +197,7 @@ static void k3_think(Regs *r) {
             set_w(&r->d[0], 1); continue;
         case 3:
             unlink_obj(r);
-            w16(o + 2, r16(o + 2) | 0x8000);
+            w16(o + OB_TYPE, r16(o + OB_TYPE) | 0x8000);
             set_w(&r->d[0], 4); continue;
         case 5: case 6: {
             uint16_t by = (uint16_t)r->d[7] == 5 ? 5 : 10;
@@ -219,7 +220,7 @@ static void k3_think(Regs *r) {
  * axis of +$1A towards its cell's edge (low four bits of x / y towards 0 below 8, else to $F); a
  * type 9 also moves its marked target cell that way when that cell is free. Then event 4. */
 static void k3_push(Regs *r, uint8_t n, uint16_t cell) {
-    uint32_t a1 = og32(0x53C8) + ((uint32_t)n << 6), map = og32(0x53D4);
+    uint32_t a1 = og32(OG_OBJECTS) + ((uint32_t)n << 6), map = og32(OG_MAP);
     uint16_t type = r16(a1 + 2);
     if (type != 9 && type != 0x12) return;
     uint32_t f = r16(r->a[4] + 0x1A) ? 8 : 4;
@@ -246,35 +247,35 @@ static void k3_push_player(Regs *r, uint16_t g) {
 static void k3_act(Regs *r) {
     uint32_t o = r->a[4];
     uint16_t s = (uint16_t)r->d[7];
-    if (s == 0) { w16(o + 0x12, k3->act0); w16(o + 0xC, 0); return; }
+    if (s == 0) { w16(o + 0x12, k3->act0); w16(o + OB_HEADING, 0); return; }
     if (s != 1 && s != 2) return;
     if (k3->kind == 2) { if (s == 1) w16(o + 0x12, 4); return; }
     w16(o + 0x12, 2);
-    uint32_t t = og32(0x53C8);
+    uint32_t t = og32(OG_OBJECTS);
     if (k3->kind == 1) {
-        if (r16(t + sxw((uint16_t)(og16(0x3834) + 0x40)) + 0x12) == 4) w16(o + 0x12, 4);
+        if (r16(t + sxw((uint16_t)(og16(OG_SELF) + 0x40)) + 0x12) == 4) w16(o + 0x12, 4);
         return;
     }
-    if (r16(t + sxw((uint16_t)(og16(0x3834) - 0x40)) + 0x18) & 0x8000) return;
-    uint16_t cell = r16(o + 0x30);                          /* fn_S10_1F4E: the objects listed in the cell */
+    if (r16(t + sxw((uint16_t)(og16(OG_SELF) - 0x40)) + 0x18) & 0x8000) return;
+    uint16_t cell = r16(o + OB_CELL);                          /* fn_S10_1F4E: the objects listed in the cell */
     for (uint32_t k = 1; k <= 10; k++) {
-        uint8_t n = r8(og32(0x53D4) + sxw(cell) + k);
+        uint8_t n = r8(og32(OG_MAP) + sxw(cell) + k);
         if (!n) break;
         k3_push(r, n, cell);
     }
     if (r16(o + 0x10)) return;
-    if (og16(0x56D0) != cell) return;                       /* fn_S10_2096 */
+    if (og16(OG_PLAYER_CELL) != cell) return;                       /* fn_S10_2096 */
     for (int k = 0; k < 3; k++) k3_push_player(r, r16(o + 0x1A) == 2 ? 0x56D4 : 0x56D8);
 }
 static void kind3_tick(Regs *r, int v) {
     static const uint16_t hits[] = {0x13, 6, 0x17, 5, 0x18, 7, 0xFFFF};
     k3 = &kind3[v];
-    set_w(&r->d[7], r16(r->a[4] + 0x16));
+    set_w(&r->d[7], r16(r->a[4] + OB_STATE));
     set_w(&r->d[0], (uint16_t)r->d[7]);
     k3_think(r);
     o_hit(r, (uint16_t)r->d[7] <= 2 ? hits : NULL, k3_think);
     k3_act(r);
-    w16(r->a[4] + 0x16, (uint16_t)r->d[7]);
+    w16(r->a[4] + OB_STATE, (uint16_t)r->d[7]);
 }
 void fo_S10_1974(Regs *r) { kind3_tick(r, 0); }
 void fo_S10_1B2E(Regs *r) { kind3_tick(r, 1); }
@@ -290,9 +291,9 @@ static void t1ce2_think(Regs *r) {
         switch ((uint16_t)r->d[7]) {
         case 0: {
             w16(r->a[4] + 0x12, 0);
-            uint16_t c = (uint16_t)(r16(r->a[4] + 0xC) + 1);
-            if (c >= 0x2E) { w16(r->a[4] + 0xC, 0); set_w(&r->d[0], 1); continue; }
-            w16(r->a[4] + 0xC, c); return;
+            uint16_t c = (uint16_t)(r16(r->a[4] + OB_HEADING) + 1);
+            if (c >= 0x2E) { w16(r->a[4] + OB_HEADING, 0); set_w(&r->d[0], 1); continue; }
+            w16(r->a[4] + OB_HEADING, c); return;
         }
         case 1:
             random_d0(r);
@@ -304,25 +305,25 @@ static void t1ce2_think(Regs *r) {
 }
 void fo_S10_1CE2(Regs *r) {
     static const uint16_t hits[] = {0x18, 2, 0x19, 2, 0x1B, 2, 0x801B, 2, 0xFFFF};
-    set_w(&r->d[7], r16(r->a[4] + 0x16));
+    set_w(&r->d[7], r16(r->a[4] + OB_STATE));
     set_w(&r->d[0], (uint16_t)r->d[7]);
     t1ce2_think(r);
     o_hit(r, (uint16_t)r->d[7] <= 1 ? hits : NULL, t1ce2_think);
     if ((uint16_t)r->d[7] == 2) {
         call_d0d1(r, fo_S7_1292, 0, 0x80);
-        w16(r->a[4] + 2, 0x1B);
-        set_w(&r->d[0], og16(0x3834));
+        w16(r->a[4] + OB_TYPE, 0x1B);
+        set_w(&r->d[0], og16(OG_SELF));
         mz_seg_of(2, 0x3480), fn_S2_3480(r);
-        w16(r->a[4] + 0x16, 0);
+        w16(r->a[4] + OB_STATE, 0);
     }
-    w16(r->a[4] + 0x16, (uint16_t)r->d[7]);
+    w16(r->a[4] + OB_STATE, (uint16_t)r->d[7]);
 }
 
 /* fn_S10_2B92: the level's twelve counters (words of G_53C8 + $1E: low byte counts to $10, then a
  * new random high nibble and low byte 0 or $FF), the map's refresh (fn_S7_3128), and while the
  * player is near (G_382E < 4) life G_56EA and G_56E6 + 10 each, to $8E */
 void fo_S10_2B92(Regs *r) {
-    uint32_t a2 = og32(0x53C8) + 0x1E;
+    uint32_t a2 = og32(OG_OBJECTS) + 0x1E;
     for (uint16_t d3 = 0; d3 < 0x18; d3 += 2) {
         uint16_t w = r16(a2 + d3), n = (uint16_t)((w & 0xFF) + 1);
         if (n != 0x11) { w16(a2 + d3, (uint16_t)((w & 0xFF00) | n)); continue; }
@@ -332,7 +333,7 @@ void fo_S10_2B92(Regs *r) {
         w16(a2 + d3, (uint16_t)(hi | ((uint16_t)-((uint16_t)r->d[0] & 1) & 0xFF)));
     }
     mz_seg_of(7, 0x3128), fn_S7_3128(r);
-    if (og16(0x382E) < 4) { sog16(0x56EA, heal(og16(0x56EA), 0xA)); sog16(0x56E6, heal(og16(0x56E6), 0xA)); }
+    if (og16(OG_NEAR_DIST) < 4) { sog16(OG_LIFE, heal(og16(OG_LIFE), 0xA)); sog16(0x56E6, heal(og16(0x56E6), 0xA)); }
 }
 
 /* ---------- finding the way, cell by cell ----------
@@ -347,10 +348,10 @@ void fo_S10_2B92(Regs *r) {
  *  is leaving has become closer than its target, it turns back (D0 = -1). */
 enum { ROUTE_RANDOM, ROUTE_FIXED, ROUTE_CLOSER };
 static uint16_t o_route(Regs *r, int mode) {
-    uint32_t o = r->a[4], map = og32(0x53D4);
+    uint32_t o = r->a[4], map = og32(OG_MAP);
 #define CELL(c, f) (map + sxw(c) + (f))
     uint16_t at = r16(o + 0xE);
-    int16_t dx = (int16_t)(r16(CELL(at, 0x1C)) - r16(o + 4)), dy = (int16_t)(r16(CELL(at, 0x1E)) - r16(o + 8));
+    int16_t dx = (int16_t)(r16(CELL(at, 0x1C)) - r16(o + OB_X)), dy = (int16_t)(r16(CELL(at, 0x1E)) - r16(o + OB_Y));
     if (dx || dy) {
         uint16_t dir = dx ? (dx < 0 ? 0 : 0x20) : (dy < 0 ? 0x10 : 0x30);
         if (mode != ROUTE_CLOSER) return dir;
@@ -403,7 +404,7 @@ static uint16_t o_route(Regs *r, int mode) {
  * back to 1), 10-11 event $303: 5 ticks of the dying picture $1E, removed, 12-13 following the
  * scent (fn_S7_1B46) and pulling. */
 static void hunter_think(Regs *r) {
-    uint32_t o = r->a[4], map = og32(0x53D4);
+    uint32_t o = r->a[4], map = og32(OG_MAP);
     for (;;) {
         set_w(&r->d[7], (uint16_t)r->d[0]);
         uint16_t dist = r16(map + sxw(r16(o + 0xE)) + 0x10);
@@ -412,16 +413,16 @@ static void hunter_think(Regs *r) {
         case 1:
             if (r16(o + 0xE) >= 0x2000) { set_w(&r->d[0], 6); continue; }
             mz_seg_of(7, 0x319E), fn_S7_319E(r);
-            if (og16(0x382E) < 0x19) { set_w(&r->d[0], 5); continue; }
+            if (og16(OG_NEAR_DIST) < 0x19) { set_w(&r->d[0], 5); continue; }
             return;
         case 2:
             w16(o + 0x18, 0xC0);
-            sog16(0x56A8, 0x14); sog16(0x56A6, og16(0x56D0));
+            sog16(0x56A8, 0x14); sog16(0x56A6, og16(OG_PLAYER_CELL));
             mz_seg_of(2, 0x366A), fn_S2_366A(r); fn_S2_3568(r);    /* fn_S2_2B3E */
             set_w(&r->d[0], 3); continue;
         case 3: {
             uint16_t t = r16(o + 0x18);
-            if (r16(o + 8) >= 0x88) t = (uint16_t)(t - 2);
+            if (r16(o + OB_Y) >= 0x88) t = (uint16_t)(t - 2);
             t = (uint16_t)(t - 1);
             w16(o + 0x18, t);
             if (t & 0x8000) { w16(o + 0x10, 0); set_w(&r->d[0], 1); continue; }
@@ -438,16 +439,16 @@ static void hunter_think(Regs *r) {
         case 4: w16(o + 0x18, 0); set_w(&r->d[0], 7); continue;
         case 5:
             mz_seg_of(7, 0x319E), fn_S7_319E(r);
-            if (og16(0x382E) >= 0x19) { set_w(&r->d[0], 1); continue; }
+            if (og16(OG_NEAR_DIST) >= 0x19) { set_w(&r->d[0], 1); continue; }
             return;
         case 6:
             if (r16(o + 0xE) < 0x2000) { set_w(&r->d[0], 1); continue; }
             mz_seg_of(7, 0x319E), fn_S7_319E(r);
-            if (og16(0x382E) < 0x19) { set_w(&r->d[0], 5); continue; }
+            if (og16(OG_NEAR_DIST) < 0x19) { set_w(&r->d[0], 5); continue; }
             return;
         case 8: {
             if (dist) { set_w(&r->d[0], 9); continue; }
-            uint32_t t = og32(0x53C8);
+            uint32_t t = og32(OG_OBJECTS);
             if ((r16(t + 0x82) & 0x8000) && (r16(t + 0xC2) & 0x8000) && (r16(t + 0x102) & 0x8000)) { set_w(&r->d[0], 1); continue; }
             return;
         }
@@ -466,24 +467,24 @@ static void spin_move(Regs *r, uint16_t d0, int every_other) {   /* fn_S10_2624 
 static int near_player(Regs *r) { mz_seg_of(7, 0x3D2A), fn_S7_3D2A(r); return (uint16_t)r->d[0] != 0; }
 static void pull(Regs *r) { mz_seg_of(7, 0x09EC), fn_S7_09EC(r); }
 static void remove_obj(Regs *r) {
-    w16(og32(0x53D4) + sxw(r16(r->a[4] + 0xE)) + 0xE, 0);
+    w16(og32(OG_MAP) + sxw(r16(r->a[4] + 0xE)) + 0xE, 0);
     unlink_obj(r);
-    w16(r->a[4] + 2, r16(r->a[4] + 2) | 0x8000);
+    w16(r->a[4] + OB_TYPE, r16(r->a[4] + OB_TYPE) | 0x8000);
 }
 /* fn_S7_1F60: an object of type `type` made in the first free record (type $FFFF, from the last
  * down) at G_382C / G_3828 in cell G_3824 (fn_S2_2976 refusing it: none), heading c, +$10 f10; its
  * record offset, or -1 */
 static int make_object(Regs *r, uint16_t type, uint16_t c, uint16_t f10) {
-    uint32_t t = og32(0x53C8);
+    uint32_t t = og32(OG_OBJECTS);
     uint16_t rec = 0x1DC0;
     while (r16(t + rec + 2) != 0xFFFF) { rec -= 0x40; if (!rec) return -1; }
-    set_w(&r->d[0], rec); set_w(&r->d[1], og16(0x3824));
+    set_w(&r->d[0], rec); set_w(&r->d[1], og16(OG_MOVE_CELL));
     mz_seg_of(2, 0x33A4), fn_S2_33A4(r);
     if ((uint16_t)r->d[0]) return -1;
     uint32_t o = t + rec;
-    w16(o + 2, type); w16(o + 4, og16(0x382C)); w16(o + 8, og16(0x3828));
+    w16(o + OB_TYPE, type); w16(o + OB_X, og16(OG_MOVE_X)); w16(o + OB_Y, og16(OG_MOVE_Y));
     w16(o + 6, 0x8000); w16(o + 0xA, 0x8000); w16(o + 0xE, 0);
-    w16(o + 0xC, c); w16(o + 0x10, f10); w16(o + 0x14, 0); w16(o + 0x12, 0xFFFF);
+    w16(o + OB_HEADING, c); w16(o + 0x10, f10); w16(o + 0x14, 0); w16(o + 0x12, 0xFFFF);
     set_w(&r->d[0], rec);
     mz_seg_of(2, 0x3480), fn_S2_3480(r);
     return rec;
@@ -492,8 +493,8 @@ static int make_object(Regs *r, uint16_t type, uint16_t c, uint16_t f10) {
  * 6; within 6 an object of type $2A (made at 0, 0) */
 static void rush_step(Regs *r) {
     mz_seg_of(7, 0x3128), fn_S7_3128(r);                    /* fn_S7_12BE */
-    if (og16(0x3830) & 0x8000) return;
-    set_w(&r->d[0], og16(0x3830));
+    if (og16(OG_NEAR_DIR) & 0x8000) return;
+    set_w(&r->d[0], og16(OG_NEAR_DIR));
     mz_seg_of(7, 0x3722), fn_S7_3722(r);
     r->a[0] = OADDR(0x4F30);
     mz_seg_of(7, 0x374C), fn_S7_374C(r);
@@ -501,9 +502,9 @@ static void rush_step(Regs *r) {
 }
 static void rush(Regs *r) {
     rush_step(r);
-    if (og16(0x382E) >= 6) { rush_step(r); rush_step(r); }
-    if (og16(0x382E) < 6) {
-        sog16(0x382C, 0); sog16(0x3828, 0); sog16(0x3824, 0);
+    if (og16(OG_NEAR_DIST) >= 6) { rush_step(r); rush_step(r); }
+    if (og16(OG_NEAR_DIST) < 6) {
+        sog16(OG_MOVE_X, 0); sog16(OG_MOVE_Y, 0); sog16(OG_MOVE_CELL, 0);
         make_object(r, 0x2A, 0, 0);
     }
 }
@@ -521,7 +522,7 @@ void fo_S10_21DC(Regs *r) {
     uint32_t o = r->a[4], a6 = r->a[6];
     r->a[6] = r->a[7] - 4;                                  /* LINK A6, #-2: the local word at -2 */
     r->a[7] -= 6;
-    set_w(&r->d[7], r16(o + 0x16));
+    set_w(&r->d[7], r16(o + OB_STATE));
     set_w(&r->d[0], (uint16_t)r->d[7]);
     hunter_think(r);
     uint16_t s = (uint16_t)r->d[7];
@@ -533,7 +534,7 @@ void fo_S10_21DC(Regs *r) {
     case 1: spin_move(r, o_route(r, ROUTE_RANDOM), 2); break;
     case 3: spin_move(r, r16(r->a[6] - 2), 1); break;
     case 5:
-        sog16(0x381C, og16(0x56D8)); sog16(0x3818, og16(0x56D4));
+        sog16(OG_TARGET_X, og16(OG_PLAYER_X)); sog16(OG_TARGET_Y, og16(OG_PLAYER_Y));
         mz_seg_of(7, 0x3B36), fn_S7_3B36(r);
         fn_S7_3D0E(r);
         spin_move(r, og16(0x3812), 1);
@@ -550,9 +551,9 @@ void fo_S10_21DC(Regs *r) {
     }
     case 8: spin_move(r, o_route(r, ROUTE_RANDOM), 0); break;
     case 9: scent_move(r); {          /* fn_S10_267C: the objects of types 3-5 in its cell get event $901 */
-        uint32_t map = og32(0x53D4), t = og32(0x53C8);
+        uint32_t map = og32(OG_MAP), t = og32(OG_OBJECTS);
         for (uint32_t k = 1; k <= 10; k++) {
-            uint8_t n = r8(map + sxw(r16(o + 0x30)) + k);
+            uint8_t n = r8(map + sxw(r16(o + OB_CELL)) + k);
             if (!n) break;
             uint16_t ty = r16(t + ((uint32_t)n << 6) + 2);
             if (ty == 3 || ty == 4 || ty == 5) w16(t + ((uint32_t)n << 6) + 0x12, 0x901);
@@ -569,7 +570,7 @@ void fo_S10_21DC(Regs *r) {
     case 12: scent_move(r); if (near_player(r) && ((uint16_t)r->d[0] & 0x8000)) pull(r); break;
     case 13: spin_move(r, 0xFFFF, 1); if (near_player(r) && ((uint16_t)r->d[0] & 0x8000)) pull(r); break;
     }
-    w16(o + 0x16, (uint16_t)r->d[7]);
+    w16(o + OB_STATE, (uint16_t)r->d[7]);
     r->a[7] += 6; r->a[6] = a6;
 }
 
@@ -581,8 +582,8 @@ void fo_S10_21DC(Regs *r) {
  * $1D02 to George and 9-11: a straight run of +$1A steps, a wait, then turning towards the player);
  * 3-4 dying (pictures 7, 4, $C, then removed and event $1D01 to George); 7 walking the path
  * of three points (fn_S10_4324) until near the player. Event 1 kills it in states 0 and 7-11. */
-static void g_target(uint16_t x, uint16_t y) { sog16(0x381C, x); sog16(0x3818, y); }
-static void g_record1(void) { uint32_t t = og32(0x53C8); g_target(r16(t + 0x44), r16(t + 0x48)); }
+static void g_target(uint16_t x, uint16_t y) { sog16(OG_TARGET_X, x); sog16(OG_TARGET_Y, y); }
+static void g_record1(void) { uint32_t t = og32(OG_OBJECTS); g_target(r16(t + 0x44), r16(t + 0x48)); }
 static void g_step(Regs *r) {                               /* fn_S7_14E8, fn_S7_1540, fn_S7_1578 */
     mz_seg_of(7, 0x36F4), fn_S7_36F4(r);
     fn_S7_374C(r);
@@ -618,9 +619,9 @@ static int g_path(Regs *r) {                                 /* fn_S10_4324: 0, 
     if ((uint16_t)r->d[0] & 0x8000) {
         i = (uint16_t)(i + 4);
         w16(r->a[4] + 0x1A, i);
-        sog16(0x381C, path[i / 2]);
+        sog16(OG_TARGET_X, path[i / 2]);
         if (path[i / 2] & 0x8000) { r->d[0] = r->d[1] = 0xFFFFFFFFu; return -1; }
-        sog16(0x3818, path[i / 2 + 1]);
+        sog16(OG_TARGET_Y, path[i / 2 + 1]);
         fo_S7_1488(r);
     }
     uint16_t d = (uint16_t)r->d[0];
@@ -639,17 +640,17 @@ static void guard_think(Regs *r) {
         switch ((uint16_t)r->d[7]) {
         case 0:
             near_d0(r);
-            if (og16(0x382E) < 8) { set_w(&r->d[0], 1); continue; }
+            if (og16(OG_NEAR_DIST) < 8) { set_w(&r->d[0], 1); continue; }
             g_record1(); fo_S7_14C0(r);
             if ((uint16_t)r->d[0] < 6) { set_w(&r->d[0], 8); continue; }
             if ((uint16_t)r->d[0] >= 9) return;
-            if (r16(og32(0x53C8) + 0x56) == 2) { set_w(&r->d[0], 8); continue; }
+            if (r16(og32(OG_OBJECTS) + 0x56) == 2) { set_w(&r->d[0], 8); continue; }
             return;
         case 1: w16(o + 0x1A, 0x1E); set_w(&r->d[0], 2); continue;
         case 2: {
             near_d0(r);
-            if (og16(0x382E) >= 0xC) { set_w(&r->d[0], 5); continue; }
-            set_w(&r->d[0], (uint16_t)((og16(0x3830) ^ 0x20) - og16(0x56DA)));
+            if (og16(OG_NEAR_DIST) >= 0xC) { set_w(&r->d[0], 5); continue; }
+            set_w(&r->d[0], (uint16_t)((og16(OG_NEAR_DIR) ^ 0x20) - og16(OG_PLAYER_HEADING)));
             mz_seg_of(7, 0x367E), fn_S7_367E(r);
             if ((uint16_t)r->d[0] >= 0x10) { set_w(&r->d[0], 5); continue; }
             uint16_t t = (uint16_t)(r16(o + 0x1A) - 1);
@@ -662,14 +663,14 @@ static void guard_think(Regs *r) {
         case 7:
             if (g_path(r) < 0 || g_path(r) < 0) { w16(o + 0x1A, 0x28); set_w(&r->d[0], 0); continue; }
             near_d0(r);
-            if (og16(0x382E) < 6) { set_w(&r->d[0], 1); continue; }
+            if (og16(OG_NEAR_DIST) < 6) { set_w(&r->d[0], 1); continue; }
             return;
         case 8:
             for (int k = 0; k < 4; k++) g_ring(r);
             g_record1(); fo_S7_14C0(r);
             if ((uint16_t)r->d[0] >= 3) return;
             call_d0d1(r, fo_S7_1278, 0x1D02, 0x40);
-            sog16(0x56C0, 0);
+            sog16(OG_MESSAGE, 0);
             w16(o + 0x1A, 6);
             set_w(&r->d[0], 9); continue;
         case 9: {
@@ -679,7 +680,7 @@ static void guard_think(Regs *r) {
             w16(o + 0x1A, (uint16_t)n);
             do {
                 r->a[0] = OADDR(0x4F30);
-                set_w(&r->d[0], r16(o + 0xC));
+                set_w(&r->d[0], r16(o + OB_HEADING));
                 g_step(r);
                 set_w(&r->d[3], (uint16_t)((uint16_t)r->d[3] - 1));
             } while (!((uint16_t)r->d[3] & 0x8000));
@@ -696,7 +697,7 @@ static void guard_think(Regs *r) {
             w16(o + 0x1A, t);
             if (t & 0x8000) { set_w(&r->d[0], 3); continue; }
             near_d0(r);
-            set_w(&r->d[0], og16(0x3830));
+            set_w(&r->d[0], og16(OG_NEAR_DIR));
             if ((uint16_t)r->d[0] & 0x8000) { set_w(&r->d[0], 3); continue; }
             mz_seg_of(7, 0x36F4), fn_S7_36F4(r);
             return;
@@ -709,7 +710,7 @@ void fo_S10_400A(Regs *r) {
     static const uint16_t ev[] = {1, 3, 0xFFFF};
     static const uint8_t has_ev[12] = {1, 0, 0, 0, 0, 0, 0, 1, 1, 1, 1, 1};
     uint32_t o = r->a[4];
-    set_w(&r->d[7], r16(o + 0x16));
+    set_w(&r->d[7], r16(o + OB_STATE));
     set_w(&r->d[0], (uint16_t)r->d[7]);
     guard_think(r);
     o_event(r, (uint16_t)r->d[7] < 12 && has_ev[(uint16_t)r->d[7]] ? ev : NULL, guard_think);
@@ -719,14 +720,14 @@ void fo_S10_400A(Regs *r) {
         g_record1(); fo_S7_14C0(r);
         if (!(og16(0x56C4) & ((uint16_t)r->d[0] >= 0xF ? 0x1F : 0x7F))) g_ring(r);
         break;
-    case 2: g_pic_random(r); set_w(&r->d[0], og16(0x3830)); mz_seg_of(7, 0x36F4), fn_S7_36F4(r); break;
+    case 2: g_pic_random(r); set_w(&r->d[0], og16(OG_NEAR_DIR)); mz_seg_of(7, 0x36F4), fn_S7_36F4(r); break;
     case 4: {
         uint16_t t = (uint16_t)(r16(o + 0x1A) + 1);
         w16(o + 0x1A, t);
         if (t < 4) w16(o + 0x18, 7);
         else if (t < 8) w16(o + 0x18, 4);
         else if (t < 0xC) w16(o + 0x18, 0xC);
-        else { unlink_obj(r); w16(o + 2, r16(o + 2) | 0x8000); call_d0d1(r, fo_S7_1278, 0x1D01, 0x40); }
+        else { unlink_obj(r); w16(o + OB_TYPE, r16(o + OB_TYPE) | 0x8000); call_d0d1(r, fo_S7_1278, 0x1D01, 0x40); }
         break;
     }
     case 6: {
@@ -734,15 +735,15 @@ void fo_S10_400A(Regs *r) {
         int16_t t = (int16_t)(r16(o + 0x1A) - 1);
         w16(o + 0x1A, (uint16_t)(t < 0 ? 0 : t));
         w16(o + 0x18, 0x10);
-        sog32(0x382C, og32(0x56D8)); sog32(0x3828, og32(0x56D4)); sog16(0x3824, og16(0x56D0));
+        sog32(OG_MOVE_X, og32(OG_PLAYER_X)); sog32(OG_MOVE_Y, og32(OG_PLAYER_Y)); sog16(OG_MOVE_CELL, og16(OG_PLAYER_CELL));
         mz_seg_of(7, 0x3784), fn_S7_3784(r);
-        int16_t l = (int16_t)(og16(0x56EA) - 0x28);
-        sog16(0x56EA, (uint16_t)(l < 0 ? 0 : l));
+        int16_t l = (int16_t)(og16(OG_LIFE) - 0x28);
+        sog16(OG_LIFE, (uint16_t)(l < 0 ? 0 : l));
         break;
     }
     case 7: case 8: g_pic_random(r); break;
     }
-    w16(o + 0x16, (uint16_t)r->d[7]);
+    w16(o + OB_STATE, (uint16_t)r->d[7]);
 }
 
 /* ---------- George (fn_S10_2C7C, type $14, record 1) ----------
@@ -764,25 +765,25 @@ void fo_S10_400A(Regs *r) {
  * (fo_S7_155C) and leave him there until the player goes (36-37: gone). Not all of them are
  * reached by the tests yet. */
 void fo_S7_155C(Regs *r);
-static void say(uint16_t text) { sog16(0x56C0, (uint16_t)(0x8000 | text)); }
+static void say(uint16_t text) { sog16(OG_MESSAGE, (uint16_t)(0x8000 | text)); }
 static int flag(Regs *r, uint16_t word, uint16_t bits) { call_d0d1(r, fo_S7_1282, word, bits); return (uint16_t)r->d[0] != 0; }
 static void flag_set(Regs *r, uint16_t word, uint16_t bits) { call_d0d1(r, fo_S7_1292, word, bits); }
 static int cell_in(uint16_t cell, const uint16_t *list) { for (; *list; list++) if (cell == *list) return 1; return 0; }
 static int george_cell_ends(void) {                          /* fn_S10_3D6C: the player in one of these cells ends a remark */
     static const uint16_t cells[] = {0x2580, 0x2940, 0x4BC0, 0x5340, 0x7B20, 0x4660, 0x4E80, 0x7160, 0x6E20, 0x6520,
                                      0x6540, 0x6560, 0};
-    return cell_in(og16(0x56D0), cells);
+    return cell_in(og16(OG_PLAYER_CELL), cells);
 }
 /* fn_S10_3B7C: off the map (out of his cell; x, y, cell and the showing phase +$1A cleared) */
 static void george_hide(Regs *r) {
-    if (!r16(r->a[4] + 0x30)) return;
+    if (!r16(r->a[4] + OB_CELL)) return;
     unlink_obj(r);
-    w16(r->a[4] + 4, 0); w16(r->a[4] + 8, 0); w16(r->a[4] + 0x30, 0); w16(r->a[4] + 0x1A, 0);
+    w16(r->a[4] + OB_X, 0); w16(r->a[4] + OB_Y, 0); w16(r->a[4] + OB_CELL, 0); w16(r->a[4] + 0x1A, 0);
 }
 static void george_hide_shown(Regs *r) { if (r16(r->a[4] + 0x1A)) george_hide(r); }   /* fn_S10_3B9C */
 /* placed where the player stands (fn_S7_1578 from G_382C / G_3828 / G_3824) */
 static void george_at_player(Regs *r) {
-    sog32(0x382C, og32(0x56D8)); sog32(0x3828, og32(0x56D4)); sog16(0x3824, og16(0x56D0));
+    sog32(OG_MOVE_X, og32(OG_PLAYER_X)); sog32(OG_MOVE_Y, og32(OG_PLAYER_Y)); sog16(OG_MOVE_CELL, og16(OG_PLAYER_CELL));
     mz_seg_of(7, 0x3784), fn_S7_3784(r);
 }
 /* fn_S10_3BA8: how he appears for a new text: 0 he goes; 1 beside the player, facing him (+$1A 1,
@@ -792,17 +793,17 @@ static void george_appear(Regs *r, uint16_t how) {
     uint32_t o = r->a[4];
     if (how == 0 || how > 4) { george_hide_shown(r); return; }    /* (texts use 0-4) */
     if (how == 1) {
-        if (!r16(o + 0x1A)) { george_at_player(r); w16(o + 0xC, og16(0x56DA) ^ 0x20); }
+        if (!r16(o + 0x1A)) { george_at_player(r); w16(o + OB_HEADING, og16(OG_PLAYER_HEADING) ^ 0x20); }
         w16(o + 0x1A, 1); w16(o + 0x22, 0x32);
         return;
     }
     w16(o + 0x22, frames[how]);
     if (!r16(o + 0x1A)) {
-        uint32_t at = og32(0x53C8) + sxw(r16(o + 0x1C));
-        sog32(0x382C, r32(at + 4)); sog32(0x3828, r32(at + 8)); sog16(0x3824, r16(at + 0x30));
+        uint32_t at = og32(OG_OBJECTS) + sxw(r16(o + 0x1C));
+        sog32(OG_MOVE_X, r32(at + 4)); sog32(OG_MOVE_Y, r32(at + 8)); sog16(OG_MOVE_CELL, r16(at + 0x30));
         mz_seg_of(7, 0x3784), fn_S7_3784(r);
-        g_target(og16(0x56D8), og16(0x56D4)); fo_S7_1488(r);
-        w16(o + 0xC, (uint16_t)r->d[0]);
+        g_target(og16(OG_PLAYER_X), og16(OG_PLAYER_Y)); fo_S7_1488(r);
+        w16(o + OB_HEADING, (uint16_t)r->d[0]);
     }
     w16(o + 0x1A, 3);
 }
@@ -811,8 +812,8 @@ static void george_appear(Regs *r, uint16_t how) {
  * screen, and G_56B8 = -1: said. */
 static void george_speech(Regs *r) {
     sog16(0x56B8, 0);
-    uint16_t t = og16(0x56C0) & 0x8000 ? og16(0x56C0) & 0x7FFF : 0;
-    sog16(0x56C0, t);
+    uint16_t t = og16(OG_MESSAGE) & 0x8000 ? og16(OG_MESSAGE) & 0x7FFF : 0;
+    sog16(OG_MESSAGE, t);
     if (t != og16(0x56BE)) {
         sog16(0x56BE, t);
         set_w(&r->d[0], t); mz_seg(6), fo_S6_0000(r);
@@ -821,7 +822,7 @@ static void george_speech(Regs *r) {
         w16(r->a[4] + 0x1C, r16(r->a[0] + 8));
         george_appear(r, r16(r->a[0] + 6));
     } else if (og16(0x56BC)) sog16(0x56BC, (uint16_t)(og16(0x56BC) - 1));
-    else if (!og16(0x56C0)) return;
+    else if (!og16(OG_MESSAGE)) return;
     else if (og16(0x56BA)) sog16(0x56BA, (uint16_t)(og16(0x56BA) - 1));
     else sog16(0x56B8, 0xFFFF);
 }
@@ -836,18 +837,18 @@ static void george_showing(Regs *r) {
     case 1: w16(o + 0x20, 0x8000); w16(o + 0x1A, 2); w16(o + 0x26, 5); break;
     case 2:
         w16(o + 0x20, 0); george_at_player(r);
-        set_w(&r->d[0], og16(0x56DA) ^ 0x20); george_turn(r);
+        set_w(&r->d[0], og16(OG_PLAYER_HEADING) ^ 0x20); george_turn(r);
         if (george_count(r)) w16(o + 0x1A, 6);
         break;
     case 3:
-        w16(o + 0x20, 0); g_target(og16(0x56D8), og16(0x56D4)); fo_S7_1488(r); george_turn(r);
+        w16(o + 0x20, 0); g_target(og16(OG_PLAYER_X), og16(OG_PLAYER_Y)); fo_S7_1488(r); george_turn(r);
         if (george_count(r)) w16(o + 0x1A, 4);
         break;
     case 4: w16(o + 0x20, 0x8000); w16(o + 0x26, 5); w16(o + 0x1A, 5); break;
     case 5: case 7: george_hide_shown(r); break;
     case 6:
         w16(o + 0x20, 0x8000); george_at_player(r);
-        set_w(&r->d[0], og16(0x56DA) ^ 0x20); george_turn(r);
+        set_w(&r->d[0], og16(OG_PLAYER_HEADING) ^ 0x20); george_turn(r);
         george_count(r); w16(o + 0x1A, 7);
         break;
     }
@@ -860,9 +861,9 @@ static int george_path(Regs *r) {
     g_target(path[i], path[i + 1]); fo_S7_1488(r);
     if ((uint16_t)r->d[0] & 0x8000) {
         i = (uint16_t)(r16(o + 0x1E) + 4); w16(o + 0x1E, i); i /= 2;
-        sog16(0x381C, path[i]);
+        sog16(OG_TARGET_X, path[i]);
         if (path[i] & 0x8000) { r->d[0] = 0xFFFFFFFFu; return -1; }
-        sog16(0x3818, path[i + 1]); fo_S7_1488(r);
+        sog16(OG_TARGET_Y, path[i + 1]); fo_S7_1488(r);
     }
     mz_seg_of(7, 0x36F4), fn_S7_36F4(r);
     r->a[0] = OADDR(0x4F30); fn_S7_374C(r); fn_S7_3784(r);
@@ -878,9 +879,9 @@ static int george_remark(Regs *r) {
     static const uint16_t gates[] = {0x20A0, 0x580, 0x2240, 0}, c1f[] = {0x3720, 0x3740, 0x3760, 0x3780, 0},
         c20[] = {0x2B40, 0x2BC0, 0}, c21[] = {0x49E0, 0x4A00, 0}, c22[] = {0x5760, 0x5B60, 0}, c26[] = {0x6F40, 0x6780, 0},
         c28[] = {0x6360, 0x6340, 0x6320, 0}, c30[] = {0x5A40, 0x5A60, 0}, c32[] = {0x2BA0, 0x2FA0, 0};
-    uint16_t level = og16(0x56DC), cell = og16(0x56D0);
-    int joined = og16(0x56C2) != 0;
-    if (joined && !og16(0x56C0)) {
+    uint16_t level = og16(OG_LEVEL), cell = og16(OG_PLAYER_CELL);
+    int joined = og16(OG_GEORGE_JOINED) != 0;
+    if (joined && !og16(OG_MESSAGE)) {
         if (level == 1 && (cell == 0x4240 || cell == 0x4280) && !flag(r, 0, 1) && !flag(r, 0, 0x8000) && !flag(r, 0, 0x100)) return 0x13;
         if (level == 2 && flag(r, 0, 8) && !flag(r, 0, 0x200)) return 0x18;
     }
@@ -907,9 +908,9 @@ static int george_remark(Regs *r) {
         }
     }
     if (joined && level == 5 && !flag(r, 1, 0x20)) {
-#define AREA() (set_w(&r->d[1], og16(0x56D8)), set_w(&r->d[2], og16(0x56D4)), mz_seg(7), fo_S7_2038(r), (uint16_t)r->d[0])
+#define AREA() (set_w(&r->d[1], og16(OG_PLAYER_X)), set_w(&r->d[2], og16(OG_PLAYER_Y)), mz_seg(7), fo_S7_2038(r), (uint16_t)r->d[0])
         if (AREA() == 0xA) {
-            uint32_t c = og32(0x53C8) + 0x1A;
+            uint32_t c = og32(OG_OBJECTS) + 0x1A;
             if (!(r16(c) & 0x8000)) {
                 uint16_t n = (uint16_t)(r16(c) + 1);
                 w16(c, n);
@@ -928,27 +929,27 @@ static void george_think(Regs *r) {
     for (;;) {
         set_w(&r->d[7], (uint16_t)r->d[0]);
         uint16_t s = (uint16_t)r->d[7], next;
-        int full = og16(0x56E0) >= 0x80;                    /* a full-view picture is showing */
+        int full = og16(OG_FULL_VIEW) >= 0x80;                    /* a full-view picture is showing */
         switch (s) {
         case 0: george_hide(r); return;
         case 1: case 2:
             if (full) { next = 0; break; }
-            if (og16(0x56D8) >= 0x120) { next = 0xF; break; }
+            if (og16(OG_PLAYER_X) >= 0x120) { next = 0xF; break; }
             if (s == 2) { near_d0(r); if (!(uint16_t)r->d[0]) return; next = 1; break; }
-            if (og16(0x56D4) >= 0xD2 && og16(0x56D8) < 0x28) return;
+            if (og16(OG_PLAYER_Y) >= 0xD2 && og16(OG_PLAYER_X) < 0x28) return;
             near_d0(r);
-            if (og16(0x3830) & 0x8000) return;
-            set_w(&r->d[0], (uint16_t)(og16(0x3830) - r16(o + 0xC)));
+            if (og16(OG_NEAR_DIR) & 0x8000) return;
+            set_w(&r->d[0], (uint16_t)(og16(OG_NEAR_DIR) - r16(o + OB_HEADING)));
             mz_seg_of(7, 0x367E), fn_S7_367E(r);
-            if ((uint16_t)r->d[0] >= 7 || og16(0x382E) >= 0x28) return;
+            if ((uint16_t)r->d[0] >= 7 || og16(OG_NEAR_DIST) >= 0x28) return;
             next = 2; break;
         case 3:
             unlink_obj(r);
-            w16(o + 4, 0); w16(o + 8, 0); w16(o + 0x30, 0); w16(o + 0x1A, 0);
+            w16(o + OB_X, 0); w16(o + OB_Y, 0); w16(o + OB_CELL, 0); w16(o + 0x1A, 0);
             w16(o + 0x1E, 0x14);
             next = 4; break;
         case 4: case 5: case 6:
-            if (full) { sog16(0x56C2, 0xFFFF); next = 8; break; }
+            if (full) { sog16(OG_GEORGE_JOINED, 0xFFFF); next = 8; break; }
             if (s != 4) return;
             { int16_t t = (int16_t)(r16(o + 0x1E) - 1); w16(o + 0x1E, (uint16_t)t); if (t >= 0) return; }
             next = 5; break;
@@ -977,30 +978,30 @@ static void george_think(Regs *r) {
          * it to end (o_said) or for a full view (8), some of them leaving when the player leaves
          * their cells (7) */
         case 16:                                            /* level 1: once, after the snails' bit 0 */
-            if (!og16(0x56C2) || og16(0x56C0) || !flag(r, 0, 1) || flag(r, 0, 0x40)) { next = 7; break; }
+            if (!og16(OG_GEORGE_JOINED) || og16(OG_MESSAGE) || !flag(r, 0, 1) || flag(r, 0, 0x40)) { next = 7; break; }
             flag_set(r, 0, 0x40);
             next = flag(r, 0, 0x80) ? 0x12 : 0x11;
             break;
         case 17: case 18: case 21: case 23: case 26: if (!full) return; next = 8; break;
         case 19: case 44: w16(o + 0x18, 6); next = (uint16_t)(s + 1); break;
         case 20: case 45: {                                 /* standing there turned to heading $30 / $10 */
-            if (s == 20 ? og16(0x56D0) != 0x4240 && og16(0x56D0) != 0x4280 : og16(0x56D0) != 0x6940) { next = 7; break; }
+            if (s == 20 ? og16(OG_PLAYER_CELL) != 0x4240 && og16(OG_PLAYER_CELL) != 0x4280 : og16(OG_PLAYER_CELL) != 0x6940) { next = 7; break; }
             int16_t t = (int16_t)r16(o + 0x18);
             if (t >= 0) { w16(o + 0x18, (uint16_t)(t - 1)); return; }
-            set_w(&r->d[0], (uint16_t)(og16(0x56DA) - (s == 20 ? 0x30 : 0x10)));
+            set_w(&r->d[0], (uint16_t)(og16(OG_PLAYER_HEADING) - (s == 20 ? 0x30 : 0x10)));
             mz_seg_of(7, 0x367E), fn_S7_367E(r);
             if ((uint16_t)r->d[0] >= 0xC) return;
             if (s == 20) flag_set(r, 0, 0x100); else flag_set(r, 1, 8);
             next = s == 20 ? 0x15 : 0x2E;
             break;
         }
-        case 22: next = og16(0x56D0) == 0x4240 || og16(0x56D0) == 0x4280 ? 0x17 : 7; break;
+        case 22: next = og16(OG_PLAYER_CELL) == 0x4240 || og16(OG_PLAYER_CELL) == 0x4280 ? 0x17 : 7; break;
         case 24: flag_set(r, 0, 0x200); w16(o + 0x18, 0x2D); next = 0x19; break;
         case 25: {
             int16_t t = (int16_t)(r16(o + 0x18) - 1);
             w16(o + 0x18, (uint16_t)t);
             if (t >= 0) return;
-            uint16_t c = og16(0x56D0);
+            uint16_t c = og16(OG_PLAYER_CELL);
             next = c == 0x1FE0 || c == 0x1FC0 || c == 0x1BE0 ? 0x1A : 0x1B;
             break;
         }
@@ -1009,14 +1010,14 @@ static void george_think(Regs *r) {
             if (full) { next = 8; break; }
             if (george_cell_ends()) { next = 7; break; }
             if (s == 29) {
-                if (og16(0x56D0) == 0x50E0) { next = 0x1E; break; }
-                if (og16(0x56D0) == 0x60E0) { flag_set(r, 0, 0x1000); next = 7; break; }
+                if (og16(OG_PLAYER_CELL) == 0x50E0) { next = 0x1E; break; }
+                if (og16(OG_PLAYER_CELL) == 0x60E0) { flag_set(r, 0, 0x1000); next = 7; break; }
             }
-            if (s == 31 && (og16(0x56D0) == 0x2B40 || og16(0x56D0) == 0x2BC0)) { next = 0x20; break; }
+            if (s == 31 && (og16(OG_PLAYER_CELL) == 0x2B40 || og16(OG_PLAYER_CELL) == 0x2BC0)) { next = 0x20; break; }
             return;
         case 34: case 38: case 40: {                        /* walking to a point: his part in the story */
             static const uint16_t to[41][3] = {[34] = {0x1B8, 0x178, 2}, [38] = {0x1A8, 0x188, 2}, [40] = {0x188, 0x188, 4}};
-            sog16(0x382C, to[s][0]); sog16(0x3828, to[s][1]);
+            sog16(OG_MOVE_X, to[s][0]); sog16(OG_MOVE_Y, to[s][1]);
             mz_seg(7), fo_S7_155C(r);
             mz_seg_of(7, 0x3784), fn_S7_3784(r);
             if ((uint16_t)r->d[0]) return;
@@ -1026,7 +1027,7 @@ static void george_think(Regs *r) {
             break;
         }
         case 35: case 39: case 41: {                        /* there, until the player leaves */
-            uint16_t c = og16(0x56D0);
+            uint16_t c = og16(OG_PLAYER_CELL);
             int here = s == 35 ? c == 0x5F60 : s == 39 ? c == 0x6360 || c == 0x6340 || c == 0x6320 : c == 0x6300 || c == 0x5F00;
             if (!full && !george_cell_ends() && !here) return;
             next = 0x24;
@@ -1037,14 +1038,14 @@ static void george_think(Regs *r) {
             w16(o + 0x18, (uint16_t)(r16(o + 0x18) - 1));
             if (r16(o + 0x18)) return;
             unlink_obj(r);
-            w16(o + 4, 0); w16(o + 6, 0); w16(o + 8, 0); w16(o + 0xA, 0); w16(o + 0x30, 0);
+            w16(o + OB_X, 0); w16(o + 6, 0); w16(o + OB_Y, 0); w16(o + 0xA, 0); w16(o + OB_CELL, 0);
             next = 7;
             break;
         case 42: if (!george_cell_ends()) return; next = 0x2B; break;
         case 43: next = 7; break;
         case 47: case 48: case 49: case 50: {               /* level 5: while the player stays in the area */
             static const uint8_t area[4] = {0xA, 0x11, 0xF, 0xE};
-            set_w(&r->d[1], og16(0x56D8)); set_w(&r->d[2], og16(0x56D4)); mz_seg(7), fo_S7_2038(r);
+            set_w(&r->d[1], og16(OG_PLAYER_X)); set_w(&r->d[2], og16(OG_PLAYER_Y)); mz_seg(7), fo_S7_2038(r);
             if ((uint16_t)r->d[0] == area[s - 47]) return;
             next = 7;
             break;
@@ -1059,9 +1060,9 @@ static void george_act(Regs *r) {
     switch (s) {
     case 1: g_ring_at(r, 0x1E); g_ring_at(r, 0x1E); break;
     case 2: {
-        uint16_t t = og16(0x56C0) & 0x7FFF;
+        uint16_t t = og16(OG_MESSAGE) & 0x7FFF;
         if (t != 0x1401 && t != 0x141B) {
-            uint32_t cat = og32(0x53C8) + 0x140;
+            uint32_t cat = og32(OG_OBJECTS) + 0x140;
             g_target(r16(cat + 4), r16(cat + 8)); fo_S7_14C0(r);
             t = (uint16_t)r->d[0] < 0xC ? 0x141B : 0x1401;
         }
@@ -1070,15 +1071,15 @@ static void george_act(Regs *r) {
         break;
     }
     case 5: say(0x1402); break;
-    case 6: say(0x1404); sog16(0x56C2, 0xFFFF); break;
+    case 6: say(0x1404); sog16(OG_GEORGE_JOINED, 0xFFFF); break;
     case 8: george_hide_shown(r); break;
     case 10: case 11:                                       /* turning to the player */
         near_d0(r);
-        if (!(og16(0x3830) & 0x8000)) { set_w(&r->d[0], og16(0x3830)); mz_seg_of(7, 0x3722), fn_S7_3722(r); fn_S7_3722(r); }
+        if (!(og16(OG_NEAR_DIR) & 0x8000)) { set_w(&r->d[0], og16(OG_NEAR_DIR)); mz_seg_of(7, 0x3722), fn_S7_3722(r); fn_S7_3722(r); }
         if (s == 10) say(0x1403);
         break;
     case 12: say(0x1403); break;
-    case 22: if (og16(0x56E0) >= 0x80) { set_w(&r->d[0], 8); george_think(r); } break;   /* the original's act is think 23's code */
+    case 22: if (og16(OG_FULL_VIEW) >= 0x80) { set_w(&r->d[0], 8); george_think(r); } break;   /* the original's act is think 23's code */
     case 28: flag_set(r, 0, 0x400); say(0x140B); break;
     case 29: flag_set(r, 0, 0x800); say(0x140C); break;
     case 30: flag_set(r, 0, 0x1000); say(0x140D); break;
@@ -1092,7 +1093,7 @@ static void george_act(Regs *r) {
         if (r16(o + 0x18)) w16(o + 0x20, 0);
         say(s == 35 ? 0x1411 : s == 39 ? 0x1412 : 0x1413);
         near_d0(r);
-        if (!(og16(0x3830) & 0x8000)) w16(o + 0xC, og16(0x3830));
+        if (!(og16(OG_NEAR_DIR) & 0x8000)) w16(o + OB_HEADING, og16(OG_NEAR_DIR));
         break;
     }
     case 37: w16(r->a[4] + 0x20, 0x8000); break;
@@ -1117,7 +1118,7 @@ void fo_S10_2C7C(Regs *r) {
         for (int k = 46; k <= 51; k++) { said[k][0] = (uint16_t)(0x9415 + k - 46); said[k][1] = 7; }
     }
     uint32_t o = r->a[4];
-    set_w(&r->d[7], r16(o + 0x16));
+    set_w(&r->d[7], r16(o + OB_STATE));
     set_w(&r->d[0], (uint16_t)r->d[7]);
     george_think(r);
     uint16_t s = (uint16_t)r->d[7];
@@ -1127,7 +1128,7 @@ void fo_S10_2C7C(Regs *r) {
     george_act(r);
     george_speech(r);
     george_showing(r);
-    w16(o + 0x16, (uint16_t)r->d[7]);
+    w16(o + OB_STATE, (uint16_t)r->d[7]);
 }
 
 /* ---------- fn_S7_007C: the gates between levels ----------
@@ -1141,43 +1142,43 @@ void fo_S10_2C7C(Regs *r) {
  * original's code after its table: no level has them.) */
 static void gate_go(uint16_t level, uint32_t x, uint32_t y, uint16_t dir) {
     uint32_t steps = OADDR(0x4DF0) + sxw((uint16_t)(dir << 2));
-    sog16(0x57DC, level);
-    sog32(0x57D8, x + r32(steps + 0x40));
-    sog32(0x57D4, y + r32(steps));
-    sog16(0x57DA, og16(0x56DA)); sog8(0x57DE, 1); sog8(0x57F2, 1);
+    sog16(OG_GO_LEVEL, level);
+    sog32(OG_GO_X, x + r32(steps + 0x40));
+    sog32(OG_GO_Y, y + r32(steps));
+    sog16(OG_GO_HEADING, og16(OG_PLAYER_HEADING)); sog8(0x57DE, 1); sog8(0x57F2, 1);
 }
 void fo_S7_007C(Regs *r) {
     static const struct { uint16_t level; uint32_t x, y; } to[7] = {
         {2, 0xF80000, 0x1E80000}, {1, 0x1680000, 0x1480000}, {1, 0, 0}, {5, 0x480000, 0x480000},
         {4, 0xF80000, 0xC80000}, {2, 0x1B80000, 0x480000}, {2, 0xF80000, 0x1580000}};
     uint32_t o = r->a[4];
-    int16_t s = (int16_t)r16(o + 0x16);
+    int16_t s = (int16_t)r16(o + OB_STATE);
     if (!r16(o + 6)) {
-        if (r16(o + 0x30) != og16(0x56D0)) return;
+        if (r16(o + OB_CELL) != og16(OG_PLAYER_CELL)) return;
         mz_seg_of(7, 0x3128), fn_S7_3128(r);
-        if (og16(0x382E) >= 5) return;
+        if (og16(OG_NEAR_DIST) >= 5) return;
         w16(o + 6, s >= 0xA ? 0xA : 0x14);
     }
-    if (s == 2) { sog16(0x56EA, heal(og16(0x56EA), 3)); sog16(0x56E6, heal(og16(0x56E6), 6)); }
-    uint32_t pics = OADDR(r16(o + 2) == 0x10 ? 0x3840 : 0x384C);
-    int16_t c = (int16_t)(r16(o + 0xC) + 1);
+    if (s == 2) { sog16(OG_LIFE, heal(og16(OG_LIFE), 3)); sog16(0x56E6, heal(og16(0x56E6), 6)); }
+    uint32_t pics = OADDR(r16(o + OB_TYPE) == 0x10 ? 0x3840 : 0x384C);
+    int16_t c = (int16_t)(r16(o + OB_HEADING) + 1);
     if (c >= 6) c = 0;
-    w16(o + 0xC, (uint16_t)c);
+    w16(o + OB_HEADING, (uint16_t)c);
     sog16(0x56DE, r16(pics + 2 * (uint32_t)c));
-    sog16(0x56E0, 0x80);
+    sog16(OG_FULL_VIEW, 0x80);
     uint16_t t = (uint16_t)(r16(o + 6) - 1);
     w16(o + 6, t);
     if (t) return;
-    g_target(og16(0x56D8), og16(0x56D4));
+    g_target(og16(OG_PLAYER_X), og16(OG_PLAYER_Y));
     fo_S7_1488(r);
     uint16_t dir = (uint16_t)r->d[0];
     if (s >= 0xA) {
         uint16_t cell = r16(OADDR(0x5248) + sxw((uint16_t)((((uint16_t)(s - 0xA)) ^ 1) << 1)));
-        uint32_t map = og32(0x53D4) + sxw(cell);
+        uint32_t map = og32(OG_MAP) + sxw(cell);
         gate_go(5, (uint32_t)r16(map + 0x1C) << 16, (uint32_t)r16(map + 0x1E) << 16, dir);
     } else if (s == 2) {
-        sog16(0x57DC, 1); sog32(0x57D8, 0x580000); sog32(0x57D4, 0x500000);
-        sog16(0x57DA, og16(0x56DA)); sog8(0x57DE, 1); sog8(0x57F2, 1);
+        sog16(OG_GO_LEVEL, 1); sog32(OG_GO_X, 0x580000); sog32(OG_GO_Y, 0x500000);
+        sog16(OG_GO_HEADING, og16(OG_PLAYER_HEADING)); sog8(0x57DE, 1); sog8(0x57F2, 1);
     } else if (s >= 0 && s < 7) {
         gate_go(to[s].level, to[s].x, to[s].y, dir);
         if (s == 0) for (uint16_t at = 0x80; at <= 0x100; at += 0x40) call_d0d1(r, fo_S7_1278, 1, at);
@@ -1196,13 +1197,13 @@ void fo_S7_007C(Regs *r) {
  * turns to him. */
 void fo_S7_2132(Regs *r), fo_S7_1FF8(Regs *r), fo_S7_226E(Regs *r);
 static void t30_think(Regs *r) {
-    uint32_t o = r->a[4], map = og32(0x53D4), tbl = og32(0x53C8);
+    uint32_t o = r->a[4], map = og32(OG_MAP), tbl = og32(OG_OBJECTS);
     for (;;) {
         set_w(&r->d[7], (uint16_t)r->d[0]);
         uint16_t next;
         switch ((uint16_t)r->d[7]) {
         case 0: near_d0(r); if ((uint16_t)r->d[0]) return; next = 1; break;
-        case 1: near_d0(r); if (og16(0x382E) < 0x20) return; next = 2; break;
+        case 1: near_d0(r); if (og16(OG_NEAR_DIST) < 0x20) return; next = 2; break;
         case 2: w16(o + 0x18, 0xFFFF); w16(tbl + 0x98, 0); next = 3; break;
         case 3: case 8: {
             uint16_t t = (uint16_t)(r16(o + 0x18) + 1);
@@ -1213,8 +1214,8 @@ static void t30_think(Regs *r) {
         case 4:
             w16(map + sxw(r16(o + 0xE)) + 0xE, 0);
             unlink_obj(r);
-            w16(o + 0x10, r16(o + 0x30));
-            w16(o + 4, 0); w16(o + 8, 0); w16(o + 0x30, 0); w16(o + 0xE, 0);
+            w16(o + 0x10, r16(o + OB_CELL));
+            w16(o + OB_X, 0); w16(o + OB_Y, 0); w16(o + OB_CELL, 0); w16(o + 0xE, 0);
             w16(o + 0x18, 0x10);
             next = 5; break;
         case 5: {
@@ -1228,8 +1229,8 @@ static void t30_think(Regs *r) {
             random_d0(r);
             uint16_t cell = r16(OADDR(0x4F40) + 2 * ((uint16_t)r->d[0] & 7));
             set_w(&r->d[2], cell);
-            sog16(0x3824, cell);
-            sog16(0x382C, r16(map + sxw(cell) + 0x1C)); sog16(0x3828, r16(map + sxw(cell) + 0x1E));
+            sog16(OG_MOVE_CELL, cell);
+            sog16(OG_MOVE_X, r16(map + sxw(cell) + 0x1C)); sog16(OG_MOVE_Y, r16(map + sxw(cell) + 0x1E));
             if (r16(map + sxw(cell) + 0xE)) return;
             mz_seg_of(7, 0x3972), fn_S7_3972(r); if ((uint16_t)r->d[0]) return;
             sog16(0x3822, 5);
@@ -1238,7 +1239,7 @@ static void t30_think(Regs *r) {
             next = 7; break;
         }
         case 7:
-            w16(o + 0xE, r16(o + 0x30));
+            w16(o + 0xE, r16(o + OB_CELL));
             w16(map + sxw(r16(o + 0xE)) + 0xE, 1);
             w16(o + 0x10, 0); w16(o + 0x18, 0xFFFF);
             next = 8; break;
@@ -1251,9 +1252,9 @@ static void t30_think(Regs *r) {
 }
 void fo_S4_280A(Regs *r) {
     static const uint16_t hits[] = {0x18, 2, 0xFFFF};
-    uint32_t o = r->a[4], tbl = og32(0x53C8);
+    uint32_t o = r->a[4], tbl = og32(OG_OBJECTS);
     r->a[2] = tbl;
-    set_w(&r->d[7], r16(o + 0x16));
+    set_w(&r->d[7], r16(o + OB_STATE));
     set_w(&r->d[0], (uint16_t)r->d[7]);
     t30_think(r);
     uint16_t s = (uint16_t)r->d[7];
@@ -1261,27 +1262,27 @@ void fo_S4_280A(Regs *r) {
     switch ((uint16_t)r->d[7]) {
     case 0: case 9: w16(tbl + 0x98, 0); break;
     case 1:
-        set_w(&r->d[0], og16(0x3830)); mz_seg_of(7, 0x3722), fn_S7_3722(r); fn_S7_3722(r);
+        set_w(&r->d[0], og16(OG_NEAR_DIR)); mz_seg_of(7, 0x3722), fn_S7_3722(r); fn_S7_3722(r);
         w16(tbl + 0x98, 1);
-        w16(tbl + 0xDA, og16(0x56D0)); w16(tbl + 0xDE, og16(0x56D0));
-        set_w(&r->d[1], og16(0x56D8)); set_w(&r->d[2], og16(0x56D4)); mz_seg(7), fo_S7_2038(r);
+        w16(tbl + 0xDA, og16(OG_PLAYER_CELL)); w16(tbl + 0xDE, og16(OG_PLAYER_CELL));
+        set_w(&r->d[1], og16(OG_PLAYER_X)); set_w(&r->d[2], og16(OG_PLAYER_Y)); mz_seg(7), fo_S7_2038(r);
         w16(tbl + 0xD8, (uint16_t)r->d[0]); w16(tbl + 0xDC, (uint16_t)r->d[0]);
         break;
     case 3: w16(o + 0x3A, 0x7E); break;
     case 8: w16(o + 0x3A, r16(o + 0x18) ? 0 : 0x81); break;
     case 10:                                                /* following the player */
         w16(tbl + 0x98, 1);
-        w16(tbl + 0xDA, og16(0x56D0)); w16(tbl + 0xDE, og16(0x56D0));
+        w16(tbl + 0xDA, og16(OG_PLAYER_CELL)); w16(tbl + 0xDE, og16(OG_PLAYER_CELL));
         w16(tbl + 0xE0, 2);
-        set_w(&r->d[1], og16(0x56D8)); set_w(&r->d[2], og16(0x56D4)); mz_seg(7), fo_S7_2038(r);
+        set_w(&r->d[1], og16(OG_PLAYER_X)); set_w(&r->d[2], og16(OG_PLAYER_Y)); mz_seg(7), fo_S7_2038(r);
         w16(tbl + 0xD8, (uint16_t)r->d[0]); w16(tbl + 0xDC, (uint16_t)r->d[0]);
-        if (og16(0x382E) >= 0xA) {
+        if (og16(OG_NEAR_DIST) >= 0xA) {
             mz_seg(7), fo_S7_226E(r);
             if (!(uint16_t)r->d[0]) {                       /* out of sight: the way by the cells */
-                sog16(0x3814, og16(0x56D0));
+                sog16(0x3814, og16(OG_PLAYER_CELL));
                 mz_seg(7), fo_S7_2132(r);
             } else {                                        /* in sight: straight at him */
-                sog16(0x381C, og16(0x56D8)); sog16(0x3818, og16(0x56D4));
+                sog16(OG_TARGET_X, og16(OG_PLAYER_X)); sog16(OG_TARGET_Y, og16(OG_PLAYER_Y));
                 mz_seg_of(7, 0x3B36), fn_S7_3B36(r);
                 uint16_t d = (uint16_t)r->d[0];
                 mz_seg_of(7, 0x3D0E), fn_S7_3D0E(r);
@@ -1289,10 +1290,10 @@ void fo_S4_280A(Regs *r) {
             }
             if (!((uint16_t)r->d[0] & 0x8000)) { mz_seg(7), fo_S7_1FF8(r); break; }
         }
-        set_w(&r->d[0], og16(0x3830)); mz_seg_of(7, 0x3722), fn_S7_3722(r);
+        set_w(&r->d[0], og16(OG_NEAR_DIR)); mz_seg_of(7, 0x3722), fn_S7_3722(r);
         break;
     }
-    w16(o + 0x16, (uint16_t)r->d[7]);
+    w16(o + OB_STATE, (uint16_t)r->d[7]);
 }
 
 /* ---------- type $31 (fn_S4_2AF0, level 5) ----------
@@ -1307,8 +1308,8 @@ void fo_S4_280A(Regs *r) {
 void fo_S7_226E(Regs *r);
 /* the distance-map index of map cell c from the object (G_53BC / G_53C0 are 128 x 128 maps) */
 static uint16_t t31_index(uint32_t o, uint32_t map, uint16_t c) {
-    uint16_t y = (uint16_t)(((r16(map + sxw(c) + 0x1E) - r16(o + 8)) & 0x7F) << 7);
-    return (uint16_t)(y | ((r16(map + sxw(c) + 0x1C) - r16(o + 4)) & 0x7F));
+    uint16_t y = (uint16_t)(((r16(map + sxw(c) + 0x1E) - r16(o + OB_Y)) & 0x7F) << 7);
+    return (uint16_t)(y | ((r16(map + sxw(c) + 0x1C) - r16(o + OB_X)) & 0x7F));
 }
 static const int16_t t31_steps[4] = {-0x400, 0x3E0, 0x40, 0x3E0};   /* north, west, east, south in turn */
 /* fn_S4_2DE2: a step in direction D0 (none if negative) */
@@ -1319,7 +1320,7 @@ static void t31_step(Regs *r) {
 /* fn_S4_2DF6: D0 = the direction to the target cell +$12; within 2 of it the next one is the
  * best of its free neighbours by a random weight, more for one other than the last (+$10) */
 static void t31_wander(Regs *r) {
-    uint32_t o = r->a[4], map = og32(0x53D4);
+    uint32_t o = r->a[4], map = og32(OG_MAP);
     uint16_t at = r16(o + 0x12), i = t31_index(o, map, at);
     if (r8(og32(0x53BC) + sxw(i)) >= 2) { r->d[0] = r8(og32(0x53C0) + sxw(i)); return; }
     uint16_t best = 0, bcell = 0xFFFF, c = at;
@@ -1337,18 +1338,18 @@ static void t31_wander(Regs *r) {
  * within 2 of it the next one is the free neighbour nearest G_3814 (half-scale distance map),
  * the last one (+$10) only if nothing else */
 static void t31_toward(Regs *r) {
-    uint32_t o = r->a[4], map = og32(0x53D4), dist = og32(0x53BC);
+    uint32_t o = r->a[4], map = og32(OG_MAP), dist = og32(0x53BC);
     uint16_t at = r16(o + 0x12), i = t31_index(o, map, at);
     if (r8(dist + sxw(i)) >= 2) { r->d[0] = r8(og32(0x53C0) + sxw(i)); return; }
     uint16_t to = og16(0x3814);
     if (to == at) { r->d[0] = 0xFFFFFFFEu; return; }
-    sog16(0x381C, r16(map + sxw(to) + 0x1C)); sog16(0x3818, r16(map + sxw(to) + 0x1E));
+    sog16(OG_TARGET_X, r16(map + sxw(to) + 0x1C)); sog16(OG_TARGET_Y, r16(map + sxw(to) + 0x1E));
     uint16_t best = 0xFFFF, bcell = 0xFFFF, c = at;
     for (int k = 0; k < 4; k++) {
         c = (uint16_t)(c + t31_steps[k]);
         if (r8(map + sxw(c)) & 1) continue;
-        uint16_t y = (uint16_t)((((uint16_t)(r16(map + sxw(c) + 0x1E) - og16(0x3818)) >> 1) & 0x7F) << 7);
-        uint16_t x = (uint16_t)(((uint16_t)(r16(map + sxw(c) + 0x1C) - og16(0x381C)) >> 1) & 0x7F);
+        uint16_t y = (uint16_t)((((uint16_t)(r16(map + sxw(c) + 0x1E) - og16(OG_TARGET_Y)) >> 1) & 0x7F) << 7);
+        uint16_t x = (uint16_t)(((uint16_t)(r16(map + sxw(c) + 0x1C) - og16(OG_TARGET_X)) >> 1) & 0x7F);
         uint16_t w = (uint16_t)(r8(dist + sxw((uint16_t)(y | x))) | (c == r16(o + 0x10) ? 0x100 : 0));
         if (w < best) { best = w; bcell = c; }
     }
@@ -1357,7 +1358,7 @@ static void t31_toward(Regs *r) {
 }
 static int t31_sees(Regs *r) { mz_seg(7), fo_S7_226E(r); return (uint16_t)r->d[0] != 0; }
 static void t31_think(Regs *r) {
-    uint32_t tbl = og32(0x53C8);
+    uint32_t tbl = og32(OG_OBJECTS);
     for (;;) {
         set_w(&r->d[7], (uint16_t)r->d[0]);
         uint16_t next;
@@ -1372,10 +1373,10 @@ static void t31_think(Regs *r) {
             if (r16(tbl + 0xE0) && t31_sees(r)) return;
             next = 1; break;
         case 3: {                                           /* hit: marks the player for record 3 */
-            uint16_t c = og16(0x56D0);
+            uint16_t c = og16(OG_PLAYER_CELL);
             w16(r->a[4] + 0x18, 0xFFFF);
             w16(tbl + 0xDA, c); w16(tbl + 0xDE, c);
-            set_w(&r->d[1], og16(0x56D8)); set_w(&r->d[2], og16(0x56D4)); mz_seg(7), fo_S7_2038(r);
+            set_w(&r->d[1], og16(OG_PLAYER_X)); set_w(&r->d[2], og16(OG_PLAYER_Y)); mz_seg(7), fo_S7_2038(r);
             w16(tbl + 0xD8, (uint16_t)r->d[0]); w16(tbl + 0xDC, (uint16_t)r->d[0]);
             next = 4; break;
         }
@@ -1388,7 +1389,7 @@ static void t31_think(Regs *r) {
         case 5: {                                           /* gone from the map for $4B frames */
             uint32_t o = r->a[4];
             unlink_obj(r);
-            w16(o + 4, 0); w16(o + 8, 0); w16(o + 0x30, 0);
+            w16(o + OB_X, 0); w16(o + OB_Y, 0); w16(o + OB_CELL, 0);
             w16(o + 0x18, 0x4B);
             next = 6; break;
         }
@@ -1400,12 +1401,12 @@ static void t31_think(Regs *r) {
         }
         case 7: if (r16(tbl + 0xE4)) return; next = 8; break;   /* until record 3's +$24 runs out */
         case 8: {                                           /* back in one of the eight cells (G_4F40), at random */
-            uint32_t map = og32(0x53D4);
+            uint32_t map = og32(OG_MAP);
             random_d0(r);
             uint16_t c = r16(OADDR(0x4F40) + 2 * ((uint16_t)r->d[0] & 7));
             w16(r->a[4] + 0x12, c);
-            sog16(0x3824, c);
-            sog16(0x382C, r16(map + sxw(c) + 0x1C)); sog16(0x3828, r16(map + sxw(c) + 0x1E));
+            sog16(OG_MOVE_CELL, c);
+            sog16(OG_MOVE_X, r16(map + sxw(c) + 0x1C)); sog16(OG_MOVE_Y, r16(map + sxw(c) + 0x1E));
             mz_seg_of(7, 0x3784), fn_S7_3784(r);
             if ((uint16_t)r->d[0]) return;
             w16(tbl + 0xE4, 0x14);
@@ -1418,9 +1419,9 @@ static void t31_think(Regs *r) {
 }
 void fo_S4_2AF0(Regs *r) {
     static const uint16_t hits[] = {0x18, 3, 0x2E, 3, 0xFFFF};
-    uint32_t o = r->a[4], tbl = og32(0x53C8);
+    uint32_t o = r->a[4], tbl = og32(OG_OBJECTS);
     r->a[2] = tbl;
-    set_w(&r->d[7], r16(o + 0x16));
+    set_w(&r->d[7], r16(o + OB_STATE));
     set_w(&r->d[0], (uint16_t)r->d[7]);
     t31_think(r);
     o_hit(r, (uint16_t)r->d[7] <= 2 ? hits : NULL, t31_think);
@@ -1431,7 +1432,7 @@ void fo_S4_2AF0(Regs *r) {
         break;
     case 1: {
         w16(o + 0x3A, r16(tbl + 0xE0) ? 0x7D : 0x7C);
-        set_w(&r->d[1], r16(o + 4)); set_w(&r->d[2], r16(o + 8)); mz_seg(7), fo_S7_2038(r);
+        set_w(&r->d[1], r16(o + OB_X)); set_w(&r->d[2], r16(o + OB_Y)); mz_seg(7), fo_S7_2038(r);
         uint16_t area = (uint16_t)r->d[0], gate = 0;
         if (area == r16(tbl + 0xDC)) sog16(0x3814, r16(tbl + 0xDE));
         else {
@@ -1443,11 +1444,11 @@ void fo_S4_2AF0(Regs *r) {
             if ((uint16_t)r->d[0] & 0x8000) {
                 if (area == r16(tbl + 0xDC)) { w16(tbl + 0xDC, 0); w16(tbl + 0xDE, 0); break; }
                 uint16_t c = r16(OADDR(0x5248) + sxw((uint16_t)(gate ^ 2)));   /* through: the passage's other side */
-                sog16(0x3824, c);
-                uint32_t map = og32(0x53D4);
-                sog16(0x382C, r16(map + sxw(c) + 0x1C)); sog16(0x3828, r16(map + sxw(c) + 0x1E));
+                sog16(OG_MOVE_CELL, c);
+                uint32_t map = og32(OG_MAP);
+                sog16(OG_MOVE_X, r16(map + sxw(c) + 0x1C)); sog16(OG_MOVE_Y, r16(map + sxw(c) + 0x1E));
                 mz_seg_of(7, 0x3784), fn_S7_3784(r);
-                if (!(uint16_t)r->d[0]) w16(o + 0x12, og16(0x3824));
+                if (!(uint16_t)r->d[0]) w16(o + 0x12, og16(OG_MOVE_CELL));
                 break;
             }
             t31_step(r);
@@ -1455,18 +1456,18 @@ void fo_S4_2AF0(Regs *r) {
         break;
     }
     case 2:
-        w16(o + 0x12, og16(0x56D0));
-        for (int k = 0; k < 3; k++) { near_d0(r); set_w(&r->d[0], og16(0x3830)); t31_step(r); }
-        if (og16(0x382E) < 2) {
-            int16_t l = (int16_t)(og16(0x56EA) - 1);
-            sog16(0x56EA, (uint16_t)(l < 0 ? 0 : l));
+        w16(o + 0x12, og16(OG_PLAYER_CELL));
+        for (int k = 0; k < 3; k++) { near_d0(r); set_w(&r->d[0], og16(OG_NEAR_DIR)); t31_step(r); }
+        if (og16(OG_NEAR_DIST) < 2) {
+            int16_t l = (int16_t)(og16(OG_LIFE) - 1);
+            sog16(OG_LIFE, (uint16_t)(l < 0 ? 0 : l));
             random_d0(r); w16(o + 0x26, (uint16_t)r->d[0] & 1);
         }
         w16(o + 0x3A, 0x7D);
         break;
     case 4: w16(o + 0x3A, 0x80); break;
     }
-    w16(o + 0x16, (uint16_t)r->d[7]);
+    w16(o + OB_STATE, (uint16_t)r->d[7]);
 }
 
 /* ---------- type $1F (fn_S4_0C44, level 5) ----------
@@ -1483,37 +1484,37 @@ void fo_S4_2AF0(Regs *r) {
 void fo_S7_201C(Regs *r), fo_S7_2132(Regs *r), fo_S7_1FF8(Regs *r);
 /* the gate record in cell c's object list (its first object), if of type $B / $10 in state $A+ */
 static int t1f_gate(uint16_t c, uint16_t *state) {
-    uint8_t n = r8(og32(0x53D4) + sxw(c) + 1);
+    uint8_t n = r8(og32(OG_MAP) + sxw(c) + 1);
     if (!n) return 0;
-    uint32_t g = og32(0x53C8) + ((uint32_t)n << 6);
+    uint32_t g = og32(OG_OBJECTS) + ((uint32_t)n << 6);
     if (r16(g + 2) != 0xB && r16(g + 2) != 0x10) return 0;
     *state = r16(g + 0x16);
     return *state >= 0xA;
 }
 void hx_log(const char *f, ...);
 static void t1f_at(uint16_t c) {                            /* G_3824 / G_382C / G_3828: cell c and its centre */
-    uint32_t map = og32(0x53D4);
-    sog16(0x3824, c); sog16(0x382C, r16(map + sxw(c) + 0x1C)); sog16(0x3828, r16(map + sxw(c) + 0x1E));
+    uint32_t map = og32(OG_MAP);
+    sog16(OG_MOVE_CELL, c); sog16(OG_MOVE_X, r16(map + sxw(c) + 0x1C)); sog16(OG_MOVE_Y, r16(map + sxw(c) + 0x1E));
 }
 /* moved into cell c if it is free (fn_S7_1766 / 1578), taking it over in the map; then fn_S7_1CCC */
 static void t1f_through(Regs *r, uint16_t c) {
-    uint32_t o = r->a[4], map = og32(0x53D4);
+    uint32_t o = r->a[4], map = og32(OG_MAP);
     t1f_at(c);
     if (r16(map + sxw(c) + 0xE)) return;
     mz_seg_of(7, 0x3972), fn_S7_3972(r); if ((uint16_t)r->d[0]) return;
     fn_S7_3784(r); if ((uint16_t)r->d[0]) return;
     w16(map + sxw(r16(o + 0xE)) + 0xE, 0);
-    w16(o + 0xE, og16(0x3824));
-    w16(map + sxw(og16(0x3824)) + 0xE, 1);
+    w16(o + 0xE, og16(OG_MOVE_CELL));
+    w16(map + sxw(og16(OG_MOVE_CELL)) + 0xE, 1);
     mz_seg_of(7, 0x3EE2), fn_S7_3EE2(r);
 }
 /* fn_S4_1096: D0.w = the direction to the target cell +$E; there, the next one (see above) */
 static void t1f_route(Regs *r) {
     static const int16_t step[4] = {-0x400, 0x3E0, 0x40, 0x3E0};
     static const uint16_t dir[4] = {0x10, 0, 0x20, 0x30};
-    uint32_t o = r->a[4], map = og32(0x53D4);
+    uint32_t o = r->a[4], map = og32(OG_MAP);
     uint16_t at = r16(o + 0xE), st;
-    int16_t dx = (int16_t)(r16(map + sxw(at) + 0x1C) - r16(o + 4)), dy = (int16_t)(r16(map + sxw(at) + 0x1E) - r16(o + 8));
+    int16_t dx = (int16_t)(r16(map + sxw(at) + 0x1C) - r16(o + OB_X)), dy = (int16_t)(r16(map + sxw(at) + 0x1E) - r16(o + OB_Y));
     if (dx) { set_w(&r->d[0], dx < 0 ? 0 : 0x20); return; }
     if (dy) { set_w(&r->d[0], dy < 0 ? 0x10 : 0x30); return; }
     w16(map + sxw(at) + 0xE, 0);
@@ -1524,7 +1525,7 @@ static void t1f_route(Regs *r) {
             t1f_at(c);
             if (!r16(map + sxw(c) + 0xE)) {
                 mz_seg_of(7, 0x3972), fn_S7_3972(r);
-                if (!(uint16_t)r->d[0]) { fn_S7_3784(r); w16(o + 0xE, og16(0x3824)); }
+                if (!(uint16_t)r->d[0]) { fn_S7_3784(r); w16(o + 0xE, og16(OG_MOVE_CELL)); }
             }
         }
         at = r16(o + 0xE);
@@ -1544,20 +1545,20 @@ static void t1f_route(Regs *r) {
 /* fn_S7_1334 (fn_S7_319E): the player close (< 6) or in front (within $11 of its heading)? */
 static int t1f_sees(Regs *r) {
     mz_seg_of(7, 0x319E), fn_S7_319E(r);
-    if (og16(0x382E) & 0x8000) return 0;
-    if (og16(0x382E) < 6) return 1;
-    set_w(&r->d[0], (uint16_t)(og16(0x3830) - r16(r->a[4] + 0xC)));
+    if (og16(OG_NEAR_DIST) & 0x8000) return 0;
+    if (og16(OG_NEAR_DIST) < 6) return 1;
+    set_w(&r->d[0], (uint16_t)(og16(OG_NEAR_DIR) - r16(r->a[4] + OB_HEADING)));
     mz_seg_of(7, 0x367E), fn_S7_367E(r);
     return (uint16_t)r->d[0] < 0x11;
 }
 static void mark_player(Regs *r) {                          /* record 3: the player's cell and area */
-    uint32_t tbl = og32(0x53C8);
-    w16(tbl + 0xDA, og16(0x56D0)); w16(tbl + 0xDE, og16(0x56D0));
-    set_w(&r->d[1], og16(0x56D8)); set_w(&r->d[2], og16(0x56D4)); mz_seg(7), fo_S7_2038(r);
+    uint32_t tbl = og32(OG_OBJECTS);
+    w16(tbl + 0xDA, og16(OG_PLAYER_CELL)); w16(tbl + 0xDE, og16(OG_PLAYER_CELL));
+    set_w(&r->d[1], og16(OG_PLAYER_X)); set_w(&r->d[2], og16(OG_PLAYER_Y)); mz_seg(7), fo_S7_2038(r);
     w16(tbl + 0xD8, (uint16_t)r->d[0]); w16(tbl + 0xDC, (uint16_t)r->d[0]);
 }
 static void t1f_think(Regs *r) {
-    uint32_t o = r->a[4], tbl = og32(0x53C8), map = og32(0x53D4);
+    uint32_t o = r->a[4], tbl = og32(OG_OBJECTS), map = og32(OG_MAP);
     for (;;) {
         set_w(&r->d[7], (uint16_t)r->d[0]);
         uint16_t next;
@@ -1572,14 +1573,14 @@ static void t1f_think(Regs *r) {
             next = 2; break;
         case 2:
             mz_seg_of(7, 0x319E), fn_S7_319E(r);
-            if (!(og16(0x382E) & 0x8000)) return;
+            if (!(og16(OG_NEAR_DIST) & 0x8000)) return;
             next = 3; break;
         case 3: mark_player(r); w16(r->a[4] + 0x10, 0); next = 1; break;
         case 4: {                                           /* hit: marks the player, as type $31 does */
-            uint16_t c = og16(0x56D0);
+            uint16_t c = og16(OG_PLAYER_CELL);
             w16(o + 0x18, 0xFFFF);
             w16(tbl + 0xDA, c); w16(tbl + 0xDE, c);
-            set_w(&r->d[1], og16(0x56D8)); set_w(&r->d[2], og16(0x56D4)); mz_seg(7), fo_S7_2038(r);
+            set_w(&r->d[1], og16(OG_PLAYER_X)); set_w(&r->d[2], og16(OG_PLAYER_Y)); mz_seg(7), fo_S7_2038(r);
             w16(tbl + 0xD8, (uint16_t)r->d[0]); w16(tbl + 0xDC, (uint16_t)r->d[0]);
             next = 5; break;
         }
@@ -1592,8 +1593,8 @@ static void t1f_think(Regs *r) {
         case 6:                                             /* gone from the map for $96 frames */
             w16(map + sxw(r16(o + 0xE)) + 0xE, 0);
             unlink_obj(r);
-            w16(o + 0x10, r16(o + 0x30));
-            w16(o + 4, 0); w16(o + 8, 0); w16(o + 0x30, 0); w16(o + 0xE, 0);
+            w16(o + 0x10, r16(o + OB_CELL));
+            w16(o + OB_X, 0); w16(o + OB_Y, 0); w16(o + OB_CELL, 0); w16(o + 0xE, 0);
             w16(o + 0x18, 0x96);
             next = 7; break;
         case 7: {
@@ -1607,8 +1608,8 @@ static void t1f_think(Regs *r) {
             random_d0(r);
             uint16_t c = r16(OADDR(0x4F40) + 2 * ((uint16_t)r->d[0] & 7));
             set_w(&r->d[2], c);
-            sog16(0x3824, c);
-            sog16(0x382C, r16(map + sxw(c) + 0x1C)); sog16(0x3828, r16(map + sxw(c) + 0x1E));
+            sog16(OG_MOVE_CELL, c);
+            sog16(OG_MOVE_X, r16(map + sxw(c) + 0x1C)); sog16(OG_MOVE_Y, r16(map + sxw(c) + 0x1E));
             if (r16(map + sxw(c) + 0xE)) return;
             mz_seg_of(7, 0x3972), fn_S7_3972(r); if ((uint16_t)r->d[0]) return;
             sog16(0x3822, 5);
@@ -1617,7 +1618,7 @@ static void t1f_think(Regs *r) {
             next = 9; break;
         }
         case 9:
-            w16(o + 0xE, r16(o + 0x30));
+            w16(o + 0xE, r16(o + OB_CELL));
             w16(map + sxw(r16(o + 0xE)) + 0xE, 1);
             w16(o + 0x10, 0); w16(o + 0x18, 0xFFFF);
             w16(tbl + 0xE4, 5);
@@ -1635,9 +1636,9 @@ static void t1f_think(Regs *r) {
 }
 void fo_S4_0C44(Regs *r) {
     static const uint16_t hits[] = {0x18, 4, 0x2E, 4, 0xFFFF};
-    uint32_t o = r->a[4], tbl = og32(0x53C8);
+    uint32_t o = r->a[4], tbl = og32(OG_OBJECTS);
     r->a[2] = tbl;
-    set_w(&r->d[7], r16(o + 0x16));
+    set_w(&r->d[7], r16(o + OB_STATE));
     set_w(&r->d[0], (uint16_t)r->d[7]);
     t1f_think(r);
     o_hit(r, (uint16_t)r->d[7] <= 2 ? hits : NULL, t1f_think);
@@ -1645,7 +1646,7 @@ void fo_S4_0C44(Regs *r) {
     switch (s) {
     case 0: t1f_route(r); mz_seg(7), fo_S7_201C(r); break;
     case 1: {
-        set_w(&r->d[1], r16(o + 4)); set_w(&r->d[2], r16(o + 8)); mz_seg(7), fo_S7_2038(r);
+        set_w(&r->d[1], r16(o + OB_X)); set_w(&r->d[2], r16(o + OB_Y)); mz_seg(7), fo_S7_2038(r);
         uint16_t area = (uint16_t)r->d[0], gate = 0;
         int same = area == r16(tbl + 0xD8);
         if (same) sog16(0x3814, r16(tbl + 0xDA));
@@ -1664,39 +1665,39 @@ void fo_S4_0C44(Regs *r) {
         break;
     }
     case 2:
-        w16(tbl + 0xDA, og16(0x56D0)); w16(tbl + 0xDE, og16(0x56D0));
+        w16(tbl + 0xDA, og16(OG_PLAYER_CELL)); w16(tbl + 0xDE, og16(OG_PLAYER_CELL));
         w16(tbl + 0xE0, 2);
-        g_target(og16(0x56D8), og16(0x56D4));
-        set_w(&r->d[1], og16(0x56D8)); set_w(&r->d[2], og16(0x56D4)); mz_seg(7), fo_S7_2038(r);
+        g_target(og16(OG_PLAYER_X), og16(OG_PLAYER_Y));
+        set_w(&r->d[1], og16(OG_PLAYER_X)); set_w(&r->d[2], og16(OG_PLAYER_Y)); mz_seg(7), fo_S7_2038(r);
         w16(tbl + 0xD8, (uint16_t)r->d[0]); w16(tbl + 0xDC, (uint16_t)r->d[0]);
-        if (og16(0x382E) >= 0xA) {
+        if (og16(OG_NEAR_DIST) >= 0xA) {
             mz_seg_of(7, 0x3B36), fn_S7_3B36(r); fn_S7_3D0E(r);
             set_w(&r->d[0], og16(0x3812));
             if (!(og16(0x3812) & 0x8000)) { mz_seg(7), fo_S7_1FF8(r); break; }
         }
-        set_w(&r->d[0], og16(0x3830)); mz_seg_of(7, 0x3722), fn_S7_3722(r);
+        set_w(&r->d[0], og16(OG_NEAR_DIR)); mz_seg_of(7, 0x3722), fn_S7_3722(r);
         break;
     case 5: { static const uint16_t pic[2] = {0x7E, 0x7F}; w16(o + 0x3A, pic[r16(o + 0x18)]); break; }
     case 10: { static const uint16_t pic[2] = {0x81, 0}; w16(o + 0x3A, pic[r16(o + 0x18)]); break; }
     }
-    w16(o + 0x16, (uint16_t)r->d[7]);
+    w16(o + OB_STATE, (uint16_t)r->d[7]);
 }
 
 /* types $1E and $20 when hit: off the map for a while (its cell kept in +$10, count in field f),
  * then back in that cell once it is free (G_3822 = 6), then on the map again */
 static void off_map(Regs *r, uint32_t f, uint16_t frames) {
-    uint32_t o = r->a[4], map = og32(0x53D4);
+    uint32_t o = r->a[4], map = og32(OG_MAP);
     w16(map + sxw(r16(o + 0xE)) + 0xE, 0);
     unlink_obj(r);
-    w16(o + 0x10, r16(o + 0x30));
-    w16(o + 4, 0); w16(o + 6, 0); w16(o + 8, 0); w16(o + 0xA, 0); w16(o + 0x30, 0); w16(o + 0xE, 0);
+    w16(o + 0x10, r16(o + OB_CELL));
+    w16(o + OB_X, 0); w16(o + 6, 0); w16(o + OB_Y, 0); w16(o + 0xA, 0); w16(o + OB_CELL, 0); w16(o + 0xE, 0);
     w16(o + f, frames);
 }
 static int back_in_cell(Regs *r) {                          /* 1 once it is there */
-    uint32_t map = og32(0x53D4);
+    uint32_t map = og32(OG_MAP);
     uint16_t c = r16(r->a[4] + 0x10);
-    sog16(0x382C, r16(map + sxw(c) + 0x1C)); sog16(0x3828, r16(map + sxw(c) + 0x1E));
-    sog16(0x3824, c);
+    sog16(OG_MOVE_X, r16(map + sxw(c) + 0x1C)); sog16(OG_MOVE_Y, r16(map + sxw(c) + 0x1E));
+    sog16(OG_MOVE_CELL, c);
     if (r16(map + sxw(c) + 0xE)) return 0;
     mz_seg_of(7, 0x3972), fn_S7_3972(r); if ((uint16_t)r->d[0]) return 0;
     sog16(0x3822, 6);
@@ -1706,8 +1707,8 @@ static int back_in_cell(Regs *r) {                          /* 1 once it is ther
 }
 static void on_map(Regs *r, uint32_t f) {
     uint32_t o = r->a[4];
-    w16(o + 0xE, r16(o + 0x30));
-    w16(og32(0x53D4) + sxw(r16(o + 0xE)) + 0xE, 1);
+    w16(o + 0xE, r16(o + OB_CELL));
+    w16(og32(OG_MAP) + sxw(r16(o + 0xE)) + 0xE, 1);
     w16(o + 0x10, 0); w16(o + f, 0xFFFF);
 }
 static int count_down(Regs *r, uint32_t f, uint16_t by) {  /* the field less `by`: 1 once negative */
@@ -1722,8 +1723,8 @@ static int count_up(Regs *r, uint32_t f, uint16_t to) {    /* the field plus 1: 
 }
 static void turn_to_player(Regs *r, int times) {
     near_d0(r);
-    if (og16(0x3830) & 0x8000) return;
-    set_w(&r->d[0], og16(0x3830));
+    if (og16(OG_NEAR_DIR) & 0x8000) return;
+    set_w(&r->d[0], og16(OG_NEAR_DIR));
     mz_seg_of(7, 0x3722);
     while (times--) fn_S7_3722(r);
 }
@@ -1754,10 +1755,10 @@ static void t1e_dir_scent(Regs *r) {                        /* fn_S7_1B46, then 
 static int t1e_walk(Regs *r, void (*dir)(Regs *)) {
     dir(r);
     if ((uint16_t)r->d[0] & 0x8000) return -1;
-    if ((uint16_t)r->d[0] != r16(r->a[4] + 0xC)) { mz_seg_of(7, 0x3722), fn_S7_3722(r); t1e_step(r); return 0; }
+    if ((uint16_t)r->d[0] != r16(r->a[4] + OB_HEADING)) { mz_seg_of(7, 0x3722), fn_S7_3722(r); t1e_step(r); return 0; }
     t1e_step(r);
     dir(r);
-    if ((uint16_t)r->d[0] == r16(r->a[4] + 0xC)) t1e_step(r);
+    if ((uint16_t)r->d[0] == r16(r->a[4] + OB_HEADING)) t1e_step(r);
     return 0;
 }
 static void t1e_scent_reset(Regs *r) {
@@ -1765,25 +1766,25 @@ static void t1e_scent_reset(Regs *r) {
     mz_seg_of(2, 0x366A), fn_S2_366A(r); fn_S2_3568(r);    /* fn_S2_2B3E */
 }
 static void t1e_think(Regs *r) {
-    uint32_t o = r->a[4], map = og32(0x53D4);
+    uint32_t o = r->a[4], map = og32(OG_MAP);
     for (;;) {
         set_w(&r->d[7], (uint16_t)r->d[0]);
         uint16_t next;
         switch ((uint16_t)r->d[7]) {
         case 0:
             mz_seg_of(7, 0x319E), fn_S7_319E(r);
-            if (!(og16(0x382E) & 0x8000)) {
-                if (og16(0x382E) < 5) { next = 3; break; }
-                set_w(&r->d[0], (uint16_t)(og16(0x3830) - r16(o + 0xC)));
+            if (!(og16(OG_NEAR_DIST) & 0x8000)) {
+                if (og16(OG_NEAR_DIST) < 5) { next = 3; break; }
+                set_w(&r->d[0], (uint16_t)(og16(OG_NEAR_DIR) - r16(o + OB_HEADING)));
                 mz_seg_of(7, 0x367E), fn_S7_367E(r);
                 if ((uint16_t)r->d[0] < 0x14) { next = 3; break; }
             }
-            if (!r16(map + sxw(r16(o + 0x30)) + 0x10)) return;
+            if (!r16(map + sxw(r16(o + OB_CELL)) + 0x10)) return;
             next = 5; break;
         case 2: {
             mz_seg_of(7, 0x319E), fn_S7_319E(r);
             if (!(uint16_t)r->d[0]) { next = 3; break; }
-            uint16_t sc = r16(map + sxw(r16(o + 0x30)) + 0x10);
+            uint16_t sc = r16(map + sxw(r16(o + OB_CELL)) + 0x10);
             if (!sc) { next = 0; break; }
             if (sc != 0xFFFF && !(r16(o + 0x1C) & 0x8000)) return;
             t1e_scent_reset(r);
@@ -1802,7 +1803,7 @@ static void t1e_think(Regs *r) {
         case 6: w16(o + 0x1C, 0xFFFF); next = 7; break;
         case 7: if (!count_up(r, 0x1C, 2)) return; next = 8; break;   /* hit: two frames of pictures $77, $78 */
         case 8: off_map(r, 0x1C, 0x2EE); next = 9; break;  /* gone for 750 frames */
-        case 9: if (!count_down(r, 0x1C, og16(0x56E0) >= 0x80 ? 100 : 1)) return; next = 0xA; break;   /* faster under a full view */
+        case 9: if (!count_down(r, 0x1C, og16(OG_FULL_VIEW) >= 0x80 ? 100 : 1)) return; next = 0xA; break;   /* faster under a full view */
         case 10: if (!back_in_cell(r)) return; next = 0xB; break;
         case 11: on_map(r, 0x1C); next = 0xC; break;
         case 12: if (!count_up(r, 0x1C, 0x18)) return; next = 4; break;   /* 24 frames of pictures $79, $7A, 0 */
@@ -1816,7 +1817,7 @@ static void t1e_think(Regs *r) {
 void fo_S4_0782(Regs *r) {
     static const uint16_t hits[] = {0x18, 6, 0xFFFF};
     uint32_t o = r->a[4];
-    set_w(&r->d[7], r16(o + 0x16));
+    set_w(&r->d[7], r16(o + OB_STATE));
     set_w(&r->d[0], (uint16_t)r->d[7]);
     t1e_think(r);
     uint16_t s = (uint16_t)r->d[7];
@@ -1826,17 +1827,17 @@ void fo_S4_0782(Regs *r) {
     case 0: t1e_walk(r, t1e_dir_roam); break;
     case 2: if (t1e_walk(r, t1e_dir_scent) < 0) w16(o + 0x1C, (uint16_t)(r16(o + 0x1C) - 1)); break;
     case 3:
-        if (og16(0x56D0) != og16(0x582C)) {
-            sog16(0x56A6, og16(0x56D0)); sog16(0x56A8, 0x23);
+        if (og16(OG_PLAYER_CELL) != og16(0x582C)) {
+            sog16(0x56A6, og16(OG_PLAYER_CELL)); sog16(0x56A8, 0x23);
             mz_seg_of(2, 0x366A), fn_S2_366A(r); fn_S2_3568(r);
         }
         mz_seg_of(7, 0x3D2A), fn_S7_3D2A(r);
         if (!((uint16_t)r->d[0] & 0x8000) && t1e_walk(r, t1e_dir_scent) == 0) break;
-        set_w(&r->d[0], og16(0x3830)); mz_seg_of(7, 0x3722), fn_S7_3722(r); fn_S7_3722(r);
-        set_w(&r->d[0], (uint16_t)((uint16_t)r->d[0] - r16(o + 0xC)));
+        set_w(&r->d[0], og16(OG_NEAR_DIR)); mz_seg_of(7, 0x3722), fn_S7_3722(r); fn_S7_3722(r);
+        set_w(&r->d[0], (uint16_t)((uint16_t)r->d[0] - r16(o + OB_HEADING)));
         fn_S7_367E(r);
         if ((uint16_t)r->d[0] >= 6) break;
-        set_w(&r->d[0], 0x3D); set_w(&r->d[1], og16(0x3830)); set_w(&r->d[2], og16(0x3834));
+        set_w(&r->d[0], 0x3D); set_w(&r->d[1], og16(OG_NEAR_DIR)); set_w(&r->d[2], og16(OG_SELF));
         r->a[0] = OADDR(0x48F0); mz_seg_of(7, 0x40D6), fn_S7_40D6(r);
         random_d0(r);
         w16(o + 0x1A, (uint16_t)(((uint16_t)r->d[0] & 0xF) + 0x22));
@@ -1851,7 +1852,7 @@ void fo_S4_0782(Regs *r) {
     case 15: w16(o + 0x3A, 0x78); rush(r); break;           /* at the player */
     }
     { int16_t t = (int16_t)(r16(o + 0x1A) - 1); w16(o + 0x1A, (uint16_t)(t < 0 ? 0 : t)); }
-    w16(o + 0x16, (uint16_t)r->d[7]);
+    w16(o + OB_STATE, (uint16_t)r->d[7]);
 }
 
 /* ---------- type $20 (fn_S4_1256, level 4) ----------
@@ -1867,7 +1868,7 @@ void fo_S4_0782(Regs *r) {
  * (fn_S7_1766, D0 = -1) */
 static void t20_step(Regs *r) {
     mz_seg_of(7, 0x3722), fn_S7_3722(r);
-    if ((uint16_t)r->d[0] != r16(r->a[4] + 0xC)) { r->d[0] = 0; return; }
+    if ((uint16_t)r->d[0] != r16(r->a[4] + OB_HEADING)) { r->d[0] = 0; return; }
     r->a[0] = OADDR(0x4F30); fn_S7_374C(r);
     fn_S7_3972(r);
     if ((uint16_t)r->d[0]) { r->d[0] = 0xFFFFFFFFu; return; }
@@ -1889,10 +1890,10 @@ static void t20_think(Regs *r) {
         switch ((uint16_t)r->d[7]) {
         case 0:
             mz_seg_of(7, 0x319E), fn_S7_319E(r);
-            if (!(og16(0x382E) & 0x8000)) {
-                int close = og16(0x382E) < 5;
+            if (!(og16(OG_NEAR_DIST) & 0x8000)) {
+                int close = og16(OG_NEAR_DIST) < 5;
                 if (!close) {
-                    set_w(&r->d[0], (uint16_t)(og16(0x3830) - r16(o + 0xC)));
+                    set_w(&r->d[0], (uint16_t)(og16(OG_NEAR_DIR) - r16(o + OB_HEADING)));
                     mz_seg_of(7, 0x367E), fn_S7_367E(r);
                     close = (uint16_t)r->d[0] < 0xF;
                 }
@@ -1900,7 +1901,7 @@ static void t20_think(Regs *r) {
             }
             mz_seg_of(7, 0x3FF0), fn_S7_3FF0(r);
             if (!(uint16_t)r->d[0]) return;
-            w16(o + 0x1C, og16(0x56D0)); next = 3; break;
+            w16(o + 0x1C, og16(OG_PLAYER_CELL)); next = 3; break;
         case 2: mz_seg_of(7, 0x319E), fn_S7_319E(r); if (!(uint16_t)r->d[0]) return; next = 3; break;
         case 3: w16(o + 0x1E, 0x1E); next = 4; break;
         case 4:
@@ -1915,7 +1916,7 @@ static void t20_think(Regs *r) {
         case 5: w16(o + 0x1E, 0xFFFF); next = 6; break;
         case 6: if (!count_up(r, 0x1E, 5)) return; next = 7; break;   /* hit by $18: pictures $33-$37 */
         case 7: off_map(r, 0x1E, 0x2EE); next = 8; break;
-        case 8: if (!count_down(r, 0x1E, og16(0x56E0) ? 100 : 1)) return; next = 9; break;
+        case 8: if (!count_down(r, 0x1E, og16(OG_FULL_VIEW) ? 100 : 1)) return; next = 9; break;
         case 9: if (!back_in_cell(r)) return; next = 0xA; break;
         case 10: on_map(r, 0x1E); next = 0xB; break;
         case 11: if (!count_up(r, 0x1E, 0x1C)) return; next = 0; break;   /* 28 frames of pictures $38-$3D, $32 */
@@ -1928,8 +1929,8 @@ static void t20_think(Regs *r) {
 }
 void fo_S4_1256(Regs *r) {
     static const uint16_t hits[] = {0x17, 3, 0x18, 5, 0x19, 3, 0x1A, 3, 0xFFFF}, hits11[] = {0x18, 5, 0xFFFF};
-    uint32_t o = r->a[4], map = og32(0x53D4);
-    set_w(&r->d[7], r16(o + 0x16));
+    uint32_t o = r->a[4], map = og32(OG_MAP);
+    set_w(&r->d[7], r16(o + OB_STATE));
     set_w(&r->d[0], (uint16_t)r->d[7]);
     t20_think(r);
     uint16_t s = (uint16_t)r->d[7];
@@ -1938,24 +1939,24 @@ void fo_S4_1256(Regs *r) {
     switch (s) {
     case 0: mz_seg_of(7, 0x3EE2), fn_S7_3EE2(r); if ((uint16_t)r->d[0] < 0x40) t20_step(r); break;
     case 2:
-        w16(o + 0x1C, og16(0x56D0));
+        w16(o + 0x1C, og16(OG_PLAYER_CELL));
         if (!r16(o + 0x1A)) {
-            set_w(&r->d[0], og16(0x3830)); mz_seg_of(7, 0x3722), fn_S7_3722(r);
-            if (r16(o + 0xC) != og16(0x3830)) break;
-            set_w(&r->d[0], 0x22); set_w(&r->d[1], r16(o + 0xC)); set_w(&r->d[2], og16(0x3834));
+            set_w(&r->d[0], og16(OG_NEAR_DIR)); mz_seg_of(7, 0x3722), fn_S7_3722(r);
+            if (r16(o + OB_HEADING) != og16(OG_NEAR_DIR)) break;
+            set_w(&r->d[0], 0x22); set_w(&r->d[1], r16(o + OB_HEADING)); set_w(&r->d[2], og16(OG_SELF));
             r->a[0] = OADDR(0x4CB0); mz_seg_of(7, 0x40D6), fn_S7_40D6(r);
             w16(o + 0x1A, 0x1E);
             break;
         }
-        if (og16(0x382E) >= 0xA) { g_target(og16(0x56D8), og16(0x56D4)); if (t20_go(r)) break; }
-        set_w(&r->d[0], og16(0x3830)); mz_seg_of(7, 0x3722), fn_S7_3722(r);
+        if (og16(OG_NEAR_DIST) >= 0xA) { g_target(og16(OG_PLAYER_X), og16(OG_PLAYER_Y)); if (t20_go(r)) break; }
+        set_w(&r->d[0], og16(OG_NEAR_DIR)); mz_seg_of(7, 0x3722), fn_S7_3722(r);
         break;
     case 3: break;
     case 4: {
         uint16_t c = r16(o + 0x1C);
         g_target(r16(map + sxw(c) + 0x1C), r16(map + sxw(c) + 0x1E));
         if (t20_go(r)) break;
-        if (r16(o + 0x30) == r16(o + 0x1C)) w16(o + 0x1C, 0);
+        if (r16(o + OB_CELL) == r16(o + 0x1C)) w16(o + 0x1C, 0);
         else w16(o + 0x1E, (uint16_t)(r16(o + 0x1E) - 1));
         break;
     }
@@ -1967,7 +1968,7 @@ void fo_S4_1256(Regs *r) {
     case 14: w16(o + 0x3A, 0x37); rush(r); break;           /* at the player */
     }
     { int16_t t = (int16_t)(r16(o + 0x1A) - 1); w16(o + 0x1A, (uint16_t)(t < 0 ? 0 : t)); }
-    w16(o + 0x16, (uint16_t)r->d[7]);
+    w16(o + OB_STATE, (uint16_t)r->d[7]);
 }
 
 /* ---------- type $2D (fn_S4_1DFA, level 4) ----------
@@ -1995,17 +1996,17 @@ static void t2d_think(Regs *r) {
             next = 0xC; break;
         case 12:
             mz_seg_of(7, 0x319E), fn_S7_319E(r);
-            if (!(og16(0x3830) & 0x8000)) { w16(o + 0x1A, 6); next = 2; break; }
+            if (!(og16(OG_NEAR_DIR) & 0x8000)) { w16(o + 0x1A, 6); next = 2; break; }
             mz_seg_of(7, 0x3FF0), fn_S7_3FF0(r);
             if (!(uint16_t)r->d[0]) return;
-            w16(o + 0x1C, og16(0x56D0)); next = 3; break;
+            w16(o + 0x1C, og16(OG_PLAYER_CELL)); next = 3; break;
         case 1:                                             /* (no picture: 13, else 14) */
             if (!r16(o + 0x3A)) { w16(o + 0x1E, 7); next = 0xD; } else { w16(o + 0x1E, 5); next = 0xE; }
             break;
         case 5: w16(o + 0x1E, 0xFFFF); next = 6; break;
         case 6: if (!count_up(r, 0x1E, 3)) return; next = 7; break;   /* hit by $18: pictures $71-$73 */
         case 7: off_map(r, 0x1E, 0x2EE); next = 8; break;
-        case 8: if (!count_down(r, 0x1E, og16(0x56E0) >= 0x80 ? 100 : 1)) return; next = 9; break;
+        case 8: if (!count_down(r, 0x1E, og16(OG_FULL_VIEW) >= 0x80 ? 100 : 1)) return; next = 9; break;
         case 9: if (!back_in_cell(r)) return; next = 0xA; break;
         case 10: on_map(r, 0x1E); next = 0xB; break;
         case 11: if (!count_up(r, 0x1E, 0x10)) return; next = 0xC; break;   /* 16 frames of pictures $74-$76, 0 */
@@ -2018,8 +2019,8 @@ static void t2d_think(Regs *r) {
 }
 void fo_S4_1DFA(Regs *r) {
     static const uint16_t hits[] = {0x17, 3, 0x18, 5, 0x19, 3, 0x1A, 3, 0xFFFF}, hits18[] = {0x18, 5, 0xFFFF};
-    uint32_t o = r->a[4], map = og32(0x53D4);
-    set_w(&r->d[7], r16(o + 0x16));
+    uint32_t o = r->a[4], map = og32(OG_MAP);
+    set_w(&r->d[7], r16(o + OB_STATE));
     set_w(&r->d[0], (uint16_t)r->d[7]);
     t2d_think(r);
     uint16_t s = (uint16_t)r->d[7];
@@ -2028,19 +2029,19 @@ void fo_S4_1DFA(Regs *r) {
     switch (s) {
     case 0: case 3: break;
     case 2:
-        w16(o + 0x1C, og16(0x56D0));
+        w16(o + 0x1C, og16(OG_PLAYER_CELL));
         if (!r16(o + 0x1A)) {
             random_d0(r);
             int16_t spread = (int16_t)(((uint16_t)r->d[0] & 7) - 3);
             if (spread == 4) spread = 0;
-            set_w(&r->d[1], (uint16_t)((spread + og16(0x3830)) & 0x3F));
-            set_w(&r->d[0], 0x36); set_w(&r->d[2], og16(0x3834));
+            set_w(&r->d[1], (uint16_t)((spread + og16(OG_NEAR_DIR)) & 0x3F));
+            set_w(&r->d[0], 0x36); set_w(&r->d[2], og16(OG_SELF));
             r->a[0] = OADDR(0x48F0); mz_seg_of(7, 0x40D6), fn_S7_40D6(r);
             w16(o + 0x1A, 4);
             break;
         }
-        if (og16(0x382E) < 0xA) break;
-        g_target(og16(0x56D8), og16(0x56D4));
+        if (og16(OG_NEAR_DIST) < 0xA) break;
+        g_target(og16(OG_PLAYER_X), og16(OG_PLAYER_Y));
         mz_seg_of(7, 0x3B36), fn_S7_3B36(r); fn_S7_3D0E(r);
         set_w(&r->d[0], og16(0x3812));
         if (!(og16(0x3812) & 0x8000)) { r->a[0] = OADDR(0x4B70); mz_seg(7), fo_S7_1E54(r); }
@@ -2051,7 +2052,7 @@ void fo_S4_1DFA(Regs *r) {
         mz_seg_of(7, 0x3B36), fn_S7_3B36(r); fn_S7_3D0E(r);
         set_w(&r->d[0], og16(0x3812));
         if (!(og16(0x3812) & 0x8000)) t1e_step(r);
-        if (r16(o + 0x30) == r16(o + 0x1C)) w16(o + 0x1C, 0);
+        if (r16(o + OB_CELL) == r16(o + 0x1C)) w16(o + 0x1C, 0);
         else w16(o + 0x1E, (uint16_t)(r16(o + 0x1E) - 1));
         break;
     }
@@ -2063,7 +2064,7 @@ void fo_S4_1DFA(Regs *r) {
     case 15: w16(o + 0x3A, 0x73); rush(r); break;           /* at the player */
     }
     { int16_t t = (int16_t)(r16(o + 0x1A) - 1); w16(o + 0x1A, (uint16_t)(t < 0 ? 0 : t)); }
-    w16(o + 0x16, (uint16_t)r->d[7]);
+    w16(o + OB_STATE, (uint16_t)r->d[7]);
 }
 
 /* ---------- Lips, the brain (type $2E, fn_S4_21D6, level 5) ----------
@@ -2081,35 +2082,35 @@ void fo_S4_1DFA(Regs *r) {
  * is gone with record 2. (State 9 clears the word at address $E4, not record 3's +$E4: the
  * original's slip, kept.) The lists below are the original's for all states. */
 static void t2e_count(void) {                               /* fn_S4_2770 */
-    uint32_t tbl = og32(0x53C8);
+    uint32_t tbl = og32(OG_OBJECTS);
     if (r16(tbl + 0xE0)) w16(tbl + 0xE0, (uint16_t)(r16(tbl + 0xE0) - 1));
     uint16_t t = r16(tbl + 0xE4);
     if (t && !(t & 0x8000)) w16(tbl + 0xE4, (uint16_t)(t - 1));
 }
 static void t2e_call(void) {                                /* fn_S4_2790: types $1F / $31 low on the map hit by record 3 */
-    uint32_t t = og32(0x53C8);
+    uint32_t t = og32(OG_OBJECTS);
     for (uint16_t rec = 0x1DC0; rec; rec -= 0x40) {
         uint16_t ty = r16(t + rec + 2);
         if ((ty == 0x1F || ty == 0x31) && r16(t + rec + 8) >= 0x1C0) w16(t + rec + 0x14, 0xC0);
     }
 }
 static void t2e_mark(void) {                                /* fn_S4_27C4: record 3's marks: area $E, cell $3380 */
-    uint32_t t = og32(0x53C8);
+    uint32_t t = og32(OG_OBJECTS);
     w16(t + 0xD8, 0xE); w16(t + 0xDC, 0xE); w16(t + 0xDA, 0x3380); w16(t + 0xDE, 0x3380);
 }
 static void t2e_think(Regs *r) {
-    uint32_t tbl = og32(0x53C8);
+    uint32_t tbl = og32(OG_OBJECTS);
     for (;;) {
         set_w(&r->d[7], (uint16_t)r->d[0]);
         uint16_t s = (uint16_t)r->d[7], next;
         switch (s) {
         case 0: if (!r16(tbl + 0x98)) return; next = 1; break;
-        case 1: if (r16(tbl + 0x98) && og16(0x56C2)) return; next = 2; break;
+        case 1: if (r16(tbl + 0x98) && og16(OG_GEORGE_JOINED)) return; next = 2; break;
         case 2: w16(tbl + 0xE2, 1); w16(tbl + 0xE4, 1); next = 3; break;
         case 3: if (!r16(tbl + 0x98)) return; next = 4; break;
         case 31: if (r16(tbl + 0x98)) return; next = 2; break;
         case 4: w16(tbl + 0xE4, 0xFFFF); t2e_call(); flag_set(r, 1, 0x20); next = 14; break;
-        case 5: case 20: if (r16(tbl + 0x98) && og16(0x56C2)) return; next = s == 5 ? 12 : 25; break;
+        case 5: case 20: if (r16(tbl + 0x98) && og16(OG_GEORGE_JOINED)) return; next = s == 5 ? 12 : 25; break;
         case 6: if (r16(tbl + 0x98)) return; next = 12; break;
         case 7: w16(tbl + 0x96, 50); next = 8; break;
         case 8: {
@@ -2141,22 +2142,22 @@ static void t2e_think(Regs *r) {
         case 18:
             w16(tbl + 0xE4, 5);
             t2e_call();
-            if (og16(0x56D4) < 0x180) { next = 25; break; }
+            if (og16(OG_PLAYER_Y) < 0x180) { next = 25; break; }
             if (!r16(tbl + 0x98)) return;
             w16(tbl + 0xE4, 0xFFFF);
             next = 20; break;
         case 21: case 22: if (!r16(tbl + 0x98)) { next = 25; break; } return;
         case 23: if (r16(tbl + 0x98)) return; next = 24; break;
         case 24:
-            sog16(0x382C, og16(0x56D8)); sog16(0x3828, og16(0x56D4)); sog16(0x3824, og16(0x56D0));
+            sog16(OG_MOVE_X, og16(OG_PLAYER_X)); sog16(OG_MOVE_Y, og16(OG_PLAYER_Y)); sog16(OG_MOVE_CELL, og16(OG_PLAYER_CELL));
             make_object(r, 0x37, 0, 0);
             next = 30; break;
         case 25: w16(tbl + 0xE4, 0); next = 26; break;
         case 29: {                                          /* gone, and record 2 with it */
             uint32_t o = r->a[4];
-            w16(og32(0x53D4) + sxw(r16(o + 0xE)) + 0xE, 0);
+            w16(og32(OG_MAP) + sxw(r16(o + 0xE)) + 0xE, 0);
             unlink_obj(r);
-            w16(o + 4, 0); w16(o + 8, 0); w16(o + 0x30, 0); w16(o + 0xE, 0);
+            w16(o + OB_X, 0); w16(o + OB_Y, 0); w16(o + OB_CELL, 0); w16(o + 0xE, 0);
             set_w(&r->d[0], 0x80); set_w(&r->d[1], r16(tbl + 0xB0));
             mz_seg_of(2, 0x3410), fn_S2_3410(r);
             w16(tbl + 0x84, 0); w16(tbl + 0x88, 0); w16(tbl + 0xB0, 0);
@@ -2188,8 +2189,8 @@ void fo_S4_21D6(Regs *r) {
         }
     }
     uint32_t o = r->a[4];
-    r->a[2] = og32(0x53C8);
-    set_w(&r->d[7], r16(o + 0x16));
+    r->a[2] = og32(OG_OBJECTS);
+    set_w(&r->d[7], r16(o + OB_STATE));
     set_w(&r->d[0], (uint16_t)r->d[7]);
     t2e_think(r);
     uint16_t s = (uint16_t)r->d[7];
@@ -2211,12 +2212,12 @@ void fo_S4_21D6(Regs *r) {
     case 11: t2e_count(); say(0x2E05); break;
     case 13: case 26: case 30: t2e_count(); break;
     case 15: t2e_count(); t2e_call(); t2e_mark(); break;
-    case 17: { static const uint16_t pic[3] = {0x82, 0x83, 0}; w16(r->a[4] + 0x3A, pic[r16(og32(0x53C8) + 0x96)]); t2e_count(); break; }
+    case 17: { static const uint16_t pic[3] = {0x82, 0x83, 0}; w16(r->a[4] + 0x3A, pic[r16(og32(OG_OBJECTS) + 0x96)]); t2e_count(); break; }
     case 18: t2e_count(); t2e_mark(); break;
-    case 28: { static const uint16_t pic[3] = {0x82, 0x84, 0x84}; w16(r->a[4] + 0x3A, pic[r16(og32(0x53C8) + 0x96)]); t2e_count(); break; }
+    case 28: { static const uint16_t pic[3] = {0x82, 0x84, 0x84}; w16(r->a[4] + 0x3A, pic[r16(og32(OG_OBJECTS) + 0x96)]); t2e_count(); break; }
     }
     sog32(0x5752, (uint16_t)r->d[7]);
-    w16(o + 0x16, (uint16_t)r->d[7]);
+    w16(o + OB_STATE, (uint16_t)r->d[7]);
 }
 
 /* ---------- type $29 (fn_S9_1AE0, level 3) ----------
@@ -2230,22 +2231,22 @@ static void t29_grow(Regs *r) {                             /* fn_S9_1908 */
     static const uint16_t step[5][2] = {{3, 1}, {7, 2}, {7, 3}, {100, 3}, {100, 4}};
     uint32_t o = r->a[4];
     if (flag(r, 0, 4)) return;
-    uint16_t c = r16(o + 0xC), n = (uint16_t)(r16(o + 0x10) + 1);
+    uint16_t c = r16(o + OB_HEADING), n = (uint16_t)(r16(o + 0x10) + 1);
     w16(o + 0x10, n);
     if (n < step[c][0]) return;
-    w16(o + 0xC, step[c][1]); w16(o + 0x10, 0);
+    w16(o + OB_HEADING, step[c][1]); w16(o + 0x10, 0);
 }
 static uint16_t t29_smaller(Regs *r) {                     /* hit by $1A: smaller (at 0, with flag 0 bit 2: state 3) */
     uint32_t o = r->a[4];
-    int16_t t = (int16_t)(r16(o + 0xC) - 1);
-    if (t >= 0) w16(o + 0xC, (uint16_t)t);
-    else if (flag(r, 0, 4)) { w16(o + 0xC, 0xFFFF); return 3; }
+    int16_t t = (int16_t)(r16(o + OB_HEADING) - 1);
+    if (t >= 0) w16(o + OB_HEADING, (uint16_t)t);
+    else if (flag(r, 0, 4)) { w16(o + OB_HEADING, 0xFFFF); return 3; }
     w16(o + 0x10, 0);
     return 0;
 }
 static void t29_bigger(Regs *r) {                           /* hit by $19: bigger, up to 4 */
-    uint16_t t = (uint16_t)(r16(r->a[4] + 0xC) + 1);
-    w16(r->a[4] + 0xC, t >= 5 ? 4 : t);
+    uint16_t t = (uint16_t)(r16(r->a[4] + OB_HEADING) + 1);
+    w16(r->a[4] + OB_HEADING, t >= 5 ? 4 : t);
 }
 static void t29_think(Regs *r) {
     uint32_t o = r->a[4];
@@ -2254,25 +2255,25 @@ static void t29_think(Regs *r) {
         uint16_t next;
         switch ((uint16_t)r->d[7]) {
         case 0:
-            if (r16(o + 0xC) & 0x8000) { next = 3; break; }
-            if (og16(0x56E0) >= 0x80 || og16(0x56D4) >= 0x12 || og16(0x56D8) < 0x33 || og16(0x56D8) >= 0x3D) return;
+            if (r16(o + OB_HEADING) & 0x8000) { next = 3; break; }
+            if (og16(OG_FULL_VIEW) >= 0x80 || og16(OG_PLAYER_Y) >= 0x12 || og16(OG_PLAYER_X) < 0x33 || og16(OG_PLAYER_X) >= 0x3D) return;
             next = 4; break;
         case 4: w16(o + 0x12, 7); next = 5; break;
         case 5: {
-            sog16(0x56E0, 0x83);
+            sog16(OG_FULL_VIEW, 0x83);
             uint16_t t = (uint16_t)(r16(o + 0x12) - 1);
             w16(o + 0x12, t);
             if (t) return;
-            sog16(0x57DC, 2); sog32(0x57D8, 0x1EB0000); sog32(0x57D4, 0x780000);
-            sog16(0x57DA, (uint16_t)((og16(0x56DA) - 0x10) & 0x3F)); sog8(0x57DE, 1); sog8(0x57F2, 1);
+            sog16(OG_GO_LEVEL, 2); sog32(OG_GO_X, 0x1EB0000); sog32(OG_GO_Y, 0x780000);
+            sog16(OG_GO_HEADING, (uint16_t)((og16(OG_PLAYER_HEADING) - 0x10) & 0x3F)); sog8(0x57DE, 1); sog8(0x57F2, 1);
             next = 0; break;
         }
         case 1: next = t29_smaller(r); break;
         case 2: t29_bigger(r); next = 0; break;
         case 3:                                             /* gone: each frame 2 from the player's life */
-            sog32(0x382C, 0); sog32(0x3828, 0); sog16(0x3824, 0);
+            sog32(OG_MOVE_X, 0); sog32(OG_MOVE_Y, 0); sog16(OG_MOVE_CELL, 0);
             mz_seg_of(7, 0x3784), fn_S7_3784(r);
-            { int16_t l = (int16_t)(og16(0x56EA) - 2); sog16(0x56EA, (uint16_t)(l < 0 ? 0 : l)); }
+            { int16_t l = (int16_t)(og16(OG_LIFE) - 2); sog16(OG_LIFE, (uint16_t)(l < 0 ? 0 : l)); }
             sog16(0x56EE, 0x27);
             return;
         default: return;
@@ -2283,14 +2284,14 @@ static void t29_think(Regs *r) {
 void fo_S9_1AE0(Regs *r) {
     static const uint16_t hits[] = {0x19, 2, 0x1A, 1, 0xFFFF};
     uint32_t o = r->a[4];
-    set_w(&r->d[7], r16(o + 0x16));
-    w16(o + 0xC, r16(og32(0x53C8) + 0x1C));
+    set_w(&r->d[7], r16(o + OB_STATE));
+    w16(o + OB_HEADING, r16(og32(OG_OBJECTS) + 0x1C));
     set_w(&r->d[0], (uint16_t)r->d[7]);
     t29_think(r);
     o_hit(r, (uint16_t)r->d[7] == 0 ? hits : NULL, t29_think);
     if ((uint16_t)r->d[7] == 0 || (uint16_t)r->d[7] == 5) t29_grow(r);
-    w16(og32(0x53C8) + 0x1C, r16(o + 0xC));
-    w16(o + 0x16, (uint16_t)r->d[7]);
+    w16(og32(OG_OBJECTS) + 0x1C, r16(o + OB_HEADING));
+    w16(o + OB_STATE, (uint16_t)r->d[7]);
 }
 
 /* ---------- the snails (types 3, 4 and 5: fn_S10_0028, level 1) ----------
@@ -2324,16 +2325,16 @@ static const uint16_t snail_ways[136] = {                 /* points { x, y } ...
     0x128, 0x128, 0x128, 0x148, 0x158, 0x148, 0x158, 0x118, 0x148, 0x118, 0xFFFF, 0xFFFF};
 enum { WAY_1044 = 0, WAY_106C = 0x28, WAY_10B4 = 0x70, WAY_10BC = 0x78,       /* byte offsets */
        WAY_1104 = 0xC0, WAY_111C = 0xD8, WAY_112C = 0xE8, WAY_113C = 0xF8 };
-static int snail_within(Regs *r, uint16_t d) { near_d0(r); return og16(0x382E) < d; }   /* fn_S10_115A (15), 1168 (20) */
+static int snail_within(Regs *r, uint16_t d) { near_d0(r); return og16(OG_NEAR_DIST) < d; }   /* fn_S10_115A (15), 1168 (20) */
 static int snail_looked_at(Regs *r, uint16_t dir, uint16_t within) {   /* the player looks this way */
-    set_w(&r->d[0], (uint16_t)(dir - og16(0x56DA)));
+    set_w(&r->d[0], (uint16_t)(dir - og16(OG_PLAYER_HEADING)));
     mz_seg_of(7, 0x367E), fn_S7_367E(r);
     return (uint16_t)r->d[0] < within;
 }
-static int snail_faced(Regs *r) { return snail_looked_at(r, (og16(0x3830) + 0x20) & 0x3F, 8); }   /* fn_S10_1176 */
+static int snail_faced(Regs *r) { return snail_looked_at(r, (og16(OG_NEAR_DIR) + 0x20) & 0x3F, 8); }   /* fn_S10_1176 */
 static int snail_watched(Regs *r) {                        /* within 32 and looked at (within 12) */
     near_d0(r);
-    return og16(0x382E) < 0x20 && snail_looked_at(r, og16(0x3830) ^ 0x20, 12);
+    return og16(OG_NEAR_DIST) < 0x20 && snail_looked_at(r, og16(OG_NEAR_DIR) ^ 0x20, 12);
 }
 static void snail_wander(Regs *r, uint16_t dir) {          /* fn_S10_16FC: about heading dir */
     uint32_t o = r->a[4];
@@ -2347,17 +2348,17 @@ static void snail_wander(Regs *r, uint16_t dir) {          /* fn_S10_16FC: about
     mz_seg_of(7, 0x372C), fn_S7_372C(r);
 }
 static void tell(Regs *r, uint16_t ev, uint16_t rec) { call_d0d1(r, fo_S7_1278, ev, rec); }   /* event ev to a record */
-static void flag0_clear(uint16_t bits) { uint32_t f = og32(0x53C8) + 0x16; w16(f, r16(f) & ~bits); }   /* fn_S7_12A6 */
-static int gone(uint16_t rec) { return (r16(og32(0x53C8) + rec + 2) & 0x8000) != 0; }
+static void flag0_clear(uint16_t bits) { uint32_t f = og32(OG_OBJECTS) + 0x16; w16(f, r16(f) & ~bits); }   /* fn_S7_12A6 */
+static int gone(uint16_t rec) { return (r16(og32(OG_OBJECTS) + rec + 2) & 0x8000) != 0; }
 /* fn_S10_167A: the way from byte +$1C on: the heading to its point (fn_S7_1488), the next point
  * once there; -1 at its end. Kept at -2(A6) for the act. */
 static int snail_way(Regs *r, uint16_t way) {
     uint32_t o = r->a[4];
     for (;;) {
         uint16_t i = (uint16_t)((way + r16(o + 0x1C)) / 2);
-        sog16(0x381C, snail_ways[i]);
+        sog16(OG_TARGET_X, snail_ways[i]);
         if (snail_ways[i] & 0x8000) { r->d[0] = 0xFFFFFFFFu; break; }
-        sog16(0x3818, snail_ways[i + 1]);
+        sog16(OG_TARGET_Y, snail_ways[i + 1]);
         fo_S7_1488(r);
         if (!((uint16_t)r->d[0] & 0x8000)) break;
         w16(o + 0x1C, (uint16_t)(r16(o + 0x1C) + 4));
@@ -2370,7 +2371,7 @@ static void refresh(Regs *r) {                              /* fn_S2_2B3E */
     mz_seg_of(2, 0x3568), fn_S2_3568(r);
 }
 static void unlink_rec(Regs *r, uint16_t rec) {             /* fn_S2_29E2 for another record */
-    set_w(&r->d[0], rec); set_w(&r->d[1], r16(og32(0x53C8) + rec + 0x30));
+    set_w(&r->d[0], rec); set_w(&r->d[1], r16(og32(OG_OBJECTS) + rec + 0x30));
     mz_seg_of(2, 0x3410), fn_S2_3410(r);
 }
 /* the walk along a way (the act): fn_S10_1742 (table G_4A30) / 1746, pushing (fn_S10_176A) and
@@ -2382,21 +2383,21 @@ static void snail_walk(Regs *r, int how) {
     set_w(&r->d[0], r16(r->a[6] - 2));
     r->a[0] = OADDR(how & WALK_FAST ? 0x4B70 : 0x4A30);
     mz_seg_of(7, 0x36F4), fn_S7_36F4(r);                     /* fn_S7_14E8: turned that way? */
-    if ((uint16_t)r->d[0] == r16(o + 0xC)) {
+    if ((uint16_t)r->d[0] == r16(o + OB_HEADING)) {
         mz_seg_of(7, 0x374C), fn_S7_374C(r);
         mz_seg_of(7, 0x3972), fn_S7_3972(r);
         if (!(uint16_t)r->d[0]) mz_seg_of(7, 0x3784), fn_S7_3784(r);
     }
     if (how & WALK_PUSH) {                                  /* the type 9 objects in its cell get event $303 */
-        uint32_t map = og32(0x53D4), t = og32(0x53C8);
+        uint32_t map = og32(OG_MAP), t = og32(OG_OBJECTS);
         for (uint32_t k = 1; k <= 10; k++) {
-            uint8_t n = r8(map + sxw(r16(o + 0x30)) + k);
+            uint8_t n = r8(map + sxw(r16(o + OB_CELL)) + k);
             if (!n) break;
             if (r16(t + ((uint32_t)n << 6) + 2) == 9) w16(t + ((uint32_t)n << 6) + 0x12, 0x303);
         }
     }
-    if ((how & WALK_VIEW) && r16(o + 0x30) != og16(0x582C)) {   /* the view goes with it */
-        sog16(0x56A6, r16(o + 0x30)); sog16(0x56A8, 100);
+    if ((how & WALK_VIEW) && r16(o + OB_CELL) != og16(0x582C)) {   /* the view goes with it */
+        sog16(0x56A6, r16(o + OB_CELL)); sog16(0x56A8, 100);
         refresh(r);
     }
 }
@@ -2406,14 +2407,14 @@ static void snail_call_others(Regs *r) {                    /* fn_S10_16AE: even
 }
 static void snail_remove(Regs *r) {
     unlink_obj(r);
-    w16(r->a[4] + 2, r16(r->a[4] + 2) | 0x8000);
+    w16(r->a[4] + OB_TYPE, r16(r->a[4] + OB_TYPE) | 0x8000);
     sog16(0x56A8, 0); sog16(0x56A6, 0);
     refresh(r);
 }
 static void snail_shrink(Regs *r, uint16_t pic, int tell_george) {   /* dying: 7 pictures from pic + 1, then gone */
     uint16_t n = (uint16_t)(r16(r->a[4] + 0x1C) + 1);
     if (n < 7) { w16(r->a[4] + 0x1C, n); set_pic(r, (uint16_t)(pic + n)); return; }
-    if (tell_george) { near_d0(r); if (!(og16(0x382E) & 0x8000)) tell(r, 0x304, 0x40); }
+    if (tell_george) { near_d0(r); if (!(og16(OG_NEAR_DIST) & 0x8000)) tell(r, 0x304, 0x40); }
     snail_remove(r);
 }
 static void snail_sink(Regs *r) {                           /* at the end of the way: pictures $20, $22, $22, then gone */
@@ -2423,14 +2424,14 @@ static void snail_sink(Regs *r) {                           /* at the end of the
     if (n < 6) set_pic(r, pic[n / 2]); else snail_remove(r);
 }
 static void snail_finale(Regs *r) {                         /* fn_S10_1816 */
-    uint32_t t = og32(0x53C8);
+    uint32_t t = og32(OG_OBJECTS);
     int above = 0;
     for (uint16_t rec = 0x1DC0; rec && !above; rec -= 0x40)
         above = r16(t + rec + 2) == 9 && r16(t + rec + 8) < 0x88;
     if (above)                                              /* all the type 9 objects removed */
         for (uint16_t rec = 0x1DC0; rec; rec -= 0x40) {
             if (r16(t + rec + 2) != 9) continue;
-            w16(og32(0x53D4) + sxw(r16(t + rec + 0xE)) + 0xE, 0);
+            w16(og32(OG_MAP) + sxw(r16(t + rec + 0xE)) + 0xE, 0);
             unlink_rec(r, rec);
             w16(t + rec + 2, r16(t + rec + 2) | 0x8000);
         }
@@ -2455,7 +2456,7 @@ static void talker_think(Regs *r) {
             next = back[s];
             break;
         }
-        case 2: w16(o + 0x1C, 20); w16(o + 0x18, og16(0x382E)); w16(o + 0x1A, 25); next = 3; break;
+        case 2: w16(o + 0x1C, 20); w16(o + 0x18, og16(OG_NEAR_DIST)); w16(o + 0x1A, 25); next = 3; break;
         case 5: case 8: case 11: w16(o + 0x1C, 200); next = (uint16_t)(s + 1); break;
         case 63: next = 67; break;
         case 64: call_d0d1(r, fo_S7_1292, 0, 1); next = 67; break;
@@ -2490,7 +2491,7 @@ static void talker_think(Regs *r) {
             next = 80;
             break;
         }
-        case 86: case 87: case 88: near_d0(r); if (!(og16(0x3830) & 0x8000)) return; next = 80; break;
+        case 86: case 87: case 88: near_d0(r); if (!(og16(OG_NEAR_DIR) & 0x8000)) return; next = 80; break;
         case 96: w16(o + 0x1C, 0xFFFF); next = 79; break;
         default:
             /* awake: beyond 20 it rests */
@@ -2499,11 +2500,11 @@ static void talker_think(Regs *r) {
                      : s <= 58 ? 53 : s <= 60 ? 61 : s == 62 ? 63 : s == 65 ? 66 : s == 91 ? 90 : 93;
                 break;
             }
-            if ((s == 1 || s == 91) && og16(0x56C2) && (s == 1 || !og16(0x56C0))) { next = s == 1 ? 2 : 92; break; }
+            if ((s == 1 || s == 91) && og16(OG_GEORGE_JOINED) && (s == 1 || !og16(OG_MESSAGE))) { next = s == 1 ? 2 : 92; break; }
             if (s == 3) {
                 int16_t t = (int16_t)r16(o + 0x1C);
                 if (t >= 0) { w16(o + 0x1C, (uint16_t)(t - 1)); return; }
-                if (!snail_faced(r) || og16(0x56C0)) return;
+                if (!snail_faced(r) || og16(OG_MESSAGE)) return;
                 next = 4;
                 break;
             }
@@ -2568,18 +2569,18 @@ static void talker_act(Regs *r) {
     case 77: snail_walk(r, WALK_PIC | WALK_FAST | WALK_PUSH | WALK_VIEW); break;
     case 79: snail_shrink(r, 0x8E, 0); break;
     case 81: snail_sink(r); break;
-    case 83: sog16(0x56C0, 0x8329); set_pic(r, 0x21); break;
+    case 83: sog16(OG_MESSAGE, 0x8329); set_pic(r, 0x21); break;
     case 85: snail_wander(r, 0x19); set_pic(r, 0x21); break;
     case 89: snail_finale(r); break;
     case 1: case 3: case 4: case 6: case 7: case 9: case 10: case 12: case 16: case 17: case 18: case 19: case 20:
     case 22: case 23: case 54: case 55: case 56: case 57: case 58: case 59: case 60: case 62: case 65:
     case 86: case 87: case 88: case 91: case 92: case 94: case 95:
-        if (says[s]) sog16(0x56C0, says[s]);
+        if (says[s]) sog16(OG_MESSAGE, says[s]);
         if (s >= 86 && s <= 88) set_pic(r, 0x21);
-        snail_wander(r, og16(0x3830));                      /* after the player */
+        snail_wander(r, og16(OG_NEAR_DIR));                      /* after the player */
         break;
     default:
-        if (s >= 25 && s <= 48) { sog16(0x56C0, (uint16_t)(0x8309 + s - 25)); snail_wander(r, og16(0x3830)); }
+        if (s >= 25 && s <= 48) { sog16(OG_MESSAGE, (uint16_t)(0x8309 + s - 25)); snail_wander(r, og16(OG_NEAR_DIR)); }
         break;                                              /* the rest do nothing */
     }
 }
@@ -2588,7 +2589,7 @@ static void talker_act(Regs *r) {
  * record 2, for type 5 also record 3), 16 the end; hit by $18 (or $1B in 5): 12, 17, 13 dying (pictures
  * from $96 / $9D; type 4 tells George, event $304, when the player can see it) */
 static int follower_last(Regs *r) {                         /* the ones before it gone */
-    return gone(0x80) && (r16(r->a[4] + 2) == 4 || gone(0xC0));
+    return gone(0x80) && (r16(r->a[4] + OB_TYPE) == 4 || gone(0xC0));
 }
 static void follower_think(Regs *r) {
     uint32_t o = r->a[4];
@@ -2606,7 +2607,7 @@ static void follower_think(Regs *r) {
         case 8: call_d0d1(r, fo_S7_1292, 0, 0x8000); w16(o + 0x1C, 0); next = 9; break;
         case 9: if (!snail_way(r, WAY_10BC)) return; next = 10; break;
         case 10:
-            if (r16(o + 2) == 4) w16(o + 0x1C, !gone(0x80) ? WAY_111C : !gone(0x100) ? WAY_1104 : WAY_113C);
+            if (r16(o + OB_TYPE) == 4) w16(o + 0x1C, !gone(0x80) ? WAY_111C : !gone(0x100) ? WAY_1104 : WAY_113C);
             else w16(o + 0x1C, gone(0x80) && gone(0xC0) ? WAY_113C : WAY_112C);
             next = 11;
             break;
@@ -2621,10 +2622,10 @@ static void follower_think(Regs *r) {
     }
 }
 static void follower_act(Regs *r) {
-    int t4 = r16(r->a[4] + 2) == 4, view = follower_last(r) ? WALK_VIEW : 0;
+    int t4 = r16(r->a[4] + OB_TYPE) == 4, view = follower_last(r) ? WALK_VIEW : 0;
     switch ((uint16_t)r->d[7]) {
     case 0: snail_wander(r, t4 ? 0x18 : 8); break;
-    case 1: snail_wander(r, og16(0x3830)); break;
+    case 1: snail_wander(r, og16(OG_NEAR_DIR)); break;
     case 3: case 7: snail_walk(r, 0); break;
     case 5: snail_walk(r, view); break;
     case 9: snail_walk(r, WALK_PIC | WALK_PUSH | view); break;
@@ -2650,11 +2651,11 @@ void fo_S10_0028(Regs *r) {
     static const uint16_t *const f_hits[18] = {h, h, NULL, h, NULL, h5, NULL, h};
     static const uint16_t *const f_events[18] = {e01, e01, NULL, e1, NULL, e5, NULL, e1, NULL, e1, NULL, e1};
     uint32_t o = r->a[4], a6 = r->a[6];
-    uint16_t type = r16(o + 2);
+    uint16_t type = r16(o + OB_TYPE);
     if (type < 3 || type > 5) return;
     r->a[6] = r->a[7] - 4;                                  /* LINK A6, #-2: the way's heading, for the act */
     r->a[7] -= 6;
-    set_w(&r->d[7], r16(o + 0x16));
+    set_w(&r->d[7], r16(o + OB_STATE));
     set_w(&r->d[0], (uint16_t)r->d[7]);
     if (type == 3) {
         talker_think(r);
@@ -2671,7 +2672,7 @@ void fo_S10_0028(Regs *r) {
         o_event(r, s < 18 ? f_events[s] : NULL, follower_think);
         follower_act(r);
     }
-    w16(o + 0x16, (uint16_t)r->d[7]);
+    w16(o + OB_STATE, (uint16_t)r->d[7]);
     r->a[7] += 6; r->a[6] = a6;
 }
 
@@ -2681,7 +2682,7 @@ void fo_S10_0028(Regs *r) {
  * in the map (+$E) and four doorways always; within 4 of the player it takes his place: he is moved
  * to it, turned 6 to the left and his life is gone (+$26 = 2, fn_S2_2AD2). */
 static void hold_around(uint16_t v, uint16_t c) {          /* fn_S4_0164 */
-    uint32_t map = og32(0x53D4);
+    uint32_t map = og32(OG_MAP);
     static const int16_t at[9] = {-0x420, -0x400, -0x3E0, -0x20, 0, 0x20, 0x3E0, 0x400, 0x420};
     for (int k = 0; k < 9; k++) {
         uint16_t n = (uint16_t)(c + at[k]);
@@ -2694,7 +2695,7 @@ static void td_step(Regs *r) {                             /* fn_S4_0090 */
         0x5560, 0x5580, 0x51A0, 0x4D80, 0x4D60, 0x4D40, 0x5120, 0x5520, 0x5940, 0x5960, 0x5980, 0x5DA0, 0x61A0,
         0x6580, 0x6560, 0x0460, 0x6120, 0x5D40, 0x5D60, 0x5D80, 0x59A0, 0x5580, 0x5560, 0x5540, 0x5120, 0x4D40,
         0x4D60, 0x4D80, 0x51A0, 0x55A0, 0x5980, 0x5960, 0x5940, 0x5D20, 0x6120, 0};   /* (sic: $0460) */
-    uint32_t o = r->a[4], map = og32(0x53D4);
+    uint32_t o = r->a[4], map = og32(OG_MAP);
     for (;;) {
         uint16_t c = way[r16(o + 0x10) / 2];
         hold_around(1, c);
@@ -2702,7 +2703,7 @@ static void td_step(Regs *r) {                             /* fn_S4_0090 */
         fo_S7_1488(r);
         if (!((uint16_t)r->d[0] & 0x8000)) {
             mz_seg_of(7, 0x3722), fn_S7_3722(r);
-            set_w(&r->d[0], r16(o + 0xC));
+            set_w(&r->d[0], r16(o + OB_HEADING));
             r->a[0] = OADDR(0x4F30);
             mz_seg_of(7, 0x374C), fn_S7_374C(r);
             mz_seg_of(7, 0x3784), fn_S7_3784(r);
@@ -2714,16 +2715,16 @@ static void td_step(Regs *r) {                             /* fn_S4_0090 */
     }
 }
 void fo_S4_0028(Regs *r) {
-    uint16_t x = og16(0x56D8), y = og16(0x56D4);
+    uint16_t x = og16(OG_PLAYER_X), y = og16(OG_PLAYER_Y);
     if (x < 0x90 || x >= 0xE8 || y >= 0x1D0 || y < 0x100) return;
     td_step(r); td_step(r);
     near_d0(r);
-    if (og16(0x382E) >= 4) return;
+    if (og16(OG_NEAR_DIST) >= 4) return;
     uint32_t o = r->a[4];
-    sog16(0x56D8, r16(o + 4)); sog16(0x56D4, r16(o + 8)); sog16(0x56D0, r16(o + 0x30));
-    sog16(0x56DA, (uint16_t)((og16(0x56DA) - 6) & 0x3F));
+    sog16(OG_PLAYER_X, r16(o + OB_X)); sog16(OG_PLAYER_Y, r16(o + OB_Y)); sog16(OG_PLAYER_CELL, r16(o + OB_CELL));
+    sog16(OG_PLAYER_HEADING, (uint16_t)((og16(OG_PLAYER_HEADING) - 6) & 0x3F));
     w16(o + 0x26, 2);
-    sog16(0x56EA, 0);
+    sog16(OG_LIFE, 0);
     mz_seg_of(2, 0x3500), fn_S2_3500(r);
 }
 
@@ -2733,8 +2734,8 @@ void fo_S4_0028(Regs *r) {
  * he is in parts of the room, for fixed points; within 4 it takes his place as type $D does
  * (turned 6 to the right). */
 static uint16_t te_next_cell(Regs *r, uint16_t tx, uint16_t ty) {   /* fn_S4_030E */
-    uint32_t map = og32(0x53D4), dist = og32(0x53BC);
-    uint16_t best = 0xFFFF, cell = 0x5960, c = r16(r->a[4] + 0x30);
+    uint32_t map = og32(OG_MAP), dist = og32(0x53BC);
+    uint16_t best = 0xFFFF, cell = 0x5960, c = r16(r->a[4] + OB_CELL);
     #define TRY(n) do { uint16_t n_ = (n); if (!r16(map + sxw(n_) + 0xE)) { \
         uint16_t y_ = (uint16_t)((((uint16_t)(ty - r16(map + sxw(n_) + 0x1E)) >> 1) & 0x7F) << 7); \
         uint16_t x_ = (uint16_t)(((uint16_t)(tx - r16(map + sxw(n_) + 0x1C)) >> 1) & 0x7F); \
@@ -2753,8 +2754,8 @@ static uint16_t te_next_cell(Regs *r, uint16_t tx, uint16_t ty) {   /* fn_S4_030
     return cell;
 }
 void fo_S4_020C(Regs *r) {
-    uint32_t map = og32(0x53D4);
-    uint16_t x = og16(0x56D8), y = og16(0x56D4), tx, ty;
+    uint32_t map = og32(OG_MAP);
+    uint16_t x = og16(OG_PLAYER_X), y = og16(OG_PLAYER_Y), tx, ty;
     if (x < 0x90 || x >= 0x128 || y >= 0x1D0 || y < 0x100) return;
     if (x >= 0xE0) tx = 0xB8, ty = 0x168;
     else if (y < 0x130) tx = 0xC8, ty = 0x148;
@@ -2762,7 +2763,7 @@ void fo_S4_020C(Regs *r) {
     else tx = x, ty = y;
     for (int k = 0; k < 4; k++) {                           /* fn_S4_02D4 */
         uint16_t c = te_next_cell(r, tx, ty);
-        if (c == og16(0x56D0)) g_target(og16(0x56D8), og16(0x56D4));
+        if (c == og16(OG_PLAYER_CELL)) g_target(og16(OG_PLAYER_X), og16(OG_PLAYER_Y));
         else g_target(r16(map + sxw(c) + 0x1C), r16(map + sxw(c) + 0x1E));
         fo_S7_1488(r);
         if ((uint16_t)r->d[0] & 0x8000) continue;
@@ -2771,12 +2772,12 @@ void fo_S4_020C(Regs *r) {
         mz_seg_of(7, 0x3784), fn_S7_3784(r);
     }
     near_d0(r);
-    if (og16(0x382E) >= 4) return;
+    if (og16(OG_NEAR_DIST) >= 4) return;
     uint32_t o = r->a[4];
-    sog16(0x56D8, r16(o + 4)); sog16(0x56D4, r16(o + 8)); sog16(0x56D0, r16(o + 0x30));
-    sog16(0x56DA, (uint16_t)((og16(0x56DA) + 6) & 0x3F));
+    sog16(OG_PLAYER_X, r16(o + OB_X)); sog16(OG_PLAYER_Y, r16(o + OB_Y)); sog16(OG_PLAYER_CELL, r16(o + OB_CELL));
+    sog16(OG_PLAYER_HEADING, (uint16_t)((og16(OG_PLAYER_HEADING) + 6) & 0x3F));
     w16(o + 0x26, 2);
-    sog16(0x56EA, 0);
+    sog16(OG_LIFE, 0);
     mz_seg_of(2, 0x3500), fn_S2_3500(r);
 }
 
@@ -2793,7 +2794,7 @@ static void tf_think(Regs *r) {
         uint16_t s = (uint16_t)r->d[0], next;
         set_w(&r->d[7], s);
         switch (s) {
-        case 1: near_d0(r); if (og16(0x382E) < 0x20) return; next = 3; break;
+        case 1: near_d0(r); if (og16(OG_NEAR_DIST) < 0x20) return; next = 3; break;
         case 2: {
             uint16_t n = (uint16_t)(r16(o + 0x18) + 0x40);
             w16(o + 0x18, n >= 0x500 ? 0x40 : n);
@@ -2802,17 +2803,17 @@ static void tf_think(Regs *r) {
         }
         case 3: w16(o + 0x1A, 0xFFFF); next = 0; break;
         case 4: {
-            sog16(0x382C, r16(o + 4)); sog16(0x3828, r16(o + 8)); sog16(0x3824, r16(o + 0x30));
-            uint16_t self = og16(0x3834), off = r16(o + 0x18);
-            sog16(0x3834, (uint16_t)(self + off));
+            sog16(OG_MOVE_X, r16(o + OB_X)); sog16(OG_MOVE_Y, r16(o + OB_Y)); sog16(OG_MOVE_CELL, r16(o + OB_CELL));
+            uint16_t self = og16(OG_SELF), off = r16(o + 0x18);
+            sog16(OG_SELF, (uint16_t)(self + off));
             uint32_t p = o + off;
             r->a[4] = p;
             w16(p + 0x18, r16(p + 0x18) | 0x4000);
-            w16(og32(0x53D4) + sxw(r16(p + 0xE)) + 0xE, 0);
+            w16(og32(OG_MAP) + sxw(r16(p + 0xE)) + 0xE, 0);
             mz_seg_of(7, 0x3784), fn_S7_3784(r);
             w16(p + 0x16, 1);
             int t23 = r16(p + 2) == 0x23;
-            r->a[4] = o; sog16(0x3834, self);
+            r->a[4] = o; sog16(OG_SELF, self);
             w16(o + 0x1A, 0xFFFF);
             if (t23) { w16(o + 0x1C, 15); next = 6; } else next = 5;
             break;
@@ -2820,7 +2821,7 @@ static void tf_think(Regs *r) {
         case 6: if (!count_down(r, 0x1C, 1)) return; w16(o + 0x1C, 20); next = 7; break;
         case 7: if (!count_down(r, 0x1C, 1)) return; w16(o + 0x1C, 2); tell(r, 0xF01, 0xC0); next = 9; break;
         case 8: {                                           /* fn_S4_06F4: the types $1E, $20, $2D gone; then itself */
-            uint32_t t = og32(0x53C8);
+            uint32_t t = og32(OG_OBJECTS);
             for (uint16_t rec = 0x1DC0; rec; rec -= 0x40) {
                 uint16_t ty = r16(t + rec + 2);
                 if (ty != 0x1E && ty != 0x20 && ty != 0x2D) continue;
@@ -2831,8 +2832,8 @@ static void tf_think(Regs *r) {
                 w16(t + rec + 0x18, r16(t + rec + 0x18) | 0x4000);
             }
             unlink_obj(r);
-            w16(o + 4, 0); w16(o + 8, 0); w16(o + 0x30, 0);
-            w16(o + 2, r16(o + 2) | 0x8000);
+            w16(o + OB_X, 0); w16(o + OB_Y, 0); w16(o + OB_CELL, 0);
+            w16(o + OB_TYPE, r16(o + OB_TYPE) | 0x8000);
             next = 5; break;
         }
         case 9: if (!count_down(r, 0x1C, 1)) return; tell(r, 0xF01, 0xC0); next = 8; break;
@@ -2846,7 +2847,7 @@ void fo_S4_04AE(Regs *r) {
     uint32_t o = r->a[4], a6 = r->a[6];
     r->a[6] = r->a[7] - 4;                                  /* LINK A6, #-6 */
     r->a[7] -= 10;
-    set_w(&r->d[7], r16(o + 0x16));
+    set_w(&r->d[7], r16(o + OB_STATE));
     set_w(&r->d[0], (uint16_t)r->d[7]);
     tf_think(r);
     o_hit(r, (uint16_t)r->d[7] <= 1 ? hits : NULL, tf_think);
@@ -2855,7 +2856,7 @@ void fo_S4_04AE(Regs *r) {
         uint32_t p = o + r16(o + 0x18);
         uint16_t v = r16(p + 0x18);
         uint16_t h = (uint16_t)(((v & 0x8000) ? v - 2 : v + 2) & 0x3F);
-        w16(o + 0xC, h);
+        w16(o + OB_HEADING, h);
         w16(p + 0x18, (uint16_t)((v & 0xFF00) | h));
         break;
     }
@@ -2863,7 +2864,7 @@ void fo_S4_04AE(Regs *r) {
     case 7: { random_d0(r); static const uint16_t pic[2] = {0x46, 0x47}; set_pic(r, pic[(uint16_t)r->d[0] & 1]); break; }
     case 9: set_pic(r, 0x48); break;
     }
-    w16(o + 0x16, (uint16_t)r->d[7]);
+    w16(o + OB_STATE, (uint16_t)r->d[7]);
     r->a[7] += 10; r->a[6] = a6;
 }
 
@@ -2874,8 +2875,8 @@ void fo_S4_04AE(Regs *r) {
  * player within 3 (moving onto him, +$26 = 2) unless he is against a wall. Record 8 clear: state -1,
  * and once set again it only pulls until its state (counting up) is no longer negative. */
 static int t11_player_at_wall(void) {                       /* fn_S9_00C2: within 4 / 5 of a wall cell around */
-    uint32_t c = og32(0x53D4) + og16(0x56D0);
-    uint16_t px = og16(0x56D8), py = og16(0x56D4), cx = r16(c + 0x1C), cy = r16(c + 0x1E);
+    uint32_t c = og32(OG_MAP) + og16(OG_PLAYER_CELL);
+    uint16_t px = og16(OG_PLAYER_X), py = og16(OG_PLAYER_Y), cx = r16(c + 0x1C), cy = r16(c + 0x1E);
     #define WALL(o) (r8(c + (uint32_t)(int32_t)(o)) & 1)
     if (WALL(0x20) && (uint16_t)(cx + 4) < px) return 1;
     if (WALL(0x400) && (uint16_t)(cy + 4) < py) return 1;
@@ -2890,8 +2891,8 @@ static int t11_player_at_wall(void) {                       /* fn_S9_00C2: withi
 }
 static void t11_pull(Regs *r) {                             /* fn_S9_0086 */
     near_d0(r);
-    if (og16(0x382E) >= 3 || t11_player_at_wall()) return;
-    sog16(0x382C, og16(0x56D8)); sog16(0x3828, og16(0x56D4)); sog16(0x3824, og16(0x56D0));
+    if (og16(OG_NEAR_DIST) >= 3 || t11_player_at_wall()) return;
+    sog16(OG_MOVE_X, og16(OG_PLAYER_X)); sog16(OG_MOVE_Y, og16(OG_PLAYER_Y)); sog16(OG_MOVE_CELL, og16(OG_PLAYER_CELL));
     mz_seg_of(7, 0x3972), fn_S7_3972(r);
     if ((uint16_t)r->d[0]) return;
     mz_seg_of(7, 0x3784), fn_S7_3784(r);
@@ -2901,7 +2902,7 @@ static void t11_bend(Regs *r, uint32_t shot) {             /* fn_S9_028A */
     uint32_t o = r->a[4];
     uint16_t ty = r16(shot + 2);
     if (!((ty >= 0x17 && ty < 0x1B) || ty == 0x13)) return;
-    uint16_t i = (uint16_t)((((r16(o + 8) - r16(shot + 8)) & 0x7F) << 7) | ((r16(o + 4) - r16(shot + 4)) & 0x7F));
+    uint16_t i = (uint16_t)((((r16(o + OB_Y) - r16(shot + 8)) & 0x7F) << 7) | ((r16(o + OB_X) - r16(shot + 4)) & 0x7F));
     uint16_t dir = r8(og32(0x53C0) + sxw(i));
     if (r16(shot + 0xC) & 0x8000) { w16(shot + 0xC, dir); return; }
     set_w(&r->d[0], (uint16_t)(dir - r16(shot + 0xC)));
@@ -2917,16 +2918,16 @@ static void t11_bend(Regs *r, uint32_t shot) {             /* fn_S9_028A */
 }
 void fo_S9_0046(Regs *r) {
     uint32_t o = r->a[4];
-    if (!r16(og32(0x53C8) + 0x21E)) { w16(o + 0x16, 0xFFFF); t11_pull(r); return; }
-    int16_t st = (int16_t)r16(o + 0x16);
-    if (st < 0) { w16(o + 0x16, (uint16_t)(st + 1)); if (st + 1 < 0) { t11_pull(r); return; } }
-    uint16_t t = (uint16_t)(r16(o + 0xC) + 1);
-    w16(o + 0xC, t >= 0x14 ? 0 : t);
+    if (!r16(og32(OG_OBJECTS) + 0x21E)) { w16(o + OB_STATE, 0xFFFF); t11_pull(r); return; }
+    int16_t st = (int16_t)r16(o + OB_STATE);
+    if (st < 0) { w16(o + OB_STATE, (uint16_t)(st + 1)); if (st + 1 < 0) { t11_pull(r); return; } }
+    uint16_t t = (uint16_t)(r16(o + OB_HEADING) + 1);
+    w16(o + OB_HEADING, t >= 0x14 ? 0 : t);
     t11_pull(r);
-    uint32_t map = og32(0x53D4), tbl = og32(0x53C8);       /* fn_S9_01C4: the 3 x 3 cells around */
+    uint32_t map = og32(OG_MAP), tbl = og32(OG_OBJECTS);       /* fn_S9_01C4: the 3 x 3 cells around */
     static const int16_t at[9] = {-0x420, -0x400, -0x3E0, -0x20, 0, 0x20, 0x3E0, 0x400, 0x420};
     for (int k = 0; k < 9; k++) {
-        uint16_t c = (uint16_t)(r16(o + 0x30) + at[k]);
+        uint16_t c = (uint16_t)(r16(o + OB_CELL) + at[k]);
         for (uint32_t j = 1; j <= 10; j++) {
             uint8_t n = r8(map + sxw(c) + j);
             if (!n) break;
@@ -2941,17 +2942,17 @@ void fo_S9_0046(Regs *r) {
  * back (G_57DC = 3, the level, and the move made at the frame's end, G_57DE / G_57F2). Type $2C
  * also sets G_56EE by the player's y (fn_S9_1D68: $18 above $90, $1E above $A0, else $2A). */
 static void passage(uint16_t x0, uint16_t y, int16_t dx, int16_t dy) {
-    uint16_t px = og16(0x56D8), py = og16(0x56D4), last = og16(0x56CA);
+    uint16_t px = og16(OG_PLAYER_X), py = og16(OG_PLAYER_Y), last = og16(0x56CA);
     if (px < x0 || px >= x0 + 5) return;
     if (!(y >= py ? y < last : y >= last)) return;           /* not crossed */
-    sog16(0x57DC, 3);
-    sog16(0x57D8, (uint16_t)(px + dx)); sog16(0x57D4, (uint16_t)(py + dy));
-    sog16(0x57DA, og16(0x56DA));
+    sog16(OG_GO_LEVEL, 3);
+    sog16(OG_GO_X, (uint16_t)(px + dx)); sog16(OG_GO_Y, (uint16_t)(py + dy));
+    sog16(OG_GO_HEADING, og16(OG_PLAYER_HEADING));
     sog8(0x57DE, 1); sog8(0x57F2, 1);
 }
 void fo_S9_1CAC(Regs *r) {
     (void)r;
-    uint16_t py = og16(0x56D4);
+    uint16_t py = og16(OG_PLAYER_Y);
     sog16(0x56EE, py >= 0xA0 ? 0x2A : py >= 0x90 ? 0x1E : 0x18);
     passage(0x56, 0x98, 0xB0, 0xC0);
 }
@@ -2970,14 +2971,14 @@ static void talk_mouth(Regs *r) {                           /* fn_S7_22EE: a new
     w16(o + 0x18, t);
 }
 static uint16_t t32_where(void) {                           /* fn_S7_22BC: 0 above y $A0, 1 in x $D0-$13F / y $120-$19F, else 2 */
-    uint16_t x = og16(0x56D8), y = og16(0x56D4);
+    uint16_t x = og16(OG_PLAYER_X), y = og16(OG_PLAYER_Y);
     if (y < 0xA0) return 0;
     return y >= 0x120 && y < 0x1A0 && x >= 0xD0 && x < 0x140 ? 1 : 2;
 }
 static int t32_watched(Regs *r, uint16_t within, uint16_t look) {
     near_d0(r);
-    if (og16(0x382E) >= within) return 0;
-    set_w(&r->d[0], (uint16_t)(og16(0x3830) - r16(r->a[4] + 0xC)));
+    if (og16(OG_NEAR_DIST) >= within) return 0;
+    set_w(&r->d[0], (uint16_t)(og16(OG_NEAR_DIR) - r16(r->a[4] + OB_HEADING)));
     mz_seg_of(7, 0x367E), fn_S7_367E(r);
     return (uint16_t)r->d[0] < look;
 }
@@ -2987,7 +2988,7 @@ static void t32_think(Regs *r) {
         uint16_t s = (uint16_t)r->d[0], next;
         set_w(&r->d[7], s);
         switch (s) {
-        case 0: if (!t32_watched(r, 7, 0xA) || !og16(0x56C2)) return; next = 1; break;
+        case 0: if (!t32_watched(r, 7, 0xA) || !og16(OG_GEORGE_JOINED)) return; next = 1; break;
         case 1: case 2: if (t32_watched(r, 0x14, 0x1A)) return; next = 5; break;
         case 3: tell(r, 0x3201, 0x100); next = 6; break;
         case 5: tell(r, 0x3202, 0x100); next = 4; break;
@@ -3003,20 +3004,20 @@ static void t32_turn(Regs *r, uint16_t to) { set_w(&r->d[0], to); mz_seg_of(7, 0
 void fo_S9_1E46(Regs *r) {
     static const uint16_t said[10][2] = {[1] = {0xB201, 2}, [2] = {0xB202, 3}, [8] = {0xB203, 9}, [9] = {0xB204, 5}};
     uint32_t o = r->a[4];
-    set_w(&r->d[7], r16(o + 0x16));
+    set_w(&r->d[7], r16(o + OB_STATE));
     set_w(&r->d[0], (uint16_t)r->d[7]);
     t32_think(r);
     uint16_t s = (uint16_t)r->d[7];
     if (s < 10) o_said(r, said[s], t32_think);
     switch ((uint16_t)r->d[7]) {
     case 0: talk_mouth(r); break;
-    case 1: talk_mouth(r); sog16(0x56C0, 0xB201); flag_set(r, 0, 4); t32_turn(r, og16(0x3830)); break;
-    case 2: talk_mouth(r); sog16(0x56C0, 0xB202); t32_turn(r, 0x10); break;
+    case 1: talk_mouth(r); sog16(OG_MESSAGE, 0xB201); flag_set(r, 0, 4); t32_turn(r, og16(OG_NEAR_DIR)); break;
+    case 2: talk_mouth(r); sog16(OG_MESSAGE, 0xB202); t32_turn(r, 0x10); break;
     case 4: case 7: talk_mouth(r); t32_turn(r, 0x10); break;
-    case 8: talk_mouth(r); sog16(0x56C0, 0xB203); t32_turn(r, 0x10); break;
-    case 9: talk_mouth(r); sog16(0x56C0, 0xB204); t32_turn(r, 0x10); break;
+    case 8: talk_mouth(r); sog16(OG_MESSAGE, 0xB203); t32_turn(r, 0x10); break;
+    case 9: talk_mouth(r); sog16(OG_MESSAGE, 0xB204); t32_turn(r, 0x10); break;
     }
-    w16(o + 0x16, (uint16_t)r->d[7]);
+    w16(o + OB_STATE, (uint16_t)r->d[7]);
 }
 
 /* ---------- type $34 (fn_S9_2072, level 3) ----------
@@ -3026,17 +3027,17 @@ void fo_S9_1E46(Regs *r) {
 static void t34_move(Regs *r) { mz_seg(7), fo_S7_155C(r); mz_seg_of(7, 0x3784), fn_S7_3784(r); }
 static void t34_toward(Regs *r, uint16_t tx, uint16_t ty) { /* a pixel along x, else along y; 0 if there */
     uint32_t o = r->a[4];
-    sog16(0x382C, r16(o + 4)); sog16(0x3828, r16(o + 8));
-    int16_t d = (int16_t)(tx - r16(o + 4));
-    if (d) sog16(0x382C, (uint16_t)(og16(0x382C) + (d < 0 ? -1 : 1)));
-    else if ((d = (int16_t)(ty - r16(o + 8))) != 0) sog16(0x3828, (uint16_t)(og16(0x3828) + (d < 0 ? -1 : 1)));
+    sog16(OG_MOVE_X, r16(o + OB_X)); sog16(OG_MOVE_Y, r16(o + OB_Y));
+    int16_t d = (int16_t)(tx - r16(o + OB_X));
+    if (d) sog16(OG_MOVE_X, (uint16_t)(og16(OG_MOVE_X) + (d < 0 ? -1 : 1)));
+    else if ((d = (int16_t)(ty - r16(o + OB_Y))) != 0) sog16(OG_MOVE_Y, (uint16_t)(og16(OG_MOVE_Y) + (d < 0 ? -1 : 1)));
 }
 void fo_S9_2072(Regs *r) {
     static const uint16_t way[16] = {0x58, 0x78, 0x38, 0x78, 0x38, 0x58, 0x58, 0x58, 0x58, 0x28, 0x38, 0x28, 0x38, 0x10, 0, 0};
     uint32_t o = r->a[4];
-    if (flag(r, 0, 4)) { unlink_obj(r); w16(o + 2, r16(o + 2) | 0x8000); return; }
-    if (r16(o + 0xC)) {                                     /* fn_S9_2140 */
-        if (r16(o + 4) == 0x108 && r16(o + 8) == 0x15B) { sog16(0x382C, 0x108); sog16(0x3828, 0x164); }
+    if (flag(r, 0, 4)) { unlink_obj(r); w16(o + OB_TYPE, r16(o + OB_TYPE) | 0x8000); return; }
+    if (r16(o + OB_HEADING)) {                                     /* fn_S9_2140 */
+        if (r16(o + OB_X) == 0x108 && r16(o + OB_Y) == 0x15B) { sog16(OG_MOVE_X, 0x108); sog16(OG_MOVE_Y, 0x164); }
         else t34_toward(r, 0x108, 0x15B);
         t34_move(r);
         return;
@@ -3044,8 +3045,8 @@ void fo_S9_2072(Regs *r) {
     for (int k = 0; k < 4; k++) {                           /* fn_S9_20B0 */
         for (;;) {
             uint16_t i = r16(o + 0x10) / 2;
-            if (!way[i]) { sog16(0x382C, 0x58); sog16(0x3828, 0x98); t34_move(r); w16(o + 0x10, 0); break; }
-            if (r16(o + 4) != way[i] || r16(o + 8) != way[i + 1]) { t34_toward(r, way[i], way[i + 1]); t34_move(r); break; }
+            if (!way[i]) { sog16(OG_MOVE_X, 0x58); sog16(OG_MOVE_Y, 0x98); t34_move(r); w16(o + 0x10, 0); break; }
+            if (r16(o + OB_X) != way[i] || r16(o + OB_Y) != way[i + 1]) { t34_toward(r, way[i], way[i + 1]); t34_move(r); break; }
             w16(o + 0x10, (uint16_t)(r16(o + 0x10) + 4));
         }
     }
@@ -3060,9 +3061,9 @@ void fo_S9_2072(Regs *r) {
  * type $32 sends it to 11, $3202 to 19-15 (200 frames off the map) and 16: back at $58, $98 while
  * the player is above y $A0 (no full view), following his scent (17; under a full view 18) until
  * near him: 9. */
-static void face_player(Regs *r) { near_d0(r); if (!(og16(0x3830) & 0x8000)) w16(r->a[4] + 0xC, og16(0x3830)); }
+static void face_player(Regs *r) { near_d0(r); if (!(og16(OG_NEAR_DIR) & 0x8000)) w16(r->a[4] + OB_HEADING, og16(OG_NEAR_DIR)); }
 static void move_to(Regs *r, uint16_t x, uint16_t y, uint16_t c) {   /* G_382C / G_3828 / G_3824 and fn_S7_1578 */
-    sog16(0x382C, x); sog16(0x3828, y); sog16(0x3824, c);
+    sog16(OG_MOVE_X, x); sog16(OG_MOVE_Y, y); sog16(OG_MOVE_CELL, c);
     mz_seg_of(7, 0x3784), fn_S7_3784(r);
 }
 static void t35_think(Regs *r) {
@@ -3076,8 +3077,8 @@ static void t35_think(Regs *r) {
         case 2: if (t32_where() != 2) { next = 0; break; } if (!count_down(r, 0x1C, 1)) return; next = 3; break;
         case 3:
             if (r16(o + 0x1A) >= 0xD) { next = 9; break; }
-            random_d0(r); sog16(0x382C, (uint16_t)(((uint16_t)r->d[0] & 0x3F) - 0x20 + og16(0x56D8)));
-            random_d0(r); sog16(0x3828, (uint16_t)(((uint16_t)r->d[0] & 0x3F) - 0x20 + og16(0x56D4)));
+            random_d0(r); sog16(OG_MOVE_X, (uint16_t)(((uint16_t)r->d[0] & 0x3F) - 0x20 + og16(OG_PLAYER_X)));
+            random_d0(r); sog16(OG_MOVE_Y, (uint16_t)(((uint16_t)r->d[0] & 0x3F) - 0x20 + og16(OG_PLAYER_Y)));
             mz_seg(7), fo_S7_155C(r);
             mz_seg_of(7, 0x3784), fn_S7_3784(r);
             w16(o + 0x1C, 1);
@@ -3090,8 +3091,8 @@ static void t35_think(Regs *r) {
             }
             if (s == 4) w16(o + 0x18, 0xF);
             near_d0(r);
-            if (og16(0x3830) & 0x8000) { next = 6; break; }
-            w16(o + 0xC, og16(0x3830));
+            if (og16(OG_NEAR_DIR) & 0x8000) { next = 6; break; }
+            w16(o + OB_HEADING, og16(OG_NEAR_DIR));
             return;
         case 6: w16(o + 0x1C, 1); next = 7; break;
         case 7:
@@ -3101,13 +3102,13 @@ static void t35_think(Regs *r) {
         case 8: move_to(r, 0, 0, 0); next = 1; break;
         case 9: w16(o + 0x1A, 6); next = 0xA; break;
         case 11:                                            /* onto the player, pushing him on until clear */
-            move_to(r, og16(0x56D8), og16(0x56D4), og16(0x56D0));
-            r->a[0] = OADDR(0x4DF0); set_w(&r->d[0], og16(0x56DA));
+            move_to(r, og16(OG_PLAYER_X), og16(OG_PLAYER_Y), og16(OG_PLAYER_CELL));
+            r->a[0] = OADDR(0x4DF0); set_w(&r->d[0], og16(OG_PLAYER_HEADING));
             mz_seg_of(7, 0x374C), fn_S7_374C(r); mz_seg_of(7, 0x3784), fn_S7_3784(r);
             do {
-                r->a[0] = OADDR(0x4F30); set_w(&r->d[0], og16(0x56DA));
+                r->a[0] = OADDR(0x4F30); set_w(&r->d[0], og16(OG_PLAYER_HEADING));
                 mz_seg_of(7, 0x374C), fn_S7_374C(r); mz_seg_of(7, 0x3784), fn_S7_3784(r);
-                sog16(0x3820, og16(0x3834)); sog16(0x3822, 4);
+                sog16(0x3820, og16(OG_SELF)); sog16(0x3822, 4);
                 mz_seg_of(7, 0x37C4), fn_S7_37C4(r);
             } while ((uint16_t)r->d[0]);
             w16(o + 0x1C, 1);
@@ -3120,20 +3121,20 @@ static void t35_think(Regs *r) {
         case 13: case 15: if (!count_down(r, 0x1C, 1)) return; next = (uint16_t)(s + 1); break;
         case 14: move_to(r, 0, 0, 0); w16(o + 0x1C, 0xA); next = 0xF; break;
         case 16:
-            if (og16(0x56E0) >= 0x80) return;
+            if (og16(OG_FULL_VIEW) >= 0x80) return;
             if (t32_where()) { next = 9; break; }
-            sog16(0x382C, 0x58); sog16(0x3828, 0x98);
+            sog16(OG_MOVE_X, 0x58); sog16(OG_MOVE_Y, 0x98);
             mz_seg(7), fo_S7_155C(r);
             mz_seg_of(7, 0x3784), fn_S7_3784(r);
-            w16(o + 0xE, r16(o + 0x30));
+            w16(o + 0xE, r16(o + OB_CELL));
             next = 0x11; break;
         case 17:
             w16(o + 0x18, 5);
-            if (og16(0x56E0) >= 0x80) { next = 0x12; break; }
+            if (og16(OG_FULL_VIEW) >= 0x80) { next = 0x12; break; }
             mz_seg_of(7, 0x3D2A), fn_S7_3D2A(r);
             if (!((uint16_t)r->d[0] & 0x8000)) return;
             next = 9; break;
-        case 18: if (og16(0x56E0) >= 0x80) return; next = 0x11; break;
+        case 18: if (og16(OG_FULL_VIEW) >= 0x80) return; next = 0x11; break;
         case 19: w16(o + 0x1C, 0xC8); next = 0xD; break;
         default: return;                                    /* 10, 20 */
         }
@@ -3143,39 +3144,39 @@ static void t35_think(Regs *r) {
 void fo_S9_219A(Regs *r) {
     static const uint16_t e0[] = {0x3201, 11, 0x3202, 19, 0xFFFF}, e2[] = {0x3202, 19, 0xFFFF};
     uint32_t o = r->a[4];
-    set_w(&r->d[7], r16(o + 0x16));
+    set_w(&r->d[7], r16(o + OB_STATE));
     set_w(&r->d[0], (uint16_t)r->d[7]);
     t35_think(r);
     uint16_t s = (uint16_t)r->d[7];
     o_event(r, s == 0 ? e0 : s == 12 || s == 20 ? e2 : NULL, t35_think);
     switch ((uint16_t)r->d[7]) {
-    case 7: near_d0(r); if (!(og16(0x382E) & 0x8000)) w16(o + 0xC, og16(0x382E)); break;   /* (sic: the distance) */
+    case 7: near_d0(r); if (!(og16(OG_NEAR_DIST) & 0x8000)) w16(o + OB_HEADING, og16(OG_NEAR_DIST)); break;   /* (sic: the distance) */
     case 10: {                                              /* on the player: $28 from his life */
         w16(o + 0x26, 1);
         int16_t t = (int16_t)(r16(o + 0x1A) - 1);
         w16(o + 0x1A, (uint16_t)(t < 0 ? 0 : t));
         w16(o + 0x18, 0x10);
-        sog32(0x382C, og32(0x56D8)); sog32(0x3828, og32(0x56D4)); sog16(0x3824, og16(0x56D0));
+        sog32(OG_MOVE_X, og32(OG_PLAYER_X)); sog32(OG_MOVE_Y, og32(OG_PLAYER_Y)); sog16(OG_MOVE_CELL, og16(OG_PLAYER_CELL));
         mz_seg_of(7, 0x3784), fn_S7_3784(r);
-        int16_t l = (int16_t)(og16(0x56EA) - 0x28);
-        sog16(0x56EA, (uint16_t)(l < 0 ? 0 : l));
+        int16_t l = (int16_t)(og16(OG_LIFE) - 0x28);
+        sog16(OG_LIFE, (uint16_t)(l < 0 ? 0 : l));
         break;
     }
     case 13: case 20: face_player(r); break;
     case 17:                                                /* along his scent */
-        if (og16(0x56D0) != og16(0x582C)) { sog16(0x56A6, og16(0x56D0)); sog16(0x56A8, 0x1A); refresh(r); }
+        if (og16(OG_PLAYER_CELL) != og16(0x582C)) { sog16(0x56A6, og16(OG_PLAYER_CELL)); sog16(0x56A8, 0x1A); refresh(r); }
         mz_seg_of(7, 0x3D5C), fn_S7_3D5C(r);
         { uint16_t d = (uint16_t)r->d[0];
           fn_S7_3D0E(r);
           set_w(&r->d[0], d);
           if (d & 0x8000) break; }
         mz_seg_of(7, 0x3722), fn_S7_3722(r);
-        if ((uint16_t)r->d[0] != r16(o + 0xC)) break;
+        if ((uint16_t)r->d[0] != r16(o + OB_HEADING)) break;
         r->a[0] = OADDR(0x4F30);
         mz_seg_of(7, 0x374C), fn_S7_374C(r); mz_seg_of(7, 0x3784), fn_S7_3784(r);
         break;
     }
-    w16(o + 0x16, (uint16_t)r->d[7]);
+    w16(o + OB_STATE, (uint16_t)r->d[7]);
 }
 
 /* ---------- type $28 (fn_S9_1738, level 2) ----------
@@ -3191,16 +3192,16 @@ static void t28_think(Regs *r) {
         set_w(&r->d[7], s);
         switch (s) {
         case 0:
-            if (r16(o + 0xC) & 0x8000) { next = 3; break; }
-            if (og16(0x56E0) >= 0x80 || og16(0x56D8) < 0x1EE || og16(0x56D4) < 0x74 || og16(0x56D4) >= 0x7B) return;
+            if (r16(o + OB_HEADING) & 0x8000) { next = 3; break; }
+            if (og16(OG_FULL_VIEW) >= 0x80 || og16(OG_PLAYER_X) < 0x1EE || og16(OG_PLAYER_Y) < 0x74 || og16(OG_PLAYER_Y) >= 0x7B) return;
             next = 4; break;
         case 1: next = t29_smaller(r); break;
         case 2: t29_bigger(r); next = 0; break;
         case 3: {
             sog16(0x56EE, 0x2B);
             unlink_obj(r);
-            w16(o + 4, 0); w16(o + 8, 0); w16(o + 0x30, 0);
-            uint32_t t = og32(0x53C8);
+            w16(o + OB_X, 0); w16(o + OB_Y, 0); w16(o + OB_CELL, 0);
+            uint32_t t = og32(OG_OBJECTS);
             for (uint16_t rec = 0x3C0; rec <= 0x480; rec += 0x40) w16(t + rec + 0x18, 0x7FFF);
             flag_set(r, 0, 8);
             w16(o + 0x12, 2);
@@ -3208,13 +3209,13 @@ static void t28_think(Regs *r) {
         }
         case 4: w16(o + 0x12, 7); next = 5; break;
         case 5:
-            sog16(0x56E0, 0x82);
+            sog16(OG_FULL_VIEW, 0x82);
             w16(o + 0x12, (uint16_t)(r16(o + 0x12) - 1));
             if (r16(o + 0x12)) return;
-            sog16(0x57DC, 3); sog32(0x57D8, 0x380000); sog32(0x57D4, 0x140000);
-            sog16(0x57DA, (uint16_t)((og16(0x56DA) + 0x10) & 0x3F)); sog8(0x57DE, 1); sog8(0x57F2, 1);
+            sog16(OG_GO_LEVEL, 3); sog32(OG_GO_X, 0x380000); sog32(OG_GO_Y, 0x140000);
+            sog16(OG_GO_HEADING, (uint16_t)((og16(OG_PLAYER_HEADING) + 0x10) & 0x3F)); sog8(0x57DE, 1); sog8(0x57F2, 1);
             next = 0; break;
-        case 6: if (count_down(r, 0x12, 1)) w16(o + 2, r16(o + 2) | 0x8000); return;
+        case 6: if (count_down(r, 0x12, 1)) w16(o + OB_TYPE, r16(o + OB_TYPE) | 0x8000); return;
         default: return;
         }
         set_w(&r->d[0], next);
@@ -3223,21 +3224,21 @@ static void t28_think(Regs *r) {
 void fo_S9_1738(Regs *r) {
     static const uint16_t hits[] = {0x19, 2, 0x1A, 1, 0xFFFF};
     uint32_t o = r->a[4];
-    set_w(&r->d[7], r16(o + 0x16));
-    w16(o + 0xC, r16(og32(0x53C8) + 0x1C));
+    set_w(&r->d[7], r16(o + OB_STATE));
+    w16(o + OB_HEADING, r16(og32(OG_OBJECTS) + 0x1C));
     set_w(&r->d[0], (uint16_t)r->d[7]);
     t28_think(r);
     o_hit(r, (uint16_t)r->d[7] == 0 ? hits : NULL, t28_think);
     switch ((uint16_t)r->d[7]) {
     case 0:
         t29_grow(r);
-        if (og16(0x56E0) < 0x80 && og16(0x56D0) < 0x2800) sog16(0x56EE, 8);   /* fn_S9_1954 */
+        if (og16(OG_FULL_VIEW) < 0x80 && og16(OG_PLAYER_CELL) < 0x2800) sog16(0x56EE, 8);   /* fn_S9_1954 */
         break;
     case 5: t29_grow(r); break;
     case 6: sog16(0x56EE, 0x2B); break;
     }
-    w16(og32(0x53C8) + 0x1C, r16(o + 0xC));
-    w16(o + 0x16, (uint16_t)r->d[7]);
+    w16(og32(OG_OBJECTS) + 0x1C, r16(o + OB_HEADING));
+    w16(o + OB_STATE, (uint16_t)r->d[7]);
 }
 
 /* ---------- type $16 (fn_S11_00C0, level 6) ----------
@@ -3249,11 +3250,11 @@ static void t16_think(Regs *r) {
 void fo_S11_00C0(Regs *r) {
     static const uint16_t hits[] = {0x17, 1, 0xFFFF};
     uint32_t o = r->a[4];
-    set_w(&r->d[7], r16(o + 0x16));
+    set_w(&r->d[7], r16(o + OB_STATE));
     set_w(&r->d[0], (uint16_t)r->d[7]);
     t16_think(r);
     o_hit(r, (uint16_t)r->d[7] == 0 ? hits : NULL, t16_think);
-    w16(o + 0x16, (uint16_t)r->d[7]);
+    w16(o + OB_STATE, (uint16_t)r->d[7]);
 }
 
 /* ---------- types $38 and $39 (fn_S11_019A, fn_S11_0382, level 6) ----------
@@ -3265,15 +3266,15 @@ void fo_S11_00C0(Regs *r) {
 static void gone_from_map(Regs *r) {                        /* out of its cell, type negative */
     uint32_t o = r->a[4];
     unlink_obj(r);
-    w16(o + 4, 0); w16(o + 6, 0); w16(o + 8, 0); w16(o + 0xA, 0); w16(o + 0x30, 0);
-    w16(o + 2, r16(o + 2) | 0x8000);
+    w16(o + OB_X, 0); w16(o + 6, 0); w16(o + OB_Y, 0); w16(o + 0xA, 0); w16(o + OB_CELL, 0);
+    w16(o + OB_TYPE, r16(o + OB_TYPE) | 0x8000);
 }
 static void t38_think(Regs *r) {
     for (;;) {
         uint16_t s = (uint16_t)r->d[0], next;
         set_w(&r->d[7], s);
         switch (s) {
-        case 1: sog16(0x382C, 0xA8); sog16(0x3828, 0x82); t34_move(r); next = 2; break;
+        case 1: sog16(OG_MOVE_X, 0xA8); sog16(OG_MOVE_Y, 0x82); t34_move(r); next = 2; break;
         case 2:
             g_target(0xA8, 0x9B);
             fo_S7_1488(r);
@@ -3295,15 +3296,15 @@ static void t38_think(Regs *r) {
 void fo_S11_019A(Regs *r) {
     static const uint16_t e0[] = {0x3A01, 1, 0xFFFF}, e4[] = {0x3A03, 5, 0xFFFF}, e5[] = {0x3A04, 6, 0x3A06, 6, 0xFFFF};
     uint32_t o = r->a[4];
-    set_w(&r->d[7], r16(o + 0x16));
+    set_w(&r->d[7], r16(o + OB_STATE));
     set_w(&r->d[0], (uint16_t)r->d[7]);
     t38_think(r);
     uint16_t s = (uint16_t)r->d[7];
     o_event(r, s == 0 ? e0 : s == 4 ? e4 : s == 5 ? e5 : NULL, t38_think);
     switch ((uint16_t)r->d[7]) {
-    case 4: near_d0(r); set_w(&r->d[0], og16(0x3830)); mz_seg_of(7, 0x3722), fn_S7_3722(r); break;
+    case 4: near_d0(r); set_w(&r->d[0], og16(OG_NEAR_DIR)); mz_seg_of(7, 0x3722), fn_S7_3722(r); break;
     case 5: {                                               /* facing record 8 */
-        uint32_t t = og32(0x53C8);
+        uint32_t t = og32(OG_OBJECTS);
         if (!r16(t + 0x204)) break;
         g_target(r16(t + 0x204), r16(t + 0x208));
         fo_S7_1488(r);
@@ -3311,14 +3312,14 @@ void fo_S11_019A(Regs *r) {
         break;
     }
     }
-    w16(o + 0x16, (uint16_t)r->d[7]);
+    w16(o + OB_STATE, (uint16_t)r->d[7]);
 }
 static void t39_gone(Regs *r) { gone_from_map(r); tell(r, 0x3A05, 0x240); }
 static void t39_think(Regs *r) {
     for (;;) {
         uint16_t s = (uint16_t)r->d[0];
         set_w(&r->d[7], s);
-        if (s == 1) { sog16(0x382C, 0xA8); sog16(0x3828, 0xA6); t34_move(r); w16(r->a[4] + 0xC, 0x10); set_w(&r->d[0], 2); continue; }
+        if (s == 1) { sog16(OG_MOVE_X, 0xA8); sog16(OG_MOVE_Y, 0xA6); t34_move(r); w16(r->a[4] + OB_HEADING, 0x10); set_w(&r->d[0], 2); continue; }
         if (s == 4) t39_gone(r);
         return;
     }
@@ -3326,7 +3327,7 @@ static void t39_think(Regs *r) {
 void fo_S11_0382(Regs *r) {
     static const uint16_t e0[] = {0x3A02, 1, 0xFFFF}, e2[] = {0x3A04, 3, 0xFFFF}, h2[] = {0x17, 4, 0xFFFF};
     uint32_t o = r->a[4];
-    set_w(&r->d[7], r16(o + 0x16));
+    set_w(&r->d[7], r16(o + OB_STATE));
     set_w(&r->d[0], (uint16_t)r->d[7]);
     t39_think(r);
     uint16_t s = (uint16_t)r->d[7];
@@ -3335,11 +3336,11 @@ void fo_S11_0382(Regs *r) {
     switch ((uint16_t)r->d[7]) {
     case 2: talk_mouth(r); break;
     case 3:                                                 /* turned to the player, then gone (the act runs on into 4's think) */
-        near_d0(r); set_w(&r->d[0], og16(0x3830)); mz_seg_of(7, 0x36F4), fn_S7_36F4(r);
+        near_d0(r); set_w(&r->d[0], og16(OG_NEAR_DIR)); mz_seg_of(7, 0x36F4), fn_S7_36F4(r);
         t39_gone(r);
         break;
     }
-    w16(o + 0x16, (uint16_t)r->d[7]);
+    w16(o + OB_STATE, (uint16_t)r->d[7]);
 }
 
 /* ---------- type $23 (fn_S4_1670, record 3 on level 4) ----------
@@ -3353,37 +3354,37 @@ void fo_S11_0382(Regs *r) {
  * hits by $17 / $19 moving on, $18 ending it) until he is $20 away; then (30-32) flag word 0 bit 4,
  * picture $49 for 3 frames, and gone. State 18 (a hit by $18) pushes the player on east (fn_S4_1D2E). */
 static int t23_where(void) {
-    uint16_t x = og16(0x56D8), y = og16(0x56D4);
-    if (og16(0x56E0) >= 0x80 || y < 0xA0 || y >= 0xB0 || x < 0x90 || x >= 0xD0) return 0;
+    uint16_t x = og16(OG_PLAYER_X), y = og16(OG_PLAYER_Y);
+    if (og16(OG_FULL_VIEW) >= 0x80 || y < 0xA0 || y >= 0xB0 || x < 0x90 || x >= 0xD0) return 0;
     return x >= 0xB9 ? 1 : -1;
 }
 static void t23_player_to(Regs *r, uint16_t x) {          /* the player at x (his cell kept in the map's +$C), fn_S2_2AD2 */
-    uint32_t map = og32(0x53D4);
-    uint16_t c = (uint16_t)(((x & 0x1F0) << 1) | ((og16(0x56D4) & 0x1F0) << 6));
-    sog16(0x56D8, x);
-    if (c != og16(0x56D0)) { w16(map + sxw(og16(0x56D0)) + 0xC, 0); w16(map + sxw(c) + 0xC, 1); sog16(0x56D0, c); }
+    uint32_t map = og32(OG_MAP);
+    uint16_t c = (uint16_t)(((x & 0x1F0) << 1) | ((og16(OG_PLAYER_Y) & 0x1F0) << 6));
+    sog16(OG_PLAYER_X, x);
+    if (c != og16(OG_PLAYER_CELL)) { w16(map + sxw(og16(OG_PLAYER_CELL)) + 0xC, 0); w16(map + sxw(c) + 0xC, 1); sog16(OG_PLAYER_CELL, c); }
     mz_seg_of(2, 0x3500), fn_S2_3500(r);
 }
 static int t23_leave_mark(Regs *r) {                        /* a type $2A object where the player is: its record or 0 */
-    sog16(0x382C, og16(0x56D8)); sog16(0x3828, og16(0x56D4)); sog16(0x3824, og16(0x56D0));
+    sog16(OG_MOVE_X, og16(OG_PLAYER_X)); sog16(OG_MOVE_Y, og16(OG_PLAYER_Y)); sog16(OG_MOVE_CELL, og16(OG_PLAYER_CELL));
     int rec = make_object(r, 0x2A, 0, 0);
     return rec < 0 ? 0 : rec;
 }
 static int t23_push(Regs *r) {                              /* fn_S4_1CC2: 1 while not yet out */
     t23_leave_mark(r);
-    t23_player_to(r, (uint16_t)(og16(0x56D8) + 2));
-    return og16(0x56D8) < 0xBE;
+    t23_player_to(r, (uint16_t)(og16(OG_PLAYER_X) + 2));
+    return og16(OG_PLAYER_X) < 0xBE;
 }
 static void t23_push_on(Regs *r) {                          /* fn_S4_1D2E */
     int rec = t23_leave_mark(r);
-    if (rec) w16(og32(0x53C8) + rec + 0x12, 2);
+    if (rec) w16(og32(OG_OBJECTS) + rec + 0x12, 2);
     int w = t23_where();
     if (!w) return;
-    uint16_t x = og16(0x56D8);
+    uint16_t x = og16(OG_PLAYER_X);
     if (w > 0) x = (uint16_t)(x + 3);
-    sog16(0x382C, x);
-    uint16_t c = (uint16_t)(((x & 0x1F0) << 1) | ((og16(0x56D4) & 0x1F0) << 6));
-    if (r8(og32(0x53D4) + sxw(c)) & 1) { mz_seg_of(2, 0x3500), fn_S2_3500(r); return; }
+    sog16(OG_MOVE_X, x);
+    uint16_t c = (uint16_t)(((x & 0x1F0) << 1) | ((og16(OG_PLAYER_Y) & 0x1F0) << 6));
+    if (r8(og32(OG_MAP) + sxw(c)) & 1) { mz_seg_of(2, 0x3500), fn_S2_3500(r); return; }
     t23_player_to(r, x);
 }
 static void t23_think(Regs *r) {
@@ -3398,9 +3399,9 @@ static void t23_think(Regs *r) {
             w = t23_where();
             if (w < 0) { next = 0xD; break; }
             if (!w) { next = 0; break; }
-            if (!og16(0x56C2)) return;
+            if (!og16(OG_GEORGE_JOINED)) return;
             near_d0(r);
-            set_w(&r->d[0], (uint16_t)((og16(0x3830) ^ 0x20) - og16(0x56DA)));
+            set_w(&r->d[0], (uint16_t)((og16(OG_NEAR_DIR) ^ 0x20) - og16(OG_PLAYER_HEADING)));
             mz_seg_of(7, 0x367E), fn_S7_367E(r);
             if ((uint16_t)r->d[0] >= 7) return;
             next = 3; break;
@@ -3424,25 +3425,25 @@ static void t23_think(Regs *r) {
         case 13: case 14: case 15: case 17: {               /* pushed out east, then on */
             static const uint8_t done[18] = {[14] = 4, [15] = 6, [17] = 0xA};
             if (t23_push(r)) { t23_push(r); return; }
-            next = s == 13 ? (og16(0x56C2) ? 3 : 2) : done[s];
+            next = s == 13 ? (og16(OG_GEORGE_JOINED) ? 3 : 2) : done[s];
             break;
         }
         case 16: if (t23_where() <= 0) return; next = 4; break;
         case 20:
             sog16(0x56EE, 0x2B);
             w16(o + 0x3A, 0x3E);
-            if (og16(0x56C2)) { next = 0x15; break; }
+            if (og16(OG_GEORGE_JOINED)) { next = 0x15; break; }
             w16(o + 0x1A, 0xF); next = 0x21; break;
         case 21: case 22: case 23: case 24: case 25: case 26: case 27: case 28: case 29:
             near_d0(r);
-            if (og16(0x382E) < 0x20) return;
+            if (og16(OG_NEAR_DIST) < 0x20) return;
             next = 0x1E; break;
         case 30: w16(o + 0x1A, 2); flag_set(r, 0, 0x10); next = 0x1F; break;
         case 31: case 33: if (!count_down(r, 0x1A, 1)) return; next = s == 31 ? 0x20 : 0x1E; break;
         case 32:
             unlink_obj(r);
-            w16(o + 4, 0); w16(o + 8, 0); w16(o + 0x30, 0);
-            w16(o + 2, r16(o + 2) | 0x8000);
+            w16(o + OB_X, 0); w16(o + OB_Y, 0); w16(o + OB_CELL, 0);
+            w16(o + OB_TYPE, r16(o + OB_TYPE) | 0x8000);
             return;
         default: return;                                    /* 1, 18, 19 */
         }
@@ -3458,7 +3459,7 @@ void fo_S4_1670(Regs *r) {
         h8[] = {0x17, 9, 0x18, 0x12, 0x19, 9, 0x1A, 0xA, 0xFFFF}, h9[] = {0x17, 0xA, 0x18, 0x12, 0x19, 0xA, 0x1A, 0xA, 0xFFFF};
     static uint16_t hs[7];
     uint32_t o = r->a[4];
-    set_w(&r->d[7], r16(o + 0x16));
+    set_w(&r->d[7], r16(o + OB_STATE));
     set_w(&r->d[0], (uint16_t)r->d[7]);
     t23_think(r);
     uint16_t s = (uint16_t)r->d[7];
@@ -3484,20 +3485,20 @@ void fo_S4_1670(Regs *r) {
     o_event(r, s == 1 || s == 19 ? e : NULL, t23_think);
     s = (uint16_t)r->d[7];
     switch (s) {
-    case 1: near_d0(r); if (!(og16(0x3830) & 0x8000)) { set_w(&r->d[0], og16(0x3830)); mz_seg_of(7, 0x3722), fn_S7_3722(r); } break;
-    case 3: sog16(0x56C0, 0xA301); break;
-    case 4: sog16(0x56C0, 0xA302); break;
-    case 8: sog16(0x56C0, 0xA303); break;
-    case 9: sog16(0x56C0, 0xA304); break;
+    case 1: near_d0(r); if (!(og16(OG_NEAR_DIR) & 0x8000)) { set_w(&r->d[0], og16(OG_NEAR_DIR)); mz_seg_of(7, 0x3722), fn_S7_3722(r); } break;
+    case 3: sog16(OG_MESSAGE, 0xA301); break;
+    case 4: sog16(OG_MESSAGE, 0xA302); break;
+    case 8: sog16(OG_MESSAGE, 0xA303); break;
+    case 9: sog16(OG_MESSAGE, 0xA304); break;
     case 18: t23_push_on(r); break;
     case 19: case 31: w16(o + 0x3A, 0x49); break;
     default:
         if (s >= 21 && s <= 29) {
-            set_w(&r->d[0], og16(0x3830)); mz_seg_of(7, 0x3722), fn_S7_3722(r);
-            sog16(0x56C0, (uint16_t)(0xA305 + s - 21));
+            set_w(&r->d[0], og16(OG_NEAR_DIR)); mz_seg_of(7, 0x3722), fn_S7_3722(r);
+            sog16(OG_MESSAGE, (uint16_t)(0xA305 + s - 21));
         }
     }
-    w16(o + 0x16, s);
+    w16(o + OB_STATE, s);
 }
 
 /* ---------- type $12 (fn_S9_0372, record 8 on level 2) ----------
@@ -3516,19 +3517,19 @@ void fo_S4_1670(Regs *r) {
 static const uint16_t t12_post[2][4][3] = {               /* { x, y, heading } by +$18 */
     {{0x1B8, 0x58, 0x30}, {0x1C8, 0x48, 0x20}, {0x1B8, 0x38, 0x10}, {0x1A8, 0x48, 0}},
     {{0x1E8, 0x48, 0x30}, {0x1E8, 0x52, 0x30}, {0x1B8, 0x78, 0x20}, {0x1C2, 0x78, 0x20}}};
-static void life_less(uint16_t n) { int16_t l = (int16_t)(og16(0x56EA) - n); sog16(0x56EA, (uint16_t)(l < 0 ? 0 : l)); }
+static void life_less(uint16_t n) { int16_t l = (int16_t)(og16(OG_LIFE) - n); sog16(OG_LIFE, (uint16_t)(l < 0 ? 0 : l)); }
 static void glow(uint16_t v) { sog16(0x56EE, v >= 0x28 ? 0x27 : v); }
 static void t12_hurt_still(Regs *r) {                       /* fn_S9_09B4 */
     near_d0(r);
-    uint16_t d = og16(0x382E);
+    uint16_t d = og16(OG_NEAR_DIST);
     if (d >= 0x14) return;
     glow((uint16_t)((0x17 - d) * 2 + og16(0x56EE)));
-    if (d < 6) sog16(0x56EA, 0);
+    if (d < 6) sog16(OG_LIFE, 0);
     else life_less(d < 0xA ? 0x14 : d < 0xC ? 2 : 1);
 }
 static void t12_hurt(Regs *r) {                             /* fn_S9_0A2C */
     near_d0(r);
-    uint16_t d = og16(0x382E);
+    uint16_t d = og16(OG_NEAR_DIST);
     if (d >= 0x20) return;
     if (d >= 0x14) { glow((uint16_t)((og16(0x56EE) + 3) * 2)); return; }
     glow((uint16_t)((0x17 - d) * 2 + og16(0x56EE)));
@@ -3536,22 +3537,22 @@ static void t12_hurt(Regs *r) {                             /* fn_S9_0A2C */
 }
 static void t12_hurt_post(Regs *r) {                        /* fn_S9_0ABC */
     near_d0(r);
-    uint16_t d = og16(0x382E);
+    uint16_t d = og16(OG_NEAR_DIST);
     if (d < 0x27) { uint16_t v = (uint16_t)(0x28 - d); if (v >= 0x28) v = 0x27; if (v >= og16(0x56EE)) sog16(0x56EE, v); }
     mz_seg_of(7, 0x3D2A), fn_S7_3D2A(r);
-    d = og16(0x382E);
+    d = og16(OG_NEAR_DIST);
     if ((uint16_t)r->d[0] & 0x8000) life_less(d < 6 ? 0x23 : 0x1C);
     else if (d < 0x16) life_less(d < 0xE ? 2 : 1);
 }
 static void t12_guard(void) {                               /* fn_S9_0CB4: records 15-18 stopped; at its posts the player loses $28 */
-    uint32_t t = og32(0x53C8);
+    uint32_t t = og32(OG_OBJECTS);
     for (uint16_t rec = 0x3C0; rec <= 0x480; rec += 0x40) w16(t + rec + 0x18, 0xFFFF);
-    if (og16(0x56D0) == 0x1360 || og16(0x56D0) == 0x55E0) life_less(0x28);
+    if (og16(OG_PLAYER_CELL) == 0x1360 || og16(OG_PLAYER_CELL) == 0x55E0) life_less(0x28);
 }
 static void t12_step(Regs *r, uint16_t dir) {              /* fn_S9_0B4C: turned, and facing it a step (G_4A30) */
     set_w(&r->d[0], dir);
     mz_seg_of(7, 0x3722), fn_S7_3722(r);
-    if ((uint16_t)r->d[0] != r16(r->a[4] + 0xC)) return;
+    if ((uint16_t)r->d[0] != r16(r->a[4] + OB_HEADING)) return;
     r->a[0] = OADDR(0x4A30);
     mz_seg_of(7, 0x374C), fn_S7_374C(r); mz_seg_of(7, 0x3784), fn_S7_3784(r);
 }
@@ -3564,7 +3565,7 @@ static int t12_scent_step(Regs *r) {                        /* along the player'
     return 1;
 }
 static int t12_toward(Regs *r, uint16_t x, uint16_t y) {   /* straight at x, y; 0 when there */
-    sog16(0x381C, x); sog16(0x3818, y);
+    sog16(OG_TARGET_X, x); sog16(OG_TARGET_Y, y);
     mz_seg_of(7, 0x3B36), fn_S7_3B36(r);
     uint16_t d = (uint16_t)r->d[0];
     mz_seg_of(7, 0x3D0E), fn_S7_3D0E(r);
@@ -3575,33 +3576,33 @@ static int t12_toward(Regs *r, uint16_t x, uint16_t y) {   /* straight at x, y; 
 static void t12_view(Regs *r, uint16_t cell) { sog16(0x56A8, 0xAA); sog16(0x56A6, cell); refresh(r); }
 static void t12_tell(Regs *r, uint16_t ev) { for (uint16_t rec = 0x2C0; rec <= 0x380; rec += 0x40) tell(r, ev, rec); }
 static int t12_to_post(Regs *r, int which) {               /* placed at the post; 0 if it could not be */
-    uint32_t o = r->a[4], map = og32(0x53D4);
+    uint32_t o = r->a[4], map = og32(OG_MAP);
     const uint16_t *p = t12_post[which][r16(o + 0x18)];
-    sog16(0x382C, p[0]); sog16(0x3828, p[1]); w16(o + 0xC, p[2]);
+    sog16(OG_MOVE_X, p[0]); sog16(OG_MOVE_Y, p[1]); w16(o + OB_HEADING, p[2]);
     mz_seg(7), fo_S7_155C(r);
     mz_seg_of(7, 0x3784), fn_S7_3784(r);
     if ((uint16_t)r->d[0]) return 0;
     w16(map + sxw(r16(o + 0xE)) + 0xE, 0);
-    w16(map + sxw(r16(o + 0x30)) + 0xE, 1);
-    w16(o + 0xE, r16(o + 0x30));
+    w16(map + sxw(r16(o + OB_CELL)) + 0xE, 1);
+    w16(o + 0xE, r16(o + OB_CELL));
     return 1;
 }
 static void t12_think(Regs *r) {
-    uint32_t o = r->a[4], tbl = og32(0x53C8), map = og32(0x53D4);
+    uint32_t o = r->a[4], tbl = og32(OG_OBJECTS), map = og32(OG_MAP);
     for (;;) {
         uint16_t s = (uint16_t)r->d[0], next;
         set_w(&r->d[7], s);
-        int start = og16(0x56E0) < 0x80 && og16(0x56D0) < 0x2800;   /* fn_S7_22A0 */
-        if ((s <= 1 || s == 4 || s == 6 || s == 8 || s == 9) && og16(0x56E0) == 0x82) { next = 0xB; goto on; }
+        int start = og16(OG_FULL_VIEW) < 0x80 && og16(OG_PLAYER_CELL) < 0x2800;   /* fn_S7_22A0 */
+        if ((s <= 1 || s == 4 || s == 6 || s == 8 || s == 9) && og16(OG_FULL_VIEW) == 0x82) { next = 0xB; goto on; }
         if ((s <= 2 || s == 4 || s == 6 || (s >= 8 && s <= 10) || s == 14) && flag(r, 0, 8)) { next = 0xC; goto on; }
         switch (s) {
         case 0: if (!start) return; next = 7; break;
         case 1:
             if (start) { t12_view(r, 0x55E0); next = 6; break; }
             near_d0(r);
-            if (og16(0x382E) >= 0x28) return;
+            if (og16(OG_NEAR_DIST) >= 0x28) return;
             w16(o + 0x10, 0); next = 2; break;
-        case 2: near_d0(r); if (og16(0x382E) < 0x32) return; next = 1; break;
+        case 2: near_d0(r); if (og16(OG_NEAR_DIST) < 0x32) return; next = 1; break;
         case 3:
             t12_view(r, 0x31E0);
             t12_tell(r, r16(o + 0x18) < 2 ? 0x1201 : 0x1203);
@@ -3615,16 +3616,16 @@ static void t12_think(Regs *r) {
         case 5: next = r16(o + 0x18) < 2 ? 6 : 1; break;
         case 6:
             if (t12_scent_step(r)) return;
-            if (r16(o + 0x30) == 0x55E0) { t12_view(r, 0x51E0); next = 0; break; }
+            if (r16(o + OB_CELL) == 0x55E0) { t12_view(r, 0x51E0); next = 0; break; }
             near_d0(r);
-            if (og16(0x382E) < 0x28) { set_w(&r->d[0], og16(0x3830)); mz_seg_of(7, 0x3722), fn_S7_3722(r); }
+            if (og16(OG_NEAR_DIST) < 0x28) { set_w(&r->d[0], og16(OG_NEAR_DIR)); mz_seg_of(7, 0x3722), fn_S7_3722(r); }
             return;
         case 7: t12_view(r, 0x55E0); next = 8; break;
         case 8:
             if (t12_scent_step(r)) return;
-            if (r16(o + 0x30) != 0x55E0 || r16(map + 0x136E)) return;
+            if (r16(o + OB_CELL) != 0x55E0 || r16(map + 0x136E)) return;
             w16(map + sxw(r16(o + 0xE)) + 0xE, 0);
-            sog16(0x382C, 0x1B8); sog16(0x3828, 0x48); sog16(0x3824, 0x1360);
+            sog16(OG_MOVE_X, 0x1B8); sog16(OG_MOVE_Y, 0x48); sog16(OG_MOVE_CELL, 0x1360);
             w16(o + 0xE, 0x1360); w16(map + 0x136E, 1);
             mz_seg_of(7, 0x3784), fn_S7_3784(r);
             next = 9; break;
@@ -3645,7 +3646,7 @@ static void t12_think(Regs *r) {
         case 12:
             w16(map + sxw(r16(o + 0xE)) + 0xE, 0);
             unlink_obj(r);
-            w16(o + 2, r16(o + 2) | 0x8000);
+            w16(o + OB_TYPE, r16(o + OB_TYPE) | 0x8000);
             return;
         case 13: if (!t12_to_post(r, 1)) return; next = 0xE; break;
         default: return;                                    /* 14 */
@@ -3655,21 +3656,21 @@ static void t12_think(Regs *r) {
     }
 }
 static void t12_around(Regs *r) {                           /* fn_S9_0B64 */
-    uint32_t o = r->a[4], map = og32(0x53D4), tbl = og32(0x53C8);
+    uint32_t o = r->a[4], map = og32(OG_MAP), tbl = og32(OG_OBJECTS);
     static const int16_t at[9] = {-0x420, -0x400, -0x3E0, -0x20, 0, 0x20, 0x3E0, 0x400, 0x420};
     for (int k = 0; k < 9; k++) {
-        uint16_t c = (uint16_t)(r16(o + 0x30) + at[k]);
+        uint16_t c = (uint16_t)(r16(o + OB_CELL) + at[k]);
         for (uint32_t j = 1; j <= 10; j++) {
             uint8_t n = r8(map + sxw(c) + j);
             if (!n) break;
             uint16_t rec = (uint16_t)(n << 6), ty = r16(tbl + rec + 2);
             uint32_t q = tbl + rec;
-            if (ty == 0x26 || ty == 0x27 || (ty == 0x11 && r16(q + 0x30) == r16(o + 0x30))) {
+            if (ty == 0x26 || ty == 0x27 || (ty == 0x11 && r16(q + 0x30) == r16(o + OB_CELL))) {
                 uint32_t f = q + (ty == 0x11 ? 0x16 : 0x18);
                 uint16_t v = r16(f);
                 if (!(v & 0x8000) || v >= 0xFFF6) w16(f, (uint16_t)(v - (ty == 0x11 ? 2 : 1)));
             } else if (ty == 8) {
-                if (r16(q + 0x30) == r16(o + 0x30) && !(r16(q + 0x18) & 0x8000)) w16(q + 0x18, 0xFFFF);
+                if (r16(q + 0x30) == r16(o + OB_CELL) && !(r16(q + 0x18) & 0x8000)) w16(q + 0x18, 0xFFFF);
             } else if (ty == 0x13) w16(o + 0x14, rec);
         }
     }
@@ -3678,7 +3679,7 @@ void fo_S9_0372(Regs *r) {
     static const uint16_t h13[] = {0x13, 3, 0xFFFF}, e1201[] = {0x1201, 4, 0xFFFF}, e1202[] = {0x1202, 5, 0xFFFF},
         e6[] = {0x1201, 4, 0x1203, 4, 0xFFFF};
     uint32_t o = r->a[4];
-    set_w(&r->d[7], r16(o + 0x16));
+    set_w(&r->d[7], r16(o + OB_STATE));
     set_w(&r->d[0], (uint16_t)r->d[7]);
     t12_think(r);
     uint16_t s = (uint16_t)r->d[7];
@@ -3694,31 +3695,31 @@ void fo_S9_0372(Regs *r) {
         break;
     case 2: {
         t12_hurt(r);
-        uint16_t d = og16(0x382E);
+        uint16_t d = og16(OG_NEAR_DIST);
         if (d < 0xA) break;
-        if (d < 0x14) { t12_toward(r, og16(0x56D8), og16(0x56D4)); break; }
-        sog16(0x3814, og16(0x56D0));
+        if (d < 0x14) { t12_toward(r, og16(OG_PLAYER_X), og16(OG_PLAYER_Y)); break; }
+        sog16(0x3814, og16(OG_PLAYER_CELL));
         fo_S7_2132(r);
         if (!((uint16_t)r->d[0] & 0x8000)) t12_step(r, (uint16_t)r->d[0]);
         break;
     }
     case 4: case 6: t12_hurt(r); break;
-    case 8: t12_hurt(r); if (r16(o + 0x30) == 0x55E0) t12_guard(); break;
+    case 8: t12_hurt(r); if (r16(o + OB_CELL) == 0x55E0) t12_guard(); break;
     case 13: if (flag(r, 0, 8)) { set_w(&r->d[0], 0xC); t12_think(r); } break;   /* the original's act is think 14's code */
     case 14:                                                /* at the other post: after the player within $12, else turned to him */
         w16(o + 0x32, 4);
         near_d0(r);
         if ((uint16_t)r->d[0] & 0x8000) break;
         t12_hurt_post(r);
-        if (og16(0x382E) < 0x12) { set_w(&r->d[0], og16(0x3830)); mz_seg_of(7, 0x36F4), fn_S7_36F4(r); break; }
-        sog16(0x381C, og16(0x56D8)); sog16(0x3818, og16(0x56D4));
+        if (og16(OG_NEAR_DIST) < 0x12) { set_w(&r->d[0], og16(OG_NEAR_DIR)); mz_seg_of(7, 0x36F4), fn_S7_36F4(r); break; }
+        sog16(OG_TARGET_X, og16(OG_PLAYER_X)); sog16(OG_TARGET_Y, og16(OG_PLAYER_Y));
         mz_seg_of(7, 0x3B36), fn_S7_3B36(r);
         { uint16_t d = (uint16_t)r->d[0];
           mz_seg_of(7, 0x3D0E), fn_S7_3D0E(r);
           if (d & 0x8000) break;
           set_w(&r->d[0], d); }
         mz_seg_of(7, 0x3722), fn_S7_3722(r);
-        if ((uint16_t)r->d[0] != r16(o + 0xC)) break;
+        if ((uint16_t)r->d[0] != r16(o + OB_HEADING)) break;
         r->a[0] = OADDR(0x4B70);
         mz_seg_of(7, 0x374C), fn_S7_374C(r);
         mz_seg_of(7, 0x3972), fn_S7_3972(r);
@@ -3726,7 +3727,7 @@ void fo_S9_0372(Regs *r) {
         break;
     }
     t12_around(r);
-    w16(o + 0x16, (uint16_t)r->d[7]);
+    w16(o + OB_STATE, (uint16_t)r->d[7]);
 }
 
 /* ---------- type $24 (fn_S9_0D76, record 8 on level 2) ----------
@@ -3744,14 +3745,14 @@ static void t24_blink(Regs *r) {                            /* fn_S9_14CE */
     w16(r->a[4] + 0x18, 0); w16(r->a[4] + 0x1A, ((uint16_t)r->d[0] & 7) ? 1 : 0);
 }
 static void t24_others(void) {                              /* fn_S9_14F0 */
-    uint32_t t = og32(0x53C8);
+    uint32_t t = og32(OG_OBJECTS);
     for (uint16_t rec = 0x80; rec < 0x200; rec += 0x40) {
         uint16_t v = r16(t + rec + 0x18);
         if (v & 0x8000) w16(t + rec + 0x18, (uint16_t)(v + 2));
     }
 }
 static int t24_shot_here(Regs *r) {                         /* fn_S9_1514: a type $13 in its cell */
-    uint32_t c = og32(0x53D4) + r16(r->a[4] + 0x30), t = og32(0x53C8);
+    uint32_t c = og32(OG_MAP) + r16(r->a[4] + OB_CELL), t = og32(OG_OBJECTS);
     for (uint32_t k = 1; k <= 10; k++) {
         uint8_t n = r8(c + k);
         if (!n) return 0;
@@ -3770,13 +3771,13 @@ static void t24_think(Regs *r) {
         case 1:
             if (!open) { next = 0; break; }
             near_d0(r);
-            if (og16(0x382E) >= 8) return;
+            if (og16(OG_NEAR_DIST) >= 8) return;
             next = flag(r, 0, 1) ? 2 : 0x15; break;
         case 2: case 5: case 8: case 17: w16(o + 0x1C, 0xFFFE); next = (uint16_t)(s + 1); break;
         case 3:
             if (!open) { next = 0; break; }
             near_d0(r);
-            if (og16(0x382E) >= 0x14) { next = 1; break; }
+            if (og16(OG_NEAR_DIST) >= 0x14) { next = 1; break; }
             {
                 uint16_t t = (uint16_t)(r16(o + 0x1C) + 2);
                 w16(o + 0x1C, t);
@@ -3787,7 +3788,7 @@ static void t24_think(Regs *r) {
             static const uint8_t end[11] = {[6] = 0x1C, [9] = 0x36};
             if (!open) { next = 0xE; break; }
             near_d0(r);
-            if (og16(0x382E) >= 0x19) { next = 0xB; break; }
+            if (og16(OG_NEAR_DIST) >= 0x19) { next = 0xB; break; }
             if (!end[s]) return;
             uint16_t t = (uint16_t)(r16(o + 0x1C) + 2);
             w16(o + 0x1C, t);
@@ -3796,8 +3797,8 @@ static void t24_think(Regs *r) {
         }
         case 11:                                            /* he left: a shot */
             w16(o + 0x1E, 0xFFFF);
-            sog16(0x382C, r16(o + 4)); sog16(0x3828, r16(o + 8)); sog16(0x3824, r16(o + 0x30));
-            make_object(r, 0x13, 0xFFFF, og16(0x3834));
+            sog16(OG_MOVE_X, r16(o + OB_X)); sog16(OG_MOVE_Y, r16(o + OB_Y)); sog16(OG_MOVE_CELL, r16(o + OB_CELL));
+            make_object(r, 0x13, 0xFFFF, og16(OG_SELF));
             w16(o + 0x1C, 100);
             next = 0xC; break;
         case 12: if (!open) { next = 0xE; break; } if (!count_down(r, 0x1C, 1)) return; next = 0xD; break;
@@ -3807,21 +3808,21 @@ static void t24_think(Regs *r) {
             if (!open) return;
             w16(o + 0x1E, 0xFFFF); next = 0xD; break;
         case 15: w16(o + 0x58, 0x7FFF); w16(o + 0x98, 0x7FFF); w16(o + 0x1E, 0xFFFF); next = 0x10; break;
-        case 16: near_d0(r); if (og16(0x382E) >= 8) return; next = 0x11; break;
+        case 16: near_d0(r); if (og16(OG_NEAR_DIST) >= 8) return; next = 0x11; break;
         case 18: {
             near_d0(r);
-            if (og16(0x382E) >= 0x19) { next = 0x14; break; }
+            if (og16(OG_NEAR_DIST) >= 0x19) { next = 0x14; break; }
             uint16_t t = (uint16_t)(r16(o + 0x1C) + 2);
             w16(o + 0x1C, t);
             if (t < 0x3A) return;
             next = 0x13; break;
         }
-        case 19: near_d0(r); if (og16(0x382E) < 0x19) return; next = 0x14; break;
+        case 19: near_d0(r); if (og16(OG_NEAR_DIST) < 0x19) return; next = 0x14; break;
         case 21:
-            if (!og16(0x56C2)) { next = 0x16; break; }
+            if (!og16(OG_GEORGE_JOINED)) { next = 0x16; break; }
             if (!open) { next = 0x17; break; }
             near_d0(r);
-            if (og16(0x382E) >= 0x19) { next = 0x16; break; }
+            if (og16(OG_NEAR_DIST) >= 0x19) { next = 0x16; break; }
             return;
         case 22: if (open) return; next = 0x17; break;
         case 23: if (!open) return; next = 0x16; break;
@@ -3847,7 +3848,7 @@ void fo_S9_0D76(Regs *r) {
         m18[30] = {0, 2, 4, 6, 6, 4, 6, 4, 2, 4, 6, 4, 2, 2, 4, 2, 4, 6, 4, 6, 4, 2, 4, 2, 4, 6, 6, 4, 2, 0},
         e18[30] = {2, 3, 4, 4, 4, 3, 4, 3, 2, 3, 4, 3, 2, 1, 2, 1, 2, 3, 2, 3, 2, 1, 2, 1, 2, 3, 4, 3, 2, 2};
     uint32_t o = r->a[4];
-    set_w(&r->d[7], r16(o + 0x16));
+    set_w(&r->d[7], r16(o + OB_STATE));
     set_w(&r->d[0], (uint16_t)r->d[7]);
     t24_think(r);
     uint16_t s = (uint16_t)r->d[7];
@@ -3861,7 +3862,7 @@ void fo_S9_0D76(Regs *r) {
     case 3: t24_face(r, m3, e3); break;
     case 4: case 7: case 10: case 19: case 21: {
         static const uint16_t text[22] = {[4] = 0xA401, [7] = 0xA402, [10] = 0xA403, [19] = 0xA404, [21] = 0xA405};
-        t24_blink(r); t24_others(); sog16(0x56C0, text[s]);
+        t24_blink(r); t24_others(); sog16(OG_MESSAGE, text[s]);
         break;
     }
     case 5: set_w(&r->d[0], 6); t24_think(r); break;      /* the original's act is think 6's code */
@@ -3875,7 +3876,7 @@ void fo_S9_0D76(Regs *r) {
     case 14: case 23: w16(o + 0x18, 0); w16(o + 0x1A, 0xFFFF); w16(o + 0x1E, 0); break;
     case 18: t24_face(r, m18, e18); break;
     }
-    w16(o + 0x16, (uint16_t)r->d[7]);
+    w16(o + OB_STATE, (uint16_t)r->d[7]);
 }
 
 /* ---------- type $3A (fn_S11_046E, record 9 on level 6: the ending) ----------
@@ -3895,7 +3896,7 @@ void fo_S9_0D76(Regs *r) {
  * the map behind the player as he goes (fn_S11_0D00 / 0E30: +$1A the furthest of 15 places). */
 static void t3a_view(Regs *r) {                             /* fn_S11_0CB4 */
     uint32_t o = r->a[4];
-    sog16(0x56D8, r16(o + 4)); sog16(0x56D4, r16(o + 8)); sog16(0x56D0, r16(o + 0x30)); sog16(0x56DA, r16(o + 0xC));
+    sog16(OG_PLAYER_X, r16(o + OB_X)); sog16(OG_PLAYER_Y, r16(o + OB_Y)); sog16(OG_PLAYER_CELL, r16(o + OB_CELL)); sog16(OG_PLAYER_HEADING, r16(o + OB_HEADING));
     mz_seg_of(2, 0x3500), fn_S2_3500(r);
 }
 static int t3a_walk(Regs *r, uint16_t x, uint16_t y, int slow) {   /* towards x, y (fn_S11_0C9E / 0CD2); 0 when there */
@@ -3904,7 +3905,7 @@ static int t3a_walk(Regs *r, uint16_t x, uint16_t y, int slow) {   /* towards x,
     if ((uint16_t)r->d[0] & 0x8000) return 0;
     if (slow) {
         mz_seg_of(7, 0x36F4), fn_S7_36F4(r);
-        if ((uint16_t)r->d[0] != r16(r->a[4] + 0xC)) return 1;
+        if ((uint16_t)r->d[0] != r16(r->a[4] + OB_HEADING)) return 1;
         r->a[0] = OADDR(0x4B70);
     } else {
         mz_seg_of(7, 0x3722), fn_S7_3722(r);
@@ -3914,45 +3915,45 @@ static int t3a_walk(Regs *r, uint16_t x, uint16_t y, int slow) {   /* towards x,
     return 1;
 }
 static void t3a_bring(Regs *r, uint16_t rec, uint16_t type) {   /* record rec made type `type`, on the map */
-    uint32_t t = og32(0x53C8);
+    uint32_t t = og32(OG_OBJECTS);
     w16(t + rec + 2, type); w16(t + rec + 0xE, 0);
     set_w(&r->d[0], rec); mz_seg_of(2, 0x3480), fn_S2_3480(r);
 }
 static void t3a_remove(Regs *r, uint16_t rec) {
-    uint32_t t = og32(0x53C8);
+    uint32_t t = og32(OG_OBJECTS);
     unlink_rec(r, rec);
     for (int k = 4; k < 0xC; k += 2) w16(t + rec + k, 0);
     w16(t + rec + 0x30, 0); w16(t + rec + 2, r16(t + rec + 2) | 0x8000);
 }
 static void t3a_face(Regs *r, uint16_t rec, int twice) {  /* turned towards record rec, if it is on the map */
-    uint32_t t = og32(0x53C8);
+    uint32_t t = og32(OG_OBJECTS);
     if (!r16(t + rec + 4)) return;
     g_target(r16(t + rec + 4), r16(t + rec + 8));
     fo_S7_1488(r);
     if (twice) mz_seg_of(7, 0x3722), fn_S7_3722(r); else mz_seg_of(7, 0x36F4), fn_S7_36F4(r);
 }
 static uint16_t t3a_dist(Regs *r, uint16_t rec) {          /* the player's distance from record rec */
-    uint32_t o = r->a[4]; uint16_t self = og16(0x3834);
+    uint32_t o = r->a[4]; uint16_t self = og16(OG_SELF);
     w32(r->a[6] - 4, o); w16(r->a[6] - 6, self);           /* kept in the handler's locals */
-    r->a[4] = og32(0x53C8) + rec; sog16(0x3834, rec);
+    r->a[4] = og32(OG_OBJECTS) + rec; sog16(OG_SELF, rec);
     near_d0(r);
-    r->a[4] = o; sog16(0x3834, self);
-    return og16(0x382E);
+    r->a[4] = o; sog16(OG_SELF, self);
+    return og16(OG_NEAR_DIST);
 }
 static void t3a_flash(void) { sog16(0x56EE, 0x2B); sog16(0x56E2, 1); }   /* fn_S11_0CEE */
 static void t3a_think(Regs *r) {
-    uint32_t o = r->a[4], t = og32(0x53C8);
+    uint32_t o = r->a[4], t = og32(OG_OBJECTS);
     for (;;) {
         uint16_t s = (uint16_t)r->d[0], next;
         set_w(&r->d[7], s);
         switch (s) {
-        case 0: if (og16(0x56D8) < 0x30 && og16(0x56D4) < 0x27) return; next = 0x2C; break;
+        case 0: if (og16(OG_PLAYER_X) < 0x30 && og16(OG_PLAYER_Y) < 0x27) return; next = 0x2C; break;
         case 1: w16(o + 0x18, 0xA); next = 2; break;
         case 2: if (!count_down(r, 0x18, 1)) return; next = 3; break;
         case 3:
-            sog16(0x382C, og16(0x56D8)); sog16(0x3828, og16(0x56D4)); sog16(0x3824, og16(0x56D0));
+            sog16(OG_MOVE_X, og16(OG_PLAYER_X)); sog16(OG_MOVE_Y, og16(OG_PLAYER_Y)); sog16(OG_MOVE_CELL, og16(OG_PLAYER_CELL));
             mz_seg_of(7, 0x3784), fn_S7_3784(r);
-            w16(o + 0xC, og16(0x56DA));
+            w16(o + OB_HEADING, og16(OG_PLAYER_HEADING));
             next = 4; break;
         case 4:
             if (t3a_walk(r, 0xA5, 0xA0, 0)) { t3a_view(r); if (t3a_walk(r, 0xA5, 0xA0, 0)) { t3a_view(r); return; } }
@@ -3978,16 +3979,16 @@ static void t3a_think(Regs *r) {
             return;
         }
         case 26: tell(r, 0x3A04, 0x1C0); tell(r, 0x3A04, 0x200); next = 0x1B; break;
-        case 28: sog16(0x56EA, 0); return;
+        case 28: sog16(OG_LIFE, 0); return;
         case 29:                                            /* in record 7's place */
-            sog16(0x382C, r16(t + 0x1C4)); sog16(0x3828, (uint16_t)(r16(t + 0x1C8) + 2));
+            sog16(OG_MOVE_X, r16(t + 0x1C4)); sog16(OG_MOVE_Y, (uint16_t)(r16(t + 0x1C8) + 2));
             mz_seg(7), fo_S7_155C(r);
             mz_seg_of(7, 0x3784), fn_S7_3784(r);
             t3a_remove(r, 0x1C0);
-            w16(o + 0xC, 0x30);
-            sog16(0x56EA, 0x8D); sog16(0x56E6, 0x8D);
+            w16(o + OB_HEADING, 0x30);
+            sog16(OG_LIFE, 0x8D); sog16(0x56E6, 0x8D);
             next = 0x1E; break;
-        case 30: life_less(4); if (og16(0x56EA)) return; next = 0x2B; break;
+        case 30: life_less(4); if (og16(OG_LIFE)) return; next = 0x2B; break;
         case 31: w16(o + 0x18, 2); w16(t + 0x92, 0); next = 0x20; break;
         case 32: case 34: case 37: case 40: {
             static const uint8_t to[41] = {[32] = 0x21, [34] = 0x23, [37] = 0x26, [40] = 0x29};
@@ -3997,15 +3998,15 @@ static void t3a_think(Regs *r) {
         }
         case 33: w16(o + 0x18, 0xC); next = 0x22; break;
         case 35: {                                          /* record 10 brought in on the player */
-            uint32_t a4 = r->a[4]; uint16_t self = og16(0x3834);
+            uint32_t a4 = r->a[4]; uint16_t self = og16(OG_SELF);
             w32(r->a[6] - 4, a4); w16(r->a[6] - 6, self);
-            r->a[4] = t + 0x280; sog16(0x3834, 0x280);
+            r->a[4] = t + 0x280; sog16(OG_SELF, 0x280);
             w16(t + 0x282, 0x3B);
             set_w(&r->d[0], 0x280); mz_seg_of(2, 0x3480), fn_S2_3480(r);
-            sog16(0x382C, og16(0x56D8)); sog16(0x3828, og16(0x56D4)); sog16(0x3824, og16(0x56D0));
+            sog16(OG_MOVE_X, og16(OG_PLAYER_X)); sog16(OG_MOVE_Y, og16(OG_PLAYER_Y)); sog16(OG_MOVE_CELL, og16(OG_PLAYER_CELL));
             mz_seg_of(7, 0x3784), fn_S7_3784(r);
             w16(t + 0x28E, 0);
-            r->a[4] = a4; sog16(0x3834, self);
+            r->a[4] = a4; sog16(OG_SELF, self);
             w16(o + 0x18, 0); next = 0x24; break;
         }
         case 36: case 38: {
@@ -4047,9 +4048,9 @@ static void t3a_open(Regs *r) {                             /* fn_S11_0D00 / 0E3
         {{0x920, 0x41}, {0x540, 0x81}, {0x940, 0x50}, {0x960, 0x41}}, {{0x940, 0x81}}, {{0xD40, 0x81}},
         {{0x1140, 0x81}}, {{0x1540, 0x81}}, {{0x1940, 0x81}},
         {{0x2140, 0x81}, {0x2D40, 0xA0}, {0x3140, 0x81}, {0x2900, 0x41}, {0x2960, 0x50}, {0x2980, 0x41}}};
-    uint32_t o = r->a[4], map = og32(0x53D4);
+    uint32_t o = r->a[4], map = og32(OG_MAP);
     uint16_t at = 0;
-    for (unsigned k = 0; k < sizeof cells / sizeof cells[0]; k++) if (og16(0x56D0) == cells[k][0]) { at = cells[k][1]; break; }
+    for (unsigned k = 0; k < sizeof cells / sizeof cells[0]; k++) if (og16(OG_PLAYER_CELL) == cells[k][0]) { at = cells[k][1]; break; }
     if (at >= r16(o + 0x1A)) w16(o + 0x1A, at);
     uint16_t n = r16(o + 0x1A);
     for (int k = 0; k < 7 && walls[n][k][0]; k++) w8(map + walls[n][k][0], (uint8_t)walls[n][k][1]);
@@ -4062,7 +4063,7 @@ void fo_S11_046E(Regs *r) {
     uint32_t o = r->a[4], a6 = r->a[6];
     r->a[6] = r->a[7] - 4;                                  /* LINK A6, #-6 */
     r->a[7] -= 10;
-    set_w(&r->d[7], r16(o + 0x16));
+    set_w(&r->d[7], r16(o + OB_STATE));
     set_w(&r->d[0], (uint16_t)r->d[7]);
     t3a_think(r);
     uint16_t s = (uint16_t)r->d[7];
@@ -4071,21 +4072,21 @@ void fo_S11_046E(Regs *r) {
     o_event(r, s == 6 ? e6 : s == 30 ? e30 : NULL, t3a_think);
     switch (s = (uint16_t)r->d[7]) {
     case 6: t3a_face(r, 0x1C0, 1); t3a_view(r); break;
-    case 8: case 9: case 10: case 11: t3a_view(r); sog16(0x56C0, (uint16_t)(0xBA01 + s - 8)); break;
-    case 14: sog16(0x56EA, 0); t3a_view(r); break;
-    case 15: case 16: case 17: case 18: case 19: t3a_view(r); sog16(0x56C0, (uint16_t)(0xBA05 + s - 15)); break;
-    case 21: case 22: t3a_face(r, 0x200, 0); t3a_view(r); sog16(0x56C0, s == 21 ? 0xBA0A : 0xBA0B); break;
-    case 24: sog16(0x56C0, 0xBA0C); break;
+    case 8: case 9: case 10: case 11: t3a_view(r); sog16(OG_MESSAGE, (uint16_t)(0xBA01 + s - 8)); break;
+    case 14: sog16(OG_LIFE, 0); t3a_view(r); break;
+    case 15: case 16: case 17: case 18: case 19: t3a_view(r); sog16(OG_MESSAGE, (uint16_t)(0xBA05 + s - 15)); break;
+    case 21: case 22: t3a_face(r, 0x200, 0); t3a_view(r); sog16(OG_MESSAGE, s == 21 ? 0xBA0A : 0xBA0B); break;
+    case 24: sog16(OG_MESSAGE, 0xBA0C); break;
     case 27: sog16(0x56EE, 0x2A); life_less(0x14); break;
     case 30: t3a_view(r); t3a_flash(); break;
     case 32: t3a_view(r); t3a_flash(); sog16(0x56EE, 0x2C); break;
     case 34: t3a_view(r); t3a_flash(); sog16(0x56EE, r16(o + 0x18) >= 4 ? 0x2D : 0x2B); break;
-    case 37: w16(og32(0x53C8) + 0x2A6, 7); t3a_view(r); break;
+    case 37: w16(og32(OG_OBJECTS) + 0x2A6, 7); t3a_view(r); break;
     case 36: case 38: case 39: case 40: case 43: t3a_view(r); break;
-    case 41: sog16(0x56C0, 0xBA0D); t3a_view(r); break;
+    case 41: sog16(OG_MESSAGE, 0xBA0D); t3a_view(r); break;
     }
     if ((uint16_t)r->d[7]) t3a_open(r);
-    w16(o + 0x16, (uint16_t)r->d[7]);
+    w16(o + OB_STATE, (uint16_t)r->d[7]);
     r->a[7] += 10; r->a[6] = a6;
 }
 
@@ -4094,18 +4095,18 @@ void fo_S11_046E(Regs *r) {
  * there: life 0, fn_S10_2126) and is gone. */
 void fo_S10_1F28(Regs *r) {
     uint32_t o = r->a[4];
-    uint16_t t = (uint16_t)(r16(o + 0x16) + 1);
-    w16(o + 0x16, t);
+    uint16_t t = (uint16_t)(r16(o + OB_STATE) + 1);
+    w16(o + OB_STATE, t);
     if (t < 5) return;
-    uint32_t c = og32(0x53D4) + sxw(r16(o + 0x30)), tbl = og32(0x53C8);
-    if (r16(c + 0xC)) sog16(0x56EA, 0);
+    uint32_t c = og32(OG_MAP) + sxw(r16(o + OB_CELL)), tbl = og32(OG_OBJECTS);
+    if (r16(c + 0xC)) sog16(OG_LIFE, 0);
     for (uint32_t k = 1; k <= 10; k++) {
         uint8_t n = r8(c + k);
         if (!n) break;
-        w16(tbl + ((uint32_t)n << 6) + 0x14, og16(0x3834));
+        w16(tbl + ((uint32_t)n << 6) + 0x14, og16(OG_SELF));
     }
     unlink_obj(r);
-    w16(o + 2, r16(o + 2) | 0x8000);
+    w16(o + OB_TYPE, r16(o + OB_TYPE) | 0x8000);
 }
 
 /* ---------- shots and spells (fn_S7_087A, 099C, 0A5A, 0AB0, 0B7C, 0C9C) ----------
@@ -4115,12 +4116,12 @@ void fo_S10_1F28(Regs *r) {
  * (the spells: +$12 = their time on the player, they stay there taking life each frame), or any
  * object fn_S7_15B8 finds within a cell (the hit one's +$14 = this record, for a type $13). At 0
  * they are gone (record free, type $FFFF). */
-static void shot_free(Regs *r) { unlink_obj(r); w16(r->a[4] + 2, 0xFFFF); }
+static void shot_free(Regs *r) { unlink_obj(r); w16(r->a[4] + OB_TYPE, 0xFFFF); }
 static int shot_step(Regs *r, uint16_t kind, uint16_t hold) {   /* fn_S7_09FC, 0B1E, 0BE2: -1 when it ends */
     uint32_t o = r->a[4];
-    r->a[0] = OADDR(0x4F30); set_w(&r->d[0], r16(o + 0xC));
+    r->a[0] = OADDR(0x4F30); set_w(&r->d[0], r16(o + OB_HEADING));
     mz_seg_of(7, 0x374C), fn_S7_374C(r); mz_seg_of(7, 0x3784), fn_S7_3784(r);
-    if (r8(og32(0x53D4) + sxw(r16(o + 0x30))) & 1) { w16(o + 0x12, 0); return -1; }
+    if (r8(og32(OG_MAP) + sxw(r16(o + OB_CELL))) & 1) { w16(o + 0x12, 0); return -1; }
     sog16(0x3822, kind);
     mz_seg_of(7, 0x3ACA), fn_S7_3ACA(r);
     if ((uint16_t)r->d[0]) { w16(o + 0x12, hold); return -1; }
@@ -4132,11 +4133,11 @@ static int shot_step(Regs *r, uint16_t kind, uint16_t hold) {   /* fn_S7_09FC, 0
 static void spell_hold(Regs *r, uint16_t drain) {          /* on the player: moved with him, life - drain */
     uint32_t o = r->a[4];
     w16(o + 0x12, (uint16_t)(r16(o + 0x12) - 1));
-    sog32(0x382C, og32(0x56D8)); sog32(0x3828, og32(0x56D4)); sog16(0x3824, og16(0x56D0));
+    sog32(OG_MOVE_X, og32(OG_PLAYER_X)); sog32(OG_MOVE_Y, og32(OG_PLAYER_Y)); sog16(OG_MOVE_CELL, og16(OG_PLAYER_CELL));
     mz_seg_of(7, 0x3784), fn_S7_3784(r);
     w16(o + 0x26, 0);
-    int16_t l = (int16_t)(og16(0x56EA) - drain);
-    sog16(0x56EA, (uint16_t)(l < 0 ? 0 : l));
+    int16_t l = (int16_t)(og16(OG_LIFE) - drain);
+    sog16(OG_LIFE, (uint16_t)(l < 0 ? 0 : l));
 }
 static void spell(Regs *r, int steps, uint16_t kind, uint16_t hold, uint16_t f14, uint16_t drain) {
     uint32_t o = r->a[4];
@@ -4158,14 +4159,14 @@ void fo_S7_0A5A(Regs *r) {                                  /* type $2A (made by
 void fo_S7_087A(Regs *r) {                                  /* type $13: the hit object's +$14 = it */
     uint32_t o = r->a[4];
     if (!(r16(o + 0x12) & 0x8000)) { shot_free(r); return; }
-    if (r16(o + 0xC) & 0x8000) return;
+    if (r16(o + OB_HEADING) & 0x8000) return;
     r->a[0] = OADDR(0x4F30);
     mz_seg_of(7, 0x374C), fn_S7_374C(r); mz_seg_of(7, 0x3784), fn_S7_3784(r);
-    if (r8(og32(0x53D4) + sxw(r16(o + 0x30))) & 1) { w16(o + 0x12, 0); return; }
+    if (r8(og32(OG_MAP) + sxw(r16(o + OB_CELL))) & 1) { w16(o + 0x12, 0); return; }
     sog16(0x3822, 1); sog16(0x3820, r16(o + 0x10));
     mz_seg_of(7, 0x37C4), fn_S7_37C4(r);
     if (!(uint16_t)r->d[0]) return;
-    w16(og32(0x53C8) + sxw((uint16_t)r->d[0]) + 0x14, og16(0x3834));
+    w16(og32(OG_OBJECTS) + sxw((uint16_t)r->d[0]) + 0x14, og16(OG_SELF));
     w16(o + 0x12, 0);
 }
 void fo_S7_0C9C(Regs *r) {                                  /* type $37 (Lips' end): 5 frames on the player, then level 6 */
@@ -4173,11 +4174,11 @@ void fo_S7_0C9C(Regs *r) {                                  /* type $37 (Lips' e
     if (r16(o + 0x12) & 0x8000) w16(o + 0x12, 5);
     uint16_t t = (uint16_t)(r16(o + 0x12) - 1);
     w16(o + 0x12, t); w16(o + 0x26, t);
-    sog16(0x382C, og16(0x56D8)); sog16(0x3828, og16(0x56D4)); sog16(0x3824, og16(0x56D0));
+    sog16(OG_MOVE_X, og16(OG_PLAYER_X)); sog16(OG_MOVE_Y, og16(OG_PLAYER_Y)); sog16(OG_MOVE_CELL, og16(OG_PLAYER_CELL));
     mz_seg_of(7, 0x3784), fn_S7_3784(r);
     if (t) return;
-    sog16(0x57DC, 6); sog32(0x57D8, 0x140000); sog32(0x57D4, 0x140000);
-    sog16(0x57DA, og16(0x56DA)); sog8(0x57DE, 1); sog8(0x57F2, 1);
+    sog16(OG_GO_LEVEL, 6); sog32(OG_GO_X, 0x140000); sog32(OG_GO_Y, 0x140000);
+    sog16(OG_GO_HEADING, og16(OG_PLAYER_HEADING)); sog8(0x57DE, 1); sog8(0x57F2, 1);
 }
 
 /* ---------- fn_S7_0F78: one object's tick (Original's dispatcher, for fn_S7_2E9A) ----------
@@ -4206,10 +4207,10 @@ void fo_S7_0F78(Regs *r) {
         {10, fo_S10_1D96}, {7, fo_S7_0B7C}, {0, NULL}};
     uint32_t d3 = r->d[3], d4 = r->d[4], d5 = r->d[5], d6 = r->d[6], d7 = r->d[7];
     uint32_t a2 = r->a[2], a3 = r->a[3], a4 = r->a[4];
-    sog16(0x3834, (uint16_t)r->d[0]);
+    sog16(OG_SELF, (uint16_t)r->d[0]);
     r->d[0] &= 0xFFFF;
-    r->a[4] = og32(0x53C8) + r->d[0];
-    uint16_t type = r16(r->a[4] + 2);
+    r->a[4] = og32(OG_OBJECTS) + r->d[0];
+    uint16_t type = r16(r->a[4] + OB_TYPE);
     if (type < 63 && by_type[type].f) {
         if (by_type[type].f != type_23) mz_seg(by_type[type].seg);
         by_type[type].f(r);

@@ -8,7 +8,9 @@
   wall outline, the 45 object models and their dispatcher, the panel (frames, the two gauges,
   the mood labels, the message box with the texts of segment 6), mouse steering and the mood,
   saving and restoring the level's objects and the player. Original's own globals are named by
-  its offsets (`og16(0x56DA)`).
+  its offsets (`og16(0x56DA)`), or by name where what they hold is certain (`game/orig_names.h`:
+  the player, life, the map and object records, the next level, ...; and in the creatures the
+  record fields type, x, y, heading, state and cell).
 - `tools/orig_todo.py [--ready]` lists what Original's runs execute that no C covers yet (ready:
   everything it calls is C already); `tools/quick_original.sh [test ticks]` is a fast per-call
   check; `tools/verify_original.sh` the full one (per call and end to end).

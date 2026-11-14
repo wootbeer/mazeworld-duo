@@ -1,6 +1,7 @@
 /* CODE segment 2 of Mazeworld Original: its own routines (no Catacombs counterpart), named by
  * Original's offsets (see build/disasm-original/seg2.s). */
 #include "mzasm.h"
+#include "orig_names.h"
 
 /* fo_S2_2AD2 (JT 26): after the player turns or moves (where Catacombs calls the empty fn_S2_3500):
  * G_56D6 = G_56D2 = $8000, and the two step bytes G_5830 / G_582F from the table at G_53DC:
@@ -11,8 +12,8 @@ void fo_S2_2AD2(Regs *r) {
     r->a[0] = t;
     set_w(&r->d[0], 0x8000);
     sog16(0x56D6, 0x8000); sog16(0x56D2, 0x8000);
-    uint16_t row = (uint16_t)(og16(0x56DA) << 6);
-    uint16_t x = (uint16_t)(row + (og16(0x56D8) & 0xF)), y = (uint16_t)(row + (og16(0x56D4) & 0xF));
+    uint16_t row = (uint16_t)(og16(OG_PLAYER_HEADING) << 6);
+    uint16_t x = (uint16_t)(row + (og16(OG_PLAYER_X) & 0xF)), y = (uint16_t)(row + (og16(OG_PLAYER_Y) & 0xF));
     set_w(&r->d[1], x); set_w(&r->d[2], y);
     uint8_t a = r8(t + sxw(x)), b = r8(t + sxw(y) + 0x20);
     uint8_t v = (uint8_t)(0 - a - b);
@@ -71,16 +72,16 @@ void fo_S2_41E8(uint32_t table) {
     w32(a6 + 8, table);
     Regs r = {{0}, {0}, 0};
     r.a[6] = a6;
-    uint16_t dir = og16(0x56DA);
+    uint16_t dir = og16(OG_PLAYER_HEADING);
     uint32_t e = og32(0x53E0), i2 = (uint32_t)(uint16_t)(dir << 1);
     e += (uint32_t)(r8(e + i2 + 1) << 8 | r8(e + i2)) + 0x80;
     uint32_t row24 = og32(0x53D8) + ((uint32_t)dir << 7), row28 = og32(0x53D8) + ((uint32_t)((dir + 0x10) & 0x3F) << 7);
-    uint8_t fx = (uint8_t)(og16(0x56D8) & 0xF), fy = (uint8_t)(og16(0x56D4) & 0xF);
+    uint8_t fx = (uint8_t)(og16(OG_PLAYER_X) & 0xF), fy = (uint8_t)(og16(OG_PLAYER_Y) & 0xF);
     uint8_t sy = og8(0x582F), sx = og8(0x5830);
     for (uint16_t cellw = (uint16_t)(r8(e + 1) << 8 | r8(e)); cellw != 100; e += 0xB, cellw = (uint16_t)(r8(e + 1) << 8 | r8(e))) {
-        uint16_t off = (uint16_t)(cellw + og16(0x56D0));
+        uint16_t off = (uint16_t)(cellw + og16(OG_PLAYER_CELL));
         if (off & 0x8000) continue;
-        uint8_t b = r8(og32(0x53D4) + off);
+        uint8_t b = r8(og32(OG_MAP) + off);
         if (!b) continue;
         uint8_t faces = (uint8_t)(((uint8_t)((r8(e + 0xA) ^ b) << 2) & b) & 0xC0);
         if (!faces) continue;

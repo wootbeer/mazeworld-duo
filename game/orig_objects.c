@@ -1,6 +1,7 @@
 /* Mazeworld Original's objects: drawing and behaviour of its object types, spread over its
  * segments 4, 7, 9, 10 and 11 (see build/disasm-original), named by Original's offsets. */
 #include "mzasm.h"
+#include "orig_names.h"
 
 void fn_S2_3532(Regs *r);
 
@@ -37,7 +38,7 @@ static void full_width(Regs *r) {
 }
 /* (G_56DA - A4+$2A [- A4+$C]) & mask, doubled, in D0 (or D1) */
 static uint16_t angle(Regs *r, uint32_t *d, int with_c, uint16_t mask) {
-    set_w(d, og16(0x56DA)); sub_w(r, d, r16(r->a[4] + 0x2A));
+    set_w(d, og16(OG_PLAYER_HEADING)); sub_w(r, d, r16(r->a[4] + 0x2A));
     if (with_c) sub_w(r, d, r16(r->a[4] + 0xC));
     set_w(d, (uint16_t)((uint16_t)*d & mask)); lsl_w(r, d, 1);
     return (uint16_t)*d;
@@ -46,7 +47,7 @@ static uint16_t angle(Regs *r, uint32_t *d, int with_c, uint16_t mask) {
 /* fo_S7_0000 / fo_S7_003E: a colour cycle (A4+$C over six entries of G_384C / G_3840 into G_56AA)
  * on the first model of G_537C; nothing while G_56E0 is $80 */
 static void cycling(Regs *r, uint16_t colours) {
-    set_w(&r->d[0], og16(0x56E0));
+    set_w(&r->d[0], og16(OG_FULL_VIEW));
     cc_cmp_w(r, 0x80, (uint16_t)r->d[0]);
     if ((uint16_t)r->d[0] == 0x80) return;
     next_frame(r, 0xC, 6, 1);
@@ -152,9 +153,9 @@ void fo_S9_0000(Regs *r) {
     else { set_w(&r->d[0], r16(r->a[4] + 0xC)); lsl_w(r, &r->d[0], 2); r->a[0] = t + r32(t + sxw(r->d[0])); }
     sog32(0x56AE, r->a[0]);
     set_w(&r->d[0], r16(r->a[4] + 4));
-    if ((uint16_t)r->d[0] == og16(0x56D8)) {
+    if ((uint16_t)r->d[0] == og16(OG_PLAYER_X)) {
         set_w(&r->d[0], r16(r->a[4] + 8));
-        if ((uint16_t)r->d[0] == og16(0x56D4)) { set_w(&r->d[0], og16(0x5736)); add_w(r, &r->d[0], 4); sog16(0x56B4, (uint16_t)r->d[0]); }
+        if ((uint16_t)r->d[0] == og16(OG_PLAYER_Y)) { set_w(&r->d[0], og16(0x5736)); add_w(r, &r->d[0], 4); sog16(0x56B4, (uint16_t)r->d[0]); }
     }
     mz_draw_stream(r, r->a[0]);
 }
@@ -190,11 +191,11 @@ void fo_S9_202C(Regs *r) {
  * 2ABA) or facing away (4-11: 2B26), from G_5320 in colour 4 / $8D */
 static void parts(Regs *r, uint16_t colour, int away) {
     sog16(0x56AA, colour);
-    r->a[2] = og32(0x53C8) + 0x1E;
+    r->a[2] = og32(OG_OBJECTS) + 0x1E;
     for (r->d[3] = 0; (uint16_t)r->d[3] < 0x18; set_w(&r->d[3], (uint16_t)(r->d[3] + 2))) {
         uint16_t w = r16(r->a[2] + sxw(r->d[3]));
         set_w(&r->d[0], (uint16_t)((w >> 8) << 2));
-        set_w(&r->d[2], og16(0x56DA)); sub_w(r, &r->d[2], r16(r->a[4] + 0x2A)); sub_w(r, &r->d[2], (uint16_t)r->d[0]);
+        set_w(&r->d[2], og16(OG_PLAYER_HEADING)); sub_w(r, &r->d[2], r16(r->a[4] + 0x2A)); sub_w(r, &r->d[2], (uint16_t)r->d[0]);
         lsr_w(r, &r->d[2], 2);
         set_w(&r->d[2], (uint16_t)((uint16_t)r->d[2] & 0xF));
         int facing = (uint16_t)r->d[2] < 4 || (uint16_t)r->d[2] >= 0xC;
@@ -218,7 +219,7 @@ void fo_S10_2C2C(Regs *r) {
     int lit = (uint16_t)r->d[0] & 0x8000;
     if (!lit) { mz_seg_of(2, 0x3532), fn_S2_3532(r); set_w(&r->d[0], (uint16_t)((uint16_t)r->d[0] & 0xF)); lit = !(uint16_t)r->d[0]; }
     if (lit) sog16(0x56AA, 0x2D);
-    set_w(&r->d[0], og16(0x56DA)); sub_w(r, &r->d[0], r16(r->a[4] + 0xC));
+    set_w(&r->d[0], og16(OG_PLAYER_HEADING)); sub_w(r, &r->d[0], r16(r->a[4] + 0xC));
     set_w(&r->d[0], (uint16_t)((uint16_t)r->d[0] & 0x3E)); lsl_w(r, &r->d[0], 1);
     uint32_t t = og32(0x5350);
     r->a[0] = t + r32(t + sxw(r->d[0]));
@@ -363,7 +364,7 @@ static const uint16_t pose_1962[160] = {
     0x0060, 0x0060, 0x0060, 0x0060, 0x0060, 0x0060, 0x0060, 0x0060, 0x0060, 0x0060, 0x0060, 0x005C, 0x005C, 0x005C, 0x0058, 0x0058,
 };
 static void posed(Regs *r, const uint16_t *pose, uint16_t extra) {
-    set_w(&r->d[0], og16(0x56DA)); sub_w(r, &r->d[0], r16(r->a[4] + 0x2A));
+    set_w(&r->d[0], og16(OG_PLAYER_HEADING)); sub_w(r, &r->d[0], r16(r->a[4] + 0x2A));
     if (extra) sub_w(r, &r->d[0], extra);
     set_w(&r->d[0], (uint16_t)(((uint16_t)r->d[0] & 0x3E) ^ 0x20));
     set_w(&r->d[1], r16(r->a[4] + 0xC)); lsl_w(r, &r->d[1], 6);
@@ -472,7 +473,7 @@ void fo_S7_0D32(Regs *r) {
     uint32_t d3 = r->d[3], d4 = r->d[4], d5 = r->d[5], d6 = r->d[6], d7 = r->d[7];
     uint32_t a2 = r->a[2], a3 = r->a[3], a4 = r->a[4];
     r->a[4] = r->a[0];
-    sog16(0x3834, (uint16_t)r->d[1]);
+    sog16(OG_SELF, (uint16_t)r->d[1]);
     uint16_t type = (uint16_t)r->d[0];
     add_w(r, &r->d[0], (uint16_t)r->d[0]);
     if (type < 63) {
