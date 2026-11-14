@@ -29,6 +29,7 @@ void     qd_remove_window(uint32_t win);
 MtbRect  qd_auto_position(MtbRect content, uint16_t pos);
 uint16_t qd_template_position(uint32_t h, int title_offset);
 uint32_t qd_front_window(void);
+MtbRect qd_window_global(uint32_t win);
 void     qd_post_update(uint32_t win);        /* queue an update event for win */
 int      qd_take_update_for(uint32_t win);     /* 1 if an update was pending for win (and is now taken) */
 uint32_t qd_take_update(void);

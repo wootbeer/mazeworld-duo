@@ -16,9 +16,11 @@
 #include "../harness/hx.h"
 #include "../game/mz.h"
 #include "../game/fns.h"
+#include "../mactb/mactb.h"
 #include "shell.h"
 
 uint32_t qd_front_window(void);
+MtbRect qd_window_global(uint32_t win);
 void input_live_event(uint16_t what, uint32_t msg, uint32_t where);
 void input_live_menu(int menu, int item);
 
@@ -35,6 +37,23 @@ static int shell_in_front(void) {
 int shell_playing(void) {
     uint32_t w = qd_front_window();
     return w && (int16_t)rd16(w + 0x6C) >= 0 && rd32(w + 0x98) != 0 && !g8(0x22C6);
+}
+
+/* What the window shows (x, y, w, h of the Mac screen). Catacombs: the whole screen. Original: the
+ * game's own area only, its window size (G_5748 x G_5746), as a Mac would show it with its desktop
+ * and menu bar hidden: in play, where the full-screen game window draws it (the screen's centre);
+ * otherwise where the main window G_5804 is. So the picture keeps its place when play pauses (on a
+ * 640 x 480 screen the main window sits below the Mac's menu bar), and a smaller size shows nothing
+ * of what a larger one left behind. */
+void shell_view(int *x, int *y, int *w, int *h) {
+    *x = 0; *y = 0; *w = SCREEN_W; *h = SCREEN_H;
+    uint32_t main = mz_original ? og32(0x5804) : 0, front = qd_front_window();
+    int vw = (int16_t)og16(0x5748), vh = (int16_t)og16(0x5746);
+    if (!main || !front || vw < 64 || vh < 64 || vw > SCREEN_W || vh > SCREEN_H) return;
+    MtbRect f = qd_window_global(front);
+    if (front != main && f.top <= 0 && f.left <= 0 && f.right >= SCREEN_W && f.bottom >= SCREEN_H) { *x = (SCREEN_W - vw) / 2; *y = (SCREEN_H - vh) / 2; }
+    else { MtbRect m = qd_window_global(main); *x = m.left; *y = m.top; }
+    *w = vw; *h = vh;
 }
 
 /* Mazeworld Original's menus, by its rules (fn_S8_259A: in the main window fn_S8_2716, else

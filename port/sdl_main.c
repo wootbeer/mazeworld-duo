@@ -277,13 +277,25 @@ static void install_menus(void) {
 
 static uint32_t shown[SCREEN_W * SCREEN_H];
 static int redraw = 1;           /* the window needs drawing even if the screen has not changed */
+static uint32_t view[SCREEN_W * SCREEN_H];
+static int view_x, view_y, view_w = SCREEN_W, view_h = SCREEN_H;   /* the part of the screen shown */
 static void present(void) {
+    int vx, vy, vw, vh;
     qd_screen_argb(pixels);
-    if (!redraw && !memcmp(pixels, shown, sizeof pixels)) return;
-    memcpy(shown, pixels, sizeof pixels); redraw = 0;
-    SDL_UpdateTexture(tex, NULL, pixels, SCREEN_W * 4);
+    shell_view(&vx, &vy, &vw, &vh);
+    for (int y = 0; y < vh; y++)                            /* the view; black where it leaves the screen */
+        for (int x = 0; x < vw; x++) {
+            int sx = vx + x, sy = vy + y;
+            view[y * vw + x] = sx >= 0 && sy >= 0 && sx < SCREEN_W && sy < SCREEN_H ? pixels[sy * SCREEN_W + sx] : 0xFF000000u;
+        }
+    view_x = vx; view_y = vy;
+    if (vw != view_w || vh != view_h) { view_w = vw; view_h = vh; SDL_RenderSetLogicalSize(ren, vw, vh); redraw = 1; }
+    if (!redraw && !memcmp(view, shown, (size_t)vw * vh * 4)) return;
+    memcpy(shown, view, (size_t)vw * vh * 4); redraw = 0;
+    SDL_Rect src = {0, 0, vw, vh};
+    SDL_UpdateTexture(tex, &src, view, vw * 4);
     SDL_RenderClear(ren);
-    SDL_RenderCopy(ren, tex, NULL, NULL);
+    SDL_RenderCopy(ren, tex, &src, NULL);
     SDL_RenderPresent(ren);
 }
 
@@ -321,7 +333,7 @@ static void events(void) {
         case SDL_MOUSEMOTION:
             if (captured && mz_original && settings.orig_classic) input_live_move(e.motion.xrel, e.motion.yrel);
             else if (captured) mouse_px += e.motion.xrel;
-            else input_live_mouse(e.motion.x, e.motion.y);
+            else input_live_mouse(e.motion.x + view_x, e.motion.y + view_y);
             break;
         case SDL_MOUSEBUTTONDOWN: case SDL_MOUSEBUTTONUP:
             if (captured) {
@@ -331,7 +343,7 @@ static void events(void) {
                 break;
             }
             if (e.button.button == SDL_BUTTON_LEFT) {
-                input_live_mouse(e.button.x, e.button.y);
+                input_live_mouse(e.button.x + view_x, e.button.y + view_y);
                 input_live_button(e.type == SDL_MOUSEBUTTONDOWN);
             }
             break;

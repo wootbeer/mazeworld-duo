@@ -519,6 +519,11 @@ uint16_t qd_template_position(uint32_t h, int title) {
     return mm_handle_size(h) >= end + 2 ? rd16(a + (uint32_t)end) : 0;
 }
 uint32_t qd_front_window(void) { return window_list; }   /* for the port's shell */
+/* a window's content in screen coordinates (its port rectangle less its pixel map's origin) */
+MtbRect qd_window_global(uint32_t win) {
+    MtbRect pr = rd_rect(win + CP_PortRect), b = rd_rect(port_pixmap(win) + PM_Bounds);
+    return (MtbRect){(int16_t)(pr.top - b.top), (int16_t)(pr.left - b.left), (int16_t)(pr.bottom - b.top), (int16_t)(pr.right - b.left)};
+}
 /* FindWindow(pt, VAR window): which part of which window a global point is in: inMenuBar (1) above
  * MBarHeight, else the front-most visible window whose structure holds it: inContent (3), or
  * inSysWindow (2) for a desk accessory, or inDrag (4) on its frame; else inDesk (0).
