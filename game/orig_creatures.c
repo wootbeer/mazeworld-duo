@@ -3342,6 +3342,164 @@ void fo_S11_0382(Regs *r) {
     w16(o + 0x16, (uint16_t)r->d[7]);
 }
 
+/* ---------- type $23 (fn_S4_1670, record 3 on level 4) ----------
+ * A talker at the door of a little room (x $90-$CF, y $A0-$AF; fn_S4_1C86: 0 with the player
+ * outside it or a full view, -1 in its west part, 1 east of x $B9). The player stepping into the
+ * west part is pushed out east (13-15, 17: fn_S4_1CC2, a type $2A object left where he was, two
+ * pixels a frame to x $BE). In the east part with George there and the player looking at it within
+ * 7 it says $2301 (3), $2302 (4) and, once he comes back (flag word 0 bit 1), $2303 / $2304 (8-9:
+ * flag word 1 bit 4). Event $F01 (from type $F) in 1 starts 19 (picture $49), again: 20, the end:
+ * without George it goes in 15 frames, with him it turns to the player and says $2305-$230D (21-29,
+ * hits by $17 / $19 moving on, $18 ending it) until he is $20 away; then (30-32) flag word 0 bit 4,
+ * picture $49 for 3 frames, and gone. State 18 (a hit by $18) pushes the player on east (fn_S4_1D2E). */
+static int t23_where(void) {
+    uint16_t x = og16(0x56D8), y = og16(0x56D4);
+    if (og16(0x56E0) >= 0x80 || y < 0xA0 || y >= 0xB0 || x < 0x90 || x >= 0xD0) return 0;
+    return x >= 0xB9 ? 1 : -1;
+}
+static void t23_player_to(Regs *r, uint16_t x) {          /* the player at x (his cell kept in the map's +$C), fn_S2_2AD2 */
+    uint32_t map = og32(0x53D4);
+    uint16_t c = (uint16_t)(((x & 0x1F0) << 1) | ((og16(0x56D4) & 0x1F0) << 6));
+    sog16(0x56D8, x);
+    if (c != og16(0x56D0)) { w16(map + sxw(og16(0x56D0)) + 0xC, 0); w16(map + sxw(c) + 0xC, 1); sog16(0x56D0, c); }
+    mz_seg_of(2, 0x3500), fn_S2_3500(r);
+}
+static int t23_leave_mark(Regs *r) {                        /* a type $2A object where the player is: its record or 0 */
+    sog16(0x382C, og16(0x56D8)); sog16(0x3828, og16(0x56D4)); sog16(0x3824, og16(0x56D0));
+    int rec = make_object(r, 0x2A, 0, 0);
+    return rec < 0 ? 0 : rec;
+}
+static int t23_push(Regs *r) {                              /* fn_S4_1CC2: 1 while not yet out */
+    t23_leave_mark(r);
+    t23_player_to(r, (uint16_t)(og16(0x56D8) + 2));
+    return og16(0x56D8) < 0xBE;
+}
+static void t23_push_on(Regs *r) {                          /* fn_S4_1D2E */
+    int rec = t23_leave_mark(r);
+    if (rec) w16(og32(0x53C8) + rec + 0x12, 2);
+    int w = t23_where();
+    if (!w) return;
+    uint16_t x = og16(0x56D8);
+    if (w > 0) x = (uint16_t)(x + 3);
+    sog16(0x382C, x);
+    uint16_t c = (uint16_t)(((x & 0x1F0) << 1) | ((og16(0x56D4) & 0x1F0) << 6));
+    if (r8(og32(0x53D4) + sxw(c)) & 1) { mz_seg_of(2, 0x3500), fn_S2_3500(r); return; }
+    t23_player_to(r, x);
+}
+static void t23_think(Regs *r) {
+    uint32_t o = r->a[4];
+    for (;;) {
+        uint16_t s = (uint16_t)r->d[0], next;
+        int w;
+        set_w(&r->d[7], s);
+        switch (s) {
+        case 0: if (t23_where() <= 0) return; next = 2; break;
+        case 2:
+            w = t23_where();
+            if (w < 0) { next = 0xD; break; }
+            if (!w) { next = 0; break; }
+            if (!og16(0x56C2)) return;
+            near_d0(r);
+            set_w(&r->d[0], (uint16_t)((og16(0x3830) ^ 0x20) - og16(0x56DA)));
+            mz_seg_of(7, 0x367E), fn_S7_367E(r);
+            if ((uint16_t)r->d[0] >= 7) return;
+            next = 3; break;
+        case 3: case 4: case 6: case 9: case 10: {          /* out of the room / into its west part */
+            static const uint8_t out[11] = {[3] = 0x10, [4] = 7, [6] = 7, [9] = 0xB, [10] = 0xB};
+            static const uint8_t west[11] = {[3] = 0xE, [4] = 0xF, [6] = 0xF, [9] = 0x11, [10] = 0x11};
+            w = t23_where();
+            if (w > 0) return;
+            next = w ? west[s] : out[s];
+            break;
+        }
+        case 5: next = flag(r, 0, 2) ? 8 : 6; break;
+        case 7: if (t23_where() <= 0) return; next = 6; break;
+        case 8:
+            flag_set(r, 0, 2); flag_set(r, 1, 0x10);
+            w = t23_where();
+            if (w > 0) return;
+            next = w ? 0x11 : 0xB; break;
+        case 11: if (t23_where() <= 0) return; next = 0xA; break;
+        case 12: flag_set(r, 0, 2); next = 4; break;
+        case 13: case 14: case 15: case 17: {               /* pushed out east, then on */
+            static const uint8_t done[18] = {[14] = 4, [15] = 6, [17] = 0xA};
+            if (t23_push(r)) { t23_push(r); return; }
+            next = s == 13 ? (og16(0x56C2) ? 3 : 2) : done[s];
+            break;
+        }
+        case 16: if (t23_where() <= 0) return; next = 4; break;
+        case 20:
+            sog16(0x56EE, 0x2B);
+            w16(o + 0x3A, 0x3E);
+            if (og16(0x56C2)) { next = 0x15; break; }
+            w16(o + 0x1A, 0xF); next = 0x21; break;
+        case 21: case 22: case 23: case 24: case 25: case 26: case 27: case 28: case 29:
+            near_d0(r);
+            if (og16(0x382E) < 0x20) return;
+            next = 0x1E; break;
+        case 30: w16(o + 0x1A, 2); flag_set(r, 0, 0x10); next = 0x1F; break;
+        case 31: case 33: if (!count_down(r, 0x1A, 1)) return; next = s == 31 ? 0x20 : 0x1E; break;
+        case 32:
+            unlink_obj(r);
+            w16(o + 4, 0); w16(o + 8, 0); w16(o + 0x30, 0);
+            w16(o + 2, r16(o + 2) | 0x8000);
+            return;
+        default: return;                                    /* 1, 18, 19 */
+        }
+        set_w(&r->d[0], next);
+    }
+}
+void fo_S4_1670(Regs *r) {
+    static const uint16_t said[34][2] = {[3] = {0xA301, 4}, [4] = {0xA302, 5}, [8] = {0xA303, 9}, [9] = {0xA304, 0xA},
+        [21] = {0xA305, 22}, [22] = {0xA306, 23}, [23] = {0xA307, 24}, [24] = {0xA308, 25}, [25] = {0xA309, 26},
+        [26] = {0xA30A, 27}, [27] = {0xA30B, 28}, [28] = {0xA30C, 29}, [29] = {0xA30D, 30}};
+    static const uint16_t h18[] = {0x18, 0x12, 0xFFFF}, h3[] = {0x17, 0xC, 0x18, 0x12, 0x19, 4, 0x1A, 4, 0xFFFF},
+        h4[] = {0x17, 8, 0x18, 0x12, 0x19, 5, 0x1A, 5, 0xFFFF}, h6[] = {0x17, 8, 0x18, 0x12, 0xFFFF},
+        h8[] = {0x17, 9, 0x18, 0x12, 0x19, 9, 0x1A, 0xA, 0xFFFF}, h9[] = {0x17, 0xA, 0x18, 0x12, 0x19, 0xA, 0x1A, 0xA, 0xFFFF};
+    static uint16_t hs[7];
+    uint32_t o = r->a[4];
+    set_w(&r->d[7], r16(o + 0x16));
+    set_w(&r->d[0], (uint16_t)r->d[7]);
+    t23_think(r);
+    uint16_t s = (uint16_t)r->d[7];
+    if (s < 34) o_said(r, said[s], t23_think);
+    s = (uint16_t)r->d[7];
+    const uint16_t *h = NULL;
+    switch (s) {
+    case 0: case 2: case 7: case 10: case 11: case 16: h = h18; break;
+    case 3: h = h3; break;
+    case 4: h = h4; break;
+    case 6: h = h6; break;
+    case 8: h = h8; break;
+    case 9: h = h9; break;
+    default:
+        if (s >= 21 && s <= 29) {                           /* the closing texts: $17 / $19 on, $18 to the end */
+            hs[0] = 0x17; hs[1] = (uint16_t)(s + 1); hs[2] = 0x18; hs[3] = 0x1E; hs[4] = 0x19; hs[5] = (uint16_t)(s + 1); hs[6] = 0xFFFF;
+            h = hs;
+        }
+    }
+    o_hit(r, h, t23_think);
+    s = (uint16_t)r->d[7];
+    uint16_t e[3] = {0xF01, (uint16_t)(s == 1 ? 19 : 20), 0xFFFF};
+    o_event(r, s == 1 || s == 19 ? e : NULL, t23_think);
+    s = (uint16_t)r->d[7];
+    switch (s) {
+    case 1: near_d0(r); if (!(og16(0x3830) & 0x8000)) { set_w(&r->d[0], og16(0x3830)); mz_seg_of(7, 0x3722), fn_S7_3722(r); } break;
+    case 3: sog16(0x56C0, 0xA301); break;
+    case 4: sog16(0x56C0, 0xA302); break;
+    case 8: sog16(0x56C0, 0xA303); break;
+    case 9: sog16(0x56C0, 0xA304); break;
+    case 18: t23_push_on(r); break;
+    case 19: case 31: w16(o + 0x3A, 0x49); break;
+    default:
+        if (s >= 21 && s <= 29) {
+            set_w(&r->d[0], og16(0x3830)); mz_seg_of(7, 0x3722), fn_S7_3722(r);
+            sog16(0x56C0, (uint16_t)(0xA305 + s - 21));
+        }
+    }
+    w16(o + 0x16, s);
+}
+
 /* ---------- type $1B (fn_S10_1F28) ----------
  * A blast: after 5 frames (+$16 counting) it hits everything in its cell (+$14 = it; the player
  * there: life 0, fn_S10_2126) and is gone. */
