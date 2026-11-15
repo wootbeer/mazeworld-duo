@@ -259,7 +259,6 @@ static int load_any(const uint8_t *buf, size_t len, ArcSet *set, const char *pre
     return fail(set, "not a recognised archive (expected .hqx, .sit or MacBinary)", NULL);
 }
 
-int arc_load(const uint8_t *buf, size_t len, ArcSet *set) { memset(set, 0, sizeof *set); return load_any(buf, len, set, "", 0); }
 
 int arc_load_file(const char *path, ArcSet *set) {
     memset(set, 0, sizeof *set);
@@ -279,11 +278,3 @@ void arc_free(ArcSet *set) {
     free(set->files); set->files = NULL; set->n = set->cap = 0;
 }
 
-const ArcFile *arc_find(const ArcSet *set, const char *name) {
-    for (int i = 0; i < set->n; i++) {
-        const char *b = strrchr(set->files[i].path, '/');
-        b = b ? b + 1 : set->files[i].path;
-        if (!strcmp(b, name)) return &set->files[i];
-    }
-    return NULL;
-}

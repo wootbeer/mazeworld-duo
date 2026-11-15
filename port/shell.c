@@ -1,18 +1,13 @@
-/* The port's shell: what the original's menus do (docs/SHELL.md), for the native menu bar.
+/* The port's shell: the original's menus on a native menu bar (see docs/SHELL.md).
  *
- * Menu commands reach the game the way a Mac's do: as an event the shell loop (fn_S8_2A4A) takes
- * from the event queue. A command chosen in the native menu is posted as a click on the menu bar,
- * and the MenuSelect trap returns that item (the Toolbox layer, harness/menu.c); a command-key press
- * arrives as a key event (fn_S8_2C36) and goes through MenuKey. The test rig's scripts choose menu
- * items the same way, so both run the original's own path. Either way the command then
- * runs inside the shell loop, through the game's own handlers (fn_S8_3344, fn_S8_338A, ...), so the
- * game is exactly as it would be after the same choice on a Mac.
+ * A menu choice reaches the game as it would on a Mac: posted as a click on the menu bar, which
+ * the MenuSelect trap answers with that item (harness/menu.c). Command keys arrive as key events
+ * and go through MenuKey. Either way the game's own handlers run the command, so the result is
+ * the same as on a Mac. The test rig's scripts pick menu items the same way.
  *
- * Before a command the game's own menu records are brought up to date (fn_S8_2E10, as the original
- * does) and only an item enabled there runs. The native menu shows the same state, computed by
- * shell_item_state from the same rules (fn_S8_2E4C / 2FB4 / 3190 / 3278) without touching the game.
- * The Options dialog (fn_S8_1FC4, "More Power B'Elanna!") becomes three check-mark items in the
- * Options menu, with the same effect as its check boxes and OK. */
+ * Greying and check marks come from the game's own rules (fn_S8_2E4C / 2FB4 / 3190 / 3278,
+ * in shell_item_state). Catacombs' Options dialog ("More Power B'Elanna!") becomes three
+ * check-mark items under Options > Legacy. */
 #include "../harness/hx.h"
 #include "../game/mz.h"
 #include "../game/fns.h"
@@ -39,12 +34,11 @@ int shell_playing(void) {
     return w && (int16_t)rd16(w + 0x6C) >= 0 && rd32(w + 0x98) != 0 && !g8(0x22C6);
 }
 
-/* What the window shows (x, y, w, h of the Mac screen). Catacombs: the whole screen. Original: the
- * game's own area only, its window size (G_5748 x G_5746), as a Mac would show it with its desktop
- * and menu bar hidden: in play, where the full-screen game window draws it (the screen's centre);
- * otherwise where the main window G_5804 is. So the picture keeps its place when play pauses (on a
- * 640 x 480 screen the main window sits below the Mac's menu bar), and a smaller size shows nothing
- * of what a larger one left behind. Returns 1 for the game's area, 0 for the whole screen. */
+/* The part of the Mac screen the window shows (x, y, w, h).
+ * Catacombs: the whole screen. Original: only the game's area at its window size (G_5748 x
+ * G_5746): in play where the full-screen window draws it (the screen's centre), paused where the
+ * main window G_5804 is. That keeps the picture still when play pauses, and hides the Mac desktop
+ * around a small window. Returns 1 for the game's area, 0 for the whole screen. */
 int shell_view(int *x, int *y, int *w, int *h) {
     *x = 0; *y = 0; *w = SCREEN_W; *h = SCREEN_H;
     uint32_t main = mz_original ? og32(0x5804) : 0, front = qd_front_window();

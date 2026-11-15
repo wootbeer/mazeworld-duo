@@ -1,8 +1,8 @@
 // Version information shown in Windows Explorer (Properties > Details).
 #include <winver.h>
 VS_VERSION_INFO VERSIONINFO
-FILEVERSION     1,0,5,0
-PRODUCTVERSION  1,0,5,0
+FILEVERSION     0,1,0,0
+PRODUCTVERSION  0,1,0,0
 FILEOS          VOS_NT_WINDOWS32
 FILETYPE        VFT_APP
 BEGIN
@@ -10,12 +10,12 @@ BEGIN
   BEGIN
     BLOCK "040904B0"
     BEGIN
-      VALUE "FileDescription",  "Mazeworld Catacombs (native port)"
-      VALUE "FileVersion",      "1.0.5 port"
+      VALUE "FileDescription",  "Mazeworld and Mazeworld Catacombs (native port)"
+      VALUE "FileVersion",      "0.1.0 beta"
       VALUE "ProductName",      "Mazeworld"
-      VALUE "ProductVersion",   "1.0.5 port"
+      VALUE "ProductVersion",   "0.1.0 beta"
       VALUE "OriginalFilename", "Mazeworld.exe"
-      VALUE "Comments",         "Native port of the 1994 Macintosh game by Michael R. Howard (Farfetch Software); needs the original game archive."
+      VALUE "Comments",         "Native port of the 1994 Macintosh games by Michael R. Howard (Farfetch Software); needs the original game archives."
     END
   END
   BLOCK "VarFileInfo"

@@ -216,7 +216,6 @@ void mac_GlobalToLocal(uint32_t pt);
 int16_t mac_FSpCreate(uint32_t spec, uint32_t creator, uint32_t type, int16_t script);
 int16_t mac_FSpDelete(uint32_t spec);
 int16_t mac_FSpExchangeFiles(uint32_t a, uint32_t b);
-int16_t mac_AEProcessAppleEvent(uint32_t ev);
 /* The native shell's side (menus and the mouse are native in the port; see docs/SHELL.md) */
 void     shell_menu_key(uint32_t ev);     /* a command-key press in the shell */
 void     shell_mouse_down(uint32_t ev);   /* a mouse-down event in the shell */
@@ -259,12 +258,10 @@ void     mac_SetWTitle(uint32_t w, uint32_t title);
 void     mac_CustomPutFile(uint32_t prompt, uint32_t name, uint32_t reply, uint32_t where, uint32_t filter);
 void     mac_CustomGetFile(int16_t ntypes, uint32_t types, uint32_t reply, uint32_t where, uint32_t filter);
 void     mac_Move(int16_t dh, int16_t dv);
-void     mac_LineTo(int16_t h, int16_t v);
 void     mac_Line(int16_t dh, int16_t dv);
 void     mac_DrawString(uint32_t str);
 void     mac_TextFont(int16_t font);
 void     mac_TextFace(int16_t face);
 void     mac_TextMode(int16_t mode);
 void     mac_TextSize(int16_t size);
-int16_t  mac_StringWidth(uint32_t str);
 #endif

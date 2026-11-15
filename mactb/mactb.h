@@ -110,5 +110,4 @@ int  mtb_snd_samples_for_tick(uint32_t tick);   /* output samples at 22254.5454 
 /* Operands are in 68k memory layout. Returns 0, or -1 if the operation is not implemented. */
 int mtb_fp68k(uint16_t opword, uint8_t *dst, const uint8_t *src, uint8_t *ccr);
 int mtb_sane_pop_bytes(uint16_t opword);       /* parameter bytes FP68K removes, opword included */
-int mtb_sane_operand_size(uint16_t opword);    /* bytes of the source operand's format */
 #endif

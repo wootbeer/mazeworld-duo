@@ -15,8 +15,6 @@ uint8_t *M;                        /* game code's view of memory */
 uint32_t g_sub_pc;                 /* entry of the C function now running (for logs) */
 static uint32_t local_top;         /* mz_local scratch */
 void     mz_local_reset(void) { local_top = 0; }
-uint32_t mz_local_get(void) { return local_top; }
-void     mz_local_set(uint32_t t) { local_top = t; }
 
 /* hooks */
 int  rt_in_check_phase(void);
@@ -256,7 +254,6 @@ void mac_GlobalToLocal(uint32_t pt) { pascal_trap(0xA871, 0, "l", pt); }
 int16_t mac_FSpCreate(uint32_t spec, uint32_t creator, uint32_t type, int16_t script) { setreg(M68K_REG_D0, 4); return (int16_t)pascal_trap(0xAA52, 2, "lllw", spec, creator, type, W(script)); }
 int16_t mac_FSpDelete(uint32_t spec) { setreg(M68K_REG_D0, 6); return (int16_t)pascal_trap(0xAA52, 2, "l", spec); }
 int16_t mac_FSpExchangeFiles(uint32_t a, uint32_t b) { setreg(M68K_REG_D0, 0xF); return (int16_t)pascal_trap(0xAA52, 2, "ll", a, b); }
-int16_t mac_AEProcessAppleEvent(uint32_t ev) { setreg(M68K_REG_D0, 0x21B); return (int16_t)pascal_trap(0xA816, 2, "l", ev); }
 #undef W
 void     mz_unsupported(const char *what)           { hx_fault("C code reached a path the port does not support: %s", what); }
 uint32_t mac_GetPixBaseAddr(uint32_t pm)   { return qdx(0x4000F, 4, "l", pm); }
@@ -306,14 +303,12 @@ void mac_CustomGetFile(int16_t ntypes, uint32_t types, uint32_t reply, uint32_t 
     pascal_trap(0xA9EA, 0, "lwllwllllllw", 0u, (uint32_t)(uint16_t)ntypes, types, reply, 0u, where, 0u, filter, 0u, 0u, 0u, 8u);
 }
 void     mac_Move(int16_t dh, int16_t dv)          { pascal_trap(0xA894, 0, "ww", (uint32_t)(uint16_t)dh, (uint32_t)(uint16_t)dv); }
-void     mac_LineTo(int16_t h, int16_t v)          { pascal_trap(0xA891, 0, "ww", (uint32_t)(uint16_t)h, (uint32_t)(uint16_t)v); }
 void     mac_Line(int16_t dh, int16_t dv)          { pascal_trap(0xA892, 0, "ww", (uint32_t)(uint16_t)dh, (uint32_t)(uint16_t)dv); }
 void     mac_DrawString(uint32_t str)              { pascal_trap(0xA884, 0, "l", str); }
 void     mac_TextFont(int16_t font)                { pascal_trap(0xA887, 0, "w", (uint32_t)(uint16_t)font); }
 void     mac_TextFace(int16_t face)                { pascal_trap(0xA888, 0, "w", (uint32_t)(uint16_t)face); }
 void     mac_TextMode(int16_t mode)                { pascal_trap(0xA889, 0, "w", (uint32_t)(uint16_t)mode); }
 void     mac_TextSize(int16_t size)                { pascal_trap(0xA88A, 0, "w", (uint32_t)(uint16_t)size); }
-int16_t  mac_StringWidth(uint32_t str)             { return (int16_t)pascal_trap(0xA88C, 2, "l", str); }
 void     mac_ExitToShell(void)                     { pascal_trap(0xA9F4, 0, ""); if (g_stop) rt_abandon(2); }
 
 /* register-based OS traps taking a handle in A0, result code (or size) in D0 */

@@ -19,10 +19,6 @@ static void put32(uint8_t *p, uint32_t v) { p[0] = v >> 24; p[1] = (uint8_t)(v >
 static floatx80 ldx(const uint8_t *p) { floatx80 x; x.high = (bits16)(p[0] << 8 | p[1]); x.low = be64(p + 2); return x; }
 static void stx(uint8_t *p, floatx80 x) { p[0] = x.high >> 8; p[1] = (uint8_t)x.high; put64(p + 2, x.low); }
 
-int mtb_sane_operand_size(uint16_t op) {
-    switch (op & 0x3800) { case 0x0000: return 10; case 0x0800: return 8; case 0x1000: return 4; case 0x2000: return 2; case 0x2800: return 4; case 0x3000: return 8; }
-    return 0;
-}
 
 static floatx80 load_fmt(uint16_t op, const uint8_t *p) {
     switch (op & 0x3800) {

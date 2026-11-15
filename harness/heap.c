@@ -92,13 +92,6 @@ uint32_t mm_new_handle(uint32_t size, int clear) {
     return mp;
 }
 
-int mm_is_handle(uint32_t h) {
-    if (h < HEAP_BASE || h >= HEAP_END || (h & 1)) return 0;
-    uint32_t p = rd32(h);
-    if (p < HEAP_BASE || p >= HEAP_END) return 0;
-    uint32_t b = block_of_ptr(p);
-    return B_USED(b) && B_KIND(b) == 1 && B_MP(b) == h;
-}
 
 void mm_dispose_handle(uint32_t h) {
     if (!h) return;

@@ -15,8 +15,6 @@ static inline MtbRect rd_rect(uint32_t a) { MtbRect r = {(int16_t)rd16(a), (int1
 static inline void wr_rect(uint32_t a, MtbRect r) { wr16(a, (uint16_t)r.top); wr16(a + 2, (uint16_t)r.left); wr16(a + 4, (uint16_t)r.bottom); wr16(a + 6, (uint16_t)r.right); }
 
 const char *hx_where(void);
-uint32_t qd_the_port(void);
-void     qd_set_port(uint32_t port);
 MtbPix8  qd_port_pix(uint32_t port);           /* the port's pixels, in its local coordinates */
 MtbRect  qd_port_clip(uint32_t port);
 void     qd_device_ctab(MtbCTab *t);           /* the main screen's colour table */

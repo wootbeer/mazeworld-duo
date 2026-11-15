@@ -6,11 +6,10 @@ enum { MENU_APPLE = 128, MENU_FILE, MENU_EDIT, MENU_VIEW, MENU_SOUND, MENU_OPTIO
 enum { MENU_O_SIZE = 131, MENU_O_OPTIONS };
 /* the port's own menus (the front end handles them; the game never sees them) */
 enum { MENU_PORT_VOLUME = 200, MENU_PORT_GAME, MENU_PORT_CONTROLS, MENU_PORT_LABELS };
-/* the Options menu's items: the original dialog's check boxes (the port's own options will follow) */
+/* Options > Legacy: the original Options dialog's check boxes */
 enum { OPT_DIRECT = 1, OPT_NOSYNC, OPT_DISTRIBUTE };
-int  shell_playing(void);
-int  shell_view(int *x, int *y, int *w, int *h);   /* the part of the Mac screen the window shows */       /* is the game window in front (play in progress)? */
-
+int  shell_playing(void);                                   /* is the game window in front (in play)? */
+int  shell_view(int *x, int *y, int *w, int *h);            /* the part of the Mac screen the window shows */
 int  shell_item_state(int menu, int item, int *checked);   /* returns 1 if enabled */
 void shell_choose(int menu, int item);                      /* a command chosen in the native menu */
 void shell_request_quit(void);

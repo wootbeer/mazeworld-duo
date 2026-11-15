@@ -11,27 +11,6 @@ static RFile files[MAXF];
 static int nfiles = 0;      /* index order = open order; search goes newest -> oldest from current */
 static int cur = -1;        /* index into files */
 
-
-static uint8_t *load_fork(const char *path, uint32_t *len) {
-    FILE *f = fopen(path, "rb");
-    if (!f) return NULL;
-    fseek(f, 0, SEEK_END); long n = ftell(f); fseek(f, 0, SEEK_SET);
-    uint8_t *b = malloc(n); if (fread(b, 1, n, f) != (size_t)n) { fclose(f); free(b); return NULL; }
-    fclose(f);
-    if (n > 26 && b[0] == 0 && b[1] == 5 && b[2] == 0x16 && b[3] == 7) {  /* AppleDouble */
-        int ne = (b[24] << 8) | b[25];
-        for (int i = 0; i < ne; i++) {
-            uint8_t *e = b + 26 + 12 * i;
-            uint32_t id = (e[0] << 24) | (e[1] << 16) | (e[2] << 8) | e[3];
-            uint32_t off = (e[4] << 24) | (e[5] << 16) | (e[6] << 8) | e[7];
-            uint32_t ln = (e[8] << 24) | (e[9] << 16) | (e[10] << 8) | e[11];
-            if (id == 2) { uint8_t *r = malloc(ln); memcpy(r, b + off, ln); free(b); *len = ln; return r; }
-        }
-        free(b); return NULL;
-    }
-    *len = (uint32_t)n; return b;
-}
-
 #define BE16(p) (uint16_t)(((p)[0] << 8) | (p)[1])
 #define BE32(p) (uint32_t)(((uint32_t)(p)[0] << 24) | ((p)[1] << 16) | ((p)[2] << 8) | (p)[3])
 
@@ -88,18 +67,6 @@ static int parse_fork(RFile *rf) {
     return 0;
 }
 
-int rs_open_file(const char *path, int as_app) {
-    if (nfiles >= MAXF) return -1;
-    RFile *rf = &files[nfiles];
-    memset(rf, 0, sizeof *rf);
-    rf->fork = load_fork(path, &rf->forklen);
-    if (!rf->fork) return -1;
-    parse_fork(rf);
-    rf->ref = as_app ? 2 : 3 + nfiles;  /* refnums are arbitrary but stable */
-    rf->open = 1;
-    cur = nfiles++;
-    return rf->ref;
-}
 
 int rs_open_mem_ref(const uint8_t *buf, uint32_t len, const char *macname, int as_app) {
     if (nfiles >= MAXF) return -1;

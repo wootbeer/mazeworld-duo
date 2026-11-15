@@ -557,11 +557,11 @@
 10 3BA8  internal george_appear  orig
 10 3B08  internal george_speech  orig
 10 3DC0  internal george_path  orig
-10 16FC  internal (orig_gen.c)  orig
+10 16FC  internal snail_wander  orig
 10 3B7C  internal george_hide  orig
 10 3B9C  internal george_hide_shown  orig
-10 1168  internal (orig_gen.c)  orig
-10 115A  internal (orig_gen.c)  orig
+10 1168  internal snail_within  orig
+10 115A  internal snail_within  orig
 8  2346  internal shell_mouse_down  orig
 8  2524  internal fo_menu  orig
 8  29AE  internal fo_menu  orig

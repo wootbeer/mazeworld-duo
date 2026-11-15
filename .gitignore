@@ -22,6 +22,7 @@ third_party/deark/
 port/*.hqx
 port/*.sit
 port/*.bin
+# the playable test build
 harness/mzplay
 harness/wbuild/
 harness/main_play.o

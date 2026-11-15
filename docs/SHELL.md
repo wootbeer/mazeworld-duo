@@ -1,10 +1,7 @@
 # The shell: menus, dialogs and preferences (Catacombs 1.0.5)
 
-The game logic and rendering are translated to C and checked against the original
-(`docs/STATUS.md`). The Macintosh shell around them (menu bar, dialogs, Apple events, the
-preferences file) is not translated instruction by instruction: the port gets a native shell
-that does what each menu item does, using the same globals and the same already-checked C
-routines, so a game started from it is identical to one started on a Mac with the same settings.
+How the port's native menus map to the original's, and the preferences file. Mazeworld
+Original's menus work the same way (`game/orig_shell.c`).
 
 ## Menus of the original (`MENU` 128-133, handlers `fn_S8_2D86` ...)
 
@@ -85,11 +82,6 @@ is not affected. In play the mouse is captured, and its sideways movement adds t
 G_217E, which holding Q or E steps once per tick (2 units per direction, 64 directions; 8 pixels
 per unit). The movement is collected and paid out one unit per tick, like a held key, and faster
 only while the mouse is far ahead, so turning is as even as with the keys.
-
-Still to come in the menu:
-- the port's own options, off by default (32-bit output, other graphics options; see the to-do
-  list in `docs/STATUS.md`);
-- switching between Mazeworld Catacombs and Mazeworld Original (once Original is supported).
 
 Not carried over (Mac-only, nothing to do on Windows): desk accessories, the Edit menu (always
 disabled in the game), window dragging, black windows over other monitors, the system-version

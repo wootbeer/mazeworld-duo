@@ -747,23 +747,26 @@ void fo_S10_400A(Regs *r) {
 }
 
 /* ---------- George (fn_S10_2C7C, type $14, record 1) ----------
- * The invisible translator ("My name is George..."): he speaks the texts $14xx of segment 6 and
- * appears beside the player when he does. A text is asked for by setting G_56C0 = $8000 | text
- * every frame (say()); fn_S10_3B08 shows a new one (fo_S6_0000: its record gives a wait G_56BC, a
- * time on screen G_56BA, a record +$1C and how he appears, fn_S10_3BA8) and sets G_56B8 when its
- * time is up, which o_said() turns into his next state. Record 5 is the Eashire Cat (fo_S10_400A), which chases him.
- * Level 1, states 0-15: 0 gone; 1 circling the forest's ring (+$1E) until the player is near,
- * facing him, within $28: 2; 2 "Run for your life! It's the Eashire Cat!!" ("Heeeeeeelp!" while
- * within $C of the cat), then 1; past x $120: 15, which sends the cat event 1; the cat's end
- * (event $1D01) makes him 3-6: gone for $14 frames, "Whew! Thank you! ..." and "My name is George
- * ..." (he joins: G_56C2), then 7; event $1D02 sends him away (0). 7 is his remarks (george_remark),
- * 8 waits out a full-view picture (G_56E0 >= $80, which in most states sends him to 0 or 8); 9-14
- * (event $1D02 at the start): $1C frames, "Welcome to the Mazeworld...", a walk along two points
- * (george_path), then 1.
- * States 16-51 are his remarks (george_remark, event $304 from the snails: 16), each a text or
- * two ($1405-$141A), most setting a bit of flag words 0 / 1; 34-41 walk him to a point on level 4
- * (fo_S7_155C) and leave him there until the player goes (36-37: gone). Not all of them are
- * reached by the tests yet. */
+ * The invisible translator ("My name is George..."). He says the texts $14xx of segment 6 and
+ * shows up beside the player while he talks. say() asks for a text (G_56C0 = $8000 | text, every
+ * frame); fn_S10_3B08 shows it (fo_S6_0000) and sets G_56B8 when its time is up, which o_said()
+ * turns into his next state. Record 5 is the Eashire Cat (fo_S10_400A), which chases him.
+ *
+ * Level 1 (states 0-15):
+ *   0      gone
+ *   1      circles the forest's ring (+$1E) until the player is within $28, facing him: 2
+ *   2      "Run for your life! It's the Eashire Cat!!" ("Heeeeeeelp!" near the cat), then 1;
+ *          past x $120: 15, which sends the cat event 1
+ *   3-6    after the cat (event $1D01): gone $14 frames, "Whew! Thank you!", "My name is
+ *          George..." (he joins: G_56C2), then 7
+ *   7      his remarks (george_remark)
+ *   8      waits out a full-view picture (G_56E0 >= $80)
+ *   9-14   $1C frames, "Welcome to the Mazeworld...", a walk along two points, then 1
+ * Event $1D02 sends him away (0).
+ *
+ * 16-51 are his remarks (george_remark; event $304 from the snails: 16), a text or two each
+ * ($1405-$141A), most setting a bit of flag word 0 or 1. 34-41 walk him to a point on level 4
+ * and leave him there until the player goes (36-37: gone). */
 void fo_S7_155C(Regs *r);
 static void say(uint16_t text) { sog16(OG_MESSAGE, (uint16_t)(0x8000 | text)); }
 static int flag(Regs *r, uint16_t word, uint16_t bits) { call_d0d1(r, fo_S7_1282, word, bits); return (uint16_t)r->d[0] != 0; }
@@ -1186,15 +1189,16 @@ void fo_S7_007C(Regs *r) {
 }
 
 /* ---------- type $30 (fn_S4_280A, level 5) ----------
- * Waits (0) until the player is near, then (1) turns to him and marks him for records 2 and 3
- * (record 2's +$18 = 1; record 3's +$18 / +$1C the area fn_S7_2038 gives for his position, +$1A /
- * +$1E his cell) until he is $20 away; then (2-5) picture $7E for 3 frames and gone from the map for
- * $10 frames; (6) back, once record 3's +$22 is set, in a free cell of the eight around it (G_4F40,
- * at random) that the player is not close to; (7-8) two frames of picture $81, then (9) waiting
- * for the player. Hit by type $18 in states 0, 1, 9 and 10: 2. In 10 (the player near again) it
- * follows him, marking him as in 1 (and record 3's +$20 = 2): beyond $A, by the cells when it
- * cannot see him (fo_S7_2132), straight at him when it can (fn_S7_1FF8 the step); otherwise it
- * turns to him. */
+ *   0        waits until the player is near
+ *   1        turns to him and marks him for records 2 and 3 (record 2's +$18 = 1; record 3's
+ *            +$18 / +$1C his area by fn_S7_2038, +$1A / +$1E his cell) until he is $20 away
+ *   2-5      picture $7E for 3 frames, then gone from the map for $10 frames
+ *   6        back, once record 3's +$22 is set, in a free cell of the eight around it (G_4F40,
+ *            at random) that the player is not close to
+ *   7-9      two frames of picture $81, then waits for the player
+ *   10       follows him, marking him as in 1 (and record 3's +$20 = 2): by the cells when it
+ *            cannot see him (fo_S7_2132), straight at him when it can (fn_S7_1FF8)
+ * Hit by type $18 in states 0, 1, 9 and 10: 2. */
 void fo_S7_2132(Regs *r), fo_S7_1FF8(Regs *r), fo_S7_226E(Regs *r);
 static void t30_think(Regs *r) {
     uint32_t o = r->a[4], map = og32(OG_MAP), tbl = og32(OG_OBJECTS);
@@ -1471,16 +1475,17 @@ void fo_S4_2AF0(Regs *r) {
 }
 
 /* ---------- type $1F (fn_S4_0C44, level 5) ----------
- * Roams the map (fn_S4_1096: on to a free neighbouring cell at random, the last one less likely;
- * standing on a gate's cell (type $B / $10, state $A or more), one time in two through it to the
- * paired gate's cell, G_5248) until it sees the player close (fn_S7_1334: distance < 6, or
- * facing him within $11): 2, chasing him (marking him for record 3: +$18 / +$1C his area, +$1A /
- * +$1E his cell, +$20 = 2) until he is out of sight: 3, which notes where he was, and 1: following
- * record 3's marks, through the gates between areas (G_51E0 / G_5248) to his last cell; there,
- * with no trace (record 3's +$18 cleared, or +$22), back to 0. Hit by types $18 / $2E in states
- * 0-2: 4, marking the player as in 2; 5 two frames of pictures $7E, $7F; 6-7 gone from the map for
- * $96 frames; 8 back, once record 3's +$24 is clear, in a free cell of the eight G_4F40 lists
- * (+$24 = 5); 9-10 picture $81, then 0. */
+ *   0        roams (fn_S4_1096: a free neighbouring cell at random, the last one less likely; on
+ *            a gate's cell, one time in two through it, G_5248) until it sees the player close
+ *            (fn_S7_1334: within 6, or facing him within $11)
+ *   2        chases him, marking him for record 3 (+$18 / +$1C his area, +$1A / +$1E his cell,
+ *            +$20 = 2) until he is out of sight
+ *   3, 1     notes where he was and follows record 3's marks through the gates (G_51E0 /
+ *            G_5248) to his last cell; no trace left there: 0
+ *   4-5      hit by types $18 / $2E (in 0-2): marks the player, pictures $7E, $7F
+ *   6-7      gone from the map for $96 frames
+ *   8        back, once record 3's +$24 is clear, in a free cell of the eight G_4F40 lists
+ *   9-10     picture $81, then 0 */
 void fo_S7_201C(Regs *r), fo_S7_2132(Regs *r), fo_S7_1FF8(Regs *r);
 /* the gate record in cell c's object list (its first object), if of type $B / $10 in state $A+ */
 static int t1f_gate(uint16_t c, uint16_t *state) {
@@ -1730,17 +1735,18 @@ static void turn_to_player(Regs *r, int times) {
 }
 
 /* ---------- type $1E (fn_S4_0782, level 4) ----------
- * A hunter: roams (0, fn_S7_1CCC's way, two steps a frame while facing it) until it sees the player
- * close (fn_S7_1334: distance < 5, or in front within $14): 3, where it closes in along his scent
- * (fn_S7_1B46) and, near him (fn_S7_1B1E) or without a way, turns to him and within 6 of facing
- * him fires (fn_S7_1EC0, $3D) with a pause of $22-$31 frames (+$1A, 4: walking off meanwhile,
- * the pause shortened by 4 when it has no way); out of sight: 5, then 2, following the scent in its
- * cell (map +$10) for $14 steps (+$1C) or until it ends. The player moving to a new cell while it
- * chases is noted for the scent (G_56A6 / G_56A8 = $23, fn_S2_2B3E). Hit by type $18 in states 0,
- * 2, 3, 4 and 12: 6: pictures $77, $78 (7), gone from the map for 750 frames (8-9, faster under a
- * full view), back in its old cell once free (10-11) and 24 frames of pictures $79, $7A, 0 (12),
- * then 4. State 1 (no test reaches it from play) leads by 13 (turning to the player) or 14 to 15,
- * picture $78 rushing at him (fn_S7_1E66). */
+ * A hunter.
+ *   0        roams (fn_S7_1CCC's way, two steps a frame) until it sees the player close
+ *            (fn_S7_1334: within 5, or in front within $14): 3
+ *   3-4      closes in along his scent (fn_S7_1B46); near him or with no way, turns to him and,
+ *            within 6 of facing him, fires a $3D (fn_S7_1EC0) and pauses $22-$31 frames (+$1A)
+ *   5, 2     out of sight: follows the scent in its cell (map +$10) for $14 steps (+$1C)
+ *   6-12     hit by type $18 (in 0, 2, 3, 4 and 12): pictures $77, $78, gone from the map for
+ *            750 frames, back in its old cell once it is free, pictures $79, $7A, then 4
+ *   1, 13-15 (no test reaches 1 from play) turns to the player and rushes at him, picture $78
+ *            (fn_S7_1E66)
+ * While it chases, the player moving to a new cell is noted for the scent (G_56A6 / G_56A8 = $23,
+ * fn_S2_2B3E). */
 void fo_S7_1E54(Regs *r);
 static void t1e_step(Regs *r) { r->a[0] = OADDR(0x4F30); mz_seg(7), fo_S7_1E54(r); }
 static void t1e_dir_roam(Regs *r) { mz_seg_of(7, 0x3EE2), fn_S7_3EE2(r); }
@@ -2068,19 +2074,23 @@ void fo_S4_1DFA(Regs *r) {
 }
 
 /* ---------- Lips, the brain (type $2E, fn_S4_21D6, level 5) ----------
- * Speaks the texts $2Exx ("Lips says, \"I can see you, but you'll never find me...\"", later "The
- * brain says, \"Wait! Wait! Let me live...\""), watching record 2's +$18 (set by type $30 while
- * the player is near it) and George's company (G_56C2); each frame it counts down record 3's
- * +$20 and +$24 (fn_S4_2770). States: 0 waiting for record 2; 1 "I can see you..." (said: 31),
- * left when record 2 clears or George is gone: 2, which sets record 3's +$22 and +$24 (the hunt
- * of types $1F / $31 begins), 3 waiting for record 2 again; 31 waiting for it to clear. 4 (hit)
- * calls types $1F / $31 to it (fn_S4_2790: those below y $1C0 get a hit by record 3; flag word 1
- * bit $20) and 14-15 waits 30 frames for the player; 5-13 and 20-23 are its texts ($2E02-$2E09,
- * most with fn_S4_27C4 calling the hunters to area $E, cell $3380) while record 2 stays set; 16-18
- * three pictures ($82, $83, 0), then the call again and, the player below y $180, 25-26 the end;
- * 24 makes an object of type $37 where the player is; 27-29 three pictures ($82, $84, $84) and it
- * is gone with record 2. (State 9 clears the word at address $E4, not record 3's +$E4: the
- * original's slip, kept.) The lists below are the original's for all states. */
+ * Says the texts $2Exx ("Lips says, \"I can see you, but you'll never find me...\"", later "The
+ * brain says, \"Wait! Wait! Let me live...\""). It watches record 2's +$18 (set by type $30
+ * while the player is near it) and George's company (G_56C2). Each frame it counts down record
+ * 3's +$20 and +$24 (fn_S4_2770).
+ *   0        waits for record 2
+ *   1        "I can see you..." (said: 31); record 2 clear or George gone: 2
+ *   2        sets record 3's +$22 and +$24: the hunt by types $1F / $31 begins
+ *   3, 31    waits for record 2 to be set / to clear
+ *   4        hit: calls types $1F / $31 (fn_S4_2790; flag word 1 bit $20)
+ *   14-15    waits 30 frames for the player
+ *   5-13, 20-23  its texts ($2E02-$2E09) while record 2 stays set, most calling the hunters
+ *            to cell $3380 (fn_S4_27C4)
+ *   16-18    pictures $82, $83, 0, then the call again; the player below y $180: 25-26, the end
+ *   24       makes a type $37 object where the player is
+ *   27-29    pictures $82, $84, $84, then gone with record 2
+ * State 9 clears the word at address $E4, not record 3's +$E4. That is the original's slip,
+ * kept. */
 static void t2e_count(void) {                               /* fn_S4_2770 */
     uint32_t tbl = og32(OG_OBJECTS);
     if (r16(tbl + 0xE0)) w16(tbl + 0xE0, (uint16_t)(r16(tbl + 0xE0) - 1));
@@ -2295,23 +2305,28 @@ void fo_S9_1AE0(Regs *r) {
 }
 
 /* ---------- the snails (types 3, 4 and 5: fn_S10_0028, level 1) ----------
- * Three snails. The talker (type 3, record 2) speaks to the player once George is with him
- * (G_56C2), its texts $83xx: it wakes (state 1) when the player comes within 15 (G_382E) and
- * rests beyond 20. Awake it wanders after the player, and with George there waits +$1C frames
- * (2-3) for the player to face it with nothing being said, then speaks: each text ended (or a
- * hit by types $17 / $19) moves it on through 4-12, 16-20, 22-23, 25-48 (the long story,
- * $8309-$8320), 54-57, 59-60 and 62; out of range it waits in a resting state (13-15, 21, 24,
- * 53, 61) until the player is back. A hit by $1A jumps ahead; by $18 (most states) it dies (78,
- * 96, 79: event $301 to the others, and shrinking away). In 64 flag word 0 bit 0 is set (it is
- * cleared when one dies); 63-67 start the journey: event $301 calls the other two (types 4 and 5,
- * records 3 and 4, otherwise wandering near their places: 0-1), and all three walk the ways below
- * (68-77; 2-11 for the others), the talker waiting 50 frames on the way, telling records 6-11 (event
- * $302), setting bit 15 of flag word 0, pushing the objects of type 9 in their cells (event $303)
- * and, the last of them still walking, taking the view along (G_56A6). At the end they wait (80-88:
- * the talker speaks again when the player, within 32, looks at it) until event 1 ends it all (89; 16
- * for the others): the type 9 objects removed if one is above y $88, and the three snails with them.
- * Event $101 sends the talker to 90 (resting) or 93 (awake): 90-95 talk once more ($832D, $832E);
- * $304 sends it to 63. */
+ * Three snails. The talker (type 3, record 2) talks to the player once George is with him
+ * (G_56C2), texts $83xx. The other two (types 4 and 5, records 3 and 4) wander near their
+ * places (0-1) until the journey.
+ *
+ * The talker:
+ *   0-1      rests; wakes when the player is within 15 (G_382E), rests again beyond 20
+ *   2-3      awake: follows the player; with George there waits +$1C frames for the player to
+ *            face it, then talks
+ *   4-62     its texts: each one ended (or a hit by types $17 / $19) moves it on: 4-12, 16-20,
+ *            22-23, 25-48 (the long story, $8309-$8320), 54-57, 59-60, 62. Out of range it rests
+ *            (13-15, 21, 24, 53, 61) until the player is back
+ *   63-77    the journey: 64 sets flag word 0 bit 0; event $301 calls the other two and all three
+ *            walk the ways below (68-77; 2-11 for the others). On the way the talker waits 50
+ *            frames, tells records 6-11 (event $302), sets flag word 0 bit 15, pushes the type 9
+ *            objects in their cells (event $303), and the last one walking takes the view along
+ *            (G_56A6)
+ *   80-88    at the end: talks again when the player, within 32, looks at it
+ *   89       event 1 ends it all (16 for the others): the type 9 objects go if one is above
+ *            y $88, and the three snails with them
+ *   90-95    event $101: talks once more ($832D, $832E); 90 resting, 93 awake
+ *   78-79,96 dying (a hit by $18 in most states): event $301 to the others, then shrinks away
+ * A hit by $1A jumps ahead. Event $304 sends the talker to 63. */
 static const uint16_t snail_ways[136] = {                 /* points { x, y } ..., $FFFF: the original's at S10:$1044 */
     0x18, 0x98, 0x18, 0x78, 0x28, 0x78, 0x28, 0x4B, 0x48, 0x4B, 0x68, 0x4B, 0x98, 0x37, 0x98, 0x28, 0xB8, 0x28, 0xFFFF, 0xFFFF,
     0xE8, 0x28, 0x108, 0x28, 0x108, 0x38, 0x118, 0x38, 0x118, 0x58, 0x118, 0x78, 0x148, 0x78, 0x148, 0x68, 0x168, 0x68,
@@ -3344,15 +3359,18 @@ void fo_S11_0382(Regs *r) {
 }
 
 /* ---------- type $23 (fn_S4_1670, record 3 on level 4) ----------
- * A talker at the door of a little room (x $90-$CF, y $A0-$AF; fn_S4_1C86: 0 with the player
- * outside it or a full view, -1 in its west part, 1 east of x $B9). The player stepping into the
- * west part is pushed out east (13-15, 17: fn_S4_1CC2, a type $2A object left where he was, two
- * pixels a frame to x $BE). In the east part with George there and the player looking at it within
- * 7 it says $2301 (3), $2302 (4) and, once he comes back (flag word 0 bit 1), $2303 / $2304 (8-9:
- * flag word 1 bit 4). Event $F01 (from type $F) in 1 starts 19 (picture $49), again: 20, the end:
- * without George it goes in 15 frames, with him it turns to the player and says $2305-$230D (21-29,
- * hits by $17 / $19 moving on, $18 ending it) until he is $20 away; then (30-32) flag word 0 bit 4,
- * picture $49 for 3 frames, and gone. State 18 (a hit by $18) pushes the player on east (fn_S4_1D2E). */
+ * A talker at the door of a little room (x $90-$CF, y $A0-$AF). fn_S4_1C86 says where the player
+ * is: 0 outside or in a full view, -1 in the west part, 1 east of x $B9.
+ *   13-15,17 the player stepping into the west part is pushed out east, two pixels a frame to
+ *            x $BE (fn_S4_1CC2; a type $2A object is left where he was)
+ *   3-4      in the east part, with George there and the player looking at it within 7: $2301,
+ *            $2302
+ *   8-9      once he comes back (flag word 0 bit 1): $2303, $2304 (flag word 1 bit 4)
+ *   19-20    event $F01 (from type $F) in 1: picture $49; again: the end
+ *   21-29    with George: turns to the player and says $2305-$230D until he is $20 away (hits by
+ *            $17 / $19 move it on, $18 ends it); without him it goes in 15 frames
+ *   30-32    flag word 0 bit 4, picture $49 for 3 frames, gone
+ *   18       a hit by $18: pushes the player on east (fn_S4_1D2E) */
 static int t23_where(void) {
     uint16_t x = og16(OG_PLAYER_X), y = og16(OG_PLAYER_Y);
     if (og16(OG_FULL_VIEW) >= 0x80 || y < 0xA0 || y >= 0xB0 || x < 0x90 || x >= 0xD0) return 0;
@@ -3502,18 +3520,21 @@ void fo_S4_1670(Regs *r) {
 }
 
 /* ---------- type $12 (fn_S9_0372, record 8 on level 2) ----------
- * Level 2's keeper. It hurts the player near it (life and the screen's G_56EE glow: fn_S9_09B4 /
- * 0A2C / 0ABC by the distance), keeps the objects around it going (fn_S9_0B64: types $26 / $27 and
- * $11 counted down, type 8 in its cell stopped, a type $13 shot marked as hitting it), and:
- * 0 waits; at the level's start (fn_S7_22A0) 7-8: the view to cell $55E0 and along the player's
- * scent until there and cell $1360 is free, where it goes (9), heads for its post (+$18: the table
- * below) and stands (10). 1 roams (fn_S7_1CCC) until the player is within $28 (2: after him, by
- * the cells beyond $14, straight within, near enough to stop beyond $32); at the start: 6 (scent,
- * the view, back to 0 at cell $55E0). Hit by a type $13 shot: 3, events $1201 (+$18 below 2) or
- * $1203 to records 11-14 and 4: along the scent and, record 9's +$18 negative, $1202 to them and 5
- * (+$18 below 2: 6, else 1). Event $1201 / $1203 sends it to 4, $1202 to 5. A full view $82
- * (fn_S9_098A) takes it to its post (11: records 2-7, 9 and 10 get +$18 = -1, the type $13 shots
- * gone) and 10; flag word 0 bit 2 then to the other post (13-14); bit 3 (fn_S9_099C): gone (12). */
+ * Level 2's keeper. It hurts the player near it (life, and the screen glow G_56EE, by distance:
+ * fn_S9_09B4 / 0A2C / 0ABC) and keeps the objects around it going (fn_S9_0B64).
+ *   0        waits
+ *   7-8      at the level's start: the view to cell $55E0, then along the player's scent until
+ *            there and cell $1360 is free
+ *   9-10     goes to its post (+$18, the table below) and stands there
+ *   1        roams until the player is within $28
+ *   2        after him (by the cells beyond $14, straight within; stops beyond $32)
+ *   6        at the start: scent, the view, back to 0 at cell $55E0
+ *   3-5      hit by a type $13 shot: events $1201 / $1203 to records 11-14, along the scent, then
+ *            $1202 once record 9's +$18 is negative
+ *   11       a full view $82 (fn_S9_098A): to its post; records 2-7, 9 and 10 get +$18 = -1
+ *   13-14    flag word 0 bit 2: to the other post
+ *   12       flag word 0 bit 3: gone
+ * Event $1201 / $1203 sends it to 4, $1202 to 5. */
 static const uint16_t t12_post[2][4][3] = {               /* { x, y, heading } by +$18 */
     {{0x1B8, 0x58, 0x30}, {0x1C8, 0x48, 0x20}, {0x1B8, 0x38, 0x10}, {0x1A8, 0x48, 0}},
     {{0x1E8, 0x48, 0x30}, {0x1E8, 0x52, 0x30}, {0x1B8, 0x78, 0x20}, {0x1C2, 0x78, 0x20}}};
@@ -3731,15 +3752,17 @@ void fo_S9_0372(Regs *r) {
 }
 
 /* ---------- type $24 (fn_S9_0D76, record 8 on level 2) ----------
- * A face at the level's start, alive while records 9 and 10 (+$18) are not negative. With the
- * player within 8 it talks (+$18 / +$1A its mouth and eyes, from the tables below while it talks,
- * else blinking at random: fn_S9_14CE): 2-4 ($2401), 5-7 ($2402), 8-10 ($2403) as long as he stays
- * within $19 (hits by $17 / $19 move it on), the first time only after flag word 0 bit 0 (else 21-23:
- * $2405 while George is there). He leaves (11): it fires a type $13 shot (+$1E = -1) and waits 100
- * frames, then as long as a shot is in its cell (12-13). Records 9 / 10 negative: 14 (closed), back
- * to 13 when they are not; flag word 0 bit 3: 15-19, records 9 and 10 set to $7FFF and, the player
- * within 8, its last text ($2404); 20 the end. Every frame it moves records 2-7's negative +$18 on
- * by 2 (fn_S9_14F0). */
+ * A face at the level's start, alive while records 9 and 10 (+$18) are not negative. While it
+ * talks its mouth and eyes (+$18 / +$1A) follow the tables below; otherwise it blinks at random
+ * (fn_S9_14CE). Every frame it moves records 2-7's negative +$18 on by 2 (fn_S9_14F0).
+ *   2-10     the player within 8: $2401, $2402, $2403 while he stays within $19 (hits by $17 /
+ *            $19 move it on); the first time only after flag word 0 bit 0
+ *   21-23    before that, with George there: $2405
+ *   11-13    he leaves: it fires a type $13 shot (+$1E = -1), waits 100 frames, then while a shot
+ *            is in its cell
+ *   14       records 9 / 10 negative: closed, back to 13 when they are not
+ *   15-20    flag word 0 bit 3: records 9 and 10 set to $7FFF, its last text ($2404) with the
+ *            player within 8, then the end */
 static void t24_blink(Regs *r) {                            /* fn_S9_14CE */
     random_d0(r);
     w16(r->a[4] + 0x18, 0); w16(r->a[4] + 0x1A, ((uint16_t)r->d[0] & 7) ? 1 : 0);
@@ -3880,20 +3903,26 @@ void fo_S9_0D76(Regs *r) {
 }
 
 /* ---------- type $3A (fn_S11_046E, record 9 on level 6: the ending) ----------
- * It waits (0) until the player leaves the start corner (x $30 / y $27), then (44) until records
- * 3-6's +$12 are all set. Then the ending runs with the view its own (fn_S11_0CB4: the player put
- * where it is, facing as it faces): it takes his place (1-3), walks to $A5, $A0 (4), brings in type
- * $38 at record 7 (5, event $3A01) and faces it until it is done (6, event $3801), calls record 2
- * (+$12 = 1) and talks ($3A01-$3A04, 8-11; or, with flag word 0 bits 4 and 3, $3A05-$3A09, 15-19),
- * or walks to record 2 (12-13) and the player's life is gone (14). 20 brings in type $39 at record 8
- * (events $3A02 / $3A03) and it talks to it ($3A0A, $3A0B); 23-25 a count of $88 frames, the glow
- * G_56EE rising and record 7's +$18 counting at the end, and the player within reach of records 7
- * (29), 8 or 2 (28: life gone); the count out: 26-27 (events $3A04; the player losing $14 a frame).
- * 29 takes record 7's place (it is removed; life and G_56E6 $8D), 30 draining it by 4 until event
- * $3A05 (31) or it is gone (43); 31-34 flashes, 35-39 record 10 brought in as type $3B on the player,
- * opening (+$26 0-7, then pictures $20-$25) and removed; record 2's +$12 = -1, 40-41 ($3A0D), and 42
- * walking to record 2: the game won (G_5787 / G_5786, G_57F2 / G_57F1). Beyond state 0 it also opens
- * the map behind the player as he goes (fn_S11_0D00 / 0E30: +$1A the furthest of 15 places). */
+ * While the ending runs the view is its own (fn_S11_0CB4 puts the player where it is, facing
+ * the way it faces).
+ *   0, 44    waits for the player to leave the start corner, then for records 3-6's +$12
+ *   1-4      takes the player's place and walks to $A5, $A0
+ *   5-6      brings in type $38 at record 7 (event $3A01) and faces it until event $3801
+ *   7        calls record 2 (+$12 = 1)
+ *   8-11     talks ($3A01-$3A04); with flag word 0 bits 4 and 3: 15-19 ($3A05-$3A09)
+ *   12-14    walks to record 2; the player's life is gone
+ *   20-22    brings in type $39 at record 8 and talks to it ($3A0A, $3A0B)
+ *   23-25    counts $88 frames, the glow G_56EE rising; the player within reach of record 7: 29,
+ *            of record 8 or 2: 28 (life gone)
+ *   26-27    the count ran out: events $3A04, the player loses $14 a frame
+ *   29-30    takes record 7's place (life $8D), draining it by 4 until event $3A05 (31) or it
+ *            is gone (43)
+ *   31-34    flashes
+ *   35-39    record 10 comes in as type $3B on the player, opens and goes
+ *   40-41    record 2's +$12 = -1, says $3A0D
+ *   42       walks to record 2: the game is won (G_5787 / G_5786, G_57F2 / G_57F1)
+ * After state 0 it also opens the map behind the player (fn_S11_0D00 / 0E30: +$1A the
+ * furthest of 15 places he has reached). */
 static void t3a_view(Regs *r) {                             /* fn_S11_0CB4 */
     uint32_t o = r->a[4];
     sog16(OG_PLAYER_X, r16(o + OB_X)); sog16(OG_PLAYER_Y, r16(o + OB_Y)); sog16(OG_PLAYER_CELL, r16(o + OB_CELL)); sog16(OG_PLAYER_HEADING, r16(o + OB_HEADING));

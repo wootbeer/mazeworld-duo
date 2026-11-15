@@ -255,8 +255,7 @@ int16_t fo_S8_210C(uint32_t h) {
 
 /* ---------- registration ---------- */
 
-/* fo_S8_6760: is the 8-character registration code (its first four characters a seed, its last four
- * a check) right for the name (a Pascal string)? 1 / 0 */
+/* fo_S8_6760: the original's registration check: 1 if the code fits the name (a Pascal string) */
 uint8_t fo_S8_6760(uint32_t code, uint32_t name) {
     uint8_t buf[0x100], acc[4];
     int16_t n = r8(name), i;

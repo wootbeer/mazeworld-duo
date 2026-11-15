@@ -95,19 +95,18 @@ static void sound_out(const int16_t *in, int n) {
 
 #include "sdlkeys.h"
 
-/* Modern controls. The game reads only the keypad and letter keys: Q W E turn left / forward /
- * turn right, A D sideways, X back (keypad 7 8 9, 4 6, 2), and Space, Return, Enter or Shift fire.
- * The port adds, by setting the KeyMap bit of the key the game knows (the pressed key's own events
- * are unchanged, so typing a name is not affected):
- *   S          back (X)
- *   arrow keys the classic controls: up / down forward and back, left / right turn (keypad 8 2 7 9)
+/* Modern controls. Catacombs reads only the keypad and letter keys (Q W E turn left / forward /
+ * turn right, A D sideways, X back; Space, Return, Enter or Shift fire). The port presses the key
+ * the game knows for:
+ *   S                  back (X)
+ *   arrow keys         up / down forward and back, left / right turn
  *   left mouse button  fire (Space)
- * and in play the mouse turns: its sideways movement adds to the game's turn counter G_217E, as
- * holding Q or E does once per tick (2 units = one of the 64 directions; mouse_look()).
- * Mazeworld Original gets the same keys and mouse turning (mz_alt_controls: the game reads the keys
- * in its VBL task, the turning goes to mz_alt_move), a click fires the chosen ability and 1-4
- * choose it; or, with Options > Classic Mouse Controls, its own: the mouse moves and turns, and a
- * drag with the button held chooses the ability, fired on release. */
+ * In play the mouse turns too (mouse_look(): adds to the turn counter G_217E, 2 units = one of
+ * the 64 directions). Typing a name is not affected.
+ *
+ * Mazeworld Original gets the same keys and mouse turning (mz_alt_controls), a click fires the
+ * chosen ability and 1-4 pick it. Options > Classic Mouse Controls brings back its own: the mouse
+ * moves and turns, and a drag with the button held picks the ability, fired on release. */
 void input_live_keybit(uint8_t code, int down);
 static const struct { SDL_Scancode sc; uint8_t as; } extra[] = {
     {SDL_SCANCODE_S, 0x07},       /* X: back */
@@ -288,7 +287,7 @@ static void present(void) {
     int vx, vy, vw, vh;
     qd_screen_argb(pixels);
     if (shell_view(&vx, &vy, &vw, &vh)) {
-        /* Window Size changed: the window changes with it, keeping its zoom */
+        /* Window Size changed: resize the window to match, keeping its zoom */
         if (game_w && (vw != game_w || vh != game_h) && !(SDL_GetWindowFlags(win) & (SDL_WINDOW_FULLSCREEN_DESKTOP | SDL_WINDOW_MAXIMIZED))) {
             int cw, ch; SDL_GetWindowSize(win, &cw, &ch);
             double z = (double)cw / game_w;
@@ -296,8 +295,8 @@ static void present(void) {
         }
         game_w = vw; game_h = vh;
     }
-    /* the view moving (play starting or pausing): the old picture stays a moment, while the
-     * game draws into its new place, instead of a frame of a bare window */
+    /* the view moved (play starting or pausing): keep the last picture for a few ticks while
+     * the game draws into its new place, so a blank window never shows */
     if ((vx != view_x || vy != view_y || vw != view_w || vh != view_h) && !hold) hold = 5;
     if (hold && --hold) return;
     for (int y = 0; y < vh; y++)                            /* the view; black where it leaves the screen */

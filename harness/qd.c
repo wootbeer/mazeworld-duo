@@ -546,8 +546,6 @@ static void t_FindWindow(uint16_t w) {
     RETW(0);
 }
 void qd_post_update(uint32_t win) { need_update(win); }
-uint32_t qd_the_port(void) { return the_port(); }
-void qd_set_port(uint32_t p) { set_port(p); }
 MtbPix8 qd_port_pix(uint32_t port) { return pix_of(port_pixmap(port)); }
 MtbRect qd_port_clip(uint32_t port) { return port_clip(port); }
 void qd_device_ctab(MtbCTab *t) { ctab_read(gd_ctab(main_gd), t); }

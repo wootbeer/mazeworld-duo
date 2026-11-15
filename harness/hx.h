@@ -81,10 +81,8 @@ int32_t  mm_ptr_size(uint32_t p);
 uint8_t  mm_get_state(uint32_t h);
 void     mm_set_state(uint32_t h, uint8_t st);
 uint32_t mm_free_bytes(void);
-int      mm_is_handle(uint32_t h);
 
 /* ---------- resources (rsrc.c) ---------- */
-int      rs_open_file(const char *path, int as_app);   /* returns refnum or -1 */
 uint32_t rs_get(uint32_t type, int16_t id, int one_deep);
 uint32_t rs_get_named(uint32_t type, const uint8_t *pname, int one_deep);
 uint32_t rs_get_ind(uint32_t type, int index, int one_deep);

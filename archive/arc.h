@@ -23,12 +23,10 @@ typedef struct {
     char err[256];
 } ArcSet;
 
-/* Decodes buf (any supported format, nested archives expanded). Returns 0 on success.
+/* Decodes the file (any supported format, nested archives expanded). Returns 0 on success.
  * Files whose fork cannot be decoded are reported in set->err and the call fails. */
-int  arc_load(const uint8_t *buf, size_t len, ArcSet *set);
 int  arc_load_file(const char *path, ArcSet *set);
 void arc_free(ArcSet *set);
-const ArcFile *arc_find(const ArcSet *set, const char *name);   /* by final path component */
 
 /* decompressors (internal) */
 int sit13_decode(const uint8_t *src, size_t slen, uint8_t *dst, size_t dlen);       /* LGPL, sit13.c */

@@ -20,9 +20,10 @@ LIABILITY, WHETHER IN AN ACTION OF CONTRACT, TORT OR OTHERWISE, ARISING FROM,
 OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE
 SOFTWARE.
 
-This license covers the project's own code. Files under other licenses say so:
-archive/sit13.c, archive/sit13_tables.h and archive/arsenic.c are LGPL-2.1
-(archive/COPYING.LGPL-2.1); third_party/Musashi has its own license (its
-readme.txt). The game archives in original/ are the authors' untouched
-distributions, redistributed as their own licenses allow; they are not covered
-by this license.
+This license covers the project's own code. Other parts keep their own:
+- archive/sit13.c, archive/sit13_tables.h and archive/arsenic.c: LGPL-2.1
+  (archive/COPYING.LGPL-2.1)
+- third_party/Musashi: its own license (its readme.txt)
+- third_party/geneva9, and the 9 point letters made from it in mactb/font_data.c:
+  "Geneva 9" by Kelsey Higham, CC BY 3.0
+- original/: the games' untouched archives, shared as their own licenses allow
