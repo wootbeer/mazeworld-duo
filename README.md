@@ -29,6 +29,9 @@ Other copies of the same versions work too (`.sit`, `.hqx` or MacBinary `.bin`).
 Put the archives next to `Mazeworld.exe`, or drop one onto it. With both there, switch games
 in the Game menu.
 
+Needs 64-bit Windows. Nothing else to install: SDL2 and everything else is built
+into `Mazeworld.exe`.
+
 ## Playing
 
 - W / S or Up / Down: forward and back. A / D: sideways. Left / Right or Q / E: turn.
